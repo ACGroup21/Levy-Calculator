@@ -581,13 +581,34 @@ function applyPolicyFlags(){
 function rebuildSelect(){
   applyPolicyFlags();
   sel.innerHTML='';
-  STANDARDS.forEach((s,i)=>{
-    const o=document.createElement('option');o.value=i;
-    let tag='';
-    if(s.defunded)tag=' ⚠ defunded Sep 2026';
-    else if(s.level===7)tag=' ⚠ under-22 only';
-    o.textContent=s.name+(s.ksbs?' ✦':'')+tag;
-    sel.appendChild(o);
+  // Placeholder
+  const ph=document.createElement('option');ph.value='';ph.textContent='Select a standard…';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
+  // Index every standard, keeping original position as the option value
+  const indexed=STANDARDS.map((s,i)=>({s,i}));
+  const custom=indexed.filter(x=>x.s.name==='Other / custom');
+  const real=indexed.filter(x=>x.s.name!=='Other / custom');
+  // Group by level
+  const levels=[...new Set(real.map(x=>x.s.level))].sort((a,b)=>a-b);
+  const levelLabel=l=>l>0?`Level ${l}`:'Other';
+  levels.forEach(l=>{
+    const items=real.filter(x=>x.s.level===l).sort((a,b)=>a.s.name.localeCompare(b.s.name));
+    if(!items.length)return;
+    const og=document.createElement('optgroup');og.label=`──  ${levelLabel(l)}  ──`;
+    items.forEach(({s,i})=>{
+      const o=document.createElement('option');o.value=i;
+      let tag='';
+      if(s.defunded)tag=' ⚠ defunded Sep 2026';
+      else if(s.level===7)tag=' ⚠ under-22 only';
+      o.textContent=s.name+(s.ksbs?' ✦':'')+tag;
+      og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+  // Custom last, in its own group
+  custom.forEach(({s,i})=>{
+    const og=document.createElement('optgroup');og.label='──  Custom  ──';
+    const o=document.createElement('option');o.value=i;o.textContent=s.name;og.appendChild(o);
+    sel.appendChild(og);
   });
 }
 rebuildSelect();
