@@ -296,6 +296,7 @@ footer span{color:var(--teal)}
         <div class="field" style="grid-column:span 2">
           <label>Apprenticeship standard</label>
           <select id="inp-standard" onchange="onStandardChange()"></select>
+          <div id="standardWarn" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;padding:9px 12px;border-radius:8px"></div>
         </div>
         <div class="field hidden" id="custom-name-wrap">
           <label>Custom name</label>
@@ -441,7 +442,7 @@ const STANDARDS_BASE=[
   {name:'L3 Recruitment Consultant',band:4500,dur:18,level:3,roles:['recruitment','recruiter','talent acquisition','resourcing','headhunting','staffing']},
   {name:'L3 Sales Executive',band:7000,dur:15,level:3,roles:['sales','sales executive','business development','account executive','b2b','b2c']},
   {name:'L3 Social Care Worker (Senior)',band:4000,dur:15,level:3,roles:['social care','social worker','senior care','care management','safeguarding']},
-  {name:'L3 Team Leader / Supervisor',band:5000,dur:15,level:3,roles:['team leader','supervisor','manager','line manager','people manager','management','managing']},
+  {name:'L3 Team Leader / Supervisor',band:5000,dur:15,level:3,defunded:true,roles:['team leader','supervisor','manager','line manager','people manager','management','managing']},
   // ── Level 4 ──────────────────────────────────────────────────
   {name:'L4 Associate Project Manager',band:9000,dur:24,level:4,roles:['project','pm','project manager','project management','delivery manager','scrum master']},
   {name:'L4 Building Services Engineering',band:18000,dur:36,level:4,roles:['building services','mep','hvac','mechanical engineering','building engineering','facilities']},
@@ -458,14 +459,14 @@ const STANDARDS_BASE=[
   {name:'L4 Professional Accounting Technician',band:8000,dur:18,level:4,roles:['accounting','accounting technician','aat','bookkeeping','management accounts','finance']},
   {name:'L4 Software Developer',band:18000,dur:24,level:4,roles:['software developer','developer','software engineer','coding','programmer','full stack','web developer']},
   // ── Level 5 ──────────────────────────────────────────────────
-  {name:'L5 Chartered Manager Degree',band:22000,dur:48,level:5,roles:['chartered manager','degree apprenticeship','cmi','senior manager','general manager']},
-  {name:'L5 Coaching Professional',band:6000,dur:15,level:5,roles:['coaching','coach','executive coach','business coach','mentoring','personal development']},
+  {name:'L6 Chartered Manager Degree',band:22000,dur:48,level:6,defunded:true,roles:['chartered manager','degree apprenticeship','cmi','senior manager','general manager']},
+  {name:'L5 Coaching Professional',band:6000,dur:15,level:5,defunded:true,roles:['coaching','coach','executive coach','business coach','mentoring','personal development']},
   {name:'L5 Data Engineer',band:18000,dur:24,level:5,roles:['data engineer','data engineering','etl','pipeline','databricks','spark','azure data']},
   {name:'L5 Education & Training',band:7000,dur:18,level:5,roles:['education','training','teaching','trainer','lecturer','further education','teacher']},
   {name:'L5 Healthcare Assistant Practitioner',band:14000,dur:24,level:5,roles:['healthcare','assistant practitioner','nursing associate','clinical','nhs','patient care']},
   {name:'L5 L&D Consultant / Business Partner',band:8000,dur:18,level:5,roles:['l&d','learning and development','training','organisational development','od','talent development']},
   {name:'L5 Network & Information Security',band:18000,dur:24,level:5,roles:['network security','information security','cyber','nist','soc analyst','siem','iso27001']},
-  {name:'L5 Operations / Departmental Manager',band:9000,dur:30,level:5,roles:['operations manager','ops manager','departmental manager','department head','general manager','business operations']},
+  {name:'L5 Operations / Departmental Manager',band:9000,dur:30,level:5,defunded:true,roles:['operations manager','ops manager','departmental manager','department head','general manager','business operations']},
   {name:'L5 Product Manager',band:18000,dur:24,level:5,roles:['product manager','product','product owner','product management','roadmap','agile','scrum']},
   {name:'L5 Project Manager',band:18000,dur:24,level:5,roles:['project manager','programme manager','prince2','pmo','project management professional','delivery']},
   // ── Level 6 ──────────────────────────────────────────────────
@@ -561,9 +562,33 @@ function setKSBStatus(msg,type){
 
 // ── populate standard dropdown ──
 const sel=document.getElementById('inp-standard');
+// The 16 standards defunded from 1 Sept 2026 — matched by name regardless of data source.
+// {all:[substrings that must ALL appear in the name], lvl:optional level constraint}
+const DEFUNDED_MATCHERS=[
+  {all:['team leader']},{all:['departmental manager']},{all:['operations manager'],lvl:5},
+  {all:['coaching professional']},{all:['chartered manager']},{all:['lead practitioner','adult care']},
+  {all:['improvement practitioner']},{all:['improvement leader']},{all:['security first line']},
+  {all:['professional security operative']},{all:['learning','skills mentor']},{all:['learning','skills assessor']},
+  {all:['custody','detention']},{all:['cleaning','hygiene']},{all:['compliance investigator']},
+  {all:['outdoor learning']},{all:['facilities management supervisor']},
+];
+function applyPolicyFlags(){
+  STANDARDS.forEach(s=>{
+    const n=(s.name||'').toLowerCase();
+    s.defunded=DEFUNDED_MATCHERS.some(m=>m.all.every(p=>n.includes(p))&&(m.lvl==null||s.level===m.lvl));
+  });
+}
 function rebuildSelect(){
+  applyPolicyFlags();
   sel.innerHTML='';
-  STANDARDS.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s.name+(s.ksbs?' ✦':'');sel.appendChild(o);});
+  STANDARDS.forEach((s,i)=>{
+    const o=document.createElement('option');o.value=i;
+    let tag='';
+    if(s.defunded)tag=' ⚠ defunded Sep 2026';
+    else if(s.level===7)tag=' ⚠ under-22 only';
+    o.textContent=s.name+(s.ksbs?' ✦':'')+tag;
+    sel.appendChild(o);
+  });
 }
 rebuildSelect();
 
@@ -592,6 +617,22 @@ function onStandardChange(){
   if(idx>0&&!isC){
     document.getElementById('inp-cost').value=s.band||'';
     if(s.dur){const sd=document.getElementById('inp-start').value||todayStr;const d=new Date(sd);d.setMonth(d.getMonth()+s.dur);document.getElementById('inp-epa').value=d.toISOString().slice(0,10);}
+  }
+  showStandardWarn(s);
+}
+
+function showStandardWarn(s){
+  const w=document.getElementById('standardWarn');
+  if(s&&s.defunded){
+    w.style.display='block';
+    w.style.background='rgba(255,76,106,0.08)';w.style.border='1px solid rgba(255,76,106,0.35)';w.style.color='#ff8fa3';
+    w.innerHTML='<strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date — learners enrolled before 1 Sept 2026 may complete. New starts must be self-funded.';
+  }else if(s&&s.level===7){
+    w.style.display='block';
+    w.style.background='rgba(245,166,35,0.08)';w.style.border='1px solid rgba(245,166,35,0.35)';w.style.color='#f5c87a';
+    w.innerHTML='<strong>⚠ Level 7 funding restricted (from 1 Jan 2026).</strong> Levy funding only for apprentices aged <strong>under 22</strong> at the start — or aged 22–24 with an EHC plan or who are care-experienced. Older learners must be self-funded.';
+  }else{
+    w.style.display='none';
   }
 }
 
@@ -868,6 +909,8 @@ function matchStandards(intent,queryWords){
       const {score:kScore}=scoreKSBMatch(s,queryWords);
       score+=kScore*2;
     }
+    // Push defunded standards down — they can't take new funded starts after Sep 2026
+    if(s.defunded)score-=8;
     return{...s,score};
   }).sort((a,b)=>b.score-a.score).filter(s=>s.score>0).slice(0,3);
 }
@@ -936,6 +979,13 @@ function processQuery(q){
 
   if(primary.occupation_summary){
     html+=`<div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-style:italic">${primary.occupation_summary.slice(0,160)}…</div>`;
+  }
+
+  // Policy warnings — defunding & Level 7 age restriction
+  if(primary.defunded){
+    html+=`<div style="font-size:11.5px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.35);color:#ff8fa3"><strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date. Consider an alternative below or enrol before the deadline.</div>`;
+  }else if(primary.level===7){
+    html+=`<div style="font-size:11.5px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.35);color:#f5c87a"><strong>⚠ Level 7 — under-22s only (from 1 Jan 2026).</strong> Levy funds only apprentices aged under 22 at the start (or 22–24 with an EHC plan / care-experienced).</div>`;
   }
 
   html+=`
