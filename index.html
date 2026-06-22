@@ -249,8 +249,9 @@ footer span{color:var(--teal)}
     <div id="csvStatus" class="status"></div>
   </div>
 
-  <!-- KSB UPLOAD -->
-  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load standards &amp; KSB data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— optional, upgrades co-pilot advice</span></span></div>
+  <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
+  <div id="ksbDevPanel" style="display:none">
+  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load standards &amp; KSB data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span></div>
   <p class="step-sub">Upload the JSON file from your IfATE standards scraper. The co-pilot will match your talent objectives to actual Knowledge, Skills &amp; Behaviours.</p>
   <div class="card" style="border-color:rgba(167,139,250,0.2)">
     <div class="upload-zone ksb-zone" id="ksbDropzone" onclick="document.getElementById('ksbFile').click()">
@@ -270,6 +271,7 @@ footer span{color:var(--teal)}
       </details>
     </div>
   </div>
+  </div><!-- /ksbDevPanel -->
 
   <!-- SUMMARY -->
   <div id="levySummary" class="hidden">
@@ -970,6 +972,15 @@ function addFromCopilot(stdIdx,cost,count,start,epa){
   aiMsg(`Done — <strong>${s.name}</strong> (${count} learner${count>1?'s':''}) added to your projection. Scroll up to see the updated chart.`);
   setTimeout(()=>{const el=document.getElementById('projectionSection');if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},200);
 }
+
+// Ctrl+Shift+K — developer KSB panel toggle
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.shiftKey&&e.key==='K'){
+    e.preventDefault();
+    const p=document.getElementById('ksbDevPanel');
+    p.style.display=p.style.display==='none'?'block':'none';
+  }
+});
 </script>
 </body>
 </html>
