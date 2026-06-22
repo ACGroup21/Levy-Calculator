@@ -651,7 +651,6 @@ function renderStandardOptions(){
       const o=document.createElement('option');o.value=i;
       let tag='';
       if(s.defunded)tag=' ⚠ defunded Sep 2026';
-      else if(s.level===7)tag=' ⚠ under-22 only';
       o.textContent=s.name+(s.ksbs?' ✦':'')+tag;
       og.appendChild(o);
     });
