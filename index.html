@@ -167,6 +167,14 @@ th.r,td.r{text-align:right}
 .badge-ksb{background:rgba(167,139,250,0.1);color:var(--purple);border:1px solid rgba(167,139,250,0.3)}
 
 .warn-box{display:none;background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.25);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--amber);margin-top:1rem}
+.expiry-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+.expiry-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);text-align:left;padding:4px 8px;border-bottom:1px solid rgba(245,166,35,0.2)}
+.expiry-table td{padding:4px 8px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text2)}
+.expiry-table .r{text-align:right}
+.expiry-table .c-red{color:var(--red)}.expiry-table .c-amber{color:var(--amber)}
+.expiry-details{margin-top:10px}
+.expiry-details summary{cursor:pointer;font-size:11.5px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;user-select:none}
+.expiry-details summary:hover{color:var(--amber)}
 
 details summary{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;user-select:none;letter-spacing:.05em;padding:6px 0}
 details summary:hover,details[open] summary{color:var(--teal)}
@@ -946,6 +954,27 @@ function renderProgrammes(){
   }).join('');
 }
 
+// FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
+// or 12m after declaration if unspent. Uses uploaded history as opening tranches.
+function simulateLevyFIFO(income,tot,pmk,M){
+  const decl={},spend={};
+  (levyData.byMonth||[]).forEach(m=>{if(m.mk<pmk){decl[m.mk]=(decl[m.mk]||0)+m.income;spend[m.mk]=(spend[m.mk]||0)+m.paid;}});
+  for(let i=0;i<M;i++){const mk=pmk+i;decl[mk]=(decl[mk]||0)+income[i];spend[mk]=(spend[mk]||0)+tot[i];}
+  const mks=Object.keys(decl).map(Number);if(!mks.length)return{total:0,byMonth:[],ledger:[]};
+  const minMk=Math.min(...mks),maxMk=pmk+M-1;
+  const pot=[],ledger=[],byMonth=[];let total=0;
+  for(let mk=minMk;mk<=maxMk;mk++){
+    const added=decl[mk]||0;if(added>0.5)pot.push({mk,remaining:added});
+    let need=spend[mk]||0,drawn=0;
+    for(const t of pot){if(need<=0)break;const take=Math.min(t.remaining,need);t.remaining-=take;need-=take;drawn+=take;}
+    let expired=0;
+    for(const t of pot){if(t.remaining>0.5&&mk>=t.mk+expMo(t.mk)){expired+=t.remaining;t.remaining=0;}}
+    const balance=pot.reduce((a,b)=>a+b.remaining,0);
+    if(mk>=pmk){ledger.push({mk,added,drawn,expired,balance});if(expired>0.5){byMonth.push({mk,amount:expired});total+=expired;}}
+  }
+  return{total,byMonth,ledger};
+}
+
 function renderProjection(){
   document.getElementById('projectionSection').classList.remove('hidden');
   const M=36,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
@@ -970,9 +999,19 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  const expRisk=[];for(let i=0;i<M;i++){[12,24].forEach(exp=>{const dm=pmk+i-exp;if((dm<RULE_MK&&exp===24)||(dm>=RULE_MK&&exp===12)){const din=dm>=pmk?income[dm-pmk]:levyData.monthlyAvg;const spent=tot.slice(Math.max(0,dm-pmk),i).reduce((a,b)=>a+b,0);if(Math.max(0,din-spent/exp)>200)expRisk.push(i);}});}
-  const uR=[...new Set(expRisk)];const ew=document.getElementById('expiryWarning');
-  if(uR.length){ew.style.display='block';let msg=`Levy funds may expire unused in ${uR.length} month${uR.length!==1?'s':''} over the 36-month window.`;if(uR.some(i=>pmk+i>=RULE_MK))msg+=' The August 2026 rule change shortens the expiry window to 12 months — plan gifting early.';document.getElementById('expiryText').textContent=msg;}else ew.style.display='none';
+  const exp=simulateLevyFIFO(income,tot,pmk,M);
+  const ew=document.getElementById('expiryWarning');
+  if(exp.total>1){
+    ew.style.display='block';
+    const firstMk=exp.byMonth[0].mk;
+    const breakdown=exp.byMonth.map(e=>`<tr><td class="mono">${mkLbl(e.mk)}</td><td class="r mono c-amber">${fmt(e.amount)}</td></tr>`).join('');
+    const ledger=exp.ledger.map(l=>`<tr><td class="mono">${mkLbl(l.mk)}</td><td class="r mono">${fmt(l.added)}</td><td class="r mono">${fmt(l.drawn)}</td><td class="r mono ${l.expired>0.5?'c-red':''}">${l.expired>0.5?fmt(l.expired):'—'}</td><td class="r mono">${fmt(l.balance)}</td></tr>`).join('');
+    ew.innerHTML=`<div><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong> over the next 36 months, starting <strong>${mkLbl(firstMk)}</strong>. Commit or gift these funds before they age out — the Aug 2026 rule shortens new declarations to a 12-month window.
+      <table class="expiry-table"><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table>
+      <details class="expiry-details"><summary>&#9656; Show full month-by-month ledger</summary>
+        <table class="expiry-table"><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Pot balance</th></tr></thead><tbody>${ledger}</tbody></table>
+      </details></div>`;
+  }else ew.style.display='none';
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
   document.getElementById('giftMetrics').innerHTML=`<div class="metric"><div class="ml">Annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Projected 12-month income</div></div><div class="metric"><div class="ml">Max transfer (50%)</div><div class="mv c-amber">${fmt(annual*.5)}</div><div class="ms">Statutory gifting cap</div></div><div class="metric"><div class="ml">Own commitment (12m)</div><div class="mv">${fmt(n12)}</div><div class="ms">Next 12 months drawdown</div></div><div class="metric"><div class="ml">Safe gift promise</div><div class="mv c-teal">${fmt(safe)}</div><div class="ms">Surplus after own spend + 10% buffer</div></div>`;
