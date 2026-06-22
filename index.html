@@ -1036,7 +1036,32 @@ function renderPlan(){
   const backfillFTE=withinBuffer?0:(lostHrs-bufferHrs)/hours;
   const quiet=planCfg.months.map((s,i)=>s===2?MONTH_NAMES[i]:null).filter(Boolean);
   const peak=planCfg.months.map((s,i)=>s===1?MONTH_NAMES[i]:null).filter(Boolean);
-  const peakStarts=programmes.filter(p=>planCfg.months[new Date(p.start).getMonth()]===1).map(p=>p.name);
+  // Learning-intensity curve over the first 6 months: light onboarding, ramping to peak demand
+  const INTENSITY=[0.3,0.7,1.0,1.0,0.9,0.7];
+  const scoreStart=(start)=>{
+    let sc=0;
+    // post-peak recovery drag: a just-finished peak leaves people clearing backlog & worn out.
+    // Heaviest the month straight after, easing over the next month.
+    if(planCfg.months[(start+11)%12]===1)sc-=0.7; // peak ended last month
+    if(planCfg.months[(start+10)%12]===1)sc-=0.3; // peak ended two months ago
+    for(let m=0;m<INTENSITY.length;m++){
+      const mi=(start+m)%12,w=INTENSITY[m];
+      if(planCfg.months[mi]===1)sc-=w;            // peak hits the demanding phase — bad
+      else if(planCfg.months[mi]===2)sc+=w*0.6;   // quiet during demanding phase — good
+      if(BANK_HOL_MONTHS.includes(mi))sc-=0.15*w; // fewer training days
+    }
+    return sc;
+  };
+  const marked=planCfg.months.some(s=>s!==0);
+  const scored=MONTH_NAMES.map((nm,i)=>({nm,i,sc:scoreStart(i)})).sort((a,b)=>b.sc-a.sc);
+  const bestMonths=scored.filter(x=>x.sc>=scored[0].sc-0.01).map(x=>x.nm);
+  const worstMonths=scored.slice().reverse().filter(x=>x.sc<=scored[scored.length-1].sc+0.01&&x.sc<0).map(x=>x.nm);
+  // Per-programme: does its demanding phase (months 2-5 after start) land in a peak?
+  const clashProgs=programmes.filter(p=>{
+    const sm=new Date(p.start).getMonth();
+    for(let m=1;m<=4;m++){if(planCfg.months[(sm+m)%12]===1)return true;}
+    return false;
+  }).map(p=>p.name);
   // stat cards
   let html=`<div class="plan-card-grid">
     <div class="plan-stat"><div class="pl">Total overlay cost</div><div class="pv">${fmt(totalOverlay)}</div><div class="ps">Productive time you absorb across all programmes</div></div>
@@ -1050,12 +1075,16 @@ function renderPlan(){
     const moreL3=Math.floor(spareHrs/(otj[3]||6.5)),moreL5=Math.floor(spareHrs/(otj[5]||8));
     html+=`<div class="plan-rec"><strong>✅ Within capacity.</strong> You have about <strong>${spareHrs.toFixed(0)} hrs/week</strong> of spare tolerance — room for roughly <strong>${moreL3}</strong> more L3 or <strong>${moreL5}</strong> more L5 learners before you'd dip below your ${dip}% threshold.</div>`;
   }
-  // timing
+  // timing — driven by the learning-intensity scoring
   let timing='';
-  if(quiet.length)timing+=`Best months to start: <strong>${quiet.join(', ')}</strong> — lands the demanding early-learning phase in your quiet periods. `;
-  if(peakStarts.length)timing+=`<span style="color:#f5c87a">⚠ ${peakStarts.length} programme${peakStarts.length>1?'s':''} currently start in a peak month — consider shifting.</span> `;
-  if(peak.length)timing+=`Avoid starting around: ${peak.join(', ')}. `;
-  timing+=`Bank-holiday months (Jan, Apr, May, Aug, Dec) give fewer training days — build slack into those weeks.`;
+  if(!marked){
+    timing=`Mark your peak and quiet months on the calendar above for tailored start-timing advice. As a rule, aim for the <strong>demanding phase (months 2–5)</strong>, not the start month, to fall in quieter periods.`;
+  }else{
+    timing+=`<strong>Best months to start: ${bestMonths.join(', ')}.</strong> This keeps the demanding phase (months 2–5, once onboarding settles) clear of your peaks. `;
+    if(worstMonths.length)timing+=`<span style="color:#f5c87a">Avoid starting in ${worstMonths.join(', ')}</span> — either the demanding phase collides with a peak, or you'd start straight after one while the team is still clearing backlog. `;
+    if(clashProgs.length)timing+=`<br><br><span style="color:#f5c87a">⚠ ${clashProgs.length} added programme${clashProgs.length>1?'s have':' has'} a demanding phase landing in a peak month: ${clashProgs.join(', ')} — consider shifting the start.</span> `;
+  }
+  timing+=`<br><br>Bank-holiday months (Jan, Apr, May, Aug, Dec) give fewer training days — build slack into those weeks.`;
   html+=`<div class="plan-rec" style="margin-top:10px">${timing}</div>`;
   // breakdown
   html+=`<div style="margin-top:16px"><div class="plan-label">Per-programme breakdown</div>${rows}</div>`;
