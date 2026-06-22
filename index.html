@@ -321,6 +321,7 @@ footer span{color:var(--teal)}
             <button type="button" class="lvl-pill l6" data-lvl="6" onclick="setLevelFilter('6',this)">L6</button>
             <button type="button" class="lvl-pill l7" data-lvl="7" onclick="setLevelFilter('7',this)">L7</button>
           </div>
+          <div id="l7PolicyBox" style="display:none;margin-bottom:9px;font-size:12.5px;line-height:1.55;padding:11px 13px;border-radius:8px;background:rgba(245,166,35,0.09);border:1px solid rgba(245,166,35,0.4);color:#f5c87a"></div>
           <input type="text" id="standardSearch" class="standard-search" placeholder="🔍  Type to filter standards (e.g. data, nurse, project)…" oninput="renderStandardOptions()">
           <select id="inp-standard" onchange="onStandardChange()"></select>
           <div id="standardCount" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
@@ -611,6 +612,19 @@ function setLevelFilter(lvl,btn){
   activeLevel=lvl;
   document.querySelectorAll('.lvl-pill').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
+  // Level 7 eligibility box with dynamic born-on-or-after cut-off
+  const box=document.getElementById('l7PolicyBox');
+  if(box){
+    if(lvl==='7'){
+      const now=new Date();
+      const cut=new Date(now.getFullYear()-22,now.getMonth(),now.getDate());
+      const cutStr=cut.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+      box.style.display='block';
+      box.innerHTML=`<strong>⚠ Level 7 — funding restricted since 1 January 2026.</strong><br>Level 7 apprenticeships are only levy-funded for learners aged <strong>under 22</strong> at their start date. To be eligible today, a learner must be born <strong>on or after ${cutStr}</strong>.<br><span style="font-size:11.5px;opacity:.85">Exception: learners aged 22–24 who have an EHC plan or are care-experienced remain eligible. Older learners must be self-funded.</span>`;
+    }else{
+      box.style.display='none';
+    }
+  }
   renderStandardOptions();
 }
 function renderStandardOptions(){
