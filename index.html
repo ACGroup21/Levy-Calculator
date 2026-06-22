@@ -261,8 +261,13 @@ footer span{color:var(--teal)}
     </div>
     <div id="ksbStatus" class="status"></div>
     <div id="ksbSummary" style="display:none;margin-top:1rem">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.08em;margin-bottom:8px">LOADED STANDARDS</div>
-      <div id="ksbTagList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      <details>
+        <summary style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.08em;cursor:pointer;user-select:none;list-style:none;display:flex;align-items:center;gap:6px">
+          <span id="ksbSummaryLabel">LOADED STANDARDS</span>
+          <span style="color:var(--purple);font-size:10px">▾ show</span>
+        </summary>
+        <div id="ksbTagList" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
+      </details>
     </div>
   </div>
 
@@ -533,6 +538,7 @@ function processKSBData(data){
   document.getElementById('ksbIndicator').classList.add('on');
   const tl=document.getElementById('ksbTagList');
   tl.innerHTML=scraped.map(s=>`<span class="ksb-tag">L${s.level||'?'} ${s.name.replace(/^L\d\+?\s/,'')}</span>`).join('');
+  document.getElementById('ksbSummaryLabel').textContent=`${scraped.length} STANDARDS LOADED`;
   document.getElementById('ksbSummary').style.display='block';
 }
 
