@@ -187,6 +187,9 @@ details summary:hover,details[open] summary{color:var(--teal)}
 
 .gift-note{font-size:12px;color:var(--text3);margin-top:1rem;line-height:1.75}
 .gift-note strong{color:var(--teal)}
+.gift-rec{margin-top:1rem;padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;color:var(--text)}
+.gift-rec strong{color:var(--teal)}
+.gift-rec .amt{color:var(--amber);font-weight:600}
 
 /* ── KSB panel ── */
 .ksb-panel{background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:1rem 1.25rem;margin-top:.75rem;display:none}
@@ -430,6 +433,7 @@ footer span{color:var(--teal)}
       <div class="divider"></div>
       <div class="step-row"><span class="step-chip">GIFT</span><span class="step-title">Transfer / gifting suggestion</span></div>
       <div class="metrics" id="giftMetrics"></div>
+      <div id="giftExpiryRec" class="gift-rec" style="display:none"></div>
       <p class="gift-note">Employers can gift up to <strong>50%</strong> of their annual levy to charities, supply chain partners, or SMEs — covering <strong>100%</strong> of training and assessment costs for new starts at the receiving organisation. Unspent funds expire after <strong>24 months</strong> (pre-Aug 2026) or <strong>12 months</strong> (from Aug 2026).</p>
     </div>
 
@@ -1023,6 +1027,13 @@ function renderProjection(){
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
   document.getElementById('giftMetrics').innerHTML=`<div class="metric"><div class="ml">Annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Projected 12-month income</div></div><div class="metric"><div class="ml">Max transfer (50%)</div><div class="mv c-amber">${fmt(annual*.5)}</div><div class="ms">Statutory gifting cap</div></div><div class="metric"><div class="ml">Own commitment (12m)</div><div class="mv">${fmt(n12)}</div><div class="ms">Next 12 months drawdown</div></div><div class="metric"><div class="ml">Safe gift promise</div><div class="mv c-teal">${fmt(safe)}</div><div class="ms">Surplus after own spend + 10% buffer</div></div>`;
+  // Tie the FIFO expiry forecast to the gifting solution
+  const gr=document.getElementById('giftExpiryRec');
+  if(exp.total>1){
+    const giftable=Math.min(exp.total,Math.max(0,annual*.5));
+    gr.style.display='block';
+    gr.innerHTML=`💡 <strong>Turn expiry into impact.</strong> You're on track to lose <span class="amt">${fmt(exp.total)}</span> to expiry, the first <span class="amt">${fmt(exp.byMonth[0].amount)}</span> in <strong>${mkLbl(exp.byMonth[0].mk)}</strong>. You could gift up to <span class="amt">${fmt(giftable)}</span> of it to a supply-chain partner, SME or charity before it ages out — funding their apprenticeships instead of losing the money.${giftable<exp.total?` (The remaining ${fmt(exp.total-giftable)} is above the 50% transfer cap — use it on your own new starts.)`:''}`;
+  }else gr.style.display='none';
   renderPlan();
 }
 
