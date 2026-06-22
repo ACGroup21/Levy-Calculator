@@ -117,6 +117,32 @@ button{font-family:var(--sans);cursor:pointer}
 .standard-search:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,178,0.1)}
 .standard-search::placeholder{color:var(--text3)}
 
+/* plan / things to consider */
+.step-chip.plan{background:rgba(129,140,248,0.12);color:#a5b0ff;border-color:rgba(129,140,248,0.4)}
+.plan-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.25rem}
+.plan-label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
+.month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:1.25rem}
+.month-cell{position:relative;text-align:center;font-family:var(--mono);font-size:12px;padding:9px 4px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:var(--text2);transition:all .15s;user-select:none}
+.month-cell:hover{border-color:rgba(255,255,255,0.3)}
+.month-cell.peak{background:rgba(255,76,106,0.14);border-color:rgba(255,76,106,0.5);color:#ff8fa3}
+.month-cell.quiet{background:rgba(45,212,178,0.14);border-color:rgba(45,212,178,0.5);color:var(--teal)}
+.month-cell .bh{position:absolute;top:3px;right:5px;font-size:8px;opacity:.65}
+@media(max-width:560px){.month-grid{grid-template-columns:repeat(4,1fr)}}
+.otj-details{margin-bottom:1.25rem;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px}
+.otj-details summary{cursor:pointer;font-size:12.5px;color:var(--text2);font-weight:500}
+.otj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:12px}
+.otj-grid .field label{margin-bottom:4px}
+.otj-grid input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 9px}
+.plan-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1.25rem 0}
+.plan-stat{background:rgba(129,140,248,0.05);border:1px solid rgba(129,140,248,0.18);border-radius:10px;padding:1rem}
+.plan-stat .pl{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.plan-stat .pv{font-size:22px;font-weight:600;color:var(--text)}
+.plan-stat .ps{font-size:11px;color:var(--text3);margin-top:4px}
+.plan-rec{padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;margin-top:10px}
+.plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
+.plan-prog-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12.5px}
+.plan-prog-row .ppn{color:var(--text2)}.plan-prog-row .ppv{font-family:var(--mono);color:var(--text);white-space:nowrap}
+
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
 th{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
@@ -391,6 +417,27 @@ footer span{color:var(--teal)}
       <div class="step-row"><span class="step-chip">GIFT</span><span class="step-title">Transfer / gifting suggestion</span></div>
       <div class="metrics" id="giftMetrics"></div>
       <p class="gift-note">Employers can gift up to <strong>50%</strong> of their annual levy to charities, supply chain partners, or SMEs — covering <strong>100%</strong> of training and assessment costs for new starts at the receiving organisation. Unspent funds expire after <strong>24 months</strong> (pre-Aug 2026) or <strong>12 months</strong> (from Aug 2026).</p>
+    </div>
+
+    <div id="planSection" class="hidden">
+      <div class="divider"></div>
+      <div class="step-row"><span class="step-chip plan">PLAN</span><span class="step-title">Things to consider before you start <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— workforce impact &amp; timing</span></span></div>
+      <p class="step-sub">The levy pays the training fee. Your business absorbs the <strong>time</strong> — off-the-job (OTJ) hours pull people off the floor. This estimates that overlay cost, checks it against your team's capacity, and suggests when to start around your peak seasons.</p>
+      <div class="card">
+        <div class="plan-inputs">
+          <div class="field"><label>Department headcount</label><input type="number" min="1" id="plan-headcount" value="10" oninput="renderPlan()"></div>
+          <div class="field"><label>Contracted hrs / week</label><input type="number" min="1" step="0.5" id="plan-hours" value="37.5" oninput="renderPlan()"></div>
+          <div class="field"><label>Acceptable capacity dip %</label><input type="number" min="1" max="100" id="plan-dip" value="10" oninput="renderPlan()"></div>
+          <div class="field"><label>Blended cost £/hour</label><input type="number" min="0" step="0.5" id="plan-rate" value="18" oninput="renderPlan()"></div>
+        </div>
+        <label class="plan-label">Your business calendar — click a month to cycle: Normal → <span style="color:var(--red)">Peak (avoid)</span> → <span style="color:var(--teal)">Quiet (good to start)</span></label>
+        <div class="month-grid" id="monthGrid"></div>
+        <details class="otj-details">
+          <summary>Off-the-job hours per week, by level <span style="color:var(--text3);font-weight:400">(editable — higher levels study more)</span></summary>
+          <div class="otj-grid" id="otjGrid"></div>
+        </details>
+        <div id="planResults"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -929,6 +976,90 @@ function renderProjection(){
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
   document.getElementById('giftMetrics').innerHTML=`<div class="metric"><div class="ml">Annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Projected 12-month income</div></div><div class="metric"><div class="ml">Max transfer (50%)</div><div class="mv c-amber">${fmt(annual*.5)}</div><div class="ms">Statutory gifting cap</div></div><div class="metric"><div class="ml">Own commitment (12m)</div><div class="mv">${fmt(n12)}</div><div class="ms">Next 12 months drawdown</div></div><div class="metric"><div class="ml">Safe gift promise</div><div class="mv c-teal">${fmt(safe)}</div><div class="ms">Surplus after own spend + 10% buffer</div></div>`;
+  renderPlan();
+}
+
+// ══════════════════════════════
+//  THINGS TO CONSIDER — workforce impact & timing
+// ══════════════════════════════
+const BANK_HOL_MONTHS=[0,3,4,7,11]; // Jan, Apr, May, Aug, Dec (England — approx)
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
+const PLAN_KEY='ac_levy_plan_v1';
+function savePlanCfg(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(planCfg));}catch(e){}}
+function loadPlanCfg(){try{const r=localStorage.getItem(PLAN_KEY);if(r){const c=JSON.parse(r);planCfg={...planCfg,...c,otj:{...planCfg.otj,...(c.otj||{})}};}}catch(e){}}
+function progLevel(p){const m=(p.name||'').match(/\bL(?:evel\s*)?(\d)\b/i);return m?parseInt(m[1]):4;}
+function buildMonthGrid(){
+  const g=document.getElementById('monthGrid');if(!g)return;g.innerHTML='';
+  MONTH_NAMES.forEach((nm,i)=>{
+    const c=document.createElement('div');
+    c.className='month-cell'+(planCfg.months[i]===1?' peak':planCfg.months[i]===2?' quiet':'');
+    c.innerHTML=nm+(BANK_HOL_MONTHS.includes(i)?'<span class="bh" title="Contains a bank holiday">●</span>':'');
+    c.onclick=()=>{planCfg.months[i]=(planCfg.months[i]+1)%3;buildMonthGrid();renderPlan();savePlanCfg();};
+    g.appendChild(c);
+  });
+}
+function buildOtjGrid(){
+  const g=document.getElementById('otjGrid');if(!g)return;g.innerHTML='';
+  [2,3,4,5,6,7].forEach(l=>{
+    const f=document.createElement('div');f.className='field';
+    f.innerHTML=`<label>Level ${l}</label><input type="number" min="1" step="0.5" value="${planCfg.otj[l]}">`;
+    f.querySelector('input').oninput=e=>{planCfg.otj[l]=parseFloat(e.target.value)||0;renderPlan();savePlanCfg();};
+    g.appendChild(f);
+  });
+}
+function syncPlanInputs(){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  set('plan-headcount',planCfg.headcount);set('plan-hours',planCfg.hours);set('plan-dip',planCfg.dip);set('plan-rate',planCfg.rate);
+}
+function renderPlan(){
+  const sec=document.getElementById('planSection');if(!sec)return;
+  if(!programmes.length){sec.classList.add('hidden');return;}
+  sec.classList.remove('hidden');
+  planCfg.headcount=parseFloat(document.getElementById('plan-headcount').value)||1;
+  planCfg.hours=parseFloat(document.getElementById('plan-hours').value)||37.5;
+  planCfg.dip=parseFloat(document.getElementById('plan-dip').value)||10;
+  planCfg.rate=parseFloat(document.getElementById('plan-rate').value)||0;
+  savePlanCfg();
+  const {headcount,hours,dip,rate,otj}=planCfg;
+  const bufferHrs=headcount*hours*(dip/100); // hrs/week the dept can lose within tolerance
+  let totalOverlay=0,lostHrs=0,totalFTE=0,rows='';
+  programmes.forEach(p=>{
+    const lvl=progLevel(p),oh=otj[lvl]||6;
+    const weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
+    const overlay=oh*weeks*p.count*rate, fte=oh*p.count/hours;
+    totalOverlay+=overlay;lostHrs+=oh*p.count;totalFTE+=fte;
+    rows+=`<div class="plan-prog-row"><span class="ppn">${p.name} &times;${p.count}</span><span class="ppv">${oh}h/wk &middot; ${weeks}w &middot; ${fmt(overlay)} &middot; ${fte.toFixed(2)} FTE</span></div>`;
+  });
+  const withinBuffer=lostHrs<=bufferHrs;
+  const spareHrs=Math.max(0,bufferHrs-lostHrs);
+  const backfillFTE=withinBuffer?0:(lostHrs-bufferHrs)/hours;
+  const quiet=planCfg.months.map((s,i)=>s===2?MONTH_NAMES[i]:null).filter(Boolean);
+  const peak=planCfg.months.map((s,i)=>s===1?MONTH_NAMES[i]:null).filter(Boolean);
+  const peakStarts=programmes.filter(p=>planCfg.months[new Date(p.start).getMonth()]===1).map(p=>p.name);
+  // stat cards
+  let html=`<div class="plan-card-grid">
+    <div class="plan-stat"><div class="pl">Total overlay cost</div><div class="pv">${fmt(totalOverlay)}</div><div class="ps">Productive time you absorb across all programmes</div></div>
+    <div class="plan-stat"><div class="pl">Capacity removed</div><div class="pv">${totalFTE.toFixed(2)} FTE</div><div class="ps">${lostHrs.toFixed(0)} hrs/wk of ${(headcount*hours).toFixed(0)} dept hrs</div></div>
+    <div class="plan-stat"><div class="pl">Within ${dip}% buffer?</div><div class="pv" style="color:${withinBuffer?'var(--teal)':'var(--red)'}">${withinBuffer?'Yes':'No'}</div><div class="ps">${withinBuffer?fmt(spareHrs).replace('£','')+' hrs/wk spare':'over by '+backfillFTE.toFixed(2)+' FTE'}</div></div>
+  </div>`;
+  // recommendation
+  if(!withinBuffer){
+    html+=`<div class="plan-rec warn"><strong>⚠ Capacity risk.</strong> These cohorts pull <strong>${lostHrs.toFixed(0)} hrs/week</strong> off the floor — beyond your ${dip}% tolerance (${bufferHrs.toFixed(0)} hrs/wk). To stay steady you'd need roughly <strong>${Math.ceil(backfillFTE)} backfill head${Math.ceil(backfillFTE)!==1?'s':''}</strong>, or stagger the cohorts so they don't all run at once.</div>`;
+  }else{
+    const moreL3=Math.floor(spareHrs/(otj[3]||6.5)),moreL5=Math.floor(spareHrs/(otj[5]||8));
+    html+=`<div class="plan-rec"><strong>✅ Within capacity.</strong> You have about <strong>${spareHrs.toFixed(0)} hrs/week</strong> of spare tolerance — room for roughly <strong>${moreL3}</strong> more L3 or <strong>${moreL5}</strong> more L5 learners before you'd dip below your ${dip}% threshold.</div>`;
+  }
+  // timing
+  let timing='';
+  if(quiet.length)timing+=`Best months to start: <strong>${quiet.join(', ')}</strong> — lands the demanding early-learning phase in your quiet periods. `;
+  if(peakStarts.length)timing+=`<span style="color:#f5c87a">⚠ ${peakStarts.length} programme${peakStarts.length>1?'s':''} currently start in a peak month — consider shifting.</span> `;
+  if(peak.length)timing+=`Avoid starting around: ${peak.join(', ')}. `;
+  timing+=`Bank-holiday months (Jan, Apr, May, Aug, Dec) give fewer training days — build slack into those weeks.`;
+  html+=`<div class="plan-rec" style="margin-top:10px">${timing}</div>`;
+  // breakdown
+  html+=`<div style="margin-top:16px"><div class="plan-label">Per-programme breakdown</div>${rows}</div>`;
+  document.getElementById('planResults').innerHTML=html;
 }
 
 // ══════════════════════════════
@@ -1165,6 +1296,9 @@ document.addEventListener('keydown',e=>{
     p.style.display=p.style.display==='none'?'block':'none';
   }
 });
+
+// Init "things to consider" planner
+loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();
 
 // Restore any previously saved data on load
 loadState();
