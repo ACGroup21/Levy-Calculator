@@ -614,9 +614,11 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='';if(e.d
 function readCSV(file){const r=new FileReader();r.onload=e=>parseESFA(e.target.result);r.readAsText(file);}
 
 function parseESFA(text){
+  // Strip BOM and any leading whitespace (common in ESFA exports)
+  text=text.replace(/^﻿/,'').replace(/^ï»¿/,'');
   const sep=text.includes('\t')?'\t':',';
   const lines=text.trim().split(/\r?\n/);
-  const hdr=lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/\s+/g,' '));
+  const hdr=lines[0].split(sep).map(h=>h.trim().replace(/^﻿/,'').toLowerCase().replace(/\s+/g,' '));
   const col=n=>hdr.findIndex(h=>h===n);
   const iP=col('payroll month'),iL=col('levy declared'),iT=col('10% top up'),iF=col('paid from levy'),iD=col('transaction date');
   if(iL<0){setStatus('Could not match "Levy declared" column. Verify this is the ESFA transactions export.','warn');return;}
