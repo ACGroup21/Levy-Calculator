@@ -100,6 +100,20 @@ button{font-family:var(--sans);cursor:pointer}
 .date-pair-field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.4) sepia(1) hue-rotate(150deg)}
 .epa-chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:1px 6px;border-radius:99px;white-space:nowrap;background:rgba(245,166,35,0.1);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
 
+/* level filter pills + standard search */
+.level-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.lvl-pill{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:var(--text3);transition:all .15s}
+.lvl-pill:hover{color:var(--text);border-color:rgba(255,255,255,0.3)}
+.lvl-pill.active{color:#04121e;font-weight:700}
+.lvl-pill[data-lvl="all"].active{background:#cfd8e3;border-color:#cfd8e3}
+.lvl-pill.l2{--c:#2DD4B2}.lvl-pill.l3{--c:#38BDF8}.lvl-pill.l4{--c:#818CF8}
+.lvl-pill.l5{--c:#A78BFA}.lvl-pill.l6{--c:#F472B6}.lvl-pill.l7{--c:#F5A623}
+.lvl-pill.l2,.lvl-pill.l3,.lvl-pill.l4,.lvl-pill.l5,.lvl-pill.l6,.lvl-pill.l7{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
+.lvl-pill.l2.active,.lvl-pill.l3.active,.lvl-pill.l4.active,.lvl-pill.l5.active,.lvl-pill.l6.active,.lvl-pill.l7.active{background:var(--c);border-color:var(--c);color:#04121e}
+.standard-search{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;margin-bottom:8px;transition:all .2s}
+.standard-search:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,178,0.1)}
+.standard-search::placeholder{color:var(--text3)}
+
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
 th{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
@@ -295,7 +309,18 @@ footer span{color:var(--teal)}
       <div class="form-grid">
         <div class="field" style="grid-column:span 2">
           <label>Apprenticeship standard</label>
+          <div class="level-filter" id="levelFilter">
+            <button type="button" class="lvl-pill active" data-lvl="all" onclick="setLevelFilter('all',this)">All</button>
+            <button type="button" class="lvl-pill l2" data-lvl="2" onclick="setLevelFilter('2',this)">L2</button>
+            <button type="button" class="lvl-pill l3" data-lvl="3" onclick="setLevelFilter('3',this)">L3</button>
+            <button type="button" class="lvl-pill l4" data-lvl="4" onclick="setLevelFilter('4',this)">L4</button>
+            <button type="button" class="lvl-pill l5" data-lvl="5" onclick="setLevelFilter('5',this)">L5</button>
+            <button type="button" class="lvl-pill l6" data-lvl="6" onclick="setLevelFilter('6',this)">L6</button>
+            <button type="button" class="lvl-pill l7" data-lvl="7" onclick="setLevelFilter('7',this)">L7</button>
+          </div>
+          <input type="text" id="standardSearch" class="standard-search" placeholder="🔍  Type to filter standards (e.g. data, nurse, project)…" oninput="renderStandardOptions()">
           <select id="inp-standard" onchange="onStandardChange()"></select>
+          <div id="standardCount" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
           <div id="standardWarn" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;padding:9px 12px;border-radius:8px"></div>
         </div>
         <div class="field hidden" id="custom-name-wrap">
@@ -578,15 +603,26 @@ function applyPolicyFlags(){
     s.defunded=DEFUNDED_MATCHERS.some(m=>m.all.every(p=>n.includes(p))&&(m.lvl==null||s.level===m.lvl));
   });
 }
-function rebuildSelect(){
+let activeLevel='all';
+function setLevelFilter(lvl,btn){
+  activeLevel=lvl;
+  document.querySelectorAll('.lvl-pill').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderStandardOptions();
+}
+function renderStandardOptions(){
   applyPolicyFlags();
+  const q=(document.getElementById('standardSearch').value||'').trim().toLowerCase();
   sel.innerHTML='';
   // Placeholder
   const ph=document.createElement('option');ph.value='';ph.textContent='Select a standard…';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
   // Index every standard, keeping original position as the option value
   const indexed=STANDARDS.map((s,i)=>({s,i}));
   const custom=indexed.filter(x=>x.s.name==='Other / custom');
-  const real=indexed.filter(x=>x.s.name!=='Other / custom');
+  let real=indexed.filter(x=>x.s.name!=='Other / custom');
+  // Apply level + search filters
+  if(activeLevel!=='all')real=real.filter(x=>String(x.s.level)===activeLevel);
+  if(q)real=real.filter(x=>x.s.name.toLowerCase().includes(q)||(x.s.roles||[]).some(r=>r.includes(q)));
   // Group by level
   const levels=[...new Set(real.map(x=>x.s.level))].sort((a,b)=>a-b);
   const levelLabel=l=>l>0?`Level ${l}`:'Other';
@@ -604,13 +640,18 @@ function rebuildSelect(){
     });
     sel.appendChild(og);
   });
-  // Custom last, in its own group
+  // Custom last (always shown), in its own group
   custom.forEach(({s,i})=>{
     const og=document.createElement('optgroup');og.label='──  Custom  ──';
     const o=document.createElement('option');o.value=i;o.textContent=s.name;og.appendChild(o);
     sel.appendChild(og);
   });
+  // Result count
+  const cnt=document.getElementById('standardCount');
+  if(cnt)cnt.textContent=`${real.length} standard${real.length===1?'':'s'} shown${activeLevel!=='all'?` · Level ${activeLevel}`:''}${q?` · "${q}"`:''}`;
 }
+// Backwards-compatible alias used elsewhere in the code
+function rebuildSelect(){renderStandardOptions();}
 rebuildSelect();
 
 // ── Bundled standards data (auto-loaded, no upload needed) ──
