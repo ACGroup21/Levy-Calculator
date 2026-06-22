@@ -262,6 +262,7 @@ footer span{color:var(--teal)}
       <span style="font-size:13px;color:var(--text3)">No file to hand?</span>
       <button class="btn-demo" onclick="loadDemo()">&#9654;&nbsp; Load full working demo</button>
       <span style="font-size:12px;color:var(--text3)">Levy data + 3 sample programmes</span>
+      <button id="clearDataBtn" onclick="clearSavedData()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:6px 12px">Clear saved data</button>
     </div>
     <div id="csvStatus" class="status"></div>
   </div>
@@ -713,6 +714,44 @@ function showStandardWarn(s){
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
 let programmes=[];let projChart=null;
 
+// ── persistence (survive page refresh) ──
+const STORE_KEY='ac_levy_state_v1';
+function toggleClearBtn(show){const b=document.getElementById('clearDataBtn');if(b)b.style.display=show?'inline-block':'none';}
+function saveState(){
+  try{
+    const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
+    if(!hasLevy&&!programmes.length){localStorage.removeItem(STORE_KEY);toggleClearBtn(false);return;}
+    localStorage.setItem(STORE_KEY,JSON.stringify({levyData,programmes,savedAt:Date.now()}));
+    toggleClearBtn(true);
+  }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);if(!raw)return false;
+    const st=JSON.parse(raw);
+    if(st.levyData&&st.levyData.byMonth&&st.levyData.byMonth.length){
+      levyData=st.levyData;renderSummary();renderMonthTable();
+    }
+    if(Array.isArray(st.programmes)&&st.programmes.length){
+      programmes=st.programmes;renderProgrammes();renderProjection();
+    }
+    const when=st.savedAt?new Date(st.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+    setStatus(`Restored your saved data${when?' from '+when:''}. Upload a new file to replace it, or use “Clear saved data”.`,'ok');
+    toggleClearBtn(true);
+    return true;
+  }catch(e){return false;}
+}
+function clearSavedData(){
+  if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
+  try{localStorage.removeItem(STORE_KEY);}catch(e){}
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];
+  document.getElementById('levySummary').classList.add('hidden');
+  document.getElementById('projectionSection').classList.add('hidden');
+  document.getElementById('progTable').classList.add('hidden');
+  renderProgrammes();toggleClearBtn(false);
+  setStatus('Saved data cleared. Upload your ESFA file to start again.','ok');
+}
+
 const fmt=v=>'£'+Math.round(v).toLocaleString('en-GB');
 const nv=s=>parseFloat((s||'').toString().replace(/[£,\s]/g,''))||0;
 const fmtD=s=>{const d=new Date(s);return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});};
@@ -781,7 +820,7 @@ function buildLevyData(mm,tI,tO,rc){
   const avg=inc.length?inc.reduce((a,b)=>a+b.income,0)/inc.length:0;
   levyData={monthlyAvg:avg,balance:Math.max(0,tI-tO),byMonth};
   setStatus((rc?`[OK] Parsed ${byMonth.length} payroll months across ${rc} rows. `:'')+`Average monthly income: ${fmt(avg)}`,'ok');
-  renderSummary();renderMonthTable();
+  renderSummary();renderMonthTable();saveState();
 }
 
 function loadDemo(){
@@ -797,7 +836,7 @@ function loadDemo(){
     {name:'L4 Data Analyst',cost:14000,count:2,start:d(2),epa:d(26)},
     {name:'L5 Operations / Departmental Manager',cost:9000,count:1,start:d(4),epa:d(34)},
   ];
-  renderProgrammes();renderProjection();
+  renderProgrammes();renderProjection();saveState();
   setStatus('[DEMO] Sample data loaded — scroll down to view the 36-month projection.','ok');
 }
 
@@ -842,12 +881,12 @@ function addProgramme(overrides){
     document.getElementById('inp-start').value=todayStr;document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
   }
   programmes.push({name,cost,count,start,epa});
-  renderProgrammes();renderProjection();
+  renderProgrammes();renderProjection();saveState();
   document.getElementById('levySummary').classList.remove('hidden');
   document.getElementById('progTable').classList.remove('hidden');
 }
 
-function removeProg(i){programmes.splice(i,1);renderProgrammes();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');}}
+function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');}}
 
 function renderProgrammes(){
   const pt=document.getElementById('progTable');
@@ -1126,6 +1165,9 @@ document.addEventListener('keydown',e=>{
     p.style.display=p.style.display==='none'?'block':'none';
   }
 });
+
+// Restore any previously saved data on load
+loadState();
 </script>
 </body>
 </html>
