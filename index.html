@@ -395,6 +395,7 @@ footer span{color:var(--teal)}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ══════════════════════════════
 //  STANDARDS (fallback — overridden by KSB JSON)
@@ -613,7 +614,23 @@ const dz=document.getElementById('dropzone');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='#2DD4B2';});
 dz.addEventListener('dragleave',()=>{dz.style.borderColor='';});
 dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='';if(e.dataTransfer.files[0])readCSV(e.dataTransfer.files[0]);});
-function readCSV(file){const r=new FileReader();r.onload=e=>parseESFA(e.target.result);r.readAsText(file);}
+function readCSV(file){
+  const isExcel=/\.(xlsx|xls)$/i.test(file.name);
+  const r=new FileReader();
+  if(isExcel&&window.XLSX){
+    r.onload=e=>{
+      try{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+        const ws=wb.Sheets[wb.SheetNames[0]];
+        parseESFA(XLSX.utils.sheet_to_csv(ws,{FS:'\t'}));
+      }catch(err){setStatus('Could not read this Excel file. Try saving it as CSV. ('+err.message+')','warn');}
+    };
+    r.readAsArrayBuffer(file);
+  }else{
+    r.onload=e=>parseESFA(e.target.result);
+    r.readAsText(file);
+  }
+}
 
 function parseESFA(text){
   // Strip BOM (U+FEFF) — always present in ESFA exports
