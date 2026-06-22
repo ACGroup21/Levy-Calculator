@@ -239,7 +239,7 @@ footer span{color:var(--teal)}
       <div class="upload-icon">&#8679;</div>
       <div class="upload-title">Click to upload or drag &amp; drop</div>
       <div class="upload-sub">Tab or comma separated &nbsp;&middot;&nbsp; ESFA transactions format</div>
-      <input type="file" id="csvFile" accept=".csv,.tsv,.txt" style="display:none">
+      <input type="file" id="csvFile" accept=".csv,.tsv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none">
     </div>
     <div class="demo-row">
       <span style="font-size:13px;color:var(--text3)">No file to hand?</span>
@@ -618,12 +618,16 @@ function readCSV(file){const r=new FileReader();r.onload=e=>parseESFA(e.target.r
 function parseESFA(text){
   // Strip BOM (U+FEFF) — always present in ESFA exports
   if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
-  const sep=text.includes('\t')?'\t':',';
+  // Detect separator from the header line (tab, comma, or semicolon)
+  const firstLine=text.split(/\r?\n/)[0]||'';
+  const sep=firstLine.includes('\t')?'\t':(firstLine.includes(';')&&!firstLine.includes(',')?';':',');
   const lines=text.trim().split(/\r?\n/);
-  const hdr=lines[0].split(sep).map(h=>h.replace(/^﻿/,'').trim().toLowerCase().replace(/\s+/g,' '));
-  const col=n=>hdr.findIndex(h=>h===n);
+  // Normalise headers: strip BOM, quotes, non-breaking spaces, collapse whitespace
+  const hdr=lines[0].split(sep).map(h=>h.replace(/^﻿/,'').replace(/[ ]/g,' ').replace(/^"|"$/g,'').trim().toLowerCase().replace(/\s+/g,' '));
+  // Fuzzy column match: exact first, then substring contains
+  const col=n=>{let i=hdr.findIndex(h=>h===n);if(i<0)i=hdr.findIndex(h=>h.includes(n));return i;};
   const iP=col('payroll month'),iL=col('levy declared'),iT=col('10% top up'),iF=col('paid from levy'),iD=col('transaction date');
-  if(iL<0){setStatus('Could not match "Levy declared" column. Verify this is the ESFA transactions export.','warn');return;}
+  if(iL<0){setStatus('Could not match "Levy declared" column. Found columns: '+hdr.filter(Boolean).join(', '),'warn');return;}
   const rows=lines.slice(1).filter(l=>l.trim()).map(l=>l.split(sep).map(c=>c.trim().replace(/^"|"$/g,'')));
   const mm={};let tI=0,tO=0;
   rows.forEach(r=>{
