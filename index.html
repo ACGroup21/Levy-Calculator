@@ -174,6 +174,10 @@ th.r,td.r{text-align:right}
 
 .warn-box{display:none;background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.25);border-left:3px solid var(--amber);border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:var(--amber);margin-top:1rem}
 .expiry-head{color:var(--amber);line-height:1.55}
+.exp-years{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.exp-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);color:var(--amber);transition:all .15s}
+.exp-yr:hover{border-color:var(--amber)}
+.exp-yr.active{background:var(--amber);color:#1a1206;border-color:var(--amber)}
 .expiry-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
 .expiry-table{width:100%;max-width:540px;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12px}
 .expiry-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:4px 10px;border-bottom:1px solid rgba(245,166,35,0.2)}
@@ -972,6 +976,28 @@ function renderProgrammes(){
 
 // FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
 // or 12m after declaration if unspent. Uses uploaded history as opening tranches.
+let lastExp=null,expiryYear='all';
+function setExpiryYear(y){expiryYear=(y==='all')?'all':Number(y);renderExpiryTables();}
+function renderExpiryTables(){
+  const exp=lastExp;if(!exp)return;
+  const years=[...new Set(exp.ledger.map(l=>Math.floor(l.mk/12)))].sort((a,b)=>a-b);
+  if(expiryYear!=='all'&&!years.includes(Number(expiryYear)))expiryYear='all';
+  const yp=document.getElementById('expYears');
+  yp.innerHTML=`<button class="exp-yr${expiryYear==='all'?' active':''}" onclick="setExpiryYear('all')">All</button>`+
+    years.map(y=>{const lost=exp.byMonth.filter(e=>Math.floor(e.mk/12)===y).reduce((a,b)=>a+b.amount,0);
+      return `<button class="exp-yr${String(expiryYear)===String(y)?' active':''}" onclick="setExpiryYear(${y})">${y}${lost>0.5?` · ${fmt(lost)}`:''}</button>`;}).join('');
+  const inYr=mk=>expiryYear==='all'||Math.floor(mk/12)===Number(expiryYear);
+  const bd=exp.byMonth.filter(e=>inYr(e.mk));
+  const breakdown=bd.length?bd.map(e=>`<tr><td>${mkLbl(e.mk)}</td><td class="r c-amber">${fmt(e.amount)}</td></tr>`).join(''):`<tr><td colspan="2" style="color:var(--text3)">No funds expire in this period.</td></tr>`;
+  const ledger=exp.ledger.filter(l=>inYr(l.mk)).map(l=>`<tr><td>${mkLbl(l.mk)}</td><td class="r">${fmt(l.added)}</td><td class="r">${fmt(l.drawn)}</td><td class="r ${l.expired>0.5?'c-red':''}">${l.expired>0.5?fmt(l.expired):'—'}</td><td class="r">${fmt(l.balance)}</td></tr>`).join('');
+  document.getElementById('expiryDetailBody').innerHTML=`
+    <div class="expiry-sub">When funds expire${expiryYear==='all'?'':' in '+expiryYear}</div>
+    <table class="expiry-table"><colgroup><col style="width:55%"><col style="width:45%"></colgroup><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table>
+    <details class="expiry-details"><summary>Show full month-by-month ledger</summary>
+      <table class="expiry-table"><colgroup><col style="width:24%"><col style="width:19%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Balance</th></tr></thead><tbody>${ledger}</tbody></table>
+    </details>`;
+}
+
 function simulateLevyFIFO(income,tot,pmk,M){
   const decl={},spend={};
   (levyData.byMonth||[]).forEach(m=>{if(m.mk<pmk){decl[m.mk]=(decl[m.mk]||0)+m.income;spend[m.mk]=(spend[m.mk]||0)+m.paid;}});
@@ -1019,16 +1045,12 @@ function renderProjection(){
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
     ew.style.display='block';
+    lastExp=exp;
     const firstMk=exp.byMonth[0].mk;
-    const breakdown=exp.byMonth.map(e=>`<tr><td>${mkLbl(e.mk)}</td><td class="r c-amber">${fmt(e.amount)}</td></tr>`).join('');
-    const ledger=exp.ledger.map(l=>`<tr><td>${mkLbl(l.mk)}</td><td class="r">${fmt(l.added)}</td><td class="r">${fmt(l.drawn)}</td><td class="r ${l.expired>0.5?'c-red':''}">${l.expired>0.5?fmt(l.expired):'—'}</td><td class="r">${fmt(l.balance)}</td></tr>`).join('');
     ew.innerHTML=`<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused.</strong> The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</div>
-      <details class="expiry-details"><summary>Show when funds expire &amp; full ledger</summary>
-        <div class="expiry-sub">When funds expire</div>
-        <table class="expiry-table"><colgroup><col style="width:55%"><col style="width:45%"></colgroup><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table>
-        <div class="expiry-sub">Full month-by-month ledger</div>
-        <table class="expiry-table"><colgroup><col style="width:24%"><col style="width:19%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Balance</th></tr></thead><tbody>${ledger}</tbody></table>
-      </details>`;
+      <div class="exp-years" id="expYears"></div>
+      <div id="expiryDetailBody"></div>`;
+    renderExpiryTables();
   }else ew.style.display='none';
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
