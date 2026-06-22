@@ -705,10 +705,6 @@ function showStandardWarn(s){
     w.style.display='block';
     w.style.background='rgba(255,76,106,0.08)';w.style.border='1px solid rgba(255,76,106,0.35)';w.style.color='#ff8fa3';
     w.innerHTML='<strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date — learners enrolled before 1 Sept 2026 may complete. New starts must be self-funded.';
-  }else if(s&&s.level===7){
-    w.style.display='block';
-    w.style.background='rgba(245,166,35,0.08)';w.style.border='1px solid rgba(245,166,35,0.35)';w.style.color='#f5c87a';
-    w.innerHTML='<strong>⚠ Level 7 funding restricted (from 1 Jan 2026).</strong> Levy funding only for apprentices aged <strong>under 22</strong> at the start — or aged 22–24 with an EHC plan or who are care-experienced. Older learners must be self-funded.';
   }else{
     w.style.display='none';
   }
