@@ -1036,32 +1036,45 @@ function renderPlan(){
   const backfillFTE=withinBuffer?0:(lostHrs-bufferHrs)/hours;
   const quiet=planCfg.months.map((s,i)=>s===2?MONTH_NAMES[i]:null).filter(Boolean);
   const peak=planCfg.months.map((s,i)=>s===1?MONTH_NAMES[i]:null).filter(Boolean);
-  // Learning-intensity curve over the first 6 months: light onboarding, ramping to peak demand
-  const INTENSITY=[0.3,0.7,1.0,1.0,0.9,0.7];
+  // Build intensity "phases" per programme, scaled by its real duration & level.
+  // Two phases that actually depend on start timing: the early demanding ramp (after onboarding)
+  // and the EPA-prep window near the end. The long plateau in between spans every month and
+  // doesn't discriminate between start months, so it's excluded.
+  function progPhases(p){
+    const dur=Math.max(3,Math.round((new Date(p.epa)-new Date(p.start))/(30.44*864e5)));
+    const level=progLevel(p);
+    const amp=Math.min(0.95,0.7+0.05*(level-2)); // L2≈0.7 … L7≈0.95 sustained demand
+    const phases=[];
+    // early demanding phase: starts after ~1mo onboarding, length scales with duration
+    const earlyEnd=Math.min(dur-1,Math.max(3,Math.round(dur*0.3)));
+    for(let m=1;m<=earlyEnd;m++)phases.push({offset:m,weight:amp*Math.min(1,m/3)});
+    // EPA-prep window: final ~3 months, high intensity (revision + assessment)
+    for(let m=Math.max(1,dur-3);m<dur;m++)phases.push({offset:m,weight:Math.min(1,amp+0.2),epa:true});
+    return {name:p.name,phases,count:p.count,dur};
+  }
+  const curves=programmes.map(progPhases);
   const scoreStart=(start)=>{
-    let sc=0;
-    // post-peak recovery drag: a just-finished peak leaves people clearing backlog & worn out.
-    // Heaviest the month straight after, easing over the next month.
-    if(planCfg.months[(start+11)%12]===1)sc-=0.7; // peak ended last month
-    if(planCfg.months[(start+10)%12]===1)sc-=0.3; // peak ended two months ago
-    for(let m=0;m<INTENSITY.length;m++){
-      const mi=(start+m)%12,w=INTENSITY[m];
-      if(planCfg.months[mi]===1)sc-=w;            // peak hits the demanding phase — bad
-      else if(planCfg.months[mi]===2)sc+=w*0.6;   // quiet during demanding phase — good
-      if(BANK_HOL_MONTHS.includes(mi))sc-=0.15*w; // fewer training days
-    }
-    return sc;
+    let sc=0,wsum=0;
+    // post-peak recovery drag: a just-finished peak leaves people clearing backlog & worn out
+    if(planCfg.months[(start+11)%12]===1)sc-=0.7;
+    if(planCfg.months[(start+10)%12]===1)sc-=0.3;
+    curves.forEach(({phases,count})=>phases.forEach(ph=>{
+      const mi=(start+ph.offset)%12,w=ph.weight*count;wsum+=w;
+      if(planCfg.months[mi]===1)sc-=w;          // peak hits a demanding/EPA phase — bad
+      else if(planCfg.months[mi]===2)sc+=w*0.6; // quiet during it — good
+      if(BANK_HOL_MONTHS.includes(mi))sc-=0.15*w;
+    }));
+    return wsum?sc/Math.sqrt(wsum):sc; // normalise so long programmes don't dominate the scale
   };
   const marked=planCfg.months.some(s=>s!==0);
   const scored=MONTH_NAMES.map((nm,i)=>({nm,i,sc:scoreStart(i)})).sort((a,b)=>b.sc-a.sc);
   const bestMonths=scored.filter(x=>x.sc>=scored[0].sc-0.01).map(x=>x.nm);
   const worstMonths=scored.slice().reverse().filter(x=>x.sc<=scored[scored.length-1].sc+0.01&&x.sc<0).map(x=>x.nm);
-  // Per-programme: does its demanding phase (months 2-5 after start) land in a peak?
-  const clashProgs=programmes.filter(p=>{
-    const sm=new Date(p.start).getMonth();
-    for(let m=1;m<=4;m++){if(planCfg.months[(sm+m)%12]===1)return true;}
-    return false;
-  }).map(p=>p.name);
+  // Per-programme: does a demanding or EPA phase land in a peak month?
+  const clashProgs=curves.filter(c=>{
+    const sm=new Date(programmes.find(p=>p.name===c.name).start).getMonth();
+    return c.phases.some(ph=>planCfg.months[(sm+ph.offset)%12]===1);
+  }).map(c=>c.name);
   // stat cards
   let html=`<div class="plan-card-grid">
     <div class="plan-stat"><div class="pl">Total overlay cost</div><div class="pv">${fmt(totalOverlay)}</div><div class="ps">Productive time you absorb across all programmes</div></div>
@@ -1078,9 +1091,9 @@ function renderPlan(){
   // timing — driven by the learning-intensity scoring
   let timing='';
   if(!marked){
-    timing=`Mark your peak and quiet months on the calendar above for tailored start-timing advice. As a rule, aim for the <strong>demanding phase (months 2–5)</strong>, not the start month, to fall in quieter periods.`;
+    timing=`Mark your peak and quiet months on the calendar above for tailored start-timing advice. As a rule, aim for the <strong>demanding learning phase and EPA-prep window</strong> — not the light onboarding month — to fall in quieter periods.`;
   }else{
-    timing+=`<strong>Best months to start: ${bestMonths.join(', ')}.</strong> This keeps the demanding phase (months 2–5, once onboarding settles) clear of your peaks. `;
+    timing+=`<strong>Best months to start: ${bestMonths.join(', ')}.</strong> Tuned to each programme's duration and level, this keeps the demanding learning phase and the EPA-prep window clear of your peaks. `;
     if(worstMonths.length)timing+=`<span style="color:#f5c87a">Avoid starting in ${worstMonths.join(', ')}</span> — either the demanding phase collides with a peak, or you'd start straight after one while the team is still clearing backlog. `;
     if(clashProgs.length)timing+=`<br><br><span style="color:#f5c87a">⚠ ${clashProgs.length} added programme${clashProgs.length>1?'s have':' has'} a demanding phase landing in a peak month: ${clashProgs.join(', ')} — consider shifting the start.</span> `;
   }
