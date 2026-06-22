@@ -141,7 +141,13 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-rec{padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;margin-top:10px}
 .plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
 .plan-prog-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12.5px}
-.plan-prog-row .ppn{color:var(--text2)}.plan-prog-row .ppv{font-family:var(--mono);color:var(--text);white-space:nowrap}
+.plan-prog-row .ppn{color:var(--text2)}.plan-prog-row .ppv{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
+.plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:9px;padding:10px 14px;background:rgba(129,140,248,0.04)}
+.plan-collapse summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);user-select:none;list-style:none}
+.plan-collapse summary::-webkit-details-marker{display:none}
+.plan-collapse summary::before{content:'\\25B8  ';color:#a5b0ff}
+.plan-collapse[open] summary::before{content:'\\25BE  '}
+.plan-collapse summary:hover{color:#a5b0ff}
 
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
@@ -1040,7 +1046,23 @@ function renderProjection(){
 // ══════════════════════════════
 //  THINGS TO CONSIDER — workforce impact & timing
 // ══════════════════════════════
-const BANK_HOL_MONTHS=[0,3,4,7,11]; // Jan, Apr, May, Aug, Dec (England — approx)
+// England & Wales bank holidays (actual dated, incl. substitute days), 2026–2029
+const BANK_HOLIDAYS=[
+  {d:'2026-01-01',n:"New Year's Day"},{d:'2026-04-03',n:'Good Friday'},{d:'2026-04-06',n:'Easter Monday'},
+  {d:'2026-05-04',n:'Early May'},{d:'2026-05-25',n:'Spring'},{d:'2026-08-31',n:'Summer'},
+  {d:'2026-12-25',n:'Christmas Day'},{d:'2026-12-28',n:'Boxing Day (substitute)'},
+  {d:'2027-01-01',n:"New Year's Day"},{d:'2027-03-26',n:'Good Friday'},{d:'2027-03-29',n:'Easter Monday'},
+  {d:'2027-05-03',n:'Early May'},{d:'2027-05-31',n:'Spring'},{d:'2027-08-30',n:'Summer'},
+  {d:'2027-12-27',n:'Christmas (substitute)'},{d:'2027-12-28',n:'Boxing Day (substitute)'},
+  {d:'2028-01-03',n:"New Year's Day (substitute)"},{d:'2028-04-14',n:'Good Friday'},{d:'2028-04-17',n:'Easter Monday'},
+  {d:'2028-05-01',n:'Early May'},{d:'2028-05-29',n:'Spring'},{d:'2028-08-28',n:'Summer'},
+  {d:'2028-12-25',n:'Christmas Day'},{d:'2028-12-26',n:'Boxing Day'},
+  {d:'2029-01-01',n:"New Year's Day"},{d:'2029-03-30',n:'Good Friday'},{d:'2029-04-02',n:'Easter Monday'},
+  {d:'2029-05-07',n:'Early May'},{d:'2029-05-28',n:'Spring'},{d:'2029-08-27',n:'Summer'},
+  {d:'2029-12-25',n:'Christmas Day'},{d:'2029-12-26',n:'Boxing Day'},
+];
+const BANK_HOL_MONTHS=[...new Set(BANK_HOLIDAYS.map(h=>new Date(h.d).getMonth()))]; // months that ever contain a BH
+const fmtBH=iso=>new Date(iso).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
 const PLAN_KEY='ac_levy_plan_v1';
@@ -1049,10 +1071,14 @@ function loadPlanCfg(){try{const r=localStorage.getItem(PLAN_KEY);if(r){const c=
 function progLevel(p){const m=(p.name||'').match(/\bL(?:evel\s*)?(\d)\b/i);return m?parseInt(m[1]):4;}
 function buildMonthGrid(){
   const g=document.getElementById('monthGrid');if(!g)return;g.innerHTML='';
+  const now=new Date(),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
   MONTH_NAMES.forEach((nm,i)=>{
     const c=document.createElement('div');
     c.className='month-cell'+(planCfg.months[i]===1?' peak':planCfg.months[i]===2?' quiet':'');
-    c.innerHTML=nm+(BANK_HOL_MONTHS.includes(i)?'<span class="bh" title="Contains a bank holiday">●</span>':'');
+    // bank holidays falling in this month-of-year within the next 36 months
+    const hols=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d.getMonth()===i&&d>=now&&d<=winEnd;});
+    const dot=hols.length?`<span class="bh" title="${hols.map(h=>fmtBH(h.d)+' — '+h.n).join('\n')}">●</span>`:'';
+    c.innerHTML=nm+dot;
     c.onclick=()=>{planCfg.months[i]=(planCfg.months[i]+1)%3;buildMonthGrid();renderPlan();savePlanCfg();};
     g.appendChild(c);
   });
@@ -1155,10 +1181,17 @@ function renderPlan(){
     if(worstMonths.length)timing+=`<span style="color:#f5c87a">Avoid starting in ${worstMonths.join(', ')}</span> — either the demanding phase collides with a peak, or you'd start straight after one while the team is still clearing backlog. `;
     if(clashProgs.length)timing+=`<br><br><span style="color:#f5c87a">⚠ ${clashProgs.length} added programme${clashProgs.length>1?'s have':' has'} a demanding phase landing in a peak month: ${clashProgs.join(', ')} — consider shifting the start.</span> `;
   }
-  timing+=`<br><br>Bank-holiday months (Jan, Apr, May, Aug, Dec) give fewer training days — build slack into those weeks.`;
+  timing+=`<br><br>Bank-holiday weeks mean fewer training days — build slack into those weeks (dated list below).`;
   html+=`<div class="plan-rec" style="margin-top:10px">${timing}</div>`;
-  // breakdown
-  html+=`<div style="margin-top:16px"><div class="plan-label">Per-programme breakdown</div>${rows}</div>`;
+  // dated bank holidays within the projection window
+  const now=new Date(),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
+  const winHols=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d>=now&&d<=winEnd;});
+  if(winHols.length){
+    const hrows=winHols.map(h=>`<div class="plan-prog-row"><span class="ppn">${h.n}</span><span class="ppv">${fmtBH(h.d)}</span></div>`).join('');
+    html+=`<details class="plan-collapse" style="margin-top:14px"><summary>Bank holidays in the next 36 months (${winHols.length})</summary><div style="margin-top:6px">${hrows}</div></details>`;
+  }
+  // per-programme breakdown — collapsible, open by default only for small lists
+  html+=`<details class="plan-collapse" style="margin-top:14px"${programmes.length<=3?' open':''}><summary>Per-programme breakdown (${programmes.length})</summary><div style="margin-top:6px">${rows}</div></details>`;
   document.getElementById('planResults').innerHTML=html;
 }
 
