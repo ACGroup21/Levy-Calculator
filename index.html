@@ -1151,16 +1151,37 @@ const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','
 let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
 let bhYear=new Date().getFullYear();
 function setBhYear(y){bhYear=Number(y);renderBhList();}
+function workingDays(year,month){ // weekdays (Mon–Fri) in a calendar month
+  let d=new Date(year,month,1),c=0;
+  while(d.getMonth()===month){const wd=d.getDay();if(wd!==0&&wd!==6)c++;d.setDate(d.getDate()+1);}
+  return c;
+}
 function renderBhList(){
   const yearsEl=document.getElementById('bhYears'),body=document.getElementById('bhBody');
   if(!yearsEl||!body)return;
-  const now=new Date(),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
-  const win=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d>=now&&d<=winEnd;});
+  const now=new Date(),ms0=new Date(now.getFullYear(),now.getMonth(),1),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
+  const win=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d>=ms0&&d<winEnd;});
   const years=[...new Set(win.map(h=>new Date(h.d).getFullYear()))].sort((a,b)=>a-b);
   if(!years.includes(bhYear))bhYear=years[0];
   yearsEl.innerHTML=years.map(y=>`<button class="bh-yr${y===bhYear?' active':''}" onclick="setBhYear(${y})">${y}</button>`).join('');
-  const list=win.filter(h=>new Date(h.d).getFullYear()===bhYear);
-  body.innerHTML=`<div style="margin-top:8px">${list.map(h=>`<div class="plan-prog-row"><span class="ppn">${h.n}</span><span class="ppv">${fmtBH(h.d)}</span></div>`).join('')}</div>`;
+  // months of the selected year that fall within the rolling window
+  const months=[];for(let m=0;m<12;m++){const d=new Date(bhYear,m,1);if(d>=ms0&&d<winEnd)months.push(m);}
+  let totWd=0,totBh=0,totTr=0;
+  const rows=months.map(m=>{
+    const wd=workingDays(bhYear,m);
+    const hols=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d.getFullYear()===bhYear&&d.getMonth()===m;});
+    const tr=wd-hols.length;totWd+=wd;totBh+=hols.length;totTr+=tr;
+    const title=hols.length?hols.map(h=>fmtBH(h.d)+' — '+h.n).join('\n'):'';
+    return `<tr title="${title}"><td>${MONTH_NAMES[m]} ${bhYear}</td><td class="r">${wd}</td><td class="r ${hols.length?'c-amber':''}">${hols.length||'—'}</td><td class="r" style="color:var(--teal)">${tr}</td></tr>`;
+  }).join('');
+  body.innerHTML=`<div style="margin-top:8px">
+    <table class="expiry-table"><colgroup><col style="width:34%"><col style="width:22%"><col style="width:22%"><col style="width:22%"></colgroup>
+      <thead><tr><th>Month</th><th class="r">Weekdays</th><th class="r">Bank hols</th><th class="r">Trainable</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr style="border-top:1px solid rgba(255,255,255,0.12)"><td style="color:var(--text2)">Total</td><td class="r">${totWd}</td><td class="r c-amber">${totBh}</td><td class="r" style="color:var(--teal)">${totTr}</td></tr></tfoot>
+    </table>
+    <div style="font-size:11px;color:var(--text3);margin-top:7px">Trainable days = weekdays − bank holidays. Hover a row to see the holiday dates. (Annual leave & shift patterns will reduce this further.)</div>
+  </div>`;
 }
 const PLAN_KEY='ac_levy_plan_v1';
 function savePlanCfg(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(planCfg));}catch(e){}}
