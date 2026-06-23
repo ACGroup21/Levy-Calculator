@@ -551,6 +551,7 @@ footer span{color:var(--teal)}
           <div class="otj-grid" id="otjGrid"></div>
         </details>
         <div id="planResults"></div>
+        <button class="btn-clear" onclick="resetPlan()" style="margin-top:16px">Reset planner to defaults</button>
       </div>
     </div>
 
@@ -595,7 +596,8 @@ footer span{color:var(--teal)}
     </div>
     <div style="display:flex;align-items:center;gap:8px">
       <span class="ksb-indicator" id="ksbIndicator">&#10024; KSBs active</span>
-      <button class="copilot-close" onclick="toggleCopilot()">&#10005;</button>
+      <button class="copilot-close" onclick="clearCopilot()" title="Clear chat">&#8635;</button>
+      <button class="copilot-close" onclick="toggleCopilot()" title="Close">&#10005;</button>
     </div>
   </div>
   <div class="copilot-msgs" id="copilotMsgs"></div>
@@ -1276,6 +1278,10 @@ const BANK_HOL_MONTHS=[...new Set(BANK_HOLIDAYS.map(h=>new Date(h.d).getMonth())
 const fmtBH=iso=>new Date(iso).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
+function resetPlan(){
+  planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
+  syncPlanInputs();buildMonthGrid();buildOtjGrid();savePlanCfg();renderPlan();
+}
 let bhYear=new Date().getFullYear();
 function setBhYear(y){bhYear=Number(y);renderBhList();}
 function workingDays(year,month){ // weekdays (Mon–Fri) in a calendar month
@@ -1702,6 +1708,7 @@ function initCopilot(){
   aiMsg(`Hi! I'm your Levy Co-pilot.${hasKSB?' <strong style="color:var(--purple)">KSB data is loaded</strong> — I can now match your talent objectives to the specific Knowledge, Skills &amp; Behaviours of each standard.':' Upload your KSB JSON (above) to unlock deeper talent-to-standard matching.'}<div class="suggestion-chips">${chips.map(c=>`<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('')}</div>`);
 }
 
+function clearCopilot(){const m=document.getElementById('copilotMsgs');if(m)m.innerHTML='';initCopilot();}
 function quickAsk(q){document.getElementById('copilot-input').value=q;sendCopilot();}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,100)+'px';}
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCopilot();}}
