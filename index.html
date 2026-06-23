@@ -27,17 +27,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 @keyframes drift{0%{transform:translate(0,0) scale(1)}25%{transform:translate(50px,-30px) scale(1.08)}50%{transform:translate(80px,40px) scale(0.95)}75%{transform:translate(-20px,60px) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
 .dot-grid{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:radial-gradient(circle,rgba(45,212,178,0.07) 1px,transparent 1px);background-size:30px 30px}
 .vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(5,12,24,0.7) 100%)}
-/* steampunk brass cogs — slow rotation, low opacity */
-.gears{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.gear{position:absolute;animation:spin linear infinite;transform-origin:50% 50%}
-.gear.ccw{animation-direction:reverse}
-@keyframes spin{to{transform:rotate(360deg)}}
-.g1{width:360px;height:360px;top:-100px;left:-90px;color:#b5894e;opacity:.13;animation-duration:62s}
-.g2{width:230px;height:230px;top:7%;right:-60px;color:#a8703c;opacity:.12;animation-duration:46s}
-.g3{width:170px;height:170px;bottom:13%;left:5%;color:#2DD4B2;opacity:.085;animation-duration:38s}
-.g4{width:300px;height:300px;bottom:-110px;right:8%;color:#8a6d3b;opacity:.11;animation-duration:74s}
-.g5{width:130px;height:130px;top:45%;left:41%;color:#b5894e;opacity:.07;animation-duration:30s}
-@media(max-width:600px){.g5,.g2{display:none}}
+/* constellation network background */
+.constellation{position:fixed;inset:0;z-index:0;pointer-events:none}
 
 .page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 1.5rem 5rem}
 
@@ -295,19 +286,7 @@ footer span{color:var(--teal)}
   <div class="aurora-blob blob1"></div><div class="aurora-blob blob2"></div>
   <div class="aurora-blob blob3"></div><div class="aurora-blob blob4"></div><div class="aurora-blob blob5"></div>
 </div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="cog" viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="13" stroke-dasharray="9 11"/>
-  <circle cx="50" cy="50" r="33" fill="none" stroke="currentColor" stroke-width="3"/>
-  <circle cx="50" cy="50" r="9" fill="none" stroke="currentColor" stroke-width="4"/>
-  <g stroke="currentColor" stroke-width="3"><line x1="50" y1="18" x2="50" y2="82"/><line x1="18" y1="50" x2="82" y2="50"/><line x1="27" y1="27" x2="73" y2="73"/><line x1="73" y1="27" x2="27" y2="73"/></g>
-</symbol></svg>
-<div class="gears" aria-hidden="true">
-  <svg class="gear g1"><use href="#cog"/></svg>
-  <svg class="gear g2 ccw"><use href="#cog"/></svg>
-  <svg class="gear g3"><use href="#cog"/></svg>
-  <svg class="gear g4 ccw"><use href="#cog"/></svg>
-  <svg class="gear g5"><use href="#cog"/></svg>
-</div>
+<canvas class="constellation" id="constellation" aria-hidden="true"></canvas>
 <div class="dot-grid"></div><div class="vignette"></div>
 
 <header>
@@ -1501,6 +1480,53 @@ document.addEventListener('keydown',e=>{
     p.style.display=p.style.display==='none'?'block':'none';
   }
 });
+
+// ── Constellation network background ──
+(function(){
+  const cv=document.getElementById('constellation');if(!cv)return;
+  const ctx=cv.getContext('2d');let w,h,nodes,raf,running=true;
+  const DPR=Math.min(window.devicePixelRatio||1,2);
+  function resize(){
+    w=cv.width=innerWidth*DPR;h=cv.height=innerHeight*DPR;
+    cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';
+    const target=Math.min(90,Math.round(innerWidth*innerHeight/16000));
+    nodes=Array.from({length:target},()=>({
+      x:Math.random()*w,y:Math.random()*h,
+      vx:(Math.random()-.5)*0.18*DPR,vy:(Math.random()-.5)*0.18*DPR,
+      r:(Math.random()*1.6+0.7)*DPR
+    }));
+  }
+  const LINK=130*DPR;
+  function frame(){
+    ctx.clearRect(0,0,w,h);
+    for(const n of nodes){
+      n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;
+    }
+    // links
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+        if(d<LINK){
+          const o=(1-d/LINK)*0.16;
+          ctx.strokeStyle='rgba(45,212,178,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    // nodes
+    for(const n of nodes){
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);
+      ctx.fillStyle='rgba(120,210,196,0.55)';ctx.fill();
+    }
+    if(running)raf=requestAnimationFrame(frame);
+  }
+  function start(){if(!running){running=true;frame();}}
+  function stop(){running=false;cancelAnimationFrame(raf);}
+  addEventListener('resize',resize);
+  document.addEventListener('visibilitychange',()=>document.hidden?stop():start());
+  resize();frame();
+})();
 
 // Init "things to consider" planner
 loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();
