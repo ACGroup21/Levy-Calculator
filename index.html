@@ -1778,7 +1778,7 @@ function toggleCopilot(){
 
 function initCopilot(){
   const hasKSB=!!KSB_DATA;
-  const chips=['I want to train 3 managers at level 3','What happens if I run out of levy funds?','How does co-investment work?','How much levy will expire this year?','Can I gift any levy to a supplier?'];
+  const chips=['I want to train 3 managers at level 3','What happens if I run out of levy funds?','How does co-investment work?','Show me the official gov.uk funding rules','Are there incentives for hiring an apprentice?'];
   aiMsg(`Hi! I'm your Levy Co-pilot.${hasKSB?' <strong style="color:var(--purple)">KSB data is loaded</strong> — I can now match your talent objectives to the specific Knowledge, Skills &amp; Behaviours of each standard.':' Upload your KSB JSON (above) to unlock deeper talent-to-standard matching.'}<div class="suggestion-chips">${chips.map(c=>`<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('')}</div>`);
 }
 
@@ -1848,36 +1848,61 @@ function checkAffordability(std,count,months){
 }
 
 // Apprenticeship funding rules knowledge base (gov.uk apprenticeship funding rules, 2026 reforms)
+const FUNDING_DOCS={
+  rules:['Apprenticeship funding rules','https://www.gov.uk/guidance/apprenticeship-funding-rules'],
+  manage:['Manage apprenticeship funds','https://www.gov.uk/guidance/manage-apprenticeship-funds'],
+  transfer:['Transfer apprenticeship funds','https://www.gov.uk/guidance/transferring-apprenticeship-service-funds'],
+  bands:['Apprenticeship funding bands','https://www.gov.uk/government/publications/apprenticeship-funding-bands'],
+  otj:['Off-the-job training','https://www.gov.uk/government/publications/apprenticeships-off-the-job-training-policy'],
+  levy:['Pay Apprenticeship Levy','https://www.gov.uk/guidance/pay-apprenticeship-levy'],
+  incentive:['Apprenticeship incentive payments','https://www.apprenticeships.gov.uk/employers/incentive-payments'],
+  care:['Support for care-experienced apprentices','https://www.apprenticeships.gov.uk/apprentices/support-care-experienced-apprentices'],
+  reforms:['Apprenticeship funding (2026 changes)','https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding']
+};
 const FUNDING_GUIDANCE=[
-  {k:['co-invest','coinvest','co invest','run out','exhaust','empty','not enough','shortfall','5%','25%','top up the cost','out of funds','run short'],
-   t:`<strong>Co-investment</strong> — when a month's training cost is more than your levy account holds, you co-invest on the uncovered amount. The employer pays <strong>5%</strong> and the government <strong>95%</strong>. <strong>From 1 Aug 2026</strong>, levy payers who exhaust their pot pay <strong>25%</strong> (government 75%) for continued apprenticeships. Each month is treated <strong>in isolation</strong> — next month's levy surplus cannot retroactively repay an earlier month's co-investment. Your provider invoices you for the employer share each month you fall short.`},
-  {k:['top-up','top up','10%','bonus','government add'],
+  {k:['co-invest','coinvest','co invest','run out','exhaust','empty','not enough','shortfall','5%','25%','top up the cost','out of funds','run short'],src:'rules',
+   t:`<strong>Co-investment</strong> — when a month's training cost is more than your levy account holds, you co-invest on the uncovered amount. The employer pays <strong>5%</strong> and the government <strong>95%</strong>. <strong>From 1 Aug 2026</strong>, levy payers who exhaust their pot pay <strong>25%</strong> (government 75%) for continued apprenticeships. Each month is treated <strong>in isolation</strong> — next month's levy surplus cannot retroactively repay an earlier month's co-investment.`},
+  {k:['top-up','top up','10%','bonus','government add'],src:'manage',
    t:`<strong>10% top-up</strong> — the government currently adds 10% to your monthly levy declaration (so £100 declared becomes £110 to spend). This top-up is being <strong>removed from 1 Aug 2026</strong>, so newer funds won't be boosted.`},
-  {k:['expire','expiry','expir','lose','use it or lose','24 month','12 month','rolling','old fund'],
-   t:`<strong>Fund expiry</strong> — levy funds expire on a rolling basis if unused: <strong>24 months</strong> after entering the account for older funds, reducing to <strong>12 months</strong> for newer funds (from Aug 2026). Oldest funds are spent first (FIFO). The calculator's expiry panel forecasts exactly when and how much you risk losing.`},
-  {k:['transfer','gift','gifting','share','sme','supply chain','partner','charity','50%'],
+  {k:['expire','expiry','expir','lose','use it or lose','24 month','12 month','rolling','old fund'],src:'manage',
+   t:`<strong>Fund expiry</strong> — levy funds expire on a rolling basis if unused: <strong>24 months</strong> after entering the account for older funds, reducing to <strong>12 months</strong> for newer funds (from Aug 2026). Oldest funds are spent first (FIFO).`},
+  {k:['transfer','gift','gifting','share','sme','supply chain','partner','charity','50%'],src:'transfer',
    t:`<strong>Transfers (gifting)</strong> — levy payers can transfer up to <strong>50% of their annual funds</strong> to other employers (SMEs, supply-chain partners, charities). The transfer covers <strong>100%</strong> of the receiving employer's training and assessment costs, up to the funding band maximum.`},
-  {k:['band','maximum','max funding','cap','cost more','above the band','negotiat'],
-   t:`<strong>Funding bands</strong> — every standard sits in a funding band with a maximum (roughly £1,500–£27,000). Levy/government funding covers the negotiated price up to that maximum; <strong>any cost above the band is paid in full by the employer</strong> and can't use levy funds. Negotiate the price with your provider — you don't have to pay the band maximum.`},
-  {k:['off-the-job','off the job','otj','6 hour','six hour','study time','20%','training hours'],
-   t:`<strong>Off-the-job training</strong> — apprentices must spend a minimum of <strong>6 hours per week</strong> on off-the-job training, averaged over the practical period. This is contracted working time spent learning, not the apprentice's own time. The planner's "overlay cost" estimates what this costs your business.`},
-  {k:['80','20','epa','completion','end-point','end point','payment schedule','monthly payment','installment','instalment'],
-   t:`<strong>How payments flow</strong> — the agreed training price is paid <strong>80% in monthly instalments</strong> across the practical period, with the final <strong>20% held back until the apprentice passes End-Point Assessment (EPA)</strong>. The EPA date is fixed by completion, but the <em>payment schedule</em> can be negotiated with your provider.`},
-  {k:['level 7','l7','masters','age','under 22','restrict','eligib'],
-   t:`<strong>Level 7 funding</strong> — from <strong>1 Jan 2026</strong>, Level 7 apprenticeships are only levy-funded for apprentices aged <strong>under 22</strong> at the start (or 22–24 with an EHC plan / care-experienced). Separately, <strong>16 standards are defunded from 1 Sept 2026</strong> (existing learners complete; no new funded starts).`},
-  {k:['who pays','pay bill','0.5%','3 million','liable','how much levy'],
-   t:`<strong>Who pays the levy</strong> — employers with an annual pay bill over <strong>£3 million</strong> pay the Apprenticeship Levy at <strong>0.5%</strong> of pay bill (less a £15,000 allowance). It's collected monthly through PAYE and appears in your apprenticeship service account with the 10% top-up.`},
+  {k:['band','maximum','max funding','cap','cost more','above the band','negotiat'],src:'bands',
+   t:`<strong>Funding bands</strong> — every standard sits in a funding band with a maximum (roughly £1,500–£27,000). Levy/government funding covers the negotiated price up to that maximum; <strong>any cost above the band is paid in full by the employer</strong>. Negotiate the price — you don't have to pay the band maximum.`},
+  {k:['off-the-job','off the job','otj','6 hour','six hour','study time','training hours'],src:'otj',
+   t:`<strong>Off-the-job training</strong> — apprentices must spend a minimum of <strong>6 hours per week</strong> on off-the-job training, averaged over the practical period. This is contracted working time spent learning, not the apprentice's own time.`},
+  {k:['80','20','epa','completion','end-point','end point','payment schedule','monthly payment','installment','instalment'],src:'rules',
+   t:`<strong>How payments flow</strong> — the agreed training price is paid <strong>80% in monthly instalments</strong> across the practical period, with the final <strong>20% held back until the apprentice passes End-Point Assessment (EPA)</strong>. The EPA date is fixed by completion, but the payment schedule can be negotiated with your provider.`},
+  {k:['level 7','l7','masters','age','under 22','restrict','eligib','defund','axed','withdrawn'],src:'reforms',
+   t:`<strong>Level 7 & defunding</strong> — from <strong>1 Jan 2026</strong>, Level 7 apprenticeships are only levy-funded for apprentices aged <strong>under 22</strong> at the start (or 22–24 with an EHC plan / care-experienced). Separately, <strong>16 standards are defunded from 1 Sept 2026</strong> (existing learners complete; no new funded starts).`},
+  {k:['who pays','pay bill','0.5%','3 million','liable','how much levy','levy rate'],src:'levy',
+   t:`<strong>Who pays the levy</strong> — employers with an annual pay bill over <strong>£3 million</strong> pay the Apprenticeship Levy at <strong>0.5%</strong> of pay bill (less a £15,000 allowance). It's collected monthly through PAYE.`},
+  {k:['duration','minimum length','how long','8 month','12 month minimum','shorter','length of'],src:'rules',
+   t:`<strong>Minimum duration</strong> — the minimum apprenticeship length is being <strong>reduced from 12 months to 8 months</strong> (from Aug 2025, subject to the legislative timetable), allowing shorter programmes for some standards.`},
+  {k:['english','maths','functional skills','level 2','exit requirement','qualification'],src:'rules',
+   t:`<strong>English & maths</strong> — since 2025, apprentices aged <strong>19+</strong> no longer have to achieve Level 2 English and maths to complete (it's now optional, employer's choice). Apprentices aged <strong>16–18 still must</strong> complete the English and maths requirement.`},
+  {k:['incentive','1000','£1000','payment for hiring','employer payment','16-18','16 to 18'],src:'incentive',
+   t:`<strong>Employer incentive</strong> — you receive <strong>£1,000</strong> for hiring an apprentice aged <strong>16–18</strong> (or 19–24 with an EHC plan or who is care-experienced). Paid in two £500 instalments via your training provider. This is on top of the funded training.`},
+  {k:['care leaver','care experienced','bursary','looked after','local authority care'],src:'care',
+   t:`<strong>Care-leaver support</strong> — care-experienced apprentices aged 16–24 can get a <strong>£3,000 bursary</strong> (up from £1,000), paid in 3 instalments. The employer and provider also receive an additional <strong>£1,000</strong> for each care-leaver apprentice.`}
 ];
+function fundingLink(src){var d=FUNDING_DOCS[src]||FUNDING_DOCS.rules;return `<a href="${d[1]}" target="_blank" rel="noopener" style="font-size:11px;color:var(--teal);text-decoration:none">&#128196; ${d[0]} — gov.uk &#8599;</a>`;}
 function answerFunding(q){
   const lq=q.toLowerCase();
+  if(/official (doc|link|guidance|rule)|gov\.?uk (doc|link|rule)|the documents|all the rules|where can i (read|find)|list.*(rule|doc|link)|show.*(rule|doc)s?/.test(lq)){
+    const list=Object.keys(FUNDING_DOCS).map(k=>`<div style="margin-bottom:6px">${fundingLink(k)}</div>`).join('');
+    aiMsg(`<strong>Official gov.uk apprenticeship funding documents</strong> — public domain (Open Government Licence):<div style="margin-top:9px">${list}</div><div style="font-size:11px;color:var(--text3);margin-top:8px">These are the authoritative sources. I summarise them and link straight to gov.uk so you always have the current version.</div>`);
+    return true;
+  }
   const scored=FUNDING_GUIDANCE.map(g=>({g,s:g.k.reduce((n,kw)=>n+(lq.includes(kw)?1:0),0)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
   if(!scored.length)return false;
-  const top=scored.slice(0,2).map(x=>`<div class="r-section">${x.g.t}</div>`).join('');
-  aiMsg(`${top}<div style="font-size:11px;color:var(--text3);margin-top:8px">Source: gov.uk apprenticeship funding rules + 2026 reforms. Always confirm against the latest official guidance.</div>`);
+  const top=scored.slice(0,2).map(x=>`<div class="r-section">${x.g.t}<div style="margin-top:7px">${fundingLink(x.g.src)}</div></div>`).join('');
+  aiMsg(`${top}<div style="font-size:11px;color:var(--text3);margin-top:10px">Linked to official gov.uk guidance (Crown copyright, Open Government Licence). Rules change — always confirm against the current version.</div>`);
   return true;
 }
 function isFundingQuestion(lq){
-  return /co-?invest|top.?up|expir|transfer|gift|funding band|off.?the.?job|\botj\b|levy rate|who pays|pay bill|0\.5%|how (does|do).*(levy|funding|co-?invest)|what.*(co-?invest|top.?up|expir|funding band)|run out of (levy|funds)/.test(lq);
+  return /co-?invest|top.?up|expir|transfer|gift|funding band|off.?the.?job|\botj\b|levy rate|who pays|pay bill|0\.5%|run out of (levy|funds)|minimum (duration|length)|how long.*apprentic|functional skills|english.{0,6}maths|maths.{0,6}english|incentive|care.?leaver|care.?experienced|bursary|defund|level 7|official (doc|link|guidance|rule)|gov\.?uk|the documents|all the rules|how (does|do).*(levy|funding|co-?invest)|what.*(co-?invest|top.?up|expir|funding band|duration|incentive)/.test(lq);
 }
 
 function processQuery(q){
