@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Levy Affordability — Arthur Curtis Education</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1552,11 +1552,25 @@ function clearJD(){
   setJdDropText('&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop');
   lastJD=null;
 }
-function jdDonut(pct,size,sw,color){var r=(size-sw)/2,c=2*Math.PI*r,off=c*(1-pct/100),cx=size/2;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'"><circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="'+sw+'"/><circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+cx+' '+cx+')"/><text x="50%" y="50%" dy="0.34em" text-anchor="middle" fill="#fff" font-family="Arial" font-size="'+Math.round(size*0.27)+'" font-weight="700">'+pct+'%</text></svg>';}
+function jdDonut(pct,size,sw,color){var r=(size-sw)/2,c=2*Math.PI*r,off=c*(1-pct/100),cx=size/2;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'"><circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="'+sw+'"/><circle cx="'+cx+'" cy="'+cx+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+cx+' '+cx+')"/><text x="50%" y="50%" dy="0.34em" text-anchor="middle" fill="#fff" font-family="Inter,Arial" font-size="'+Math.round(size*0.27)+'" font-weight="700">'+pct+'%</text></svg>';}
 function jdBar(pct,color){return '<div style="height:6px;background:rgba(255,255,255,0.10);border-radius:3px;overflow:hidden;margin-top:6px"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px"></div></div>';}
-var JDIC={book:'M4 4h10a3 3 0 0 1 3 3v13a2.5 2.5 0 0 0-2.5-2.5H4z M20 4h-3',tools:'M7 7l4 4m-4-4l-3 3 4 4 3-3m6-1l3 3-7 7-3-3',users:'M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6m7 0a3 3 0 1 0 0-6M3 20v-1a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1m2-5h2a4 4 0 0 1 4 4v1',brief:'M4 8h16v11H4z M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2',brain:'M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 2 4 3 3 0 0 0 4 2V4z M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-2 4 3 3 0 0 1-4 2',cal:'M5 6h14v14H5z M5 10h14 M9 4v3 M15 4v3',bulb:'M9 18h6 M10 21h4 M7 11a5 5 0 1 1 10 0c0 2-1.5 3-2.5 4h-5C8.5 14 7 13 7 11z'};
-function jdIcon(n,color,sz){sz=sz||22;return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+(JDIC[n]||'')+'"/></svg>';}
-function jdDecor(){var dots='';[[820,60,6,5],[60,1130,6,4]].forEach(function(d){for(var i=0;i<d[2];i++)for(var j=0;j<d[3];j++)dots+='<circle cx="'+(d[0]+i*16)+'" cy="'+(d[1]+j*16)+'" r="2"/>';});return '<svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 1040 1471" preserveAspectRatio="none"><g fill="none" stroke="rgba(45,212,178,0.10)"><circle cx="1000" cy="120" r="120"/><circle cx="930" cy="60" r="60"/><circle cx="70" cy="1180" r="150"/><path d="M780 120 H880 L920 80 H1010" stroke-width="1"/></g><g fill="rgba(45,212,178,0.5)">'+dots+'</g></svg>';}
+var JDIC={
+  book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
+  tools:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  brief:'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+  brain:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/>',
+  cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>',
+  bulb:'<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .6-1.7 1.4-2.5A4.6 4.6 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.8.8 1.2 1.5 1.4 2.5"/>'
+};
+function jdIcon(n,color,sz){sz=sz||22;return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(JDIC[n]||'')+'</svg>';}
+function jdDecor(){
+  var dots='';[[820,52,7,5],[44,1120,7,5],[930,1340,5,4]].forEach(function(d){for(var i=0;i<d[2];i++)for(var j=0;j<d[3];j++)dots+='<circle cx="'+(d[0]+i*15)+'" cy="'+(d[1]+j*15)+'" r="1.8"/>';});
+  return '<svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 1040 1471" preserveAspectRatio="none">'+
+    '<g fill="none" stroke="rgba(45,212,178,0.12)" stroke-width="1.1"><circle cx="1010" cy="110" r="135"/><circle cx="1010" cy="110" r="92"/><circle cx="940" cy="44" r="40"/><path d="M700 150 H812 L852 110 H980"/><path d="M760 210 H840 L872 178 H1010"/></g>'+
+    '<g fill="none" stroke="rgba(55,77,106,0.5)" stroke-width="1"><circle cx="40" cy="1180" r="170"/><circle cx="40" cy="1180" r="118"/><path d="M120 1110 L176 1166"/><path d="M150 1300 H250 L286 1336"/></g>'+
+    '<g fill="none" stroke="rgba(45,212,178,0.10)" stroke-width="1"><path d="M40 70 L96 126 M40 110 H88"/></g>'+
+    '<g fill="rgba(45,212,178,0.55)">'+dots+'</g></svg>';}
 function jdCats(){return lastJD.groups.map(function(g){var t=g.items.length,c=g.items.filter(function(i){return i.covered;}).length;var col=/know/i.test(g.label)?'#2DD4B2':/skill/i.test(g.label)?'#9b8cf7':'#e6b13c';var ic=/know/i.test(g.label)?'book':/skill/i.test(g.label)?'tools':'users';return {label:g.label,total:t,covered:c,pct:t?Math.round(c/t*100):0,col:col,ic:ic,items:g.items};});}
 function jdBuildDash(){
   var d=lastJD,cats=jdCats(),score=d.score,scol=score>=40?'#2DD4B2':score>=JD_THRESHOLD?'#e6b13c':'#ec5a72';
@@ -1565,78 +1579,81 @@ function jdBuildDash(){
   var firstGaps=fg.slice(0,3).map(function(g){return g.id;}).join(', ');
   var kGap=(d.gapsByGroup||[]).filter(function(g){return /know/i.test(g.label);})[0]||{label:'Knowledge',gaps:fg.slice(0,18)};
   var el=document.createElement('div');
-  el.style.cssText='position:absolute;left:-20000px;top:0;width:1040px;min-height:1471px;background:linear-gradient(135deg,#0a1624 0%,#0c1f30 55%,#0a1826 100%);font-family:Arial,Helvetica,sans-serif';
+  el.style.cssText='position:absolute;left:-20000px;top:0;width:1040px;min-height:1471px;background:linear-gradient(135deg,#0a1624 0%,#0c1f30 52%,#0a1826 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased';
   var cardBdr='1px solid rgba(255,255,255,0.07)',PANEL='#13253a';
-  function catRow(c){return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+jdIcon(c.ic,c.col,20)+'<span style="color:#dfe9f2;font-size:12px;font-weight:700;letter-spacing:.04em;flex:1">'+c.label.toUpperCase()+'</span><span style="color:'+c.col+';font-size:12px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col);}
+  function catRow(c){return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+jdIcon(c.ic,c.col,20)+'<span style="color:#dfe9f2;font-size:12px;font-weight:600;letter-spacing:.04em;flex:1">'+c.label.toUpperCase()+'</span><span style="color:'+c.col+';font-size:12px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col);}
   var sideCats=cats.map(function(c){return '<div style="margin-bottom:16px">'+catRow(c)+'</div>';}).join('');
-  var glanceCats=cats.map(function(c){return '<div style="margin-bottom:15px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+jdIcon(c.ic,c.col,18)+'<span style="color:#dfe9f2;font-size:11px;font-weight:700;letter-spacing:.04em;flex:1">'+c.label.toUpperCase()+'</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8ba0b6;font-size:11px">'+c.covered+' of '+c.total+'</span><span style="color:#fff;font-size:11px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col)+'</div>';}).join('');
-  var gapList=kGap.gaps.map(function(g){return '<div style="display:flex;gap:9px;margin-bottom:8px;align-items:flex-start"><span style="color:#2DD4B2;font-size:8px;margin-top:5px">&#9679;</span><span style="color:#2DD4B2;font-weight:700;font-size:12px;min-width:32px">'+g.id+'</span><span style="color:#c9d6e2;font-size:12px;line-height:1.4">'+g.stmt+'</span></div>';}).join('');
-  var bdCols=cats.map(function(c){var rows=c.items.slice(0,5).map(function(it){return '<div style="display:flex;gap:8px;margin-bottom:5px"><span style="color:'+(it.covered?'#2DD4B2':'#8ba0b6')+';font-weight:700;font-size:10.5px;min-width:26px">'+(it.id||'')+'</span><span style="color:#aebcca;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px">'+it.stmt.slice(0,40)+(it.stmt.length>40?'…':'')+'</span></div>';}).join('');return '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+jdIcon(c.ic,c.col,18)+'<span style="color:#dfe9f2;font-size:12px;font-weight:700;letter-spacing:.03em">'+c.label.toUpperCase()+' ('+c.total+')</span></div>'+rows+'<div style="color:#2DD4B2;font-size:11px;font-weight:700;margin-top:8px">See all '+c.total+' '+c.label.toLowerCase()+' →</div></div>';}).join('');
+  var glanceCats=cats.map(function(c){return '<div style="margin-bottom:15px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+jdIcon(c.ic,c.col,18)+'<span style="color:#dfe9f2;font-size:11px;font-weight:600;letter-spacing:.04em;flex:1">'+c.label.toUpperCase()+'</span></div><div style="display:flex;justify-content:space-between"><span style="color:#8ba0b6;font-size:11px">'+c.covered+' of '+c.total+'</span><span style="color:#fff;font-size:11px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col)+'</div>';}).join('');
+  var gapList=kGap.gaps.map(function(g){return '<div style="display:flex;gap:9px;margin-bottom:8px;align-items:flex-start"><span style="color:#2DD4B2;font-size:8px;margin-top:5px">&#9679;</span><span style="color:#2DD4B2;font-weight:700;font-size:12px;min-width:32px">'+g.id+'</span><span style="color:#c9d6e2;font-size:12px;line-height:1.45">'+g.stmt+'</span></div>';}).join('');
+  var bdCols=cats.map(function(c){var rows=c.items.slice(0,5).map(function(it){return '<div style="display:flex;gap:8px;margin-bottom:5px"><span style="color:'+(it.covered?'#2DD4B2':'#8ba0b6')+';font-weight:700;font-size:10.5px;min-width:26px">'+(it.id||'')+'</span><span style="color:#aebcca;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:210px">'+it.stmt.slice(0,40)+(it.stmt.length>40?'…':'')+'</span></div>';}).join('');return '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">'+jdIcon(c.ic,c.col,18)+'<span style="color:#dfe9f2;font-size:12px;font-weight:700;letter-spacing:.03em">'+c.label.toUpperCase()+' ('+c.total+')</span></div>'+rows+'<div style="color:#2DD4B2;font-size:11px;font-weight:600;margin-top:8px">See all '+c.total+' '+c.label.toLowerCase()+' →</div></div>';}).join('');
   el.innerHTML=jdDecor()+
-  '<div style="position:relative;padding:44px 44px 0">'+
-    '<img src="'+window.AC_LOGO_WHITE+'" style="height:50px;margin-bottom:28px">'+
-    '<div style="font-size:52px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.05">JD Matcher Report</div>'+
-    '<div style="margin-top:11px;font-size:17px"><span style="color:#2DD4B2;font-weight:700">Levy Affordability Calculator</span><span style="color:#7e93a8"> · '+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})+'</span></div>'+
-    '<div style="margin-top:24px;background:'+PANEL+';border:'+cardBdr+';border-radius:14px;display:flex;align-items:center;padding:20px 26px">'+
-      '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief","#2DD4B2",30)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:3px">'+d.stdName+'</div></div></div>'+
+  '<div style="position:relative;padding:46px 46px 0">'+
+    '<img src="'+window.AC_LOGO_WHITE+'" style="height:50px;margin-bottom:30px">'+
+    '<div style="font-size:54px;font-weight:800;color:#fff;letter-spacing:-1.4px;line-height:1.02">JD Matcher Report</div>'+
+    '<div style="margin-top:12px;font-size:17px;font-weight:500"><span style="color:#2DD4B2;font-weight:600">Levy Affordability Calculator</span><span style="color:#7e93a8"> · '+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})+'</span></div>'+
+    '<div style="margin-top:24px;background:'+PANEL+';border:'+cardBdr+';border-radius:16px;display:flex;align-items:center;padding:22px 28px">'+
+      '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief","#2DD4B2",30)+'<div><div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.09em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:4px">'+d.stdName+'</div></div></div>'+
       '<div style="width:1px;height:54px;background:rgba(255,255,255,0.09)"></div>'+
-      '<div style="flex:1;display:flex;align-items:center;gap:16px;padding-left:24px">'+jdDonut(score,64,7,scol)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">COVERAGE</div><div style="color:#fff;font-size:14px;margin-top:3px">'+d.covered+' of '+d.total+' KSBs evidenced</div><div style="color:#2DD4B2;font-size:13px;margin-top:2px">'+(d.total-d.covered)+' to bridge</div></div></div>'+
+      '<div style="flex:1;display:flex;align-items:center;gap:16px;padding-left:24px">'+jdDonut(score,64,7,scol)+'<div><div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.09em">COVERAGE</div><div style="color:#fff;font-size:14px;margin-top:4px">'+d.covered+' of '+d.total+' KSBs evidenced</div><div style="color:#2DD4B2;font-size:13px;margin-top:2px">'+(d.total-d.covered)+' to bridge</div></div></div>'+
       '<div style="width:1px;height:54px;background:rgba(255,255,255,0.09)"></div>'+
-      '<div style="flex:0 0 200px;display:flex;align-items:flex-start;gap:14px;padding-left:24px">'+jdIcon("brain","#9b8cf7",28)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">AI ANALYSIS</div><div style="color:#9fb1c2;font-size:12px;margin-top:3px;line-height:1.45">Indicative keyword analysis, not a compliance verdict.</div></div></div>'+
+      '<div style="flex:0 0 200px;display:flex;align-items:flex-start;gap:14px;padding-left:24px">'+jdIcon("brain","#9b8cf7",28)+'<div><div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.09em">AI ANALYSIS</div><div style="color:#9fb1c2;font-size:12px;margin-top:4px;line-height:1.5">Indicative keyword analysis, not a compliance verdict.</div></div></div>'+
     '</div>'+
     '<div style="display:flex;gap:18px;margin-top:22px;align-items:flex-start">'+
       '<div style="flex:0 0 196px">'+
-        '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:14px;padding:20px 18px;text-align:center">'+
-          '<div style="color:#2DD4B2;font-size:12px;font-weight:700;letter-spacing:.06em">MATCH SCORE</div>'+
-          '<div style="margin:14px 0 6px;display:flex;justify-content:center">'+jdDonut(score,116,11,scol)+'</div>'+
-          '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.05em">OVERALL COVERAGE</div>'+
-          '<div style="height:1px;background:rgba(255,255,255,0.08);margin:16px 0"></div>'+
+        '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:16px;padding:22px 18px;text-align:center">'+
+          '<div style="color:#2DD4B2;font-size:12px;font-weight:600;letter-spacing:.07em">MATCH SCORE</div>'+
+          '<div style="margin:16px 0 6px;display:flex;justify-content:center">'+jdDonut(score,118,11,scol)+'</div>'+
+          '<div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.06em">OVERALL COVERAGE</div>'+
+          '<div style="height:1px;background:rgba(255,255,255,0.08);margin:18px 0"></div>'+
           '<div style="text-align:left">'+sideCats+'</div>'+
         '</div>'+
-        '<div style="background:#16273d;border:'+cardBdr+';border-radius:14px;padding:16px;margin-top:16px">'+
-          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+jdIcon("bulb","#2DD4B2",18)+'<span style="color:#2DD4B2;font-size:12px;font-weight:700;letter-spacing:.05em">INSIGHT</span></div>'+
-          '<div style="color:#9fb1c2;font-size:12px;line-height:1.5">Focus on '+low.label+' to build a stronger foundation'+(firstGaps?'. Prioritise '+firstGaps:'')+'.</div>'+
+        '<div style="background:#16273d;border:'+cardBdr+';border-radius:16px;padding:16px;margin-top:16px">'+
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+jdIcon("bulb","#2DD4B2",18)+'<span style="color:#2DD4B2;font-size:12px;font-weight:600;letter-spacing:.05em">INSIGHT</span></div>'+
+          '<div style="color:#9fb1c2;font-size:12px;line-height:1.55">Focus on '+low.label+' to build a stronger foundation'+(firstGaps?'. Prioritise '+firstGaps:'')+'.</div>'+
         '</div>'+
       '</div>'+
       '<div style="flex:1">'+
-        '<div style="display:flex;align-items:center;gap:12px">'+jdIcon("cal","#9b8cf7",24)+'<span style="color:#fff;font-size:16px;font-weight:800;letter-spacing:.02em">WORK-EXPOSURE PLAN TO BRIDGE THE GAPS</span></div>'+
-        '<div style="color:#9fb1c2;font-size:13px;line-height:1.5;margin-top:10px">Plan real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each area below.</div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+jdIcon("cal","#9b8cf7",24)+'<span style="color:#fff;font-size:16px;font-weight:700;letter-spacing:.02em">WORK-EXPOSURE PLAN TO BRIDGE THE GAPS</span></div>'+
+        '<div style="color:#9fb1c2;font-size:13px;line-height:1.55;margin-top:10px">Plan real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each area below.</div>'+
         '<div style="height:1px;background:rgba(255,255,255,0.08);margin:16px 0"></div>'+
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+jdIcon("book","#2DD4B2",20)+'<span style="color:#2DD4B2;font-size:14px;font-weight:800;letter-spacing:.03em">'+kGap.label.toUpperCase()+' ('+kGap.gaps.length+')</span></div>'+
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'+jdIcon("book","#2DD4B2",20)+'<span style="color:#2DD4B2;font-size:14px;font-weight:700;letter-spacing:.03em">'+kGap.label.toUpperCase()+' ('+kGap.gaps.length+')</span></div>'+
         gapList+
       '</div>'+
       '<div style="flex:0 0 210px">'+
-        '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:14px;padding:18px">'+
-          '<div style="color:#fff;font-size:14px;font-weight:800;letter-spacing:.04em;margin-bottom:16px">AT A GLANCE</div>'+
+        '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:16px;padding:20px">'+
+          '<div style="color:#fff;font-size:14px;font-weight:700;letter-spacing:.04em;margin-bottom:16px">AT A GLANCE</div>'+
           glanceCats+
           '<div style="height:1px;background:rgba(255,255,255,0.08);margin:6px 0 14px"></div>'+
-          '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.06em">TOTAL KSBS</div>'+
-          '<div style="margin:4px 0 16px"><span style="color:#fff;font-size:26px;font-weight:800">'+d.covered+'</span><span style="color:#8ba0b6;font-size:15px"> of '+d.total+'</span></div>'+
-          '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.06em">AREAS TO BRIDGE</div>'+
-          '<div style="color:#2DD4B2;font-size:26px;font-weight:800;margin-top:4px">'+(d.total-d.covered)+'</div>'+
+          '<div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.06em">TOTAL KSBS</div>'+
+          '<div style="margin:5px 0 16px"><span style="color:#fff;font-size:26px;font-weight:800">'+d.covered+'</span><span style="color:#8ba0b6;font-size:15px"> of '+d.total+'</span></div>'+
+          '<div style="color:#8ba0b6;font-size:11px;font-weight:500;letter-spacing:.06em">AREAS TO BRIDGE</div>'+
+          '<div style="color:#2DD4B2;font-size:26px;font-weight:800;margin-top:5px">'+(d.total-d.covered)+'</div>'+
         '</div>'+
       '</div>'+
     '</div>'+
-    '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:14px;padding:20px 24px;margin-top:24px">'+
-      '<div style="color:#fff;font-size:15px;font-weight:800;letter-spacing:.03em;margin-bottom:16px">FULL KSB BREAKDOWN</div>'+
+    '<div style="background:'+PANEL+';border:'+cardBdr+';border-radius:16px;padding:22px 26px;margin-top:24px">'+
+      '<div style="color:#fff;font-size:15px;font-weight:700;letter-spacing:.03em;margin-bottom:18px">FULL KSB BREAKDOWN</div>'+
       '<div style="display:flex;gap:30px">'+bdCols+'</div>'+
     '</div>'+
   '</div>'+
-  '<div style="border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:14px 30px;margin-top:34px;color:#7e93a8;font-size:12px"><img src="'+window.AC_LOGO_WHITE+'" style="height:18px;margin-right:14px"><span style="flex:1">Arthur Curtis Education · JD Matcher · indicative keyword analysis, not a compliance verdict</span></div>';
+  '<div style="border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:14px 32px;margin-top:36px;color:#7e93a8;font-size:12px"><img src="'+window.AC_LOGO_WHITE+'" style="height:18px;margin-right:14px;opacity:.9"><span style="flex:1">Arthur Curtis Education · JD Matcher · indicative keyword analysis, not a compliance verdict</span></div>';
   return el;
 }
 function downloadJDReport(){
   if(!lastJD){alert("Run an analysis first.");return;}
   if(!window.html2canvas||!window.jspdf){alert("Report libraries not available.");return;}
-  var el=jdBuildDash();document.body.appendChild(el);
-  html2canvas(el,{scale:2,backgroundColor:null,logging:false,windowWidth:1040}).then(function(canvas){
-    if(document.body.contains(el))document.body.removeChild(el);
-    var jsPDF=window.jspdf.jsPDF;
-    var pw=595,ph=Math.round(pw*canvas.height/canvas.width);
-    var doc=new jsPDF({unit:"pt",format:[pw,ph]});
-    doc.addImage(canvas.toDataURL("image/jpeg",0.92),"JPEG",0,0,pw,ph);
-    doc.save("JD-Matcher-"+lastJD.stdName.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
-  }).catch(function(e){if(document.body.contains(el))document.body.removeChild(el);alert("Could not build report: "+e.message);});
+  var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  ready.then(function(){
+    var el=jdBuildDash();document.body.appendChild(el);
+    return html2canvas(el,{scale:2.5,backgroundColor:null,logging:false,useCORS:true,windowWidth:1040}).then(function(canvas){
+      if(document.body.contains(el))document.body.removeChild(el);
+      var jsPDF=window.jspdf.jsPDF;
+      var pw=595,ph=Math.round(pw*canvas.height/canvas.width);
+      var doc=new jsPDF({unit:"pt",format:[pw,ph]});
+      doc.addImage(canvas.toDataURL("image/jpeg",0.94),"JPEG",0,0,pw,ph);
+      doc.save("JD-Matcher-"+lastJD.stdName.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+    });
+  }).catch(function(e){alert("Could not build report: "+e.message);});
 }
 
 // JD file upload — extract text from .txt / .pdf / .docx, then analyse
