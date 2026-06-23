@@ -147,8 +147,8 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:9px;padding:10px 14px;background:rgba(129,140,248,0.04)}
 .plan-collapse summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);user-select:none;list-style:none}
 .plan-collapse summary::-webkit-details-marker{display:none}
-.plan-collapse summary::before{content:'\\25B8  ';color:#a5b0ff}
-.plan-collapse[open] summary::before{content:'\\25BE  '}
+.plan-collapse summary::before{content:'\25B8  ';color:#a5b0ff}
+.plan-collapse[open] summary::before{content:'\25BE  '}
 .plan-collapse summary:hover{color:#a5b0ff}
 
 .sw{overflow-x:auto}
@@ -197,8 +197,8 @@ th.r,td.r{text-align:right}
 .expiry-details{margin-top:12px;border-top:1px solid rgba(245,166,35,0.18);padding-top:8px}
 .expiry-details summary{cursor:pointer;font-size:11.5px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;user-select:none;list-style:none}
 .expiry-details summary::-webkit-details-marker{display:none}
-.expiry-details summary::before{content:'\\25B8  ';color:var(--amber)}
-.expiry-details[open] summary::before{content:'\\25BE  '}
+.expiry-details summary::before{content:'\25B8  ';color:var(--amber)}
+.expiry-details[open] summary::before{content:'\25BE  '}
 .expiry-details summary:hover{color:var(--amber)}
 
 details summary{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;user-select:none;letter-spacing:.05em;padding:6px 0}
@@ -1016,13 +1016,14 @@ function renderExpiryTables(){
   if(expiryYear==='all'){
     document.getElementById('expiryDetailBody').innerHTML=`${topHtml}${ledgerHtml}`;
   }else{
-    const bd=exp.byMonth.filter(e=>inYr(e.mk));
-    const breakdown=bd.length?bd.map(e=>`<tr><td>${mkLbl(e.mk)}</td><td class="r c-amber">${fmt(e.amount)}</td></tr>`).join(''):`<tr><td colspan="2" style="color:var(--text3)">No funds expire in this period.</td></tr>`;
-    // single year: breakdown on one half, ledger on the other to reduce footprint
+    // single year: both tables share the SAME month rows (every ledger month) so they align 1:1
+    const yrLedger=exp.ledger.filter(l=>inYr(l.mk));
+    const breakdown=yrLedger.length?yrLedger.map(l=>`<tr><td>${mkLbl(l.mk)}</td><td class="r ${l.expired>0.5?'c-amber':''}">${l.expired>0.5?fmt(l.expired):'—'}</td></tr>`).join(''):`<tr><td colspan="2" style="color:var(--text3)">No data for this period.</td></tr>`;
+    const ledgerTable=`<table class="expiry-table"><colgroup><col style="width:24%"><col style="width:19%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Balance</th></tr></thead><tbody>${ledger}</tbody></table>`;
     document.getElementById('expiryDetailBody').innerHTML=`<div class="exp-single">
       <div><div class="expiry-sub">When funds expire in ${expiryYear}</div>
         <table class="expiry-table"><colgroup><col style="width:55%"><col style="width:45%"></colgroup><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table></div>
-      <div><div class="expiry-sub">${expiryYear} ledger</div>${ledgerHtml}</div>
+      <div><div class="expiry-sub">${expiryYear} ledger</div>${ledgerTable}</div>
     </div>`;
   }
 }
