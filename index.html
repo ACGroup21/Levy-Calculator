@@ -181,6 +181,9 @@ th.r,td.r{text-align:right}
 .exp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:16px;margin-top:6px}
 .exp-col-head{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--amber);display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid rgba(245,166,35,0.3);padding-bottom:5px;margin-bottom:2px}
 .exp-grid .expiry-table{max-width:none}
+.exp-single{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-top:4px}
+.exp-single .expiry-table{max-width:none;margin-top:0}
+@media(max-width:600px){.exp-single{grid-template-columns:1fr}}
 .expiry-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
 .expiry-table{width:100%;min-width:0;max-width:540px;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12px}
 .expiry-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:4px 10px;border-bottom:1px solid rgba(245,166,35,0.2)}
@@ -1001,17 +1004,23 @@ function renderExpiryTables(){
       return `<div class="exp-col"><div class="exp-col-head"><span>${y}</span><span>${fmt(tot)}</span></div><table class="expiry-table"><colgroup><col style="width:45%"><col style="width:55%"></colgroup><tbody>${rows}</tbody></table></div>`;
     }).join('');
     topHtml=`<div class="expiry-sub">When funds expire — by year</div><div class="exp-grid">${cols}</div>`;
+  }
+  const ledger=exp.ledger.filter(l=>inYr(l.mk)).map(l=>`<tr><td>${mkLbl(l.mk)}</td><td class="r">${fmt(l.added)}</td><td class="r">${fmt(l.drawn)}</td><td class="r ${l.expired>0.5?'c-red':''}">${l.expired>0.5?fmt(l.expired):'—'}</td><td class="r">${fmt(l.balance)}</td></tr>`).join('');
+  const ledgerHtml=`<details class="expiry-details"><summary>Show full month-by-month ledger${expiryYear==='all'?'':' ('+expiryYear+')'}</summary>
+      <table class="expiry-table"><colgroup><col style="width:24%"><col style="width:19%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Balance</th></tr></thead><tbody>${ledger}</tbody></table>
+    </details>`;
+  if(expiryYear==='all'){
+    document.getElementById('expiryDetailBody').innerHTML=`${topHtml}${ledgerHtml}`;
   }else{
     const bd=exp.byMonth.filter(e=>inYr(e.mk));
     const breakdown=bd.length?bd.map(e=>`<tr><td>${mkLbl(e.mk)}</td><td class="r c-amber">${fmt(e.amount)}</td></tr>`).join(''):`<tr><td colspan="2" style="color:var(--text3)">No funds expire in this period.</td></tr>`;
-    topHtml=`<div class="expiry-sub">When funds expire in ${expiryYear}</div>
-      <table class="expiry-table"><colgroup><col style="width:55%"><col style="width:45%"></colgroup><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table>`;
+    // single year: breakdown on one half, ledger on the other to reduce footprint
+    document.getElementById('expiryDetailBody').innerHTML=`<div class="exp-single">
+      <div><div class="expiry-sub">When funds expire in ${expiryYear}</div>
+        <table class="expiry-table"><colgroup><col style="width:55%"><col style="width:45%"></colgroup><thead><tr><th>Expires</th><th class="r">Amount lost</th></tr></thead><tbody>${breakdown}</tbody></table></div>
+      <div><div class="expiry-sub">${expiryYear} ledger</div>${ledgerHtml}</div>
+    </div>`;
   }
-  const ledger=exp.ledger.filter(l=>inYr(l.mk)).map(l=>`<tr><td>${mkLbl(l.mk)}</td><td class="r">${fmt(l.added)}</td><td class="r">${fmt(l.drawn)}</td><td class="r ${l.expired>0.5?'c-red':''}">${l.expired>0.5?fmt(l.expired):'—'}</td><td class="r">${fmt(l.balance)}</td></tr>`).join('');
-  document.getElementById('expiryDetailBody').innerHTML=`${topHtml}
-    <details class="expiry-details"><summary>Show full month-by-month ledger${expiryYear==='all'?'':' ('+expiryYear+')'}</summary>
-      <table class="expiry-table"><colgroup><col style="width:24%"><col style="width:19%"><col style="width:19%"><col style="width:19%"><col style="width:19%"></colgroup><thead><tr><th>Month</th><th class="r">Declared</th><th class="r">Drawn</th><th class="r">Expired</th><th class="r">Balance</th></tr></thead><tbody>${ledger}</tbody></table>
-    </details>`;
 }
 
 function simulateLevyFIFO(income,tot,pmk,M){
