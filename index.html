@@ -1088,47 +1088,51 @@ function simulateLevyFIFO(income,tot,pmk,M){
   return{total,byMonth,ledger};
 }
 
-function renderShortfallAdvice(income,tot,ev,labels,trueBal){
-  const el=document.getElementById('shortfallAdvice');if(!el)return;
-  const spare=tot.map((t,i)=>income[i]-t);
-  const shortMonths=spare.filter(s=>s<-1).length;
-  const minBal=Math.min(...trueBal),minIdx=trueBal.indexOf(minBal);
-  if(!shortMonths&&minBal>=0){el.innerHTML='';return;}
-  if(minBal>=0){
-    el.innerHTML=`<div class="sf-box ok"><strong>✓ Timing dips, but your levy pot covers them.</strong> ${shortMonths} month${shortMonths>1?'s':''} draw more than that month's levy income, but your accumulated balance absorbs it — the pot bottoms out at ${fmt(minBal)} in ${labels[minIdx]}. No action needed; just note your buffer is thinnest then.</div>`;
-    return;
+// Employer co-investment rate: 5% before Aug 2026, 25% from Aug 2026 (levy payer exhausting pot)
+function coInvRate(mk){return mk<RULE_MK?0.05:0.25;}
+// Real account model: balance floors at 0; any month's uncovered cost triggers co-investment
+// (employer share), settled that month — never repaid by later surplus.
+function simCoInvest(income,tot,pmk){
+  let bal=levyData.balance,total=0;const months=[];
+  for(let i=0;i<tot.length;i++){
+    bal+=income[i];
+    if(tot[i]>bal+0.5){
+      const uncovered=tot[i]-bal,rate=coInvRate(pmk+i),share=uncovered*rate;
+      total+=share;months.push({i,uncovered,share,rate});bal=0;
+    }else bal-=tot[i];
   }
-  // minimum running balance for a given monthly-spend array
-  const minRB=arr=>{let b=levyData.balance,m=Infinity;for(let i=0;i<arr.length;i++){b+=income[i]-arr[i];if(b<m)m=b;}return m;};
-  const base=minRB(tot);const N=income.length;
-  // for each completion payment, evaluate (a) deferring it to a later lower-spend month and
-  // (b) spreading it into instalments. Payments can only move later (after the learner passes EPA).
+  return{total,months};
+}
+function renderShortfallAdvice(income,tot,ev,labels,pmk){
+  const el=document.getElementById('shortfallAdvice');if(!el)return;
+  const base=simCoInvest(income,tot,pmk);
+  if(base.total<1){el.innerHTML='';return;}
+  const N=income.length;
   let recs='';
   ev.slice().sort((a,b)=>b.amount-a.amount).forEach(e=>{
-    // (a) DEFER to a single later month
-    let mvBest=-1,mvMin=base;
+    let mvBest=-1,mvTc=base.total;
     for(let j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){
       const t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;
-      const m=minRB(t2);if(m>mvMin+1){mvMin=m;mvBest=j;}
+      const c=simCoInvest(income,t2,pmk).total;if(c<mvTc-1){mvTc=c;mvBest=j;}
     }
-    // (b) SPREAD into k equal instalments from the EPA month forward
-    let spK=0,spMin=base;
+    let spK=0,spTc=base.total;
     for(let k=2;k<=6&&e.idx+k-1<N;k++){
       const t2=tot.slice();t2[e.idx]-=e.amount;const per=e.amount/k;
       for(let m=0;m<k;m++)t2[e.idx+m]+=per;
-      const mm=minRB(t2);
-      if(mm>=0){spK=k;spMin=mm;break;}            // smallest k that clears
-      if(mm>spMin+1){spMin=mm;spK=k;}             // else track best
+      const c=simCoInvest(income,t2,pmk).total;
+      if(c<1){spK=k;spTc=c;break;}
+      if(c<spTc-1){spTc=c;spK=k;}
     }
     const opts=[];
-    if(mvBest>=0)opts.push(`<strong>defer</strong> the payment to <strong>${labels[mvBest]}</strong>${mvMin>=0?' (clears the gap)':` (lifts the low to ${fmt(mvMin)})`}`);
-    if(spK)opts.push(`<strong>spread</strong> it over <strong>${spK} months</strong> (${fmt(e.amount/spK)}/mo, ${labels[e.idx]}–${labels[e.idx+spK-1]})${spMin>=0?' (clears the gap)':` (lifts the low to ${fmt(spMin)})`}`);
-    if(opts.length)recs+=`<li>For the <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> in ${labels[e.idx]} — keep the EPA assessment as-is and negotiate the payment schedule: ${opts.join(', or ')}.</li>`;
+    if(mvBest>=0)opts.push(`<strong>defer</strong> the payment to <strong>${labels[mvBest]}</strong> (co-investment ${mvTc<1?'down to nil':'↓ to '+fmt(mvTc)})`);
+    if(spK)opts.push(`<strong>spread</strong> it over <strong>${spK} months</strong> (${fmt(e.amount/spK)}/mo from ${labels[e.idx]}) (co-investment ${spTc<1?'down to nil':'↓ to '+fmt(spTc)})`);
+    if(opts.length)recs+=`<li>The <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> in ${labels[e.idx]} falls in a month your levy is exhausted — keep the EPA assessment as-is and negotiate the payment schedule: ${opts.join(', or ')}.</li>`;
   });
-  if(!recs)recs=`<li>Deferring or spreading payments doesn't close the gap on its own — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
-  else recs+=`<li>Or stagger programme starts / split cohorts so draws don't stack up; anything still uncovered must be self-funded.</li>`;
-  el.innerHTML=`<div class="sf-box bad"><strong>⚠ Funding gap: your levy runs short by ${fmt(-minBal)} (lowest point ${labels[minIdx]}).</strong>
-    <div style="margin:8px 0 4px;color:var(--text2)">Ways to fill the void:</div><ul class="sf-list">${recs}</ul></div>`;
+  recs+=`<li>You can also gift surplus levy earlier (so less is drawn down later), stagger programme starts, or accept the co-investment as a planned cost.</li>`;
+  const mList=base.months.map(m=>labels[m.i]).join(', ');
+  const has25=base.months.some(m=>m.rate>=0.25);
+  el.innerHTML=`<div class="sf-box bad"><strong>&#9888; Co-investment cost: ${fmt(base.total)}.</strong> In ${base.months.length} month${base.months.length>1?'s':''} (${mList}) your levy account is exhausted, so you co-invest on the uncovered cost — employer pays <strong>5%</strong> before Aug 2026${has25?' and <strong>25%</strong> from Aug 2026':''}, the government pays the rest. Each month stands alone: next month's levy can't repay an earlier month's co-investment, so act ahead of time.
+    <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul></div>`;
 }
 
 function renderProjection(){
@@ -1145,8 +1149,6 @@ function renderProjection(){
   const tot=ts.map((s,i)=>s+es[i]);
   let bal=levyData.balance;
   const bals=tot.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
-  // true running balance (can go negative) — drives shortfall advice
-  let tbal=levyData.balance;const trueBal=tot.map((s,i)=>{tbal=tbal+income[i]-s;return tbal;});
   const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
   const tc=ts.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
@@ -1157,7 +1159,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,trueBal);
+  renderShortfallAdvice(income,tot,ev,labels,pmk);
   const exp=simulateLevyFIFO(income,tot,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
@@ -1458,7 +1460,7 @@ function toggleCopilot(){
 
 function initCopilot(){
   const hasKSB=!!KSB_DATA;
-  const chips=['I want to train 3 managers at level 3','Can my levy cover a data analyst apprenticeship?','What L5 programmes can I afford?','How much levy will expire this year?','Can I gift any levy to a supplier?'];
+  const chips=['I want to train 3 managers at level 3','What happens if I run out of levy funds?','How does co-investment work?','How much levy will expire this year?','Can I gift any levy to a supplier?'];
   aiMsg(`Hi! I'm your Levy Co-pilot.${hasKSB?' <strong style="color:var(--purple)">KSB data is loaded</strong> — I can now match your talent objectives to the specific Knowledge, Skills &amp; Behaviours of each standard.':' Upload your KSB JSON (above) to unlock deeper talent-to-standard matching.'}<div class="suggestion-chips">${chips.map(c=>`<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('')}</div>`);
 }
 
@@ -1526,6 +1528,39 @@ function checkAffordability(std,count,months){
   return{totalCost,monthly,epa,monthlyOk:monthly<=avg,totalOk:totalCost<=(avg*12*(dur/12)),balanceAfter,dur};
 }
 
+// Apprenticeship funding rules knowledge base (gov.uk apprenticeship funding rules, 2026 reforms)
+const FUNDING_GUIDANCE=[
+  {k:['co-invest','coinvest','co invest','run out','exhaust','empty','not enough','shortfall','5%','25%','top up the cost','out of funds','run short'],
+   t:`<strong>Co-investment</strong> — when a month's training cost is more than your levy account holds, you co-invest on the uncovered amount. The employer pays <strong>5%</strong> and the government <strong>95%</strong>. <strong>From 1 Aug 2026</strong>, levy payers who exhaust their pot pay <strong>25%</strong> (government 75%) for continued apprenticeships. Each month is treated <strong>in isolation</strong> — next month's levy surplus cannot retroactively repay an earlier month's co-investment. Your provider invoices you for the employer share each month you fall short.`},
+  {k:['top-up','top up','10%','bonus','government add'],
+   t:`<strong>10% top-up</strong> — the government currently adds 10% to your monthly levy declaration (so £100 declared becomes £110 to spend). This top-up is being <strong>removed from 1 Aug 2026</strong>, so newer funds won't be boosted.`},
+  {k:['expire','expiry','expir','lose','use it or lose','24 month','12 month','rolling','old fund'],
+   t:`<strong>Fund expiry</strong> — levy funds expire on a rolling basis if unused: <strong>24 months</strong> after entering the account for older funds, reducing to <strong>12 months</strong> for newer funds (from Aug 2026). Oldest funds are spent first (FIFO). The calculator's expiry panel forecasts exactly when and how much you risk losing.`},
+  {k:['transfer','gift','gifting','share','sme','supply chain','partner','charity','50%'],
+   t:`<strong>Transfers (gifting)</strong> — levy payers can transfer up to <strong>50% of their annual funds</strong> to other employers (SMEs, supply-chain partners, charities). The transfer covers <strong>100%</strong> of the receiving employer's training and assessment costs, up to the funding band maximum.`},
+  {k:['band','maximum','max funding','cap','cost more','above the band','negotiat'],
+   t:`<strong>Funding bands</strong> — every standard sits in a funding band with a maximum (roughly £1,500–£27,000). Levy/government funding covers the negotiated price up to that maximum; <strong>any cost above the band is paid in full by the employer</strong> and can't use levy funds. Negotiate the price with your provider — you don't have to pay the band maximum.`},
+  {k:['off-the-job','off the job','otj','6 hour','six hour','study time','20%','training hours'],
+   t:`<strong>Off-the-job training</strong> — apprentices must spend a minimum of <strong>6 hours per week</strong> on off-the-job training, averaged over the practical period. This is contracted working time spent learning, not the apprentice's own time. The planner's "overlay cost" estimates what this costs your business.`},
+  {k:['80','20','epa','completion','end-point','end point','payment schedule','monthly payment','installment','instalment'],
+   t:`<strong>How payments flow</strong> — the agreed training price is paid <strong>80% in monthly instalments</strong> across the practical period, with the final <strong>20% held back until the apprentice passes End-Point Assessment (EPA)</strong>. The EPA date is fixed by completion, but the <em>payment schedule</em> can be negotiated with your provider.`},
+  {k:['level 7','l7','masters','age','under 22','restrict','eligib'],
+   t:`<strong>Level 7 funding</strong> — from <strong>1 Jan 2026</strong>, Level 7 apprenticeships are only levy-funded for apprentices aged <strong>under 22</strong> at the start (or 22–24 with an EHC plan / care-experienced). Separately, <strong>16 standards are defunded from 1 Sept 2026</strong> (existing learners complete; no new funded starts).`},
+  {k:['who pays','pay bill','0.5%','3 million','liable','how much levy'],
+   t:`<strong>Who pays the levy</strong> — employers with an annual pay bill over <strong>£3 million</strong> pay the Apprenticeship Levy at <strong>0.5%</strong> of pay bill (less a £15,000 allowance). It's collected monthly through PAYE and appears in your apprenticeship service account with the 10% top-up.`},
+];
+function answerFunding(q){
+  const lq=q.toLowerCase();
+  const scored=FUNDING_GUIDANCE.map(g=>({g,s:g.k.reduce((n,kw)=>n+(lq.includes(kw)?1:0),0)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  if(!scored.length)return false;
+  const top=scored.slice(0,2).map(x=>`<div class="r-section">${x.g.t}</div>`).join('');
+  aiMsg(`${top}<div style="font-size:11px;color:var(--text3);margin-top:8px">Source: gov.uk apprenticeship funding rules + 2026 reforms. Always confirm against the latest official guidance.</div>`);
+  return true;
+}
+function isFundingQuestion(lq){
+  return /co-?invest|top.?up|expir|transfer|gift|funding band|off.?the.?job|\botj\b|levy rate|who pays|pay bill|0\.5%|how (does|do).*(levy|funding|co-?invest)|what.*(co-?invest|top.?up|expir|funding band)|run out of (levy|funds)/.test(lq);
+}
+
 function processQuery(q){
   const lq=q.toLowerCase();
   const intent=parseIntent(q);
@@ -1533,6 +1568,9 @@ function processQuery(q){
   const hasLevy=levyData.monthlyAvg>0;
   const hasKSB=!!KSB_DATA;
   const annual=levyData.monthlyAvg*12;
+
+  // FUNDING RULES (gov.uk guidance)
+  if(isFundingQuestion(lq)&&answerFunding(q))return;
 
   // GIFTING
   if(intent.isGifting){
