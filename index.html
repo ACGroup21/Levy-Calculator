@@ -150,6 +150,9 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-collapse summary::before{content:'\25B8  ';color:#a5b0ff}
 .plan-collapse[open] summary::before{content:'\25BE  '}
 .plan-collapse summary:hover{color:#a5b0ff}
+.bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:#a5b0ff;transition:all .15s}
+.bh-yr:hover{border-color:#a5b0ff}
+.bh-yr.active{background:#818cf8;color:#0a0f1e;border-color:#818cf8}
 
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
@@ -1117,6 +1120,19 @@ const BANK_HOL_MONTHS=[...new Set(BANK_HOLIDAYS.map(h=>new Date(h.d).getMonth())
 const fmtBH=iso=>new Date(iso).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
+let bhYear=new Date().getFullYear();
+function setBhYear(y){bhYear=Number(y);renderBhList();}
+function renderBhList(){
+  const yearsEl=document.getElementById('bhYears'),body=document.getElementById('bhBody');
+  if(!yearsEl||!body)return;
+  const now=new Date(),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
+  const win=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d>=now&&d<=winEnd;});
+  const years=[...new Set(win.map(h=>new Date(h.d).getFullYear()))].sort((a,b)=>a-b);
+  if(!years.includes(bhYear))bhYear=years[0];
+  yearsEl.innerHTML=years.map(y=>`<button class="bh-yr${y===bhYear?' active':''}" onclick="setBhYear(${y})">${y}</button>`).join('');
+  const list=win.filter(h=>new Date(h.d).getFullYear()===bhYear);
+  body.innerHTML=`<div style="margin-top:8px">${list.map(h=>`<div class="plan-prog-row"><span class="ppn">${h.n}</span><span class="ppv">${fmtBH(h.d)}</span></div>`).join('')}</div>`;
+}
 const PLAN_KEY='ac_levy_plan_v1';
 function savePlanCfg(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(planCfg));}catch(e){}}
 function loadPlanCfg(){try{const r=localStorage.getItem(PLAN_KEY);if(r){const c=JSON.parse(r);planCfg={...planCfg,...c,otj:{...planCfg.otj,...(c.otj||{})}};}}catch(e){}}
@@ -1239,12 +1255,12 @@ function renderPlan(){
   const now=new Date(),winEnd=new Date(now.getFullYear(),now.getMonth()+36,1);
   const winHols=BANK_HOLIDAYS.filter(h=>{const d=new Date(h.d);return d>=now&&d<=winEnd;});
   if(winHols.length){
-    const hrows=winHols.map(h=>`<div class="plan-prog-row"><span class="ppn">${h.n}</span><span class="ppv">${fmtBH(h.d)}</span></div>`).join('');
-    html+=`<details class="plan-collapse" style="margin-top:14px"><summary>Bank holidays in the next 36 months (${winHols.length})</summary><div style="margin-top:6px">${hrows}</div></details>`;
+    html+=`<details class="plan-collapse" style="margin-top:14px"><summary>Bank holidays in the next 36 months (${winHols.length})</summary><div class="exp-years" id="bhYears" style="margin-top:8px"></div><div id="bhBody"></div></details>`;
   }
   // per-programme breakdown — collapsible, open by default only for small lists
   html+=`<details class="plan-collapse" style="margin-top:14px"${programmes.length<=3?' open':''}><summary>Per-programme breakdown (${programmes.length})</summary><div style="margin-top:6px">${rows}</div></details>`;
   document.getElementById('planResults').innerHTML=html;
+  if(document.getElementById('bhYears'))renderBhList();
 }
 
 // ══════════════════════════════
