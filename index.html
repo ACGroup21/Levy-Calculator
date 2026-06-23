@@ -52,6 +52,15 @@ header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify
 .section-nav button{flex:0 0 auto;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text2);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .section-nav button:hover{color:var(--teal);border-color:var(--border2);background:rgba(45,212,178,0.08)}
 .section-nav button.nav-cta{margin-left:auto;color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.1)}
+/* left rolling side-nav (scroll-spy table of contents) */
+.side-nav{position:fixed;left:14px;top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:3px}
+.side-nav button{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:5px 9px;border-radius:7px;transition:all .15s;text-align:left;white-space:nowrap}
+.side-nav button .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--text3);flex-shrink:0;transition:all .15s}
+.side-nav button:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.side-nav button:hover .dot{border-color:var(--teal)}
+.side-nav button.active{color:var(--teal);background:rgba(45,212,178,0.07)}
+.side-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 8px var(--teal)}
+@media(max-width:1150px){.side-nav{display:none}}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
 
@@ -345,6 +354,15 @@ footer span{color:var(--teal)}
   <button id="nav-plan" onclick="goSection('planSection')">Plan</button>
   <button onclick="goSection('sec-jd')">JD match</button>
   <button class="nav-cta" onclick="toggleCopilot()">&#10024; Co-pilot</button>
+</nav>
+
+<nav class="side-nav" id="sideNav" aria-label="Section navigation">
+  <button data-target="sec-levy" onclick="goSection('sec-levy')"><span class="dot"></span>Levy data</button>
+  <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="dot"></span>Programmes</button>
+  <button id="side-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="dot"></span>Forecast</button>
+  <button id="side-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span>Plan</button>
+  <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span>JD match</button>
+  <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span>Co-pilot</button>
 </nav>
 
 <div class="page">
@@ -1799,10 +1817,19 @@ function goSection(id){
   el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function updateSectionNav(){
-  const f=document.getElementById('nav-forecast'),p=document.getElementById('nav-plan');
-  if(f)f.style.display=document.getElementById('projectionSection').classList.contains('hidden')?'none':'';
-  if(p)p.style.display=document.getElementById('planSection').classList.contains('hidden')?'none':'';
+  const projHidden=document.getElementById('projectionSection').classList.contains('hidden');
+  const planHidden=document.getElementById('planSection').classList.contains('hidden');
+  [['nav-forecast',projHidden],['side-forecast',projHidden],['nav-plan',planHidden],['side-plan',planHidden]].forEach(([id,hide])=>{
+    const el=document.getElementById(id);if(el)el.style.display=hide?'none':'';
+  });
 }
+// scroll-spy: highlight the side-nav item for the section currently in view
+(function(){
+  const items=[...document.querySelectorAll('.side-nav button[data-target]')].filter(b=>b.dataset.target!=='__copilot');
+  const setActive=id=>items.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-40% 0px -55% 0px',threshold:0});
+  ['sec-levy','sec-programmes','projectionSection','planSection','sec-jd'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
+})();
 
 // JD upload wiring
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
