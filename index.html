@@ -193,6 +193,12 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-ksb.hit .jd-mark{color:var(--teal)}.jd-ksb.miss .jd-mark{color:var(--text3)}
 .jd-hits{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .jd-hit-tag{font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:4px;background:rgba(45,212,178,0.14);color:var(--teal)}
+.jd-details{margin-top:14px;border-top:1px solid rgba(167,139,250,0.18);padding-top:8px}
+.jd-details summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text3);user-select:none;list-style:none}
+.jd-details summary::-webkit-details-marker{display:none}
+.jd-details summary::before{content:'\25B8  ';color:var(--purple)}
+.jd-details[open] summary::before{content:'\25BE  '}
+.jd-details summary:hover{color:var(--purple)}
 .jd-upload{margin-bottom:1rem;padding:14px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:9px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
 /* shortfall advisor */
@@ -602,6 +608,7 @@ footer span{color:var(--teal)}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ══════════════════════════════
 //  STANDARDS (fallback — overridden by KSB JSON)
@@ -1458,22 +1465,51 @@ function analyseJD(){
   if(jd.trim().length<25){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Paste a fuller job description to analyse (a sentence or two minimum).</p>';return;}
   const tokens=jdTokens(jd);
   const groups=[['knowledge','K','Knowledge'],['skills','S','Skills'],['behaviours','B','Behaviours']];
-  let covered=0,total=0,body='';
+  let covered=0,total=0,body='';const report={stdName:std.name,groups:[]};
   groups.forEach(([key,letter,label])=>{
     const arr=std.ksbs[key]||[];if(!arr.length)return;
-    let g=`<div class="jd-group"><div class="jd-group-title">${label} (${arr.length})</div>`;
+    let g=`<div class="jd-group"><div class="jd-group-title">${label} (${arr.length})</div>`;const ritems=[];
     arr.forEach((k,n)=>{
       const stmt=k.statement||k.description||'';const id=k.id||k.code||letter+(n+1);
       total++;const m=jdMatch(stmt,tokens);if(m.covered)covered++;
+      ritems.push({id,stmt,covered:m.covered});
       const tags=m.covered&&m.hits.length?`<div class="jd-hits">${m.hits.slice(0,8).map(h=>`<span class="jd-hit-tag">${h}</span>`).join('')}</div>`:'';
       g+=`<div class="jd-ksb ${m.covered?'hit':'miss'}"><span class="jd-id">${id}</span><div class="jd-stmt">${stmt}${tags}</div><span class="jd-mark">${m.covered?'✓':'—'}</span></div>`;
     });
-    body+=g+`</div>`;
+    body+=g+`</div>`;report.groups.push({label,items:ritems});
   });
   const score=total?Math.round(covered/total*100):0;
   const col=score>=60?'var(--teal)':score>=35?'var(--amber)':'var(--red)';
+  report.score=score;report.covered=covered;report.total=total;lastJD=report;
   res.innerHTML=`<div class="jd-score"><div class="jd-score-num" style="color:${col}">${score}%</div><div class="jd-score-lbl">${covered} of ${total} KSBs evidenced by this job description</div></div>
-    <div class="jd-bar"><span style="width:${score}%;background:${col}"></span></div>${body}`;
+    <div class="jd-bar"><span style="width:${score}%;background:${col}"></span></div>
+    <details class="jd-details"><summary>Show KSB-by-KSB breakdown (${total})</summary><div style="margin-top:8px">${body}</div></details>
+    <button class="btn-demo" onclick="downloadJDReport()" style="margin-top:12px">&#11015;&nbsp; Download PDF report</button>`;
+}
+let lastJD=null;
+function downloadJDReport(){
+  if(!lastJD){alert('Run an analysis first.');return;}
+  if(!window.jspdf){alert('PDF library not available.');return;}
+  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'pt',format:'a4'});
+  const L=54,W=487;let y=56;
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(20,20,20);doc.text('KSB vs Job Description Match',L,y);y+=20;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text('Arthur Curtis Education - Levy Affordability Calculator - '+new Date().toLocaleDateString('en-GB'),L,y);y+=26;
+  doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Standard: '+lastJD.stdName,L,y);y+=18;
+  doc.setTextColor(0,140,120);doc.text(`Coverage: ${lastJD.score}%  (${lastJD.covered} of ${lastJD.total} KSBs evidenced)`,L,y);y+=24;
+  lastJD.groups.forEach(g=>{
+    if(y>770){doc.addPage();y=56;}
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(80,70,160);doc.text(g.label,L,y);y+=15;
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    g.items.forEach(it=>{
+      const prefix=(it.covered?'[COVERED] ':'[ GAP   ] ')+it.id+': ';
+      const lines=doc.splitTextToSize(prefix+it.stmt,W);
+      if(y+lines.length*11>800){doc.addPage();y=56;}
+      doc.setTextColor(it.covered?30:170,it.covered?120:60,it.covered?90:60);
+      doc.text(lines,L,y);y+=lines.length*11+4;
+    });
+    y+=8;
+  });
+  doc.save('KSB-match-'+lastJD.stdName.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf');
 }
 
 // JD file upload — extract text from .txt / .pdf / .docx, then analyse
