@@ -172,6 +172,13 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-ksb.hit .jd-mark{color:var(--teal)}.jd-ksb.miss .jd-mark{color:var(--text3)}
 .jd-hits{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .jd-hit-tag{font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:4px;background:rgba(45,212,178,0.14);color:var(--teal)}
+/* shortfall advisor */
+.sf-box{margin-top:1rem;padding:12px 15px;border-radius:9px;font-size:13px;line-height:1.6}
+.sf-box.ok{background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3)}
+.sf-box.bad{background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.35)}
+.sf-box strong{color:var(--text)}
+.sf-list{margin:4px 0 0;padding-left:18px}
+.sf-list li{margin-bottom:7px;color:var(--text2)}
 
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
@@ -458,10 +465,12 @@ footer span{color:var(--teal)}
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#1a88c0"></span>80% training draw</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#b87510"></span>20% EPA completion</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#2DD4B2"></span>Monthly levy income</span>
+        <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#a78bfa"></span>Levy balance (pot)</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#c02040"></span>Shortfall</span>
       </div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
+      <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
 
       <div id="epaList" class="hidden" style="margin-top:1.5rem">
@@ -1079,6 +1088,39 @@ function simulateLevyFIFO(income,tot,pmk,M){
   return{total,byMonth,ledger};
 }
 
+function renderShortfallAdvice(income,tot,ev,labels,trueBal){
+  const el=document.getElementById('shortfallAdvice');if(!el)return;
+  const spare=tot.map((t,i)=>income[i]-t);
+  const shortMonths=spare.filter(s=>s<-1).length;
+  const minBal=Math.min(...trueBal),minIdx=trueBal.indexOf(minBal);
+  if(!shortMonths&&minBal>=0){el.innerHTML='';return;}
+  if(minBal>=0){
+    el.innerHTML=`<div class="sf-box ok"><strong>✓ Timing dips, but your levy pot covers them.</strong> ${shortMonths} month${shortMonths>1?'s':''} draw more than that month's levy income, but your accumulated balance absorbs it — the pot bottoms out at ${fmt(minBal)} in ${labels[minIdx]}. No action needed; just note your buffer is thinnest then.</div>`;
+    return;
+  }
+  // minimum running balance for a given monthly-spend array
+  const minRB=arr=>{let b=levyData.balance,m=Infinity;for(let i=0;i<arr.length;i++){b+=income[i]-arr[i];if(b<m)m=b;}return m;};
+  const base=minRB(tot);
+  // for each EPA payment, find the move (within ±6 months) that best lifts the lowest balance
+  let recs='';
+  ev.slice().sort((a,b)=>b.amount-a.amount).forEach(e=>{
+    let best=-1,bestMin=base;
+    for(let j=Math.max(0,e.idx-6);j<=Math.min(income.length-1,e.idx+6);j++){
+      if(j===e.idx)continue;
+      const t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;
+      const m=minRB(t2);if(m>bestMin+1){bestMin=m;best=j;}
+    }
+    if(best>=0){
+      const clears=bestMin>=0;
+      recs+=`<li>Renegotiate the <strong>${fmt(e.amount)}</strong> EPA completion payment for <strong>${e.name}</strong> — shift the planned EPA date from <strong>${labels[e.idx]}</strong> to <strong>${labels[best]}</strong> (a lower-spend month). ${clears?'This alone clears the gap.':`Lifts your lowest balance to ${fmt(bestMin)}.`}</li>`;
+    }
+  });
+  if(!recs)recs=`<li>No single EPA move closes the gap — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
+  else recs+=`<li>Or stagger programme starts / split cohorts so draws don't stack up; anything still uncovered must be self-funded.</li>`;
+  el.innerHTML=`<div class="sf-box bad"><strong>⚠ Funding gap: your levy runs short by ${fmt(-minBal)} (lowest point ${labels[minIdx]}).</strong>
+    <div style="margin:8px 0 4px;color:var(--text2)">Ways to fill the void:</div><ul class="sf-list">${recs}</ul></div>`;
+}
+
 function renderProjection(){
   document.getElementById('projectionSection').classList.remove('hidden');
   const M=36,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
@@ -1093,16 +1135,19 @@ function renderProjection(){
   const tot=ts.map((s,i)=>s+es[i]);
   let bal=levyData.balance;
   const bals=tot.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
+  // true running balance (can go negative) — drives shortfall advice
+  let tbal=levyData.balance;const trueBal=tot.map((s,i)=>{tbal=tbal+income[i]-s;return tbal;});
   const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
   const tc=ts.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
   if(projChart)projChart.destroy();
-  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}}}});
+  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
+  renderShortfallAdvice(income,tot,ev,labels,trueBal);
   const exp=simulateLevyFIFO(income,tot,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
