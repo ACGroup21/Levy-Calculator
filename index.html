@@ -166,6 +166,12 @@ button{font-family:var(--sans);cursor:pointer}
 .bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:#a5b0ff;transition:all .15s}
 .bh-yr:hover{border-color:#a5b0ff}
 .bh-yr.active{background:#818cf8;color:#0a0f1e;border-color:#818cf8}
+.bh-layout{display:grid;grid-template-columns:1fr 165px;gap:18px;align-items:start;margin-top:8px}
+@media(max-width:600px){.bh-layout{grid-template-columns:1fr}}
+.bh-summary{background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:16px 14px;text-align:center;position:sticky;top:70px}
+.bh-big{font-family:var(--mono);font-size:38px;font-weight:700;color:var(--teal);line-height:1}
+.bh-big-lbl{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.4}
+.bh-sub2{font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:10px;line-height:1.6}
 /* KSB vs JD match */
 .step-chip.jd{background:rgba(167,139,250,0.12);color:#c4b5fd;border-color:rgba(167,139,250,0.4)}
 .jd-score{display:flex;align-items:baseline;gap:14px;margin:16px 0 4px}
@@ -1272,14 +1278,20 @@ function renderBhList(){
     const title=hols.length?hols.map(h=>fmtBH(h.d)+' — '+h.n).join('\n'):'';
     return `<tr title="${title}"><td>${MONTH_NAMES[m]} ${bhYear}</td><td class="r">${wd}</td><td class="r ${hols.length?'c-amber':''}">${hols.length||'—'}</td><td class="r" style="color:var(--teal)">${tr}</td></tr>`;
   }).join('');
-  body.innerHTML=`<div style="margin-top:8px">
-    <table class="expiry-table"><colgroup><col style="width:34%"><col style="width:22%"><col style="width:22%"><col style="width:22%"></colgroup>
-      <thead><tr><th>Month</th><th class="r">Weekdays</th><th class="r">Bank hols</th><th class="r">Trainable</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr style="border-top:1px solid rgba(255,255,255,0.12)"><td style="color:var(--text2)">Total</td><td class="r">${totWd}</td><td class="r c-amber">${totBh}</td><td class="r" style="color:var(--teal)">${totTr}</td></tr></tfoot>
-    </table>
-    <div style="font-size:11px;color:var(--text3);margin-top:7px">Trainable days = weekdays − bank holidays. Hover a row to see the holiday dates. (Annual leave & shift patterns will reduce this further.)</div>
-  </div>`;
+  body.innerHTML=`<div class="bh-layout">
+    <div>
+      <table class="expiry-table"><colgroup><col style="width:34%"><col style="width:22%"><col style="width:22%"><col style="width:22%"></colgroup>
+        <thead><tr><th>Month</th><th class="r">Weekdays</th><th class="r">Bank hols</th><th class="r">Trainable</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="bh-summary">
+      <div class="bh-big">${totTr}</div>
+      <div class="bh-big-lbl">trainable days in ${bhYear}</div>
+      <div class="bh-sub2">${totWd} weekdays<br>&minus; ${totBh} bank holiday${totBh!==1?'s':''}</div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin-top:9px">Trainable days = weekdays − bank holidays. Hover a row for the holiday dates. (Annual leave &amp; shift patterns reduce this further.)</div>`;
 }
 const PLAN_KEY='ac_levy_plan_v1';
 function savePlanCfg(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(planCfg));}catch(e){}}
