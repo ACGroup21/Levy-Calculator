@@ -153,6 +153,25 @@ button{font-family:var(--sans);cursor:pointer}
 .bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:#a5b0ff;transition:all .15s}
 .bh-yr:hover{border-color:#a5b0ff}
 .bh-yr.active{background:#818cf8;color:#0a0f1e;border-color:#818cf8}
+/* KSB vs JD match */
+.step-chip.jd{background:rgba(167,139,250,0.12);color:#c4b5fd;border-color:rgba(167,139,250,0.4)}
+.jd-score{display:flex;align-items:baseline;gap:14px;margin:16px 0 4px}
+.jd-score-num{font-size:36px;font-weight:700;font-family:var(--mono);line-height:1}
+.jd-score-lbl{font-size:13px;color:var(--text2)}
+.jd-bar{height:7px;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;margin:6px 0 4px}
+.jd-bar span{display:block;height:100%;border-radius:99px}
+.jd-group{margin-top:16px}
+.jd-group-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+.jd-ksb{display:flex;gap:10px;align-items:flex-start;padding:8px 11px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.5;border:1px solid transparent}
+.jd-ksb.hit{background:rgba(45,212,178,0.07);border-color:rgba(45,212,178,0.25)}
+.jd-ksb.miss{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);opacity:.72}
+.jd-id{font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;width:36px}
+.jd-ksb.hit .jd-id{color:var(--teal)}.jd-ksb.miss .jd-id{color:var(--text3)}
+.jd-stmt{flex:1;color:var(--text2)}
+.jd-mark{flex-shrink:0;font-family:var(--mono);font-weight:700}
+.jd-ksb.hit .jd-mark{color:var(--teal)}.jd-ksb.miss .jd-mark{color:var(--text3)}
+.jd-hits{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.jd-hit-tag{font-family:var(--mono);font-size:9.5px;padding:1px 6px;border-radius:4px;background:rgba(45,212,178,0.14);color:var(--teal)}
 
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
@@ -480,6 +499,16 @@ footer span{color:var(--teal)}
         <div id="planResults"></div>
       </div>
     </div>
+
+    <div class="divider"></div>
+    <div class="step-row"><span class="step-chip jd">JD</span><span class="step-title">KSB &harr; Job description match <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard?</span></span></div>
+    <p class="step-sub">Pick a standard, paste a job description, and see which Knowledge, Skills &amp; Behaviours the role actually covers — and where the gaps are.</p>
+    <div class="card">
+      <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label><select id="jd-standard"></select></div>
+      <div class="field"><label>Job description</label><textarea id="jd-text" placeholder="Paste the full job description here…" style="width:100%;min-height:140px;resize:vertical;background:rgba(255,255,255,0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
+      <button class="btn-add" onclick="analyseJD()" style="margin-top:12px">&#9670;&nbsp; Analyse coverage</button>
+      <div id="jd-results"></div>
+    </div>
   </div>
 </div>
 
@@ -653,7 +682,7 @@ function processKSBData(data){
   });
   // Keep 'Other / custom' at the end; replace everything else
   STANDARDS=[...scraped,{name:'Other / custom',band:0,dur:0,level:0,roles:[]}];
-  rebuildSelect();
+  rebuildSelect();buildJdSelect();
   const withKSB=scraped.filter(s=>s.ksbs&&(s.ksbs.knowledge||s.ksbs.skills)).length;
   setKSBStatus(`[OK] ${scraped.length} standards loaded &middot; ${withKSB} with full KSBs &middot; scraped ${data.scraped_at||'recently'}`, 'purple');
   document.getElementById('ksbBadge').classList.add('loaded');
@@ -1264,6 +1293,57 @@ function renderPlan(){
 }
 
 // ══════════════════════════════
+//  KSB ↔ JOB DESCRIPTION MATCH
+// ══════════════════════════════
+const JD_STOP=new Set(['this','that','with','from','have','will','your','their','they','able','must','should','which','when','where','what','then','than','into','also','such','been','were','being','some','more','most','other','over','under','within','across','using','used','role','work','team','able','etc','and','for','the','our','you']);
+const jdStem=w=>w.replace(/(ings?|ed|ies|es|s)$/,'');
+function jdTokens(t){return new Set(t.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>3&&!JD_STOP.has(w)).map(jdStem));}
+function jdMatch(stmt,tokens){
+  const words=[...new Set(stmt.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>3&&!JD_STOP.has(w)).map(jdStem))];
+  const hits=words.filter(w=>tokens.has(w));
+  const ratio=words.length?hits.length/words.length:0;
+  return{covered:hits.length>=2||ratio>=0.25,hits,ratio};
+}
+function buildJdSelect(){
+  const sel=document.getElementById('jd-standard');if(!sel)return;
+  const withK=STANDARDS.map((s,i)=>({s,i})).filter(x=>x.s.ksbs);
+  sel.innerHTML='';
+  const ph=document.createElement('option');ph.value='';ph.textContent=withK.length?'Select a standard…':'No KSB data loaded';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
+  const levels=[...new Set(withK.map(x=>x.s.level))].sort((a,b)=>a-b);
+  levels.forEach(l=>{
+    const items=withK.filter(x=>x.s.level===l).sort((a,b)=>a.s.name.localeCompare(b.s.name));
+    if(!items.length)return;
+    const og=document.createElement('optgroup');og.label=`──  Level ${l}  ──`;
+    items.forEach(({s,i})=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;og.appendChild(o);});
+    sel.appendChild(og);
+  });
+}
+function analyseJD(){
+  const sel=document.getElementById('jd-standard'),res=document.getElementById('jd-results');
+  const std=STANDARDS[parseInt(sel.value)],jd=document.getElementById('jd-text').value;
+  if(!std||!std.ksbs){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Select a standard with KSB data first.</p>';return;}
+  if(jd.trim().length<25){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Paste a fuller job description to analyse (a sentence or two minimum).</p>';return;}
+  const tokens=jdTokens(jd);
+  const groups=[['knowledge','K','Knowledge'],['skills','S','Skills'],['behaviours','B','Behaviours']];
+  let covered=0,total=0,body='';
+  groups.forEach(([key,letter,label])=>{
+    const arr=std.ksbs[key]||[];if(!arr.length)return;
+    let g=`<div class="jd-group"><div class="jd-group-title">${label} (${arr.length})</div>`;
+    arr.forEach((k,n)=>{
+      const stmt=k.statement||k.description||'';const id=k.id||k.code||letter+(n+1);
+      total++;const m=jdMatch(stmt,tokens);if(m.covered)covered++;
+      const tags=m.covered&&m.hits.length?`<div class="jd-hits">${m.hits.slice(0,8).map(h=>`<span class="jd-hit-tag">${h}</span>`).join('')}</div>`:'';
+      g+=`<div class="jd-ksb ${m.covered?'hit':'miss'}"><span class="jd-id">${id}</span><div class="jd-stmt">${stmt}${tags}</div><span class="jd-mark">${m.covered?'✓':'—'}</span></div>`;
+    });
+    body+=g+`</div>`;
+  });
+  const score=total?Math.round(covered/total*100):0;
+  const col=score>=60?'var(--teal)':score>=35?'var(--amber)':'var(--red)';
+  res.innerHTML=`<div class="jd-score"><div class="jd-score-num" style="color:${col}">${score}%</div><div class="jd-score-lbl">${covered} of ${total} KSBs evidenced by this job description</div></div>
+    <div class="jd-bar"><span style="width:${score}%;background:${col}"></span></div>${body}`;
+}
+
+// ══════════════════════════════
 //  KSB MATCHING ENGINE
 // ══════════════════════════════
 function scoreKSBMatch(std,queryWords){
@@ -1275,10 +1355,10 @@ function scoreKSBMatch(std,queryWords){
   ];
   const matches=[];
   allKSBs.forEach(ksb=>{
-    const stmt=ksb.statement.toLowerCase();
+    const text=ksb.statement||ksb.description||'';const stmt=text.toLowerCase();
     let hits=0;
     queryWords.forEach(w=>{if(w.length>3&&stmt.includes(w))hits++;});
-    if(hits>0)matches.push({...ksb,hits});
+    if(hits>0)matches.push({...ksb,statement:text,id:ksb.id||ksb.code,hits});
   });
   matches.sort((a,b)=>b.hits-a.hits);
   return{score:matches.reduce((t,m)=>t+m.hits,0),matches:matches.slice(0,4)};
@@ -1546,7 +1626,7 @@ document.addEventListener('keydown',e=>{
 })();
 
 // Init "things to consider" planner
-loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();
+loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();
 
 // Restore any previously saved data on load
 loadState();
