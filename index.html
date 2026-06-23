@@ -194,6 +194,7 @@ th.r,td.r{text-align:right}
 .exp-grid .expiry-table{max-width:none}
 .exp-single{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;margin-top:4px}
 .exp-single .expiry-table{max-width:none;margin-top:0}
+.exp-single .expiry-details{margin-top:0;border-top:none;padding-top:0}
 @media(max-width:600px){.exp-single{grid-template-columns:1fr}}
 .expiry-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
 .expiry-table{width:100%;min-width:0;max-width:540px;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12px}
@@ -1006,7 +1007,7 @@ function renderProgrammes(){
 
 // FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
 // or 12m after declaration if unspent. Uses uploaded history as opening tranches.
-let lastExp=null,expiryYear='all';
+let lastExp=null,expiryYear=new Date().getFullYear();
 function setExpiryYear(y){expiryYear=(y==='all')?'all':Number(y);renderExpiryTables();}
 function renderExpiryTables(){
   const exp=lastExp;if(!exp)return;
