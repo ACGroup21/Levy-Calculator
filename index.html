@@ -57,6 +57,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .led-nav button:hover .dot{border-color:var(--teal)}
 .led-nav button.active{color:var(--teal)}
 .led-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 9px var(--teal)}
+.led-nav button.pending{opacity:.4}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 @media(max-width:760px){header .header-badge{display:none}}
@@ -1418,6 +1419,7 @@ function renderPlan(){
   html+=`<details class="plan-collapse" style="margin-top:14px"${programmes.length<=3?' open':''}><summary>Per-programme breakdown (${programmes.length})</summary><div style="margin-top:6px">${rows}</div></details>`;
   document.getElementById('planResults').innerHTML=html;
   if(document.getElementById('bhYears'))renderBhList();
+  updateSectionNav();
 }
 
 // ══════════════════════════════
@@ -1857,8 +1859,9 @@ function goSection(id){
 function updateSectionNav(){
   const projHidden=document.getElementById('projectionSection').classList.contains('hidden');
   const planHidden=document.getElementById('planSection').classList.contains('hidden');
-  [['led-forecast',projHidden],['led-plan',planHidden]].forEach(([id,hide])=>{
-    const el=document.getElementById(id);if(el)el.style.display=hide?'none':'';
+  // keep items visible; dim the ones not available yet (need programmes added)
+  [['led-forecast',projHidden],['led-plan',planHidden]].forEach(([id,pending])=>{
+    const el=document.getElementById(id);if(el)el.classList.toggle('pending',pending);
   });
 }
 // scroll-spy: highlight the banner nav item for the section currently in view
