@@ -1484,6 +1484,18 @@ function buildJdSelect(query){
     sel.appendChild(og);
   });
 }
+function jdRoleMatch(std,jd){
+  if(!std)return {match:'none',title:''};
+  const t=' '+jd.toLowerCase()+' ';
+  const core=(std.name||'').toLowerCase().replace(/^l\d+\s*/,'').replace(/\(.*?\)/g,'').trim();
+  const titles=core.split(/\s*[\/,–-]\s*/).map(s=>s.trim()).filter(s=>s.length>3);
+  for(const ti of titles){if(t.indexOf(' '+ti)>=0||t.indexOf(ti+' ')>=0)return {match:'title',title:ti.replace(/\b\w/g,c=>c.toUpperCase())};}
+  const roles=(std.roles||[]).filter(r=>r.length>4);
+  const hits=roles.filter(r=>t.indexOf(r)>=0);
+  if(hits.length>=2)return {match:'title',title:hits[0].replace(/\b\w/g,c=>c.toUpperCase())};
+  if(hits.length>=1)return {match:'partial',title:hits[0]};
+  return {match:'none',title:''};
+}
 function analyseJD(){
   const sel=document.getElementById('jd-standard'),res=document.getElementById('jd-results');
   const std=STANDARDS[parseInt(sel.value)],jd=document.getElementById('jd-text').value;
@@ -1506,13 +1518,16 @@ function analyseJD(){
     if(gaps.length)gapsByGroup.push({label,gaps});
   });
   const score=total?Math.round(covered/total*100):0;
-  const col=score>=60?'var(--teal)':score>=JD_THRESHOLD?'var(--amber)':'var(--red)';
+  const rm=jdRoleMatch(std,jd);
+  const col=score>=60?'var(--teal)':(score>=JD_THRESHOLD||rm.match==='title')?'var(--amber)':'var(--red)';
   const gapCount=total-covered;
-  report.score=score;report.covered=covered;report.total=total;report.gapsByGroup=gapsByGroup;lastJD=report;
-  // (4) suitability threshold → fairness questionnaire
+  report.score=score;report.covered=covered;report.total=total;report.gapsByGroup=gapsByGroup;report.roleMatch=rm.match;report.roleTitle=rm.title;lastJD=report;
+  // (4) suitability / compatibility
   let suit='';
-  if(score<JD_THRESHOLD){
-    suit=`<div class="jd-suit"><strong>⚠ Below the ${JD_THRESHOLD}% suitability threshold.</strong> A low score can simply mean the JD is brief or out of date — not that the role is wrong. Confirm the points below before ruling this standard out, to keep the evaluation fair:
+  if(rm.match==='title'&&score<JD_THRESHOLD){
+    suit=`<div class="jd-suit" style="background:rgba(45,212,178,0.08);border-color:rgba(45,212,178,0.4)"><strong style="color:var(--teal)">✓ Compatible by role.</strong> This is an official <strong>${rm.title}</strong> job description, which maps directly to this standard — so the role is compatible by definition. The ${score}% keyword score is low only because the JD is brief; use the work-exposure plan below to evidence the remaining KSBs.</div>`;
+  }else if(score<JD_THRESHOLD){
+    suit=`<div class="jd-suit"><strong>⚠ Below the ${JD_THRESHOLD}% suitability threshold.</strong> A low score can mean the JD is brief or out of date — not that the role is wrong. Confirm the points below before ruling this standard out, to keep the evaluation fair:
       <div class="jd-fair" id="jdFair">
         ${JD_FAIR_Q.map((q,i)=>`<label class="jd-fair-q"><input type="checkbox" onchange="updateFairness()" data-q="${i}"> ${q}</label>`).join('')}
       </div>
@@ -1566,16 +1581,17 @@ var JDIC={book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1
 function jdIcon(n,color,sz){sz=sz||22;return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(JDIC[n]||'')+'</svg>';}
 function jdCats(){return lastJD.groups.map(function(g){var t=g.items.length,c=g.items.filter(function(i){return i.covered;}).length;var col=/know/i.test(g.label)?'#16b39a':/skill/i.test(g.label)?'#6d5fd6':'#cf8a12';var ic=/know/i.test(g.label)?'book':/skill/i.test(g.label)?'tools':'users';var k=/know/i.test(g.label)?'K':/skill/i.test(g.label)?'S':'B';return {label:g.label,total:t,covered:c,pct:t?Math.round(c/t*100):0,col:col,ic:ic,key:k,items:g.items};});}
 var JD_INCOMPAT=50;
-function jdVerdict(score){
-  if(score<JD_INCOMPAT)return {status:'incompatible',label:'Not compatible',col:'#d6475d',bg:'#fdeef0',bd:'#f3c6cd',note:'Coverage is below the 50% guidance threshold, so this role is not a fair fit for the standard as described. The job description would need substantial redesign, or a different standard chosen, before enrolling. Confirm the role scope and the fair-evaluation checklist first — a low score can also mean the JD is brief or out of date.'};
-  if(score<70)return {status:'compatible',label:'Compatible — gaps to bridge',col:'#16b39a',bg:'#f0faf8',bd:'#cdeae3',note:'The role meets the 50% guidance threshold and aligns with the standard. Bridge the remaining gaps through planned workplace exposure.'};
-  return {status:'strong',label:'Strong match',col:'#16b39a',bg:'#f0faf8',bd:'#cdeae3',note:'The role evidences most of the standard. A small number of gaps can be bridged through workplace exposure.'};
+function jdVerdict(score,roleMatch,roleTitle){
+  if(score>=70)return {status:'strong',label:'Strong match',col:'#16b39a',bg:'#f0faf8',bd:'#cdeae3',note:'The role evidences most of the standard. A small number of gaps can be bridged through workplace exposure.'};
+  if(score>=JD_INCOMPAT)return {status:'compatible',label:'Compatible — gaps to bridge',col:'#16b39a',bg:'#f0faf8',bd:'#cdeae3',note:'The role meets the 50% guidance threshold and aligns with the standard. Bridge the remaining gaps through planned workplace exposure.'};
+  if(roleMatch==='title')return {status:'role',label:'Compatible by role',col:'#16b39a',bg:'#f0faf8',bd:'#cdeae3',note:'This is an official '+(roleTitle||'matching')+' job description, which maps directly to the standard — so the role is compatible by definition. The '+score+'% keyword score is low only because the JD is brief. Use the development plan below to evidence the remaining KSBs through workplace exposure.'};
+  return {status:'incompatible',label:'Not compatible',col:'#d6475d',bg:'#fdeef0',bd:'#f3c6cd',note:'Coverage is below the 50% guidance threshold and the role title does not match the standard, so this is not a fair fit as described. The job description would need substantial redesign, or a different standard chosen. Confirm the role scope first — a low score can also mean the JD is brief or out of date.'};
 }
 function jdCommon(){var d=lastJD,cats=jdCats();var low=cats.slice().sort(function(a,b){return a.pct-b.pct;})[0];var fg=(d.gapsByGroup||[]).reduce(function(a,g){return a.concat(g.gaps);},[]);var firstGaps=fg.slice(0,3).map(function(g){return g.id;}).join(', ');return {d:d,cats:cats,low:low,firstGaps:firstGaps};}
 
 var JD_INK='#15314a',JD_MUTE='#5f7488',JD_CARD='#ffffff',JD_PAGE='#eef3f8',JD_BORD='1px solid #e3eaf1',JD_TEAL='#16b39a',JD_NAVY='#37506e',JD_SHADOW='box-shadow:0 1px 3px rgba(20,40,60,0.06)';
 function jdBuildReport(){
-  var x=jdCommon(),d=x.d,cats=x.cats,score=d.score,v=jdVerdict(score);
+  var x=jdCommon(),d=x.d,cats=x.cats,score=d.score,v=jdVerdict(score,d.roleMatch,d.roleTitle);
   var scol=score>=40?JD_TEAL:score>=JD_THRESHOLD?'#d3920f':'#d6475d';
   var biggest=cats.slice().sort(function(a,b){return (b.total-b.covered)-(a.total-a.covered) || a.pct-b.pct;})[0];
   var catCards=cats.map(function(c){return '<div style="flex:1;background:'+JD_CARD+';border:'+JD_BORD+';border-radius:14px;padding:18px 20px;'+JD_SHADOW+'"><div style="display:flex;align-items:center;gap:9px;margin-bottom:12px">'+jdIcon(c.ic,c.col,20)+'<span style="font-size:12px;font-weight:600;letter-spacing:.05em;color:'+JD_MUTE+'">'+c.label.toUpperCase()+'</span></div><div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:30px;font-weight:800;color:'+JD_INK+'">'+c.pct+'%</span><span style="font-size:13px;color:'+JD_MUTE+'">'+c.covered+' / '+c.total+'</span></div>'+jdBar(c.pct,c.col)+'</div>';}).join('');
