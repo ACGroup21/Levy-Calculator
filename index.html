@@ -1698,9 +1698,17 @@ function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,
 function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
 function jdPdfPage(inner,cid,n,label){
   var el=document.createElement('div');
-  el.style.cssText='position:relative;width:1123px;height:794px;overflow:hidden;background:linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff';
-  el.innerHTML=jdPageDecor(1123,794,cid)+'<div style="position:relative;z-index:2;height:100%;box-sizing:border-box;padding:30px 38px;display:flex;flex-direction:column">'+inner+jdPdfFoot(label,n)+'</div>';
+  el.setAttribute('data-cid',cid);
+  el.style.cssText='position:relative;width:1123px;min-height:380px;overflow:hidden;background:linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff';
+  el.innerHTML='<div style="position:relative;z-index:2;box-sizing:border-box;min-height:380px;padding:30px 38px;display:flex;flex-direction:column">'+inner+jdPdfFoot(label,n)+'</div>';
   return el;
+}
+/* after layout: size decor + network to the page's natural height (variable height, fixed width) */
+function jdPdfFinalize(el){
+  var h=el.offsetHeight;el.style.height=h+'px';
+  var cid=el.getAttribute('data-cid');
+  el.insertAdjacentHTML('afterbegin',jdPageDecor(1123,h,cid));
+  jdDrawNet(el.querySelector('#'+cid),1123,h);
 }
 function jdPdfKsbHead(c){
   return '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'+
@@ -1782,15 +1790,17 @@ function downloadJDReport(){
     var pages=jdBuildPdfPages();
     var host=document.createElement('div');host.style.cssText='position:absolute;left:-20000px;top:0';
     pages.forEach(function(p){host.appendChild(p);});document.body.appendChild(host);
-    pages.forEach(function(p){jdDrawNet(p.querySelector('canvas'),1123,794);});
-    var jsPDF=window.jspdf.jsPDF,pw=842,ph=595;
-    var doc=new jsPDF({unit:'pt',format:'a4',orientation:'landscape'});
+    pages.forEach(function(p){jdPdfFinalize(p);});
+    var jsPDF=window.jspdf.jsPDF,pwpt=842,K=72/96;
+    var h0=Math.round(pages[0].offsetHeight*K);
+    var doc=new jsPDF({unit:'pt',orientation:(pwpt>=h0?'l':'p'),format:[pwpt,h0]});
     var seq=Promise.resolve();
     pages.forEach(function(p,idx){
-      seq=seq.then(function(){return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:1123,windowHeight:794});}).then(function(canvas){
-        if(idx>0)doc.addPage('a4','landscape');
-        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
-      });
+      seq=seq.then(function(){var h=p.offsetHeight;return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:1123,windowHeight:h}).then(function(canvas){
+        var php=Math.round(h*K);
+        if(idx>0)doc.addPage([pwpt,php],(pwpt>=php?'l':'p'));
+        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pwpt,php);
+      });});
     });
     return seq.then(function(){
       if(document.body.contains(host))document.body.removeChild(host);
