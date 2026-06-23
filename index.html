@@ -1097,7 +1097,7 @@ function renderProjection(){
     ew.style.display='block';
     lastExp=exp;
     const firstMk=exp.byMonth[0].mk;
-    ew.innerHTML=`<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused.</strong> The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</div>
+    ew.innerHTML=`<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong><span style="color:var(--text)">. The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</span></div>
       <div class="exp-years" id="expYears"></div>
       <div id="expiryDetailBody"></div>`;
     renderExpiryTables();
