@@ -1549,7 +1549,7 @@ function analyseJD(){
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
       <button class="btn-add" onclick="openReport()" style="flex:1;min-width:150px">&#128196;&nbsp; Open report</button>
       <button class="btn-clear" onclick="downloadReportHTML()">&#11015; Save HTML</button>
-      <button class="btn-clear" onclick="downloadJDReport()">PDF</button>
+      <button class="btn-clear" onclick="downloadJDReport()">&#128424;&nbsp; Print / Save PDF</button>
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:7px">Open the report, then <strong>Print → Save as PDF</strong> (tick “Background graphics”) for a crisp vector PDF.</div>`;
 }
@@ -1682,7 +1682,7 @@ function jdReportDocHTML(){
     '<style>html,body{margin:0;background:#06121f;font-family:Inter,system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(255,255,255,0.08)}.rpbar button{font-family:Inter,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(255,255,255,0.04)!important}.gap-item:hover{background:rgba(255,255,255,0.05)}'+
     '@keyframes acspin{to{transform:rotate(360deg)}}.rep-ring{transform-box:fill-box;transform-origin:center}.rep-a{animation:acspin 70s linear infinite}.rep-b{animation:acspin 48s linear infinite reverse}.rep-c{animation:acspin 90s linear infinite}.rep-d{animation:acspin 36s linear infinite reverse}'+
     '@media print{.rpbar{display:none}.rpwrap{padding:0}.rpwrap>div{box-shadow:none}.acc-panel{display:block!important}.rep-ring{animation:none}@page{size:A4;margin:0}}</style></head><body>'+
-    '<div class="rpbar"><button onclick="jdSavePdf()">Download PDF (4-page)</button><button class="ghost" onclick="window.print()">Print this page</button><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button></div>'+
+    '<div class="rpbar"><button onclick="jdSavePdf()">Print / Save as PDF (4-page)</button><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button></div>'+
     '<div class="rpwrap">'+el.outerHTML+'</div>'+
     '<script>function jdSavePdf(){try{if(window.opener&&!window.opener.closed&&window.opener.downloadJDReport){window.opener.downloadJDReport();return;}}catch(e){}alert("Open the report from the calculator to download the formatted 4-page PDF, or use Print this page.");}function jdToggle(b){var p=b.nextElementSibling,open=p.style.display!=="none";p.style.display=open?"none":"block";var c=b.querySelector(".chev");if(c)c.style.transform=open?"rotate(0deg)":"rotate(90deg)";}function jdRev(el){var r=el.querySelector(".reveal");if(!r)return;var open=r.style.display!=="none";r.style.display=open?"none":"block";var s=el.querySelector(".rev-ind svg");if(s){s.style.transition="transform .15s";s.style.transform=open?"":"rotate(90deg)";}}function jdAll(s){document.querySelectorAll(".acc-panel").forEach(function(p){p.style.display=s?"block":"none";});document.querySelectorAll(".chev").forEach(function(c){c.style.transform=s?"rotate(90deg)":"rotate(0deg)";});document.querySelectorAll(".reveal").forEach(function(r){r.style.display=s?"block":"none";});document.querySelectorAll(".rev-ind svg").forEach(function(v){v.style.transform=s?"rotate(90deg)":"";});}window.addEventListener("beforeprint",function(){jdAll(true);});'+JD_NETJS+'<\/script>'+
     '</body></html>';
@@ -1694,7 +1694,7 @@ function downloadReportHTML(){if(!lastJD){alert("Run an analysis first.");return
 function jdPageDecor(W,H,cid){
   var m=20,T=46,s=18,dots='';
   for(var gx=m;gx<=W-m;gx+=s){for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T)dots+='<circle cx="'+gx+'" cy="'+gy+'" r="1.05" opacity="0.28"/>';}}
-  return '<canvas id="'+cid+'" width="'+W+'" height="'+H+'" style="position:absolute;inset:0;width:'+W+'px;height:'+H+'px;opacity:0.42;pointer-events:none"></canvas>'+
+  return '<canvas id="'+cid+'" class="pgnet" width="'+W+'" height="'+H+'" style="position:absolute;inset:0;width:'+W+'px;height:'+H+'px;opacity:0.42;pointer-events:none"></canvas>'+
     '<svg preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><radialGradient id="pg_'+cid+'" cx="18%" cy="10%" r="62%"><stop offset="0" stop-color="#1d9fd6" stop-opacity="0.15"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient><radialGradient id="pg2_'+cid+'" cx="86%" cy="92%" r="55%"><stop offset="0" stop-color="#1f7fae" stop-opacity="0.10"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#pg_'+cid+')"/><rect width="100%" height="100%" fill="url(#pg2_'+cid+')"/><g fill="#36c2e0">'+dots+'</g></svg>';
 }
 function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}}catch(e){}}
@@ -1822,30 +1822,30 @@ function jdBuildPdfPages(){
   cats.forEach(function(c,i){pages.push(jdPdfPage(jdPdfKsbHead(c)+jdPdfKsbBody(c),'pdf'+(i+1),i+2,c.label));});
   return pages;
 }
+/* network repaint + auto-print script injected into the print window */
+var jdNetRedrawJS='(function(){function n(cv){try{var ctx=cv.getContext("2d"),W=cv.width,H=cv.height,N=[],i,j,k=Math.round(W*H/16000);for(i=0;i<k;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}}catch(e){}}var cs=document.querySelectorAll("canvas.pgnet");for(var i=0;i<cs.length;i++)n(cs[i]);function go(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},350);}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);}else{go();}})();';
+function jdReportPrintHTML(){
+  var pages=jdBuildPdfPages();
+  var host=document.createElement('div');host.style.cssText='position:absolute;left:-20000px;top:0;width:1123px';
+  pages.forEach(function(p){host.appendChild(p);});document.body.appendChild(host);
+  pages.forEach(function(p){jdPdfFinalize(p);});
+  var body=pages.map(function(p){return '<div class="prpage">'+p.outerHTML+'</div>';}).join('');
+  if(document.body.contains(host))document.body.removeChild(host);
+  return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>JD Matcher Report — '+lastJD.stdName+'</title>'+
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">'+
+    '<style>html,body{margin:0;padding:0;background:#06172E;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
+    '@media screen{body{padding:18px;background:#06121f}.prpage{width:1123px;margin:0 auto 18px;box-shadow:0 10px 44px rgba(0,0,0,.55)}}'+
+    '@media print{@page{size:A4 landscape;margin:0}.prpage>div{overflow:visible}.prpage{break-after:page;page-break-after:always}.prpage:last-child{break-after:auto;page-break-after:avoid}}'+
+    '</style></head><body>'+body+'<scr'+'ipt>'+jdNetRedrawJS+'<\/scr'+'ipt></body></html>';
+}
 function downloadJDReport(){
   if(!lastJD){alert("Run an analysis first.");return;}
-  if(!window.html2canvas||!window.jspdf){alert("Report libraries not available.");return;}
   var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
   ready.then(function(){
-    var pages=jdBuildPdfPages();
-    var host=document.createElement('div');host.style.cssText='position:absolute;left:-20000px;top:0';
-    pages.forEach(function(p){host.appendChild(p);});document.body.appendChild(host);
-    pages.forEach(function(p){jdPdfFinalize(p);});
-    var jsPDF=window.jspdf.jsPDF,pwpt=842,K=72/96;
-    var h0=Math.round(pages[0].offsetHeight*K);
-    var doc=new jsPDF({unit:'pt',orientation:(pwpt>=h0?'l':'p'),format:[pwpt,h0]});
-    var seq=Promise.resolve();
-    pages.forEach(function(p,idx){
-      seq=seq.then(function(){var h=p.offsetHeight;return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:1123,windowHeight:h}).then(function(canvas){
-        var php=Math.round(h*K);
-        if(idx>0)doc.addPage([pwpt,php],(pwpt>=php?'l':'p'));
-        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pwpt,php);
-      });});
-    });
-    return seq.then(function(){
-      if(document.body.contains(host))document.body.removeChild(host);
-      doc.save("JD-Matcher-"+lastJD.stdName.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
-    });
+    var w=window.open('','_blank');
+    if(!w){alert("Allow pop-ups to print or save the report as a PDF.");return;}
+    var html=jdReportPrintHTML();
+    w.document.open();w.document.write(html);w.document.close();
   }).catch(function(e){alert("Could not build report: "+e.message);});
 }
 
