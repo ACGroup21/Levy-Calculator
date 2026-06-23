@@ -1100,22 +1100,32 @@ function renderShortfallAdvice(income,tot,ev,labels,trueBal){
   }
   // minimum running balance for a given monthly-spend array
   const minRB=arr=>{let b=levyData.balance,m=Infinity;for(let i=0;i<arr.length;i++){b+=income[i]-arr[i];if(b<m)m=b;}return m;};
-  const base=minRB(tot);
-  // for each EPA payment, find the move (within ±6 months) that best lifts the lowest balance
+  const base=minRB(tot);const N=income.length;
+  // for each completion payment, evaluate (a) deferring it to a later lower-spend month and
+  // (b) spreading it into instalments. Payments can only move later (after the learner passes EPA).
   let recs='';
   ev.slice().sort((a,b)=>b.amount-a.amount).forEach(e=>{
-    let best=-1,bestMin=base;
-    for(let j=Math.max(0,e.idx-6);j<=Math.min(income.length-1,e.idx+6);j++){
-      if(j===e.idx)continue;
+    // (a) DEFER to a single later month
+    let mvBest=-1,mvMin=base;
+    for(let j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){
       const t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;
-      const m=minRB(t2);if(m>bestMin+1){bestMin=m;best=j;}
+      const m=minRB(t2);if(m>mvMin+1){mvMin=m;mvBest=j;}
     }
-    if(best>=0){
-      const clears=bestMin>=0;
-      recs+=`<li>Negotiate the <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> — keep the EPA assessment where it is, but move the <em>payment date</em> from <strong>${labels[e.idx]}</strong> to <strong>${labels[best]}</strong> (a lower-spend month). ${clears?'This alone clears the gap.':`Lifts your lowest balance to ${fmt(bestMin)}.`}</li>`;
+    // (b) SPREAD into k equal instalments from the EPA month forward
+    let spK=0,spMin=base;
+    for(let k=2;k<=6&&e.idx+k-1<N;k++){
+      const t2=tot.slice();t2[e.idx]-=e.amount;const per=e.amount/k;
+      for(let m=0;m<k;m++)t2[e.idx+m]+=per;
+      const mm=minRB(t2);
+      if(mm>=0){spK=k;spMin=mm;break;}            // smallest k that clears
+      if(mm>spMin+1){spMin=mm;spK=k;}             // else track best
     }
+    const opts=[];
+    if(mvBest>=0)opts.push(`<strong>defer</strong> the payment to <strong>${labels[mvBest]}</strong>${mvMin>=0?' (clears the gap)':` (lifts the low to ${fmt(mvMin)})`}`);
+    if(spK)opts.push(`<strong>spread</strong> it over <strong>${spK} months</strong> (${fmt(e.amount/spK)}/mo, ${labels[e.idx]}–${labels[e.idx+spK-1]})${spMin>=0?' (clears the gap)':` (lifts the low to ${fmt(spMin)})`}`);
+    if(opts.length)recs+=`<li>For the <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> in ${labels[e.idx]} — keep the EPA assessment as-is and negotiate the payment schedule: ${opts.join(', or ')}.</li>`;
   });
-  if(!recs)recs=`<li>No single payment move closes the gap — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
+  if(!recs)recs=`<li>Deferring or spreading payments doesn't close the gap on its own — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
   else recs+=`<li>Or stagger programme starts / split cohorts so draws don't stack up; anything still uncovered must be self-funded.</li>`;
   el.innerHTML=`<div class="sf-box bad"><strong>⚠ Funding gap: your levy runs short by ${fmt(-minBal)} (lowest point ${labels[minIdx]}).</strong>
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to fill the void:</div><ul class="sf-list">${recs}</ul></div>`;
