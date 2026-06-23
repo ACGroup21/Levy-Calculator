@@ -48,6 +48,10 @@ header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,178,0.55),transparent)}
 .card:hover{border-color:var(--border2);box-shadow:0 0 40px rgba(45,212,178,0.05)}
 
+.section-nav{position:sticky;top:0;z-index:30;display:flex;gap:6px;align-items:center;padding:9px 16px;background:rgba(5,12,24,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.section-nav button{flex:0 0 auto;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text2);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.section-nav button:hover{color:var(--teal);border-color:var(--border2);background:rgba(45,212,178,0.08)}
+.section-nav button.nav-cta{margin-left:auto;color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.1)}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
 
@@ -332,6 +336,15 @@ footer span{color:var(--teal)}
   </div>
 </header>
 
+<nav class="section-nav" id="sectionNav">
+  <button onclick="goSection('sec-levy')">Levy data</button>
+  <button onclick="goSection('sec-programmes')">Programmes</button>
+  <button id="nav-forecast" onclick="goSection('projectionSection')">Forecast</button>
+  <button id="nav-plan" onclick="goSection('planSection')">Plan</button>
+  <button onclick="goSection('sec-jd')">JD match</button>
+  <button class="nav-cta" onclick="toggleCopilot()">&#10024; Co-pilot</button>
+</nav>
+
 <div class="page">
   <div style="padding-top:1.5rem">
     <div class="rule-banner">
@@ -341,7 +354,7 @@ footer span{color:var(--teal)}
   </div>
 
   <!-- STEP 1: LEVY CSV -->
-  <div class="step-row"><span class="step-chip">STEP 01</span><span class="step-title">Upload ESFA levy transactions</span></div>
+  <div class="step-row" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title">Upload ESFA levy transactions</span></div>
   <p class="step-sub">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
   <div class="card">
     <div class="upload-zone" id="dropzone" onclick="document.getElementById('csvFile').click()">
@@ -399,7 +412,7 @@ footer span{color:var(--teal)}
 
     <div class="divider"></div>
 
-    <div class="step-row"><span class="step-chip">STEP 02</span><span class="step-title">Add apprenticeship programmes</span></div>
+    <div class="step-row" id="sec-programmes"><span class="step-chip">STEP 02</span><span class="step-title">Add apprenticeship programmes</span></div>
     <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. 80% drawn monthly; 20% released on EPA completion.</p>
     <div class="card">
       <div class="form-grid">
@@ -510,7 +523,7 @@ footer span{color:var(--teal)}
     </div>
 
     <div class="divider"></div>
-    <div class="step-row"><span class="step-chip jd">JD</span><span class="step-title">KSB &harr; Job description match <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard?</span></span></div>
+    <div class="step-row" id="sec-jd"><span class="step-chip jd">JD</span><span class="step-title">KSB &harr; Job description match <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard?</span></span></div>
     <p class="step-sub">Pick a standard, paste a job description, and see which Knowledge, Skills &amp; Behaviours the role actually covers — and where the gaps are.</p>
     <div class="card">
       <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label><select id="jd-standard"></select></div>
@@ -1012,7 +1025,7 @@ function addProgramme(overrides){
   document.getElementById('progTable').classList.remove('hidden');
 }
 
-function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');}}
+function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
 
 function renderProgrammes(){
   const pt=document.getElementById('progTable');
@@ -1159,7 +1172,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk);
+  renderShortfallAdvice(income,tot,ev,labels,pmk);updateSectionNav();
   const exp=simulateLevyFIFO(income,tot,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
@@ -1739,8 +1752,24 @@ document.addEventListener('keydown',e=>{
   resize();frame();
 })();
 
+// ── Section nav ──
+function goSection(id){
+  const el=document.getElementById(id);
+  if(!el||el.classList.contains('hidden')){
+    // section not available yet (needs levy data / programmes)
+    const fallback=document.getElementById('sec-levy');if(fallback)fallback.scrollIntoView({behavior:'smooth',block:'start'});
+    return;
+  }
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function updateSectionNav(){
+  const f=document.getElementById('nav-forecast'),p=document.getElementById('nav-plan');
+  if(f)f.style.display=document.getElementById('projectionSection').classList.contains('hidden')?'none':'';
+  if(p)p.style.display=document.getElementById('planSection').classList.contains('hidden')?'none':'';
+}
+
 // Init "things to consider" planner
-loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();
+loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();updateSectionNav();
 
 // Restore any previously saved data on load
 loadState();
