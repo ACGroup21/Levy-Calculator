@@ -48,21 +48,17 @@ header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify
 .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,178,0.55),transparent)}
 .card:hover{border-color:var(--border2);box-shadow:0 0 40px rgba(45,212,178,0.05)}
 
-.section-nav{position:sticky;top:0;z-index:30;display:flex;gap:6px;align-items:center;padding:9px 16px;background:rgba(5,12,24,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch}
-.section-nav button{flex:0 0 auto;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text2);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.section-nav button:hover{color:var(--teal);border-color:var(--border2);background:rgba(45,212,178,0.08)}
-.section-nav button.nav-cta{margin-left:auto;color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.1)}
-/* left rolling side-nav (scroll-spy table of contents) */
-.side-nav{position:fixed;left:max(10px,calc((100vw - 1100px)/2 - 30px));top:50%;transform:translateY(-50%);z-index:25;display:flex;flex-direction:column;gap:8px}
-.side-nav button{display:flex;align-items:center;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--text2);background:transparent;border:none;cursor:pointer;padding:0;transition:color .15s}
-.side-nav button .dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--text3);flex-shrink:0;transition:all .15s}
-.side-nav button .lbl{max-width:0;overflow:hidden;white-space:nowrap;opacity:0;transition:max-width .2s,opacity .2s,margin .2s}
-.side-nav button:hover .lbl,.side-nav button.active .lbl{max-width:130px;opacity:1;margin-left:9px}
-.side-nav button:hover{color:var(--text)}
-.side-nav button:hover .dot{border-color:var(--teal)}
-.side-nav button.active{color:var(--teal)}
-.side-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 10px var(--teal)}
-@media(max-width:1200px){.side-nav{display:none}}
+/* LED scroll-spy nav inside the fixed banner */
+.led-nav{display:flex;align-items:center;gap:2px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex:1 1 auto;justify-content:center;margin:0 12px}
+.led-nav::-webkit-scrollbar{display:none}
+.led-nav button{flex:0 0 auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:6px 10px;border-radius:99px;white-space:nowrap;transition:all .15s}
+.led-nav .dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--text3);flex-shrink:0;transition:all .15s}
+.led-nav button:hover{color:var(--text)}
+.led-nav button:hover .dot{border-color:var(--teal)}
+.led-nav button.active{color:var(--teal)}
+.led-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 9px var(--teal)}
+@media(max-width:880px){.led-nav .lbl{display:none}.led-nav{justify-content:flex-start}}
+@media(max-width:880px){header .header-badge{display:none}}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
 
@@ -355,29 +351,19 @@ footer span{color:var(--teal)}
       <div class="logo-sub">Levy Affordability Calculator</div>
     </div>
   </div>
+  <nav class="led-nav" id="ledNav" aria-label="Section navigation">
+    <button data-target="sec-levy" onclick="goSection('sec-levy')"><span class="dot"></span><span class="lbl">Levy</span></button>
+    <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="dot"></span><span class="lbl">Programmes</span></button>
+    <button id="led-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="dot"></span><span class="lbl">Forecast</span></button>
+    <button id="led-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span><span class="lbl">Plan</span></button>
+    <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD</span></button>
+    <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
+  </nav>
   <div style="display:flex;align-items:center;gap:8px">
     <span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span>
     <div class="header-badge"><span class="pulse-dot"></span>UK ESFA &middot; 2026 Rules</div>
   </div>
 </header>
-
-<nav class="section-nav" id="sectionNav">
-  <button onclick="goSection('sec-levy')">Levy data</button>
-  <button onclick="goSection('sec-programmes')">Programmes</button>
-  <button id="nav-forecast" onclick="goSection('projectionSection')">Forecast</button>
-  <button id="nav-plan" onclick="goSection('planSection')">Plan</button>
-  <button onclick="goSection('sec-jd')">JD match</button>
-  <button class="nav-cta" onclick="toggleCopilot()">&#10024; Co-pilot</button>
-</nav>
-
-<nav class="side-nav" id="sideNav" aria-label="Section navigation">
-  <button data-target="sec-levy" onclick="goSection('sec-levy')"><span class="dot"></span><span class="lbl">Levy data</span></button>
-  <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="dot"></span><span class="lbl">Programmes</span></button>
-  <button id="side-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="dot"></span><span class="lbl">Forecast</span></button>
-  <button id="side-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span><span class="lbl">Plan</span></button>
-  <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD match</span></button>
-  <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
-</nav>
 
 <div class="page">
   <div style="padding-top:1.5rem">
@@ -1869,13 +1855,13 @@ function goSection(id){
 function updateSectionNav(){
   const projHidden=document.getElementById('projectionSection').classList.contains('hidden');
   const planHidden=document.getElementById('planSection').classList.contains('hidden');
-  [['nav-forecast',projHidden],['side-forecast',projHidden],['nav-plan',planHidden],['side-plan',planHidden]].forEach(([id,hide])=>{
+  [['led-forecast',projHidden],['led-plan',planHidden]].forEach(([id,hide])=>{
     const el=document.getElementById(id);if(el)el.style.display=hide?'none':'';
   });
 }
-// scroll-spy: highlight the side-nav item for the section currently in view
+// scroll-spy: highlight the banner nav item for the section currently in view
 (function(){
-  const items=[...document.querySelectorAll('.side-nav button[data-target]')].filter(b=>b.dataset.target!=='__copilot');
+  const items=[...document.querySelectorAll('.led-nav button[data-target]')].filter(b=>b.dataset.target!=='__copilot');
   const setActive=id=>items.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
   const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-40% 0px -55% 0px',threshold:0});
   ['sec-levy','sec-programmes','projectionSection','planSection','sec-jd'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
