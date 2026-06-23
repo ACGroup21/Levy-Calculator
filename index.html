@@ -198,6 +198,12 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-details summary::before{content:'\25B8  ';color:var(--purple)}
 .jd-details[open] summary::before{content:'\25BE  '}
 .jd-details summary:hover{color:var(--purple)}
+.jd-suit{margin-top:14px;padding:13px 15px;border-radius:9px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.35);font-size:13px;line-height:1.55;color:var(--text)}
+.jd-fair{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.jd-fair-q{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text2);cursor:pointer;line-height:1.45}
+.jd-fair-q input{margin-top:2px;accent-color:var(--teal);flex-shrink:0}
+.jd-verdict{font-size:12.5px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
+.jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12.5px;color:var(--text2);line-height:1.5}
 .jd-upload{margin-bottom:1rem;padding:14px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:9px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
 /* shortfall advisor */
@@ -359,7 +365,7 @@ footer span{color:var(--teal)}
     <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="dot"></span><span class="lbl">Programmes</span></button>
     <button id="led-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="dot"></span><span class="lbl">Forecast</span></button>
     <button id="led-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span><span class="lbl">Plan</span></button>
-    <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD</span></button>
+    <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD Matcher</span></button>
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
@@ -547,12 +553,15 @@ footer span{color:var(--teal)}
 
   </div><!-- /levySummary -->
 
-  <!-- JD MATCH — always visible (KSB-based, independent of levy data) -->
+  <!-- JD MATCHER — always visible (KSB-based, independent of levy data) -->
   <div class="divider"></div>
-  <div class="step-row" id="sec-jd"><span class="step-chip jd">JD</span><span class="step-title">KSB &harr; Job description match <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard?</span></span></div>
-  <p class="step-sub">Pick a standard, then paste or upload a job description, and see which Knowledge, Skills &amp; Behaviours the role actually covers — and where the gaps are.</p>
+  <div class="step-row" id="sec-jd"><span class="step-chip jd">JD</span><span class="step-title">JD Matcher <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard, and how to bridge the gaps?</span></span></div>
+  <p class="step-sub">Pick a standard, then paste or upload a job description. See which Knowledge, Skills &amp; Behaviours the role covers, where the gaps are, and what workplace exposure would bridge them.</p>
   <div class="card">
-    <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label><select id="jd-standard"></select></div>
+    <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label>
+      <input type="text" id="jd-search" class="standard-search" placeholder="🔍  Search standards (e.g. data, nurse, project)…" oninput="buildJdSelect(this.value)" style="margin-bottom:8px">
+      <select id="jd-standard"></select>
+    </div>
     <div class="jd-upload" id="jdDrop" onclick="document.getElementById('jdFile').click()">
       <span id="jdDropText">&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop</span>
       <input type="file" id="jdFile" accept=".txt,.pdf,.docx,text/plain" style="display:none">
@@ -1434,11 +1443,13 @@ function jdMatch(stmt,tokens){
   const ratio=words.length?hits.length/words.length:0;
   return{covered:hits.length>=2||ratio>=0.25,hits,ratio};
 }
-function buildJdSelect(){
+function buildJdSelect(query){
   const sel=document.getElementById('jd-standard');if(!sel)return;
-  const withK=STANDARDS.map((s,i)=>({s,i})).filter(x=>x.s.ksbs);
+  const q=(query||'').trim().toLowerCase();
+  let withK=STANDARDS.map((s,i)=>({s,i})).filter(x=>x.s.ksbs);
+  if(q)withK=withK.filter(x=>x.s.name.toLowerCase().includes(q)||(x.s.roles||[]).some(r=>r.includes(q)));
   sel.innerHTML='';
-  const ph=document.createElement('option');ph.value='';ph.textContent=withK.length?'Select a standard…':'No KSB data loaded';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
+  const ph=document.createElement('option');ph.value='';ph.textContent=withK.length?(q?`${withK.length} match${withK.length!==1?'es':''} — select…`:'Select a standard…'):'No standards match';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
   const levels=[...new Set(withK.map(x=>x.s.level))].sort((a,b)=>a-b);
   levels.forEach(l=>{
     const items=withK.filter(x=>x.s.level===l).sort((a,b)=>a.s.name.localeCompare(b.s.name));
@@ -1455,26 +1466,60 @@ function analyseJD(){
   if(jd.trim().length<25){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Paste a fuller job description to analyse (a sentence or two minimum).</p>';return;}
   const tokens=jdTokens(jd);
   const groups=[['knowledge','K','Knowledge'],['skills','S','Skills'],['behaviours','B','Behaviours']];
-  let covered=0,total=0,body='';const report={stdName:std.name,groups:[]};
+  let covered=0,total=0,body='';const report={stdName:std.name,groups:[]},gapsByGroup=[];
   groups.forEach(([key,letter,label])=>{
     const arr=std.ksbs[key]||[];if(!arr.length)return;
-    let g=`<div class="jd-group"><div class="jd-group-title">${label} (${arr.length})</div>`;const ritems=[];
+    let g=`<div class="jd-group"><div class="jd-group-title">${label} (${arr.length})</div>`;const ritems=[],gaps=[];
     arr.forEach((k,n)=>{
       const stmt=k.statement||k.description||'';const id=k.id||k.code||letter+(n+1);
-      total++;const m=jdMatch(stmt,tokens);if(m.covered)covered++;
+      total++;const m=jdMatch(stmt,tokens);if(m.covered)covered++;else gaps.push({id,stmt});
       ritems.push({id,stmt,covered:m.covered});
       const tags=m.covered&&m.hits.length?`<div class="jd-hits">${m.hits.slice(0,8).map(h=>`<span class="jd-hit-tag">${h}</span>`).join('')}</div>`:'';
       g+=`<div class="jd-ksb ${m.covered?'hit':'miss'}"><span class="jd-id">${id}</span><div class="jd-stmt">${stmt}${tags}</div><span class="jd-mark">${m.covered?'✓':'—'}</span></div>`;
     });
     body+=g+`</div>`;report.groups.push({label,items:ritems});
+    if(gaps.length)gapsByGroup.push({label,gaps});
   });
   const score=total?Math.round(covered/total*100):0;
-  const col=score>=60?'var(--teal)':score>=35?'var(--amber)':'var(--red)';
-  report.score=score;report.covered=covered;report.total=total;lastJD=report;
-  res.innerHTML=`<div class="jd-score"><div class="jd-score-num" style="color:${col}">${score}%</div><div class="jd-score-lbl">${covered} of ${total} KSBs evidenced by this job description</div></div>
+  const col=score>=60?'var(--teal)':score>=JD_THRESHOLD?'var(--amber)':'var(--red)';
+  const gapCount=total-covered;
+  report.score=score;report.covered=covered;report.total=total;report.gapsByGroup=gapsByGroup;lastJD=report;
+  // (4) suitability threshold → fairness questionnaire
+  let suit='';
+  if(score<JD_THRESHOLD){
+    suit=`<div class="jd-suit"><strong>⚠ Below the ${JD_THRESHOLD}% suitability threshold.</strong> A low score can simply mean the JD is brief or out of date — not that the role is wrong. Confirm the points below before ruling this standard out, to keep the evaluation fair:
+      <div class="jd-fair" id="jdFair">
+        ${JD_FAIR_Q.map((q,i)=>`<label class="jd-fair-q"><input type="checkbox" onchange="updateFairness()" data-q="${i}"> ${q}</label>`).join('')}
+      </div>
+      <div class="jd-verdict" id="jdVerdict">Tick what applies — the verdict updates as you go.</div></div>`;
+  }
+  // (3)/(5) work-exposure bridging plan from the gaps
+  let bridge='';
+  if(gapCount){
+    const blocks=gapsByGroup.map(gr=>`<div class="jd-group"><div class="jd-group-title">${gr.label} — ${gr.gaps.length} to develop</div>${gr.gaps.map(g=>`<div class="jd-bridge-item"><span class="jd-id" style="color:var(--amber)">${g.id}</span><span>${g.stmt}</span></div>`).join('')}</div>`).join('');
+    bridge=`<details class="jd-details" id="jdBridgeDetails"><summary>Work exposure to bridge the gaps (${gapCount})</summary>
+      <p style="font-size:12px;color:var(--text2);margin:8px 0">These KSBs aren't evidenced in the JD. To make the learning relatable and assessable, plan real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each:</p>
+      ${blocks}</details>`;
+  }
+  res.innerHTML=`<div class="jd-score"><div class="jd-score-num" style="color:${col}">${score}%</div><div class="jd-score-lbl">${covered} of ${total} KSBs evidenced by this job description${gapCount?` · ${gapCount} to bridge`:''}</div></div>
     <div class="jd-bar"><span style="width:${score}%;background:${col}"></span></div>
+    ${suit}${bridge}
     <details class="jd-details"><summary>Show KSB-by-KSB breakdown (${total})</summary><div style="margin-top:8px">${body}</div></details>
     <button class="btn-demo" onclick="downloadJDReport()" style="margin-top:12px">&#11015;&nbsp; Download PDF report</button>`;
+}
+const JD_THRESHOLD=25;
+const JD_FAIR_Q=[
+  'This is the full, current job description (not a short summary).',
+  'The role will broaden as the apprentice develops.',
+  'The employer can provide extra projects, rotations or mentoring to cover gaps.',
+  'The line manager has confirmed the day-to-day tasks.'
+];
+function updateFairness(){
+  const n=[...document.querySelectorAll('#jdFair input:checked')].length;
+  const v=document.getElementById('jdVerdict');if(!v)return;
+  if(n>=3){v.style.color='var(--teal)';v.innerHTML='✓ With these in place, the gaps can likely be bridged through planned work exposure — this standard may still be a fair fit.';}
+  else if(n<=1){v.style.color='var(--red)';v.innerHTML='✗ Limited scope to bridge the gaps — consider an alternative standard, or revisit/expand the role before enrolling.';}
+  else{v.style.color='var(--amber)';v.innerHTML='~ Partial fit — meaningful bridging needed. Agree a work-exposure plan with the employer and provider before deciding.';}
 }
 let lastJD=null;
 function downloadJDReport(){
@@ -1482,10 +1527,29 @@ function downloadJDReport(){
   if(!window.jspdf){alert('PDF library not available.');return;}
   const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'pt',format:'a4'});
   const L=54,W=487;let y=56;
-  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(20,20,20);doc.text('KSB vs Job Description Match',L,y);y+=20;
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(20,20,20);doc.text('JD Matcher Report',L,y);y+=20;
   doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text('Arthur Curtis Education - Levy Affordability Calculator - '+new Date().toLocaleDateString('en-GB'),L,y);y+=26;
   doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Standard: '+lastJD.stdName,L,y);y+=18;
-  doc.setTextColor(0,140,120);doc.text(`Coverage: ${lastJD.score}%  (${lastJD.covered} of ${lastJD.total} KSBs evidenced)`,L,y);y+=24;
+  doc.setTextColor(0,140,120);doc.text(`Coverage: ${lastJD.score}%  (${lastJD.covered} of ${lastJD.total} KSBs evidenced)`,L,y);y+=14;
+  if(lastJD.score<JD_THRESHOLD){doc.setTextColor(200,120,20);doc.setFontSize(9);doc.text(`Below the ${JD_THRESHOLD}% suitability threshold - apply the fair-evaluation checklist before ruling out this standard.`,L,y);y+=14;}
+  y+=8;
+  // Work-exposure bridging plan
+  if(lastJD.gapsByGroup&&lastJD.gapsByGroup.length){
+    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Work-exposure plan to bridge the gaps',L,y);y+=14;
+    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,110,110);
+    doc.text(doc.splitTextToSize('Plan real workplace exposure - tasks, projects, shadowing or rotations - so the apprentice can practise and evidence each area below.',W),L,y);y+=22;
+    lastJD.gapsByGroup.forEach(gr=>{
+      if(y>770){doc.addPage();y=56;}
+      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(180,110,20);doc.text(gr.label+' ('+gr.gaps.length+')',L,y);y+=13;
+      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(50,50,50);
+      gr.gaps.forEach(g=>{const lines=doc.splitTextToSize('- '+g.id+': '+g.stmt,W);if(y+lines.length*11>800){doc.addPage();y=56;}doc.text(lines,L,y);y+=lines.length*11+3;});
+      y+=6;
+    });
+    y+=6;
+  }
+  // Full KSB breakdown
+  if(y>740){doc.addPage();y=56;}
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Full KSB breakdown',L,y);y+=16;
   lastJD.groups.forEach(g=>{
     if(y>770){doc.addPage();y=56;}
     doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(80,70,160);doc.text(g.label,L,y);y+=15;
@@ -1499,7 +1563,7 @@ function downloadJDReport(){
     });
     y+=8;
   });
-  doc.save('KSB-match-'+lastJD.stdName.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf');
+  doc.save('JD-Matcher-'+lastJD.stdName.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf');
 }
 
 // JD file upload — extract text from .txt / .pdf / .docx, then analyse
