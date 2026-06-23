@@ -1112,10 +1112,10 @@ function renderShortfallAdvice(income,tot,ev,labels,trueBal){
     }
     if(best>=0){
       const clears=bestMin>=0;
-      recs+=`<li>Renegotiate the <strong>${fmt(e.amount)}</strong> EPA completion payment for <strong>${e.name}</strong> — shift the planned EPA date from <strong>${labels[e.idx]}</strong> to <strong>${labels[best]}</strong> (a lower-spend month). ${clears?'This alone clears the gap.':`Lifts your lowest balance to ${fmt(bestMin)}.`}</li>`;
+      recs+=`<li>Negotiate the <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> — keep the EPA assessment where it is, but move the <em>payment date</em> from <strong>${labels[e.idx]}</strong> to <strong>${labels[best]}</strong> (a lower-spend month). ${clears?'This alone clears the gap.':`Lifts your lowest balance to ${fmt(bestMin)}.`}</li>`;
     }
   });
-  if(!recs)recs=`<li>No single EPA move closes the gap — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
+  if(!recs)recs=`<li>No single payment move closes the gap — stagger your programme start dates so the 80% monthly draws don't stack up, split cohorts across intakes, or budget to self-fund the shortfall.</li>`;
   else recs+=`<li>Or stagger programme starts / split cohorts so draws don't stack up; anything still uncovered must be self-funded.</li>`;
   el.innerHTML=`<div class="sf-box bad"><strong>⚠ Funding gap: your levy runs short by ${fmt(-minBal)} (lowest point ${labels[minIdx]}).</strong>
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to fill the void:</div><ul class="sf-list">${recs}</ul></div>`;
