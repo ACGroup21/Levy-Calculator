@@ -1762,19 +1762,27 @@ function jdPdfKsbBody(c){
     '<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:'+c.col+';font-size:7px;margin-top:5px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:11px;min-width:30px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:11px;line-height:1.42">'+it.stmt+'</span></div>'+
     '<div style="margin-left:38px;margin-top:4px;background:rgba(32,214,195,0.06);border-left:2px solid '+c.col+';padding:5px 9px"><span style="color:'+c.col+';font-size:8.5px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:10px;line-height:1.42">'+rl+'</span></div>'+
   '</div>';}).join(''):'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:12px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
-  var cols=gaps.length>=4?2:1;
-  return '<div style="display:flex;gap:22px;flex:1;min-height:0">'+
-    '<div style="flex:0 0 31%;display:flex;flex-direction:column;min-height:0">'+
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the JD ('+cov.length+')</span></div>'+
-      '<div style="overflow:hidden">'+covRows+'</div>'+
-    '</div>'+
-    '<div style="width:1px;background:rgba(255,255,255,0.08)"></div>'+
-    '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div>'+
-      '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
-      '<div style="columns:'+cols+';column-gap:24px">'+gapRows+'</div>'+
-    '</div>'+
+  var evid='<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:9px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div><div style="columns:3;column-gap:26px">'+covRows+'</div></div>';
+  var dev=gaps.length?'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div><div style="columns:2;column-gap:26px">'+gapRows+'</div>':'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:13px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
+  return evid+dev;
+}
+/* KSB page wrapped in a table so its <thead> section title repeats on print continuation pages (no donut/%) */
+function jdPdfKsbPage(c,n){
+  var cid='pdf'+n;
+  var el=document.createElement('div');
+  el.setAttribute('data-cid',cid);
+  el.style.cssText='position:relative;width:1123px;min-height:380px;overflow:hidden;background:linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff';
+  var titleBar='<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px">'+
+    '<span style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:10px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:18px;font-family:'+JD_HF+'">'+c.key+'</span>'+
+    '<span style="font-family:'+JD_HF+';font-size:24px;font-weight:800;color:#fff">'+c.label+'</span>'+
+    '<span style="color:#8ba0b6;font-size:12px;margin-left:auto">JD Matcher &middot; development plan</span></div>';
+  var stats='<div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">'+jdDonut(c.pct,58,7,c.col)+'<div style="flex:1"><div style="color:#fff;font-size:14px"><strong>'+c.covered+'</strong> of '+c.total+' evidenced &nbsp;&middot;&nbsp; <span style="color:'+c.col+'">'+(c.total-c.covered)+' to develop</span></div><div style="margin-top:7px;max-width:440px">'+jdBar(c.pct,c.col)+'</div></div></div>';
+  el.innerHTML='<div style="position:relative;z-index:2;box-sizing:border-box;padding:28px 38px">'+
+    '<table style="width:100%;border-collapse:collapse"><thead><tr><td style="padding:0">'+titleBar+'</td></tr></thead>'+
+    '<tbody><tr><td style="padding:0">'+stats+jdPdfKsbBody(c)+'</td></tr></tbody></table>'+
+    jdPdfFoot(c.label,n)+
   '</div>';
+  return el;
 }
 function jdBuildPdfPages(){
   var x=jdCommon(),d=x.d,cats=x.cats,score=d.score;
@@ -1819,7 +1827,7 @@ function jdBuildPdfPages(){
     '<div style="margin-top:14px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:12px;padding:13px 18px;display:flex;gap:12px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,22)+'<div><div style="font-size:15px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' &middot; '+score+'% coverage</div><div style="font-size:11.5px;color:#aebfce;margin-top:3px;line-height:1.45">'+v.note+'</div></div></div>'+
     '<div style="display:flex;gap:16px;margin-top:16px;flex:1;min-height:0">'+col1+col2+col3+'</div>';
   var pages=[jdPdfPage(p1,'pdf0',1,'Summary')];
-  cats.forEach(function(c,i){pages.push(jdPdfPage(jdPdfKsbHead(c)+jdPdfKsbBody(c),'pdf'+(i+1),i+2,c.label));});
+  cats.forEach(function(c,i){pages.push(jdPdfKsbPage(c,i+2));});
   return pages;
 }
 /* network repaint + auto-print script injected into the print window */
@@ -1835,7 +1843,7 @@ function jdReportPrintHTML(){
     '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">'+
     '<style>html,body{margin:0;padding:0;background:#06172E;-webkit-print-color-adjust:exact;print-color-adjust:exact}'+
     '@media screen{body{padding:18px;background:#06121f}.prpage{width:1123px;margin:0 auto 18px;box-shadow:0 10px 44px rgba(0,0,0,.55)}}'+
-    '@media print{@page{size:A4 landscape;margin:0}.prpage>div{overflow:visible}.prpage{break-after:page;page-break-after:always}.prpage:last-child{break-after:auto;page-break-after:avoid}}'+
+    '@media print{@page{size:A4 landscape;margin:0}.prpage>div{overflow:visible}.prpage{break-after:page;page-break-after:always}.prpage:last-child{break-after:auto;page-break-after:avoid}thead{display:table-header-group}tr,td{break-inside:auto}}'+
     '</style></head><body>'+body+'<scr'+'ipt>'+jdNetRedrawJS+'<\/scr'+'ipt></body></html>';
 }
 function downloadJDReport(win){
