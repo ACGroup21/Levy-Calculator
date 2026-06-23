@@ -1526,43 +1526,82 @@ function downloadJDReport(){
   if(!lastJD){alert('Run an analysis first.');return;}
   if(!window.jspdf){alert('PDF library not available.');return;}
   const {jsPDF}=window.jspdf,doc=new jsPDF({unit:'pt',format:'a4'});
-  const L=54,W=487;let y=56;
-  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(20,20,20);doc.text('JD Matcher Report',L,y);y+=20;
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text('Arthur Curtis Education - Levy Affordability Calculator - '+new Date().toLocaleDateString('en-GB'),L,y);y+=26;
-  doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Standard: '+lastJD.stdName,L,y);y+=18;
-  doc.setTextColor(0,140,120);doc.text(`Coverage: ${lastJD.score}%  (${lastJD.covered} of ${lastJD.total} KSBs evidenced)`,L,y);y+=14;
-  if(lastJD.score<JD_THRESHOLD){doc.setTextColor(200,120,20);doc.setFontSize(9);doc.text(`Below the ${JD_THRESHOLD}% suitability threshold - apply the fair-evaluation checklist before ruling out this standard.`,L,y);y+=14;}
-  y+=8;
-  // Work-exposure bridging plan
-  if(lastJD.gapsByGroup&&lastJD.gapsByGroup.length){
-    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Work-exposure plan to bridge the gaps',L,y);y+=14;
-    doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(110,110,110);
-    doc.text(doc.splitTextToSize('Plan real workplace exposure - tasks, projects, shadowing or rotations - so the apprentice can practise and evidence each area below.',W),L,y);y+=22;
-    lastJD.gapsByGroup.forEach(gr=>{
-      if(y>770){doc.addPage();y=56;}
-      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(180,110,20);doc.text(gr.label+' ('+gr.gaps.length+')',L,y);y+=13;
-      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(50,50,50);
-      gr.gaps.forEach(g=>{const lines=doc.splitTextToSize('- '+g.id+': '+g.stmt,W);if(y+lines.length*11>800){doc.addPage();y=56;}doc.text(lines,L,y);y+=lines.length*11+3;});
-      y+=6;
-    });
-    y+=6;
+  const PW=595,PH=842,L=48,R=48,W=PW-L-R,BOT=792;
+  const NAVY=[55,77,106],TEAL=[45,212,178],TEALD=[20,150,120],AMBER=[200,130,20],GREY=[120,120,120],INK=[34,38,48];
+  const score=lastJD.score,scol=score>=40?TEALD:score>=JD_THRESHOLD?AMBER:[200,60,80];
+  // — decorative corner motifs (echo the brand template) —
+  function dots(x,y,cols,rows,c){doc.setFillColor(c[0],c[1],c[2]);for(let i=0;i<cols;i++)for(let j=0;j<rows;j++)doc.circle(x+i*8,y+j*8,1.3,'F');}
+  function donut(cx,cy,ro,ri,c){doc.setFillColor(c[0],c[1],c[2]);doc.circle(cx,cy,ro,'F');doc.setFillColor(255,255,255);doc.circle(cx,cy,ri,'F');}
+  function decor(){ // top-right + bottom-left, lightly clipped by page edges
+    donut(575,8,46,26,NAVY);dots(505,16,6,4,TEAL);
+    donut(20,834,46,26,NAVY);dots(78,800,6,4,TEAL);
   }
-  // Full KSB breakdown
-  if(y>740){doc.addPage();y=56;}
-  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(20,20,20);doc.text('Full KSB breakdown',L,y);y+=16;
+  let pageNo=1;decor();
+  // — header —
+  let y=70;
+  doc.setFont('helvetica','bold');doc.setFontSize(15);doc.setTextColor(NAVY[0],NAVY[1],NAVY[2]);doc.text('arthur curtis',L,y);
+  const wmW=doc.getTextWidth('arthur curtis ');doc.setTextColor(TEALD[0],TEALD[1],TEALD[2]);doc.text('education',L+wmW,y);
+  y+=26;doc.setTextColor(INK[0],INK[1],INK[2]);doc.setFontSize(22);doc.text('JD Matcher Report',L,y);
+  y+=16;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(GREY[0],GREY[1],GREY[2]);
+  doc.text('Levy Affordability Calculator  ·  '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),L,y);
+  y+=10;doc.setDrawColor(TEAL[0],TEAL[1],TEAL[2]);doc.setLineWidth(2);doc.line(L,y,L+60,y);
+  // — summary card —
+  y+=22;const cardH=92;
+  doc.setFillColor(247,250,250);doc.setDrawColor(225,232,236);doc.setLineWidth(1);doc.roundedRect(L,y,W,cardH,8,8,'FD');
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(GREY[0],GREY[1],GREY[2]);doc.text('APPRENTICESHIP STANDARD',L+18,y+22);
+  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(INK[0],INK[1],INK[2]);
+  doc.text(doc.splitTextToSize(lastJD.stdName,W-150),L+18,y+40);
+  // big % on the right
+  doc.setFontSize(38);doc.setTextColor(scol[0],scol[1],scol[2]);doc.text(score+'%',L+W-110,y+46,{align:'left'});
+  doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(GREY[0],GREY[1],GREY[2]);doc.text('coverage',L+W-108,y+58);
+  // bar
+  const barY=y+cardH-22,barW=W-36;doc.setFillColor(232,237,240);doc.roundedRect(L+18,barY,barW,7,3,3,'F');
+  doc.setFillColor(scol[0],scol[1],scol[2]);doc.roundedRect(L+18,barY,Math.max(6,barW*score/100),7,3,3,'F');
+  doc.setFontSize(8.5);doc.setTextColor(INK[0],INK[1],INK[2]);doc.text(`${lastJD.covered} of ${lastJD.total} KSBs evidenced  ·  ${lastJD.total-lastJD.covered} to bridge`,L+18,barY-6);
+  y+=cardH+14;
+  // suitability flag
+  if(score<JD_THRESHOLD){
+    doc.setFillColor(253,247,235);doc.setDrawColor(235,200,140);doc.roundedRect(L,y,W,34,6,6,'FD');
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(AMBER[0],AMBER[1],AMBER[2]);doc.text('Below the '+JD_THRESHOLD+'% suitability threshold',L+14,y+15);
+    doc.setFont('helvetica','normal');doc.setTextColor(90,90,90);doc.setFontSize(8);
+    doc.text('A low score may mean the JD is brief or out of date. Apply the fair-evaluation checklist before ruling out this standard.',L+14,y+27);
+    y+=46;
+  }
+  // page-break helper that keeps the decor + footer
+  function need(h){if(y+h>BOT){doc.addPage();pageNo++;decor();y=64;}}
+  function heading(t){need(30);doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(INK[0],INK[1],INK[2]);doc.text(t,L,y);doc.setDrawColor(TEAL[0],TEAL[1],TEAL[2]);doc.setLineWidth(1.5);doc.line(L,y+5,L+34,y+5);y+=22;}
+  // — work-exposure plan —
+  if(lastJD.gapsByGroup&&lastJD.gapsByGroup.length){
+    heading('Work-exposure plan to bridge the gaps');
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(90,90,90);
+    const intro=doc.splitTextToSize('Plan real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each area below.',W);
+    need(intro.length*11+6);doc.text(intro,L,y);y+=intro.length*11+10;
+    lastJD.gapsByGroup.forEach(gr=>{
+      need(20);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(AMBER[0],AMBER[1],AMBER[2]);doc.text(gr.label+'  ('+gr.gaps.length+')',L,y);y+=14;
+      doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(55,55,55);
+      gr.gaps.forEach(g=>{const lines=doc.splitTextToSize(g.id+'   '+g.stmt,W-14);need(lines.length*11+4);doc.setFillColor(AMBER[0],AMBER[1],AMBER[2]);doc.circle(L+2,y-3,1.6,'F');doc.text(lines,L+12,y);y+=lines.length*11+4;});
+      y+=8;
+    });
+    y+=4;
+  }
+  // — full breakdown —
+  heading('Full KSB breakdown');
   lastJD.groups.forEach(g=>{
-    if(y>770){doc.addPage();y=56;}
-    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(80,70,160);doc.text(g.label,L,y);y+=15;
+    need(20);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(NAVY[0],NAVY[1],NAVY[2]);doc.text(g.label,L,y);y+=14;
     doc.setFont('helvetica','normal');doc.setFontSize(9);
     g.items.forEach(it=>{
-      const prefix=(it.covered?'[COVERED] ':'[ GAP   ] ')+it.id+': ';
-      const lines=doc.splitTextToSize(prefix+it.stmt,W);
-      if(y+lines.length*11>800){doc.addPage();y=56;}
-      doc.setTextColor(it.covered?30:170,it.covered?120:60,it.covered?90:60);
-      doc.text(lines,L,y);y+=lines.length*11+4;
+      const lines=doc.splitTextToSize(it.id+'   '+it.stmt,W-16);need(lines.length*11+4);
+      const c=it.covered?TEALD:[170,90,60];doc.setFillColor(c[0],c[1],c[2]);
+      if(it.covered)doc.circle(L+2,y-3,2,'F');else{doc.setDrawColor(c[0],c[1],c[2]);doc.setLineWidth(1.2);doc.circle(L+2,y-3,2,'S');}
+      doc.setTextColor(it.covered?60:120,it.covered?70:90,it.covered?75:95);doc.text(lines,L+12,y);y+=lines.length*11+4;
     });
     y+=8;
   });
+  // — footers on every page —
+  const tot=doc.getNumberOfPages();
+  for(let p=1;p<=tot;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(150,150,150);
+    doc.text('Arthur Curtis Education  ·  JD Matcher  ·  indicative keyword analysis, not a compliance verdict',L,BOT+30);
+    doc.text('Page '+p+' of '+tot,PW-R,BOT+30,{align:'right'});}
   doc.save('JD-Matcher-'+lastJD.stdName.replace(/[^a-z0-9]+/gi,'-').toLowerCase()+'.pdf');
 }
 
@@ -1919,6 +1958,8 @@ function goSection(id){
     return;
   }
   el.scrollIntoView({behavior:'smooth',block:'start'});
+  // light up the clicked item immediately (bottom sections can't always trigger scroll-spy)
+  document.querySelectorAll('.led-nav button[data-target]').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
 }
 function updateSectionNav(){
   const projHidden=document.getElementById('projectionSection').classList.contains('hidden');
