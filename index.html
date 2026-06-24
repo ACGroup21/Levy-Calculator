@@ -94,6 +94,10 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .step-chip{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--teal);letter-spacing:0.12em;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.25);border-radius:4px;padding:3px 9px}
 .step-chip.ksb{color:var(--purple);background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.25)}
 .step-title{font-size:16px;font-weight:500;color:var(--text)}
+.proj-range{display:flex;gap:2px;margin-left:auto;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:2px}
+.proj-range button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.proj-range button:hover{color:var(--text)}
+.proj-range button.on{background:var(--teal);color:#06121f;font-weight:600}
 .step-sub{font-size:13px;color:var(--text3);margin-bottom:1rem}
 
 .upload-zone{border:1.5px dashed rgba(45,212,178,0.3);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(45,212,178,0.03)}
@@ -552,7 +556,7 @@ footer span{color:var(--teal)}
     <div class="divider"></div>
 
     <div id="projectionSection" class="hidden">
-      <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title">36-month affordability projection</span></div>
+      <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title">Affordability projection</span><div class="proj-range" id="projRange"><button data-y="1" onclick="setProjYears(1)">1 year</button><button data-y="2" onclick="setProjYears(2)">2 years</button><button data-y="3" class="on" onclick="setProjYears(3)">3 years</button></div></div>
       <div id="goalEmphasis"></div>
       <div class="legend">
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#1a88c0"></span>80% training draw</span>
@@ -628,7 +632,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24o</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -966,7 +970,7 @@ const RULEBOOK={
   unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
 };
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
-let programmes=[];let projChart=null;
+let programmes=[];let projChart=null;let projYears=3;
 
 // ── persistence (survive page refresh) ──
 const STORE_KEY='ac_levy_state_v1';   // legacy levy+programmes (migrated → SCEN_KEY)
@@ -1314,9 +1318,14 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk){
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul></div>`;
 }
 
+function setProjYears(y){
+  projYears=y;
+  document.querySelectorAll('#projRange button').forEach(b=>b.classList.toggle('on',+b.dataset.y===y));
+  if(programmes.length)renderProjection();
+}
 function renderProjection(){
   document.getElementById('projectionSection').classList.remove('hidden');
-  const M=36,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
+  const M=projYears*12,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
   const income=Array(M).fill(levyData.monthlyAvg);
   const ts=Array(M).fill(0),es=Array(M).fill(0),ev=[];
   programmes.forEach(p=>{
@@ -1337,7 +1346,7 @@ function renderProjection(){
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
-  document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
+  document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
   renderShortfallAdvice(income,tot,ev,labels,pmk);updateSectionNav();
   const exp=simulateLevyFIFO(income,tot,pmk,M);
   const ew=document.getElementById('expiryWarning');
