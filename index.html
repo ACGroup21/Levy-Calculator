@@ -1590,8 +1590,7 @@ function jdDemo(){
   document.getElementById('jd-standard').value=pick;
   document.getElementById('jd-text').value=JD_DEMO_TEXT;
   analyseJD();
-  var sec=document.getElementById('sec-jd');if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
-  if(lastJD)openReport();
+  var res=document.getElementById('jd-results');if(res)res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 var JD_HF="'Montserrat','League Spartan',Inter,Arial,sans-serif";
 var JD_CYAN='#20D6C3',JD_PURPLE='#7B61FF',JD_GOLD='#C89622',JD_PANEL='#0F2A4A',JD_PANEL2='#123255',JD_CB='1px solid rgba(255,255,255,0.08)',JD_WT='rgba(255,255,255,0.10)';
