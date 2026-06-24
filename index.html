@@ -292,6 +292,8 @@ details summary:hover,details[open] summary{color:var(--teal)}
 .gift-rec{margin-top:1rem;padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;color:var(--text)}
 .gift-rec strong{color:var(--teal)}
 .gift-rec .amt{color:var(--amber);font-weight:600}
+.gift-sv{background:rgba(123,97,255,0.08);border-color:rgba(123,97,255,0.32)}
+.gift-sv strong{color:#a78bfa}
 
 /* ── KSB panel ── */
 .ksb-panel{background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:1rem 1.25rem;margin-top:.75rem;display:none}
@@ -561,6 +563,7 @@ footer span{color:var(--teal)}
       <div class="step-row"><span class="step-chip">GIFT</span><span class="step-title">Transfer / gifting suggestion</span></div>
       <div class="metrics" id="giftMetrics"></div>
       <div id="giftExpiryRec" class="gift-rec" style="display:none"></div>
+      <div id="giftSocialValue" class="gift-rec gift-sv" style="display:none"></div>
       <p class="gift-note">Employers can gift up to <strong>50%</strong> of their annual levy to charities, supply chain partners, or SMEs — covering <strong>100%</strong> of training and assessment costs for new starts at the receiving organisation. Unspent funds expire after <strong>24 months</strong> (pre-Aug 2026) or <strong>12 months</strong> (from Aug 2026).</p>
     </div>
 
@@ -610,7 +613,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24h</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1325,6 +1328,17 @@ function renderProjection(){
     gr.style.display='block';
     gr.innerHTML=`💡 <strong>Turn expiry into impact.</strong> You're on track to lose <span class="amt">${fmt(exp.total)}</span> to expiry, the first <span class="amt">${fmt(exp.byMonth[0].amount)}</span> in <strong>${mkLbl(exp.byMonth[0].mk)}</strong>. You could gift up to <span class="amt">${fmt(giftable)}</span> of it to a supply-chain partner, SME or charity before it ages out — funding their apprenticeships instead of losing the money.${giftable<exp.total?` (The remaining ${fmt(exp.total-giftable)} is above the 50% transfer cap — use it on your own new starts.)`:''}`;
   }else gr.style.display='none';
+  // Social value: frame giftable levy as a concrete, reportable contribution (extends gifting)
+  const sv=document.getElementById('giftSocialValue');
+  const svGift=exp.total>1?Math.min(exp.total,Math.max(0,annual*.5)):Math.max(0,safe);
+  const svHeads=programmes.reduce((a,p)=>a+(+p.count||0),0);
+  const svCommitted=programmes.reduce((a,p)=>a+(+p.cost||0)*(+p.count||0),0);
+  const svPerHead=svHeads?svCommitted/svHeads:0;
+  if(svGift>500&&svPerHead>0){
+    const enabled=Math.floor(svGift/svPerHead), src=exp.total>1?'otherwise-expiring':'surplus';
+    sv.style.display='block';
+    sv.innerHTML=`&#129309; <strong>Social value.</strong> Gifting <span class="amt">${fmt(svGift)}</span> of ${src} levy to an SME, charity or supply-chain partner ${enabled>=1?`could fully fund <span class="amt">~${enabled}</span> apprenticeship${enabled!==1?'s':''} elsewhere`:'contributes toward funding an apprenticeship elsewhere'} <span style="color:var(--text3)">(based on your average programme cost of ${fmt(svPerHead)} per apprentice)</span>. Evidences the UK Social Value Model theme <strong>&ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;</strong>, reportable in tenders and CSR. <span style="color:var(--text3)">Indicative, based on your figures.</span>`;
+  }else sv.style.display='none';
   const ci=simCoInvest(income,tot,pmk);
   lastGoalCtx={endBal:bals[M-1],exp,ci,ev,income,tot};
   renderGoalEmphasis(lastGoalCtx);
