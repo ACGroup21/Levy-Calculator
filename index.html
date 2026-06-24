@@ -59,18 +59,24 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .led-nav button.active{color:var(--teal)}
 .led-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 9px var(--teal)}
 .led-nav button.pending{opacity:.4}
+:root{--goal-accent:#2DD4B2}
+body[data-goal="cash"]{--goal-accent:#2DD4B2}
+body[data-goal="expiry"]{--goal-accent:#E0A43B}
+body[data-goal="capability"]{--goal-accent:#a78bfa}
+body[data-goal="headcount"]{--goal-accent:#39A0D4}
+body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
 .goal-tile{text-align:left;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
 .goal-tile:hover{border-color:var(--teal);background:rgba(32,214,195,0.06)}
-.goal-tile.sel{border-color:var(--teal);background:rgba(32,214,195,0.10);box-shadow:0 0 0 1px var(--teal) inset}
+.goal-tile.sel{border-color:var(--goal-accent);background:rgba(255,255,255,0.05);box-shadow:0 0 0 1px var(--goal-accent) inset}
 .goal-tile .gt-ic{font-size:18px;margin-bottom:6px;line-height:1}
 .goal-tile .gt-lb{font-size:14px;font-weight:600;margin-bottom:3px}
 .goal-tile .gt-sb{font-size:12px;color:var(--text3);line-height:1.35}
-.goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,rgba(32,214,195,0.10),rgba(32,214,195,0.02));border:1px solid rgba(32,214,195,0.28);border-radius:12px;padding:13px 17px;margin:10px 0 2px}
-.goal-emph .ge-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--teal);opacity:.85;margin-bottom:2px}
+.goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,0.025);border:1px solid var(--goal-accent);border-radius:12px;padding:13px 17px;margin:10px 0 2px;transition:border-color .25s}
+.goal-emph .ge-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--goal-accent);opacity:.95;margin-bottom:2px}
 .goal-emph .ge-goal{font-size:15px;font-weight:600;color:var(--text)}
 .goal-emph .ge-metric{display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,0.10);padding-left:18px}
-.goal-emph .ge-num{font-size:22px;font-weight:700;color:var(--teal);line-height:1.05}
+.goal-emph .ge-num{font-size:22px;font-weight:700;color:var(--goal-accent);line-height:1.05;transition:color .25s}
 .goal-emph .ge-lab{font-size:11px;color:var(--text3)}
 .goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
@@ -411,7 +417,11 @@ footer span{color:var(--teal)}
   <div class="card">
     <div id="goalGrid" class="goal-grid"></div>
     <div id="goalNoteWrap" style="margin-top:12px;display:none">
-      <input id="goalNote" type="text" maxlength="140" placeholder="Add a short note (optional) — e.g. the role, team or capability" oninput="setGoalNote(this.value)" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit">
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="goalNote" type="text" maxlength="140" placeholder="Add a short note (optional) — e.g. the role, team or capability" oninput="onGoalNoteInput()" onblur="commitGoalNote()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="flex:1;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit">
+        <button type="button" id="goalNoteBtn" onclick="commitGoalNote()" style="flex:0 0 auto;background:rgba(255,255,255,0.04);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:9px;padding:9px 16px;font-size:13px;font-family:inherit;cursor:pointer">Save</button>
+      </div>
+      <div id="goalNoteSaved" style="font-size:12px;color:var(--goal-accent);margin-top:6px;display:none">&#10003; Saved</div>
     </div>
     <div id="goalConfirm" style="margin-top:12px;font-size:13px;color:var(--text3)"></div>
   </div>
@@ -613,7 +623,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24i</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2453,28 +2463,46 @@ const GOALS=[
   {key:'headcount',ic:'&#10138;',lb:'Maximise people upskilled',sb:'Most apprentices or units per &pound; of levy'},
   {key:'other',ic:'&#9998;',lb:'Something else',sb:'Describe it in the note below'}
 ];
+// What each goal will do — shown at selection so the effect is understood even before data exists
+const GOAL_FX={expiry:'lead with funds at risk of expiry',cash:'lead with employer co-investment',capability:'lead with what your levy commits to capability',headcount:'lead with people upskilled per &pound;',other:'lead with your projected balance'};
+function applyGoalAccent(){
+  const k=scnGoal&&scnGoal.key;
+  if(k)document.body.setAttribute('data-goal',k);else document.body.removeAttribute('data-goal');
+}
 function renderGoalGrid(){
   const g=document.getElementById('goalGrid');if(!g)return;
   const sel=scnGoal&&scnGoal.key;
   g.innerHTML=GOALS.map(o=>`<button type="button" class="goal-tile${o.key===sel?' sel':''}" onclick="setGoal('${o.key}')"><div class="gt-ic">${o.ic}</div><div class="gt-lb">${o.lb}</div><div class="gt-sb">${o.sb}</div></button>`).join('');
-  const nw=document.getElementById('goalNoteWrap'),ni=document.getElementById('goalNote');
+  const nw=document.getElementById('goalNoteWrap'),ni=document.getElementById('goalNote'),sv=document.getElementById('goalNoteSaved');
   if(nw)nw.style.display=sel?'block':'none';
   if(ni&&scnGoal)ni.value=scnGoal.note||'';
-  renderGoalConfirm();
+  if(sv)sv.style.display='none';
+  applyGoalAccent();renderGoalConfirm();
 }
 function renderGoalConfirm(){
   const c=document.getElementById('goalConfirm');if(!c)return;
   if(!scnGoal||!scnGoal.key){c.textContent='Pick a goal to tailor the calculator — or skip and set it later.';return;}
   const o=GOALS.find(x=>x.key===scnGoal.key);
   const note=scnGoal.note?(' — <span style="color:var(--text3)">'+scnGoal.note.replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]))+'</span>'):'';
-  c.innerHTML='&#10003; Goal set: <strong style="color:var(--teal)">'+(o?o.lb:scnGoal.key)+'</strong>'+note;
+  const hasData=!!(levyData&&levyData.byMonth&&levyData.byMonth.length&&programmes.length);
+  const fx=GOAL_FX[scnGoal.key]||'tailor your forecast';
+  c.innerHTML='&#10003; Goal set: <strong style="color:var(--goal-accent)">'+(o?o.lb:scnGoal.key)+'</strong>'+note
+    +'<div style="margin-top:5px;color:var(--text3);font-size:12.5px">Your forecast will '+fx+(hasData?'.':' — add your levy data and programmes to see it.')+'</div>';
 }
 function setGoal(key){
   const o=GOALS.find(x=>x.key===key);if(!o)return;
   scnGoal={key:key,label:o.lb,note:(scnGoal&&scnGoal.note)||'',setAt:Date.now()};
   persistScenario(true);renderGoalGrid();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);
 }
-function setGoalNote(v){if(!scnGoal)return;scnGoal.note=v;persistScenario(true);renderGoalConfirm();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);}
+function onGoalNoteInput(){const sv=document.getElementById('goalNoteSaved');if(sv)sv.style.display='none';}
+function commitGoalNote(){
+  if(!scnGoal)return;
+  const ni=document.getElementById('goalNote');if(!ni)return;
+  if((scnGoal.note||'')===ni.value)return; // unchanged — nothing to commit
+  scnGoal.note=ni.value;persistScenario(true);
+  renderGoalConfirm();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);
+  const sv=document.getElementById('goalNoteSaved');if(sv)sv.style.display='block';
+}
 
 /* The first consumer of scenario.goal: the projection leads with the metric the
    goal cares about. Display-only — reads computed values, never the maths. */
