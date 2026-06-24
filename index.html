@@ -1906,7 +1906,7 @@ function downloadJDReport(btn){
     var doc=new jsPDF({unit:'pt',orientation:'landscape',format:'a4'});
     var seq=Promise.resolve();
     pages.forEach(function(p,idx){
-      seq=seq.then(function(){return html2canvas(p,{scale:1.6,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:JD_PG_W,windowHeight:JD_PG_H}).then(function(canvas){
+      seq=seq.then(function(){return html2canvas(p,{scale:2.0,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:JD_PG_W,windowHeight:JD_PG_H}).then(function(canvas){
         if(idx>0)doc.addPage('a4','landscape');
         doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
       });});
