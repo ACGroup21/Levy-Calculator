@@ -66,6 +66,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .goal-tile .gt-ic{font-size:18px;margin-bottom:6px;line-height:1}
 .goal-tile .gt-lb{font-size:14px;font-weight:600;margin-bottom:3px}
 .goal-tile .gt-sb{font-size:12px;color:var(--text3);line-height:1.35}
+.goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:linear-gradient(90deg,rgba(32,214,195,0.10),rgba(32,214,195,0.02));border:1px solid rgba(32,214,195,0.28);border-radius:12px;padding:13px 17px;margin:10px 0 2px}
+.goal-emph .ge-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--teal);opacity:.85;margin-bottom:2px}
+.goal-emph .ge-goal{font-size:15px;font-weight:600;color:var(--text)}
+.goal-emph .ge-metric{display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,0.10);padding-left:18px}
+.goal-emph .ge-num{font-size:22px;font-weight:700;color:var(--teal);line-height:1.05}
+.goal-emph .ge-lab{font-size:11px;color:var(--text3)}
+.goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 @media(max-width:760px){header .header-badge{display:none}}
@@ -529,6 +536,7 @@ footer span{color:var(--teal)}
 
     <div id="projectionSection" class="hidden">
       <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title">36-month affordability projection</span></div>
+      <div id="goalEmphasis"></div>
       <div class="legend">
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#1a88c0"></span>80% training draw</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#b87510"></span>20% EPA completion</span>
@@ -602,7 +610,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24g</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -938,7 +946,7 @@ const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
 const SCEN_KEY='ac_scenario_v1';
 const RULES_VERSION='FY2025-26';
 const SCEN_SCHEMA=1;
-let scnGoal=null, scnTalent=null, scnId=null;
+let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null;
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
@@ -1317,6 +1325,9 @@ function renderProjection(){
     gr.style.display='block';
     gr.innerHTML=`💡 <strong>Turn expiry into impact.</strong> You're on track to lose <span class="amt">${fmt(exp.total)}</span> to expiry, the first <span class="amt">${fmt(exp.byMonth[0].amount)}</span> in <strong>${mkLbl(exp.byMonth[0].mk)}</strong>. You could gift up to <span class="amt">${fmt(giftable)}</span> of it to a supply-chain partner, SME or charity before it ages out — funding their apprenticeships instead of losing the money.${giftable<exp.total?` (The remaining ${fmt(exp.total-giftable)} is above the 50% transfer cap — use it on your own new starts.)`:''}`;
   }else gr.style.display='none';
+  const ci=simCoInvest(income,tot,pmk);
+  lastGoalCtx={endBal:bals[M-1],exp,ci,ev,income,tot};
+  renderGoalEmphasis(lastGoalCtx);
   renderPlan();
 }
 
@@ -2447,9 +2458,50 @@ function renderGoalConfirm(){
 function setGoal(key){
   const o=GOALS.find(x=>x.key===key);if(!o)return;
   scnGoal={key:key,label:o.lb,note:(scnGoal&&scnGoal.note)||'',setAt:Date.now()};
-  persistScenario(true);renderGoalGrid();
+  persistScenario(true);renderGoalGrid();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);
 }
-function setGoalNote(v){if(!scnGoal)return;scnGoal.note=v;persistScenario(true);renderGoalConfirm();}
+function setGoalNote(v){if(!scnGoal)return;scnGoal.note=v;persistScenario(true);renderGoalConfirm();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);}
+
+/* The first consumer of scenario.goal: the projection leads with the metric the
+   goal cares about. Display-only — reads computed values, never the maths. */
+function renderGoalEmphasis(o){
+  const el=document.getElementById('goalEmphasis');if(!el)return;
+  if(!scnGoal||!scnGoal.key){
+    el.innerHTML='<div class="goal-emph" style="border-style:dashed;background:none"><div class="ge-note" style="flex:1">Set a goal to tailor this projection — <button type="button" onclick="goSection(\'sec-goal\')" style="background:none;border:none;color:var(--teal);cursor:pointer;font:inherit;padding:0;text-decoration:underline">choose one</button>.</div></div>';
+    return;
+  }
+  const heads=programmes.reduce((a,p)=>a+(+p.count||0),0);
+  const committed=programmes.reduce((a,p)=>a+(+p.cost||0)*(+p.count||0),0);
+  const perHead=heads?committed/heads:0;
+  const co=(o.ci&&o.ci.total>1)?o.ci.total:0, coMonths=o.ci?o.ci.months.length:0;
+  const atRisk=(o.exp&&o.exp.total>1)?o.exp.total:0;
+  const events=o.ev?o.ev.length:0, coveredEv=o.ev?o.ev.filter(e=>o.tot[e.idx]<=o.income[e.idx]).length:0;
+  let num,lab,note;
+  switch(scnGoal.key){
+    case 'expiry':
+      num=fmt(atRisk);lab=atRisk?'forecast to expire unused':'at risk of expiry';
+      note=atRisk?('First '+fmt(o.exp.byMonth[0].amount)+' ages out '+mkLbl(o.exp.byMonth[0].mk)+' — commit or gift it before then.'):'Your current plan loses no levy to expiry. On track.';
+      break;
+    case 'cash':
+      num=fmt(co);lab='employer co-investment (36m)';
+      note=co?('Across '+coMonths+' month'+(coMonths!==1?'s':'')+'. See the timing options below to reduce it.'):'Fully covered by your levy — no cash outlay projected. On track.';
+      break;
+    case 'capability':
+      num=fmt(committed);lab='committed to building capability';
+      note=heads+' apprentice'+(heads!==1?'s':'')+' across '+programmes.length+' programme'+(programmes.length!==1?'s':'')+(events?(' · '+coveredEv+'/'+events+' completions levy-covered'):'')+'. Check each covers the skills the role needs.';
+      break;
+    case 'headcount':
+      num=String(heads);lab='people upskilled';
+      note=fmt(perHead)+' levy per head · '+fmt(committed)+' committed. More, shorter programmes raise this per £.';
+      break;
+    default:{
+      const n=(scnGoal.note||'').replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
+      num=fmt(o.endBal);lab='projected balance at month 36';
+      note=(n?n+'. ':'')+(co?(fmt(co)+' co-investment projected.'):'No co-investment projected.');
+    }
+  }
+  el.innerHTML='<div class="goal-emph"><div class="ge-head"><div class="ge-eyebrow">YOUR GOAL</div><div class="ge-goal">'+scnGoal.label+'</div></div><div class="ge-metric"><div class="ge-num">'+num+'</div><div class="ge-lab">'+lab+'</div></div><div class="ge-note">'+note+'</div></div>';
+}
 
 // Init "things to consider" planner
 loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();updateSectionNav();
