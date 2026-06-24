@@ -576,6 +576,7 @@ footer span{color:var(--teal)}
     </div>
     <div class="field"><label>Job description</label><textarea id="jd-text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(255,255,255,0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn-demo" onclick="jdDemo()">&#9654;&nbsp; See a sample report</button><span style="font-size:12px;color:var(--text3)">Loads a sample standard + JD and opens the report</span></div>
     <div id="jd-results"></div>
   </div>
 </div>
@@ -1576,6 +1577,21 @@ function clearJD(){
   document.getElementById('jd-results').innerHTML='';
   setJdDropText('&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop');
   lastJD=null;
+}
+var JD_DEMO_TEXT="Recruitment Team Leader. Lead and manage a small team to source, attract, screen and place candidates. Build and manage client and stakeholder relationships, run the recruitment process and lifecycle, set priorities and allocate work. Monitor performance against targets, manage budgets and resources, ensure compliance with legislation and data protection, and promote equality, diversity and inclusion. Coach and develop team members, communicate with stakeholders, present updates, and use data to drive continuous improvement.";
+function jdDemo(){
+  if(typeof STANDARDS==='undefined'||!STANDARDS.length){alert('Standards still loading — try again in a moment.');return;}
+  var pick=-1,i;
+  for(i=0;i<STANDARDS.length;i++){var s=STANDARDS[i];if(s&&s.ksbs&&/recruiter|team leader/i.test(s.name||'')){pick=i;break;}}
+  if(pick<0)for(i=0;i<STANDARDS.length;i++){if(STANDARDS[i]&&STANDARDS[i].ksbs){pick=i;break;}}
+  if(pick<0){alert('No standards with KSB data are available for the demo.');return;}
+  var search=document.getElementById('jd-search');if(search)search.value='';
+  buildJdSelect('');
+  document.getElementById('jd-standard').value=pick;
+  document.getElementById('jd-text').value=JD_DEMO_TEXT;
+  analyseJD();
+  var sec=document.getElementById('sec-jd');if(sec)sec.scrollIntoView({behavior:'smooth',block:'start'});
+  if(lastJD)openReport();
 }
 var JD_HF="'Montserrat','League Spartan',Inter,Arial,sans-serif";
 var JD_CYAN='#20D6C3',JD_PURPLE='#7B61FF',JD_GOLD='#C89622',JD_PANEL='#0F2A4A',JD_PANEL2='#123255',JD_CB='1px solid rgba(255,255,255,0.08)',JD_WT='rgba(255,255,255,0.10)';
