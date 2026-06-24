@@ -1814,9 +1814,10 @@ function jdDevFirstInner(c,sub,total){
 function jdDevContInner(c,sub){return jdSecTitle(c,'Work-exposure plan (continued)')+'<div style="columns:2;column-gap:26px">'+sub.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>';}
 /* combined single page (Evidenced above, To-develop below) — used for short areas like Behaviours to avoid two sparse pages */
 function jdKsbCombinedInner(c,cov,gaps){
-  var evid='<div style="display:flex;align-items:center;gap:7px;margin:4px 0 10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div>'+(cov.length?'<div style="columns:3;column-gap:26px;margin-bottom:20px">'+cov.map(jdEvidItemHtml).join('')+'</div>':'<div style="color:#8ba0b6;font-size:12px;line-height:1.5;margin-bottom:20px">None of this standard&rsquo;s '+c.label.toLowerCase()+' are evidenced by the job description yet.</div>');
+  var evid='<div style="display:flex;align-items:center;gap:7px;margin:4px 0 10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div>'+(cov.length?'<div style="columns:3;column-gap:26px">'+cov.map(jdEvidItemHtml).join('')+'</div>':'<div style="color:#8ba0b6;font-size:12px;line-height:1.5">None of this standard&rsquo;s '+c.label.toLowerCase()+' are evidenced by the job description yet.</div>');
   var dev=gaps.length?'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div><div style="columns:2;column-gap:26px">'+gaps.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>':'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:13px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
-  return jdPdfKsbHead(c)+evid+dev;
+  var divider='<div style="height:1px;background:rgba(255,255,255,0.12);margin:18px 0"></div>';
+  return jdPdfKsbHead(c)+evid+divider+dev;
 }
 function jdBuildPdfPages(){
   var x=jdCommon(),d=x.d,cats=x.cats,score=d.score;
