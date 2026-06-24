@@ -628,7 +628,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -948,6 +948,23 @@ function showStandardWarn(s){
   }
 }
 
+/* ── Dated rulebook: the single governed source for statutory funding rules.
+   These values drive the engine (co-investment, expiry, top-up, draw split,
+   transfer cap). Effective-dated rules pivot on boundaryMk (Aug 2026). Update
+   once per funding year; the version stamp travels into every report/scenario. */
+const RULEBOOK={
+  version:'FY2025-26',
+  asOf:'2026-06-24',
+  source:'https://www.gov.uk/government/publications/apprenticeship-funding-rules',
+  boundaryMk:2026*12+7,             // Aug 2026 rule-change boundary (month-key = year*12 + monthIndex)
+  topUpRate:0.10,                   // 10% government top-up on levy declarations
+  draw:{training:0.80,epa:0.20},    // 80% drawn over the practical period, 20% at EPA completion
+  transferCapPct:0.50,              // employer may gift up to 50% of annual levy
+  coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
+  expiryMonths:{before:24,from:12}, // unused funds expire after N months (by declaration date)
+  apprenticeshipMinMonths:8,        // minimum apprenticeship duration (reserved for units/duration work)
+  unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
+};
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
 let programmes=[];let projChart=null;
 
@@ -962,7 +979,7 @@ const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
    from it. goal/talent are reserved slots for the elements that attach next.
    meta.rulesVersion stamps which funding-rules era produced the figures. */
 const SCEN_KEY='ac_scenario_v1';
-const RULES_VERSION='FY2025-26';
+const RULES_VERSION=RULEBOOK.version;
 const SCEN_SCHEMA=1;
 let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null;
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
@@ -1033,8 +1050,8 @@ function clearSavedData(){
 const fmt=v=>'£'+Math.round(v).toLocaleString('en-GB');
 const nv=s=>parseFloat((s||'').toString().replace(/[£,\s]/g,''))||0;
 const fmtD=s=>{const d=new Date(s);return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});};
-const RULE_MK=2026*12+7;
-function expMo(mk){return mk<RULE_MK?24:12;}
+const RULE_MK=RULEBOOK.boundaryMk;
+function expMo(mk){return mk<RULE_MK?RULEBOOK.expiryMonths.before:RULEBOOK.expiryMonths.from;}
 function mKey(date){const d=new Date(date);return d.getFullYear()*12+d.getMonth();}
 function mBetween(a,b){return Math.max(1,mKey(b)-mKey(a));}
 function mk2d(mk){return new Date(Math.floor(mk/12),mk%12,1);}
@@ -1106,7 +1123,7 @@ function loadDemo(){
   const levies=[3050,3120,2980,3200,3090,3150,3010,3180,3070,3130,3060,3140];
   const paid=[950,980,920,1050,990,1020,940,1080,1010,970,960,1040];
   const mm={};let tI=0,tO=0;
-  levies.forEach((lv,i)=>{const mk=baseMk+i,mo=isoMo(mk),tp=Math.round(lv*.1);mm[mo]={levy:lv,topup:tp,paid:paid[i]};tI+=lv+tp;tO+=paid[i];});
+  levies.forEach((lv,i)=>{const mk=baseMk+i,mo=isoMo(mk),tp=Math.round(lv*RULEBOOK.topUpRate);mm[mo]={levy:lv,topup:tp,paid:paid[i]};tI+=lv+tp;tO+=paid[i];});
   buildLevyData(mm,tI,tO,0);
   const d=o=>{const x=new Date(today);x.setMonth(x.getMonth()+o);return x.toISOString().slice(0,10);};
   programmes=[
@@ -1127,7 +1144,7 @@ function renderSummary(){
     <div class="metric"><div class="ml">Account balance (est.)</div><div class="mv c-teal">${fmt(levyData.balance)}</div><div class="ms">Total in minus total out</div></div>
     <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${fmt(levyData.monthlyAvg)}</div><div class="ms">Levy declared + 10% top-up</div></div>
     <div class="metric"><div class="ml">Projected annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Monthly avg &times; 12</div></div>
-    <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${fmt(annual*.5)}</div><div class="ms">Statutory transfer cap</div></div>
+    <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${fmt(annual*RULEBOOK.transferCapPct)}</div><div class="ms">Statutory transfer cap</div></div>
   `;
 }
 
@@ -1180,10 +1197,10 @@ function renderProgrammes(){
   const pt=document.getElementById('progTable');
   pt.classList.toggle('hidden',!programmes.length);
   document.getElementById('progBody').innerHTML=programmes.map((p,i)=>{
-    const dur=mBetween(p.start,p.epa),mo=(p.cost*.8/dur)*p.count;
+    const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
-    return`<tr><td class="td-name">${p.name}${hasKSB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*.8*p.count)}</td><td class="r mono">${fmt(p.cost*.2*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr><td class="td-name">${p.name}${hasKSB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
 }
 
@@ -1251,7 +1268,7 @@ function simulateLevyFIFO(income,tot,pmk,M){
 }
 
 // Employer co-investment rate: 5% before Aug 2026, 25% from Aug 2026 (levy payer exhausting pot)
-function coInvRate(mk){return mk<RULE_MK?0.05:0.25;}
+function coInvRate(mk){return mk<RULE_MK?RULEBOOK.coInvest.before:RULEBOOK.coInvest.from;}
 // Real account model: balance floors at 0; any month's uncovered cost triggers co-investment
 // (employer share), settled that month — never repaid by later surplus.
 function simCoInvest(income,tot,pmk){
@@ -1304,7 +1321,7 @@ function renderProjection(){
   const ts=Array(M).fill(0),es=Array(M).fill(0),ev=[];
   programmes.forEach(p=>{
     const sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
-    const mt=(p.cost*.8/dur)*p.count,et=p.cost*.2*p.count;
+    const mt=(p.cost*RULEBOOK.draw.training/dur)*p.count,et=p.cost*RULEBOOK.draw.epa*p.count;
     for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
     const ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
@@ -1319,7 +1336,7 @@ function renderProjection(){
   const sf=tot.filter((s,i)=>s>income[i]).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
-  const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
+  const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (36m)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (36m)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month 36</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
   renderShortfallAdvice(income,tot,ev,labels,pmk);updateSectionNav();
   const exp=simulateLevyFIFO(income,tot,pmk,M);
@@ -1335,17 +1352,17 @@ function renderProjection(){
   }else ew.style.display='none';
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
-  document.getElementById('giftMetrics').innerHTML=`<div class="metric"><div class="ml">Annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Projected 12-month income</div></div><div class="metric"><div class="ml">Max transfer (50%)</div><div class="mv c-amber">${fmt(annual*.5)}</div><div class="ms">Statutory gifting cap</div></div><div class="metric"><div class="ml">Own commitment (12m)</div><div class="mv">${fmt(n12)}</div><div class="ms">Next 12 months drawdown</div></div><div class="metric"><div class="ml">Safe gift promise</div><div class="mv c-teal">${fmt(safe)}</div><div class="ms">Surplus after own spend + 10% buffer</div></div>`;
+  document.getElementById('giftMetrics').innerHTML=`<div class="metric"><div class="ml">Annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Projected 12-month income</div></div><div class="metric"><div class="ml">Max transfer (50%)</div><div class="mv c-amber">${fmt(annual*RULEBOOK.transferCapPct)}</div><div class="ms">Statutory gifting cap</div></div><div class="metric"><div class="ml">Own commitment (12m)</div><div class="mv">${fmt(n12)}</div><div class="ms">Next 12 months drawdown</div></div><div class="metric"><div class="ml">Safe gift promise</div><div class="mv c-teal">${fmt(safe)}</div><div class="ms">Surplus after own spend + 10% buffer</div></div>`;
   // Tie the FIFO expiry forecast to the gifting solution
   const gr=document.getElementById('giftExpiryRec');
   if(exp.total>1){
-    const giftable=Math.min(exp.total,Math.max(0,annual*.5));
+    const giftable=Math.min(exp.total,Math.max(0,annual*RULEBOOK.transferCapPct));
     gr.style.display='block';
     gr.innerHTML=`💡 <strong>Turn expiry into impact.</strong> You're on track to lose <span class="amt">${fmt(exp.total)}</span> to expiry, the first <span class="amt">${fmt(exp.byMonth[0].amount)}</span> in <strong>${mkLbl(exp.byMonth[0].mk)}</strong>. You could gift up to <span class="amt">${fmt(giftable)}</span> of it to a supply-chain partner, SME or charity before it ages out — funding their apprenticeships instead of losing the money.${giftable<exp.total?` (The remaining ${fmt(exp.total-giftable)} is above the 50% transfer cap — use it on your own new starts.)`:''}`;
   }else gr.style.display='none';
   // Social value: frame giftable levy as a concrete, reportable contribution (extends gifting)
   const sv=document.getElementById('giftSocialValue');
-  const svGift=exp.total>1?Math.min(exp.total,Math.max(0,annual*.5)):Math.max(0,safe);
+  const svGift=exp.total>1?Math.min(exp.total,Math.max(0,annual*RULEBOOK.transferCapPct)):Math.max(0,safe);
   const svHeads=programmes.reduce((a,p)=>a+(+p.count||0),0);
   const svCommitted=programmes.reduce((a,p)=>a+(+p.cost||0)*(+p.count||0),0);
   const svPerHead=svHeads?svCommitted/svHeads:0;
@@ -2176,7 +2193,7 @@ function checkAffordability(std,count,months){
   const avg=levyData.monthlyAvg;
   const dur=months||std.dur;
   const totalCost=std.band*count;
-  const monthly=(std.band*0.8/dur)*count;
+  const monthly=(std.band*RULEBOOK.draw.training/dur)*count;
   const epa=std.band*0.2*count;
   const balanceAfter=levyData.balance+(avg*dur)-totalCost;
   return{totalCost,monthly,epa,monthlyOk:monthly<=avg,totalOk:totalCost<=(avg*12*(dur/12)),balanceAfter,dur};
@@ -2254,9 +2271,9 @@ function processQuery(q){
   // GIFTING
   if(intent.isGifting){
     if(!hasLevy){aiMsg(`Upload your ESFA levy CSV first so I can calculate your gifting headroom.`);return;}
-    const n12=programmes.reduce((t,p)=>{const dur=mBetween(p.start,p.epa);return t+(p.cost*.8/dur)*p.count*Math.min(12,dur);},0);
-    const safe=Math.max(0,Math.min(annual*.5,annual-n12-annual*.1));
-    aiMsg(`<strong>Gifting / transfer headroom</strong><div class="r-section"><div class="r-label">Annual levy pot</div><div class="r-val">${fmt(annual)}</div></div><div class="r-section"><div class="r-label">Statutory max gift (50%)</div><div class="r-val">${fmt(annual*.5)}</div></div><div class="r-section"><div class="r-label">Own 12m commitment</div><div class="r-val">${fmt(n12)}</div></div><div class="r-section"><div class="r-label">Safe gift promise</div><div class="r-val">${fmt(safe)}</div></div>You can transfer up to <strong>${fmt(safe)}</strong> to a charity, SME, or supply chain partner — covering 100% of their apprenticeship costs.`);
+    const n12=programmes.reduce((t,p)=>{const dur=mBetween(p.start,p.epa);return t+(p.cost*RULEBOOK.draw.training/dur)*p.count*Math.min(12,dur);},0);
+    const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
+    aiMsg(`<strong>Gifting / transfer headroom</strong><div class="r-section"><div class="r-label">Annual levy pot</div><div class="r-val">${fmt(annual)}</div></div><div class="r-section"><div class="r-label">Statutory max gift (50%)</div><div class="r-val">${fmt(annual*RULEBOOK.transferCapPct)}</div></div><div class="r-section"><div class="r-label">Own 12m commitment</div><div class="r-val">${fmt(n12)}</div></div><div class="r-section"><div class="r-label">Safe gift promise</div><div class="r-val">${fmt(safe)}</div></div>You can transfer up to <strong>${fmt(safe)}</strong> to a charity, SME, or supply chain partner — covering 100% of their apprenticeship costs.`);
     return;
   }
 
