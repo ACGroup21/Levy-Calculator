@@ -1698,20 +1698,22 @@ function jdPageDecor(W,H,cid){
     '<svg preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><radialGradient id="pg_'+cid+'" cx="18%" cy="10%" r="62%"><stop offset="0" stop-color="#1d9fd6" stop-opacity="0.15"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient><radialGradient id="pg2_'+cid+'" cx="86%" cy="92%" r="55%"><stop offset="0" stop-color="#1f7fae" stop-opacity="0.10"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#pg_'+cid+')"/><rect width="100%" height="100%" fill="url(#pg2_'+cid+')"/><g fill="#36c2e0">'+dots+'</g></svg>';
 }
 function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}}catch(e){}}
-function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
+function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
+var JD_PG_W=1123, JD_PG_H=794;
 function jdPdfPage(inner,cid,n,label){
   var el=document.createElement('div');
   el.setAttribute('data-cid',cid);
+  el.setAttribute('data-label',label);
   el.style.cssText='position:relative;width:1123px;min-height:380px;overflow:hidden;background:linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;color:#fff';
-  el.innerHTML='<div style="position:relative;z-index:2;box-sizing:border-box;min-height:380px;padding:30px 38px;display:flex;flex-direction:column">'+inner+jdPdfFoot(label,n)+'</div>';
+  el.innerHTML='<div style="position:relative;z-index:2;box-sizing:border-box;height:100%;min-height:380px;padding:30px 38px;display:flex;flex-direction:column">'+inner+jdPdfFoot(label,n)+'</div>';
   return el;
 }
-/* after layout: size decor + network to the page's natural height (variable height, fixed width) */
+/* fix every page to a uniform A4-landscape sheet, then size the decor/network to it */
 function jdPdfFinalize(el){
-  var h=el.offsetHeight;el.style.height=h+'px';
+  el.style.height=JD_PG_H+'px';
   var cid=el.getAttribute('data-cid');
-  el.insertAdjacentHTML('afterbegin',jdPageDecor(1123,h,cid));
-  jdDrawNet(el.querySelector('#'+cid),1123,h);
+  el.insertAdjacentHTML('afterbegin',jdPageDecor(JD_PG_W,JD_PG_H,cid));
+  jdDrawNet(el.querySelector('#'+cid),JD_PG_W,JD_PG_H);
 }
 function jdPdfKsbHead(c){
   return '<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'+
@@ -1776,6 +1778,30 @@ function jdPdfKsbBody(c){
     '</div>'+
   '</div>';
 }
+var JD_PDF_MAXH=786;
+function jdEvidItemHtml(it){return '<div style="break-inside:avoid;display:flex;gap:7px;margin-bottom:7px;align-items:flex-start"><span style="color:'+JD_CYAN+';font-size:11px;margin-top:1px">&#10003;</span><span style="color:#dfe9f2;font-weight:700;font-size:10.5px;min-width:26px">'+(it.id||'')+'</span><span style="color:#a9bccd;font-size:10.5px;line-height:1.4">'+it.stmt+'</span></div>';}
+function jdDevItemHtml(c,it){var rl=jdReality(it.stmt,c.key);return '<div style="break-inside:avoid;margin-bottom:11px"><div style="display:flex;gap:8px;align-items:flex-start"><span style="color:'+c.col+';font-size:7px;margin-top:5px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:11px;min-width:30px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:11px;line-height:1.42">'+it.stmt+'</span></div><div style="margin-left:38px;margin-top:4px;background:rgba(32,214,195,0.06);border-left:2px solid '+c.col+';padding:5px 9px"><span style="color:'+c.col+';font-size:8.5px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:10px;line-height:1.42">'+rl+'</span></div></div>';}
+function jdKsbBodySubset(c,cov,devSub,gapsTotal){
+  var covRows=cov.length?cov.map(jdEvidItemHtml).join(''):'<div style="color:#8ba0b6;font-size:11px;line-height:1.5">None evidenced in the job description yet &mdash; all to be developed through work-exposure.</div>';
+  var gapRows=devSub.length?devSub.map(function(it){return jdDevItemHtml(c,it);}).join(''):'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:12px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
+  var cols=devSub.length>=4?2:1;
+  return '<div style="display:flex;gap:22px;flex:1;min-height:0">'+
+    '<div style="flex:0 0 31%;display:flex;flex-direction:column;min-height:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the JD ('+cov.length+')</span></div>'+
+      '<div style="overflow:hidden">'+covRows+'</div>'+
+    '</div>'+
+    '<div style="width:1px;background:rgba(255,255,255,0.08)"></div>'+
+    '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gapsTotal+')</span></div>'+
+      '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
+      '<div style="columns:'+cols+';column-gap:24px">'+gapRows+'</div>'+
+    '</div>'+
+  '</div>';
+}
+function jdKsbContInner(c,devSub){
+  return '<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px"><span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:19px;font-family:'+JD_HF+'">'+c.key+'</span><span style="font-family:'+JD_HF+';font-size:25px;font-weight:800;color:#fff">'+c.label+'</span><span style="color:#8ba0b6;font-size:13px;align-self:flex-end;padding-bottom:4px">Work-exposure plan (continued)</span></div>'+
+    '<div style="columns:2;column-gap:26px;flex:1;min-height:0">'+devSub.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>';
+}
 function jdBuildPdfPages(){
   var x=jdCommon(),d=x.d,cats=x.cats,score=d.score;
   var v=jdVerdict(score,d.roleMatch,d.roleTitle);
@@ -1818,8 +1844,25 @@ function jdBuildPdfPages(){
     '<div style="margin-top:8px;font-size:14px"><span style="color:'+JD_CYAN+';font-weight:600">'+d.stdName+'</span><span style="color:#7e93a8"> &middot; '+date+'</span></div>'+
     '<div style="margin-top:14px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:12px;padding:13px 18px;display:flex;gap:12px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,22)+'<div><div style="font-size:15px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' &middot; '+score+'% coverage</div><div style="font-size:11.5px;color:#aebfce;margin-top:3px;line-height:1.45">'+v.note+'</div></div></div>'+
     '<div style="display:flex;gap:16px;margin-top:16px;flex:1;min-height:0">'+col1+col2+col3+'</div>';
+  var host=document.createElement('div');host.style.cssText='position:absolute;left:-30000px;top:0;width:1123px';document.body.appendChild(host);
+  function measure(el){host.appendChild(el);var h=el.offsetHeight;host.removeChild(el);return h;}
+  function firstPg(c,cov,sub,total){return jdPdfPage(jdPdfKsbHead(c)+jdKsbBodySubset(c,cov,sub,total),'tmp',0,c.label);}
+  function contPg(c,sub){return jdPdfPage(jdKsbContInner(c,sub),'tmp',0,c.label);}
+  function fit(build,items){if(!items.length)return 0;if(measure(build(items))<=JD_PDF_MAXH)return items.length;var lo=1,hi=items.length,best=1;while(lo<=hi){var mid=(lo+hi)>>1;if(measure(build(items.slice(0,mid)))<=JD_PDF_MAXH){best=mid;lo=mid+1;}else{hi=mid-1;}}return best;}
   var pages=[jdPdfPage(p1,'pdf0',1,'Summary')];
-  cats.forEach(function(c,i){pages.push(jdPdfPage(jdPdfKsbHead(c)+jdPdfKsbBody(c),'pdf'+(i+1),i+2,c.label));});
+  cats.forEach(function(c){
+    var cov=c.items.filter(function(i){return i.covered;}),gaps=c.items.filter(function(i){return !i.covered;});
+    if(!gaps.length){pages.push(firstPg(c,cov,[],0));return;}
+    var k=fit(function(sub){return firstPg(c,cov,sub,gaps.length);},gaps);if(k<1)k=1;
+    pages.push(firstPg(c,cov,gaps.slice(0,k),gaps.length));
+    var rest=gaps.slice(k);
+    while(rest.length){var k2=fit(function(sub){return contPg(c,sub);},rest);if(k2<1)k2=1;
+      if(rest.length-k2===1&&k2>1)k2--;
+      pages.push(contPg(c,rest.slice(0,k2)));rest=rest.slice(k2);}
+  });
+  document.body.removeChild(host);
+  var total=pages.length;
+  pages.forEach(function(el,i){el.setAttribute('data-cid','pdf'+i);var pg=el.querySelector('.jdpg');if(pg)pg.innerHTML=(el.getAttribute('data-label')||'')+' &middot; Page '+(i+1)+' of '+total;});
   return pages;
 }
 function downloadJDReport(){
@@ -1831,15 +1874,13 @@ function downloadJDReport(){
     var host=document.createElement('div');host.style.cssText='position:absolute;left:-20000px;top:0';
     pages.forEach(function(p){host.appendChild(p);});document.body.appendChild(host);
     pages.forEach(function(p){jdPdfFinalize(p);});
-    var jsPDF=window.jspdf.jsPDF,pwpt=842,K=72/96;
-    var h0=Math.round(pages[0].offsetHeight*K);
-    var doc=new jsPDF({unit:'pt',orientation:(pwpt>=h0?'l':'p'),format:[pwpt,h0]});
+    var jsPDF=window.jspdf.jsPDF,pw=842,ph=595;
+    var doc=new jsPDF({unit:'pt',orientation:'landscape',format:'a4'});
     var seq=Promise.resolve();
     pages.forEach(function(p,idx){
-      seq=seq.then(function(){var h=p.offsetHeight;return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:1123,windowHeight:h}).then(function(canvas){
-        var php=Math.round(h*K);
-        if(idx>0)doc.addPage([pwpt,php],(pwpt>=php?'l':'p'));
-        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pwpt,php);
+      seq=seq.then(function(){return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:JD_PG_W,windowHeight:JD_PG_H}).then(function(canvas){
+        if(idx>0)doc.addPage('a4','landscape');
+        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
       });});
     });
     return seq.then(function(){
