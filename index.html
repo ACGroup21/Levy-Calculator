@@ -73,6 +73,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-tile .gt-ic{font-size:18px;height:24px;line-height:1;margin-bottom:6px;display:flex;align-items:center}
 .goal-suggest-btn{background:rgba(255,255,255,0.05);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:7px;padding:3px 10px;font-family:inherit;font-size:12.5px;cursor:pointer}
 #goalSuggest{margin-top:8px;font-size:13px;line-height:2}
+.goal-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--goal-accent);background:rgba(255,255,255,0.04);border:1px solid var(--goal-accent);border-radius:7px;padding:3px 10px;margin-bottom:9px}
 .goal-tile .gt-lb{font-size:14px;font-weight:600;margin-bottom:3px}
 .goal-tile .gt-sb{font-size:12px;color:var(--text3);line-height:1.35}
 .goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,0.025);border:1px solid var(--goal-accent);border-radius:12px;padding:13px 17px;margin:10px 0 2px;transition:border-color .25s}
@@ -627,7 +628,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1292,7 +1293,7 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk){
   recs+=`<li>You can also gift surplus levy earlier (so less is drawn down later), stagger programme starts, or accept the co-investment as a planned cost.</li>`;
   const mList=base.months.map(m=>labels[m.i]).join(', ');
   const has25=base.months.some(m=>m.rate>=0.25);
-  el.innerHTML=`<div class="sf-box bad"><strong>&#9888; Co-investment cost: ${fmt(base.total)}.</strong> In ${base.months.length} month${base.months.length>1?'s':''} (${mList}) your levy account is exhausted, so you co-invest on the uncovered cost — employer pays <strong>5%</strong> before Aug 2026${has25?' and <strong>25%</strong> from Aug 2026':''}, the government pays the rest. Each month stands alone: next month's levy can't repay an earlier month's co-investment, so act ahead of time.
+  el.innerHTML=`<div class="sf-box bad">${goalTag('cash','Serves your goal — minimise cash')}<strong>&#9888; Co-investment cost: ${fmt(base.total)}.</strong> In ${base.months.length} month${base.months.length>1?'s':''} (${mList}) your levy account is exhausted, so you co-invest on the uncovered cost — employer pays <strong>5%</strong> before Aug 2026${has25?' and <strong>25%</strong> from Aug 2026':''}, the government pays the rest. Each month stands alone: next month's levy can't repay an earlier month's co-investment, so act ahead of time.
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul></div>`;
 }
 
@@ -1327,7 +1328,7 @@ function renderProjection(){
     ew.style.display='block';
     lastExp=exp;
     const firstMk=exp.byMonth[0].mk;
-    ew.innerHTML=`<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong><span style="color:var(--text)">. The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</span></div>
+    ew.innerHTML=`${goalTag('expiry','Serves your goal — act before funds expire')}<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong><span style="color:var(--text)">. The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</span></div>
       <div class="exp-years" id="expYears"></div>
       <div id="expiryDetailBody"></div>`;
     renderExpiryTables();
@@ -2473,6 +2474,11 @@ function applyGoalAccent(){
   const k=scnGoal&&scnGoal.key;
   if(k)document.body.setAttribute('data-goal',k);else document.body.removeAttribute('data-goal');
 }
+// Directs attention to the section that serves the active goal — never changes the maths
+function goalTag(forKey,msg){
+  if(!scnGoal||scnGoal.key!==forKey)return '';
+  return '<div class="goal-tag">&#127919; '+msg+'</div>';
+}
 function renderGoalGrid(){
   const g=document.getElementById('goalGrid');if(!g)return;
   const sel=scnGoal&&scnGoal.key;
@@ -2496,7 +2502,13 @@ function renderGoalConfirm(){
 function setGoal(key){
   const o=GOALS.find(x=>x.key===key);if(!o)return;
   scnGoal={key:key,label:o.lb,note:(scnGoal&&scnGoal.note)||'',setAt:Date.now()};
-  persistScenario(true);renderGoalGrid();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);
+  persistScenario(true);renderGoalGrid();refreshGoalConsumers();
+}
+// Re-render the goal-conditioned outputs when the goal changes (banner, shortfall tag, expiry tag)
+function refreshGoalConsumers(){
+  const proj=document.getElementById('projectionSection');
+  if(proj&&!proj.classList.contains('hidden')&&programmes.length){renderProjection();}
+  else if(lastGoalCtx){renderGoalEmphasis(lastGoalCtx);}
 }
 function onGoalNoteInput(){const sv=document.getElementById('goalNoteSaved');if(sv)sv.style.display='none';renderGoalSuggest();}
 function commitGoalNote(){
