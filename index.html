@@ -1549,7 +1549,7 @@ function analyseJD(){
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
       <button class="btn-add" onclick="openReport()" style="flex:1;min-width:150px">&#128196;&nbsp; Open report</button>
       <button class="btn-clear" onclick="downloadReportHTML()">&#11015; Save HTML</button>
-      <button class="btn-clear" onclick="downloadJDReport()">PDF</button>
+      <button class="btn-clear" onclick="downloadJDReport(this)">&#128424;&nbsp; Print / Save PDF</button>
     </div>
     <div style="font-size:11px;color:var(--text3);margin-top:7px">Open the report, then <strong>Print → Save as PDF</strong> (tick “Background graphics”) for a crisp vector PDF.</div>`;
 }
@@ -1682,7 +1682,7 @@ function jdReportDocHTML(){
     '<style>html,body{margin:0;background:#06121f;font-family:Inter,system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(255,255,255,0.08)}.rpbar button{font-family:Inter,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(255,255,255,0.04)!important}.gap-item:hover{background:rgba(255,255,255,0.05)}'+
     '@keyframes acspin{to{transform:rotate(360deg)}}.rep-ring{transform-box:fill-box;transform-origin:center}.rep-a{animation:acspin 70s linear infinite}.rep-b{animation:acspin 48s linear infinite reverse}.rep-c{animation:acspin 90s linear infinite}.rep-d{animation:acspin 36s linear infinite reverse}'+
     '@media print{.rpbar{display:none}.rpwrap{padding:0}.rpwrap>div{box-shadow:none}.acc-panel{display:block!important}.rep-ring{animation:none}@page{size:A4;margin:0}}</style></head><body>'+
-    '<div class="rpbar"><button onclick="jdSavePdf()">Download PDF (4-page)</button><button class="ghost" onclick="window.print()">Print this page</button><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button></div>'+
+    '<div class="rpbar"><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button><span style="color:#8ba0b6;font-size:12px;align-self:center;margin-left:4px">For the 4-page PDF, use the <strong style="color:#cfe0ee">PDF</strong> button on the calculator</span></div>'+
     '<div class="rpwrap">'+el.outerHTML+'</div>'+
     '<script>function jdSavePdf(){try{if(window.opener&&!window.opener.closed&&window.opener.downloadJDReport){window.opener.downloadJDReport();return;}}catch(e){}alert("Open the report from the calculator to download the formatted 4-page PDF, or use Print this page.");}function jdToggle(b){var p=b.nextElementSibling,open=p.style.display!=="none";p.style.display=open?"none":"block";var c=b.querySelector(".chev");if(c)c.style.transform=open?"rotate(0deg)":"rotate(90deg)";}function jdRev(el){var r=el.querySelector(".reveal");if(!r)return;var open=r.style.display!=="none";r.style.display=open?"none":"block";var s=el.querySelector(".rev-ind svg");if(s){s.style.transition="transform .15s";s.style.transform=open?"":"rotate(90deg)";}}function jdAll(s){document.querySelectorAll(".acc-panel").forEach(function(p){p.style.display=s?"block":"none";});document.querySelectorAll(".chev").forEach(function(c){c.style.transform=s?"rotate(90deg)":"rotate(0deg)";});document.querySelectorAll(".reveal").forEach(function(r){r.style.display=s?"block":"none";});document.querySelectorAll(".rev-ind svg").forEach(function(v){v.style.transform=s?"rotate(90deg)":"";});}window.addEventListener("beforeprint",function(){jdAll(true);});'+JD_NETJS+'<\/script>'+
     '</body></html>';
@@ -1692,12 +1692,11 @@ function openReport(){if(!lastJD){alert("Run an analysis first.");return;}var w=
 function downloadReportHTML(){if(!lastJD){alert("Run an analysis first.");return;}var blob=new Blob([jdReportDocHTML()],{type:"text/html"});var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="JD-Matcher-"+lastJD.stdName.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".html";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);}
 /* ===== Landscape 4-page PDF (Summary -> K / S / B, clean page breaks) ===== */
 function jdPageDecor(W,H,cid){
-  var m=20,T=46,s=18,dots='';
-  for(var gx=m;gx<=W-m;gx+=s){for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T)dots+='<circle cx="'+gx+'" cy="'+gy+'" r="1.05" opacity="0.28"/>';}}
-  return '<canvas id="'+cid+'" width="'+W+'" height="'+H+'" style="position:absolute;inset:0;width:'+W+'px;height:'+H+'px;opacity:0.42;pointer-events:none"></canvas>'+
-    '<svg preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><radialGradient id="pg_'+cid+'" cx="18%" cy="10%" r="62%"><stop offset="0" stop-color="#1d9fd6" stop-opacity="0.15"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient><radialGradient id="pg2_'+cid+'" cx="86%" cy="92%" r="55%"><stop offset="0" stop-color="#1f7fae" stop-opacity="0.10"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#pg_'+cid+')"/><rect width="100%" height="100%" fill="url(#pg2_'+cid+')"/><g fill="#36c2e0">'+dots+'</g></svg>';
+  return '<canvas id="'+cid+'" width="'+W+'" height="'+H+'" style="position:absolute;inset:0;width:'+W+'px;height:'+H+'px;opacity:0.5;pointer-events:none"></canvas>'+
+    '<svg preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"><defs><radialGradient id="pg_'+cid+'" cx="18%" cy="10%" r="62%"><stop offset="0" stop-color="#1d9fd6" stop-opacity="0.15"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient><radialGradient id="pg2_'+cid+'" cx="86%" cy="92%" r="55%"><stop offset="0" stop-color="#1f7fae" stop-opacity="0.10"/><stop offset="100%" stop-color="#06172E" stop-opacity="0"/></radialGradient></defs><rect width="100%" height="100%" fill="url(#pg_'+cid+')"/><rect width="100%" height="100%" fill="url(#pg2_'+cid+')"/></svg>';
 }
-function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}}catch(e){}}
+/* draws network + dotted border frame straight onto the canvas (fast for html2canvas, unlike thousands of SVG circles) */
+function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}var m=20,T=46,s=18;ctx.fillStyle='rgba(54,194,224,0.55)';for(var gx=m;gx<=W-m;gx+=s)for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T){ctx.beginPath();ctx.arc(gx,gy,1.05,0,7);ctx.fill();}}}catch(e){}}
 function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
 var JD_PG_W=1123, JD_PG_H=794;
 function jdPdfPage(inner,cid,n,label){
@@ -1865,11 +1864,14 @@ function jdBuildPdfPages(){
   pages.forEach(function(el,i){el.setAttribute('data-cid','pdf'+i);var pg=el.querySelector('.jdpg');if(pg)pg.innerHTML=(el.getAttribute('data-label')||'')+' &middot; Page '+(i+1)+' of '+total;});
   return pages;
 }
-function downloadJDReport(){
+function downloadJDReport(btn){
   if(!lastJD){alert("Run an analysis first.");return;}
   if(!window.html2canvas||!window.jspdf){alert("Report libraries not available.");return;}
+  var btnTxt=btn?btn.innerHTML:null;
+  function restore(){if(btn){btn.disabled=false;btn.innerHTML=btnTxt;}}
+  if(btn){btn.disabled=true;btn.innerHTML='&#9203;&nbsp; Generating PDF&hellip;';}
   var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
-  ready.then(function(){
+  return ready.then(function(){
     var pages=jdBuildPdfPages();
     var host=document.createElement('div');host.style.cssText='position:absolute;left:-20000px;top:0';
     pages.forEach(function(p){host.appendChild(p);});document.body.appendChild(host);
@@ -1878,7 +1880,7 @@ function downloadJDReport(){
     var doc=new jsPDF({unit:'pt',orientation:'landscape',format:'a4'});
     var seq=Promise.resolve();
     pages.forEach(function(p,idx){
-      seq=seq.then(function(){return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:JD_PG_W,windowHeight:JD_PG_H}).then(function(canvas){
+      seq=seq.then(function(){return html2canvas(p,{scale:1.6,backgroundColor:'#06172E',useCORS:true,logging:false,windowWidth:JD_PG_W,windowHeight:JD_PG_H}).then(function(canvas){
         if(idx>0)doc.addPage('a4','landscape');
         doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
       });});
@@ -1886,8 +1888,9 @@ function downloadJDReport(){
     return seq.then(function(){
       if(document.body.contains(host))document.body.removeChild(host);
       doc.save("JD-Matcher-"+lastJD.stdName.replace(/[^a-z0-9]+/gi,"-").toLowerCase()+".pdf");
+      restore();
     });
-  }).catch(function(e){alert("Could not build report: "+e.message);});
+  }).catch(function(e){restore();alert("Could not build report: "+e.message);});
 }
 
 // JD file upload — extract text from .txt / .pdf / .docx, then analyse
