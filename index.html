@@ -583,7 +583,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-24e</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -907,27 +907,68 @@ let levyData={monthlyAvg:0,balance:0,byMonth:[]};
 let programmes=[];let projChart=null;
 
 // ── persistence (survive page refresh) ──
-const STORE_KEY='ac_levy_state_v1';
+const STORE_KEY='ac_levy_state_v1';   // legacy levy+programmes (migrated → SCEN_KEY)
+const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
+
+/* ── Canonical scenario: the single source of truth ─────────────────────────
+   In-memory working state lives in globals (levyData, programmes, planCfg);
+   `scenario` is the one authoritative object that gets persisted, exported and
+   compared. Every save rebuilds it from the globals; every load distributes
+   from it. goal/talent are reserved slots for the elements that attach next.
+   meta.rulesVersion stamps which funding-rules era produced the figures. */
+const SCEN_KEY='ac_scenario_v1';
+const RULES_VERSION='FY2025-26';
+const SCEN_SCHEMA=1;
+let scnGoal=null, scnTalent=null, scnId=null;
+function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
+function buildScenario(){
+  if(!scnId)scnId=scnNewId();
+  return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent};
+}
+function applyScenario(s){
+  if(!s)return;
+  if(s.meta&&s.meta.id)scnId=s.meta.id;
+  if(s.levy&&s.levy.byMonth)levyData=s.levy;
+  if(Array.isArray(s.programmes))programmes=s.programmes;
+  if(s.plan)planCfg={...planCfg,...s.plan,otj:{...planCfg.otj,...(s.plan.otj||{})}};
+  if(s.goal!==undefined)scnGoal=s.goal;
+  if(s.talent!==undefined)scnTalent=s.talent;
+}
+function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function persistScenario(force){
+  try{
+    const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
+    const hasData=force||hasLevy||programmes.length||scnGoal||scnTalent;
+    if(!hasData){localStorage.removeItem(SCEN_KEY);return;}
+    localStorage.setItem(SCEN_KEY,JSON.stringify(buildScenario()));
+  }catch(e){/* storage unavailable — fail silently */}
+}
+
 function toggleClearBtn(show){const b=document.getElementById('clearDataBtn');if(b)b.style.display=show?'inline-block':'none';}
 function saveState(){
   try{
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
-    if(!hasLevy&&!programmes.length){localStorage.removeItem(STORE_KEY);toggleClearBtn(false);return;}
-    localStorage.setItem(STORE_KEY,JSON.stringify({levyData,programmes,savedAt:Date.now()}));
-    toggleClearBtn(true);
+    persistScenario(false);
+    toggleClearBtn(!!(hasLevy||programmes.length));
   }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
 }
 function loadState(){
   try{
-    const raw=localStorage.getItem(STORE_KEY);if(!raw)return false;
-    const st=JSON.parse(raw);
-    if(st.levyData&&st.levyData.byMonth&&st.levyData.byMonth.length){
-      levyData=st.levyData;renderSummary();renderMonthTable();
+    let s=readScenario(), migrated=false;
+    if(!s){ // one-time migration from legacy levy+programmes key
+      const raw=localStorage.getItem(STORE_KEY);
+      if(raw){const st=JSON.parse(raw);s={meta:{savedAt:st.savedAt},levy:st.levyData,programmes:st.programmes};migrated=true;}
     }
-    if(Array.isArray(st.programmes)&&st.programmes.length){
-      programmes=st.programmes;renderProgrammes();renderProjection();
-    }
-    const when=st.savedAt?new Date(st.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+    if(!s)return false;
+    applyScenario(s);
+    let any=false;
+    if(levyData&&levyData.byMonth&&levyData.byMonth.length){renderSummary();renderMonthTable();any=true;}
+    if(Array.isArray(programmes)&&programmes.length){renderProgrammes();renderProjection();any=true;}
+    if(migrated){persistScenario(true);try{localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}}
+    if(!any)return false;
+    const savedAt=s.meta&&s.meta.savedAt;
+    const when=savedAt?new Date(savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
     setStatus(`Restored your saved data${when?' from '+when:''}. Upload a new file to replace it, or use “Clear saved data”.`,'ok');
     toggleClearBtn(true);
     return true;
@@ -935,8 +976,8 @@ function loadState(){
 }
 function clearSavedData(){
   if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
-  try{localStorage.removeItem(STORE_KEY);}catch(e){}
-  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];
+  try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
@@ -1326,9 +1367,15 @@ function renderBhList(){
   </div>
   <div style="font-size:11px;color:var(--text3);margin-top:9px">Trainable days = weekdays − bank holidays. Hover a row for the holiday dates. (Annual leave &amp; shift patterns reduce this further.)</div>`;
 }
-const PLAN_KEY='ac_levy_plan_v1';
-function savePlanCfg(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(planCfg));}catch(e){}}
-function loadPlanCfg(){try{const r=localStorage.getItem(PLAN_KEY);if(r){const c=JSON.parse(r);planCfg={...planCfg,...c,otj:{...planCfg.otj,...(c.otj||{})}};}}catch(e){}}
+function savePlanCfg(){persistScenario(true);}
+function loadPlanCfg(){
+  try{
+    const s=readScenario();
+    if(s&&s.plan){planCfg={...planCfg,...s.plan,otj:{...planCfg.otj,...(s.plan.otj||{})}};return;}
+    const r=localStorage.getItem(PLAN_KEY_LEGACY); // migrate legacy plan key
+    if(r){const c=JSON.parse(r);planCfg={...planCfg,...c,otj:{...planCfg.otj,...(c.otj||{})}};}
+  }catch(e){}
+}
 function progLevel(p){const m=(p.name||'').match(/\bL(?:evel\s*)?(\d)\b/i);return m?parseInt(m[1]):4;}
 function buildMonthGrid(){
   const g=document.getElementById('monthGrid');if(!g)return;g.innerHTML='';
