@@ -127,7 +127,8 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
 .lvy-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
-.lvy-table th.r,.lvy-table td.r{text-align:right}
+.lvy-table td.r,.lvy-table th.r{text-align:right;font-variant-numeric:tabular-nums}
+.lvy-figs .lvy-fv{font-variant-numeric:tabular-nums}
 .lvy-cols{display:flex;gap:22px;margin-top:16px}
 .lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 18px}
 .lvy-body{font-size:12.5px;color:#c7d6e2;line-height:1.6}
@@ -666,7 +667,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25f</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1357,6 +1358,8 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk){
    goal-led headline. Slice 1: data + page-1 exec, both framings, on-screen.
    PDF download + page-2 detail follow in the next slices. ══════════════════ */
 var LEVY_FRAMING='finance';
+function lvySubject(name){return (name||'').replace(/\b(?:l|lvl|level)\s*\d+\b/ig,'').replace(/\s+/g,' ').trim();}
+function lvyLevel(name){var m=(name||'').match(/\b(?:l|lvl|level)\s*(\d+)\b/i);return m?+m[1]:0;}
 function levyReportData(){
   var M=projYears*12, ps=new Date(today.getFullYear(),today.getMonth(),1), pmk=mKey(ps);
   var income=Array(M).fill(levyData.monthlyAvg);
@@ -1376,16 +1379,23 @@ function levyReportData(){
   var annual=levyData.monthlyAvg*12, transferCap=annual*RULEBOOK.transferCapPct;
   var expVal=exp.total>1?exp.total:0, perHead=heads?planCost/heads:0;
   var giftable=expVal?Math.min(expVal,transferCap):0, svEnabled=perHead?Math.floor(giftable/perHead):0;
+  var subjMap={}; programmes.forEach(function(p){var s=lvySubject(p.name); if(s)subjMap[s.toLowerCase()]=s;});
+  var subjectNames=Object.keys(subjMap).map(function(k){return subjMap[k];});
+  var levels=programmes.map(function(p){return lvyLevel(p.name);}).filter(Boolean);
+  var maxLevel=levels.length?Math.max.apply(null,levels):0;
+  var incomeTotal=levyData.monthlyAvg*M, util=incomeTotal?(tT+tE)/incomeTotal:0;
+  var stage=ci.total>0?'Scaling':(expVal>annual*0.15?'Under-using':'Optimising');
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
-    programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled};
+    programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
+    subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage};
 }
 function levyRag(d){
-  if(d.coInvest<1) return {label:'Comfortably covered',col:'#2DD4B2'};
-  if(d.coInvest < d.planCost*0.10) return {label:'Manageable co-investment',col:'#E0A43B'};
-  return {label:'Significant co-investment',col:'#e0607a'};
+  if(d.coInvest<1) return {label:'Comfortably Covered',col:'#2DD4B2'};
+  if(d.coInvest < d.planCost*0.10) return {label:'Manageable Co-investment',col:'#E0A43B'};
+  return {label:'Significant Co-investment',col:'#e0607a'};
 }
 function lvK(v){return '£'+Math.round(v).toLocaleString('en-GB');}
 /* goal picks the lead metric; framing picks the voice */
@@ -1439,35 +1449,41 @@ function renderLevyReport(){
 }
 function levyPage1(d,framing){
   var rag=levyRag(d), h=levyHeadline(d,framing), fin=framing==='finance';
-  var goalChip=(scnGoal&&scnGoal.key)?'<span style="font-size:11px;color:#8ba0b6">Goal: <span style="color:#fff">'+scnGoal.label+'</span></span>':'';
-  var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var goalChip=(scnGoal&&scnGoal.key)?'<span style="display:inline-flex;align-items:center;gap:7px;font-size:11px"><span style="width:7px;height:7px;border-radius:50%;background:#2DD4B2;box-shadow:0 0 9px #2DD4B2,0 0 4px #2DD4B2"></span><span style="color:#2DD4B2;text-shadow:0 0 9px rgba(45,212,178,0.75);font-weight:700;letter-spacing:.02em">Goal</span><span style="color:#c7d6e2">&nbsp;'+scnGoal.label+'</span></span>':'';
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figures=fin
     ? fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+fig('Account balance',lvK(d.balance))
-    : fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+fig('Levy per head',lvK(d.perHead))+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2');
+    : fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+fig('Levy per head',lvK(d.perHead));
   var narrative=fin
-    ? 'On the data provided, '+lvK(d.levyCovered)+' of your '+lvK(d.planCost)+' apprenticeship plan is met from your levy'+(d.coInvest?', with '+lvK(d.coInvest)+' employer co-investment across '+d.coMonths+' month'+(d.coMonths!==1?'s':''):' with no employer co-investment')+'.'+(d.expiry?' '+lvK(d.expiry)+' is forecast to expire unused unless committed or gifted.':'')
-    : 'This plan develops '+d.heads+' people across '+d.progCount+' programme'+(d.progCount!==1?'s':'')+', investing '+lvK(d.planCost)+' in skills'+(d.coInvest?' for '+lvK(d.coInvest)+' of employer co-investment':' at no additional cost beyond your levy')+'.'+(d.expiry?' '+lvK(d.expiry)+' of levy could fund further development before it expires.':'');
+    ? 'Your levy carries this plan. '+(d.stage==='Under-using'?'The priority now is putting more of it to work before it expires.':d.stage==='Scaling'?'Keep co-investment in view as your commitments grow.':'It is working efficiently — protect the surplus and the timing.')
+    : 'A structured investment in '+d.heads+' of your people'+(d.subjectCount>1?' across '+d.subjectCount+' skill areas':'')+', building capability that is evidenced at assessment, not assumed.';
   var interpHead=fin?'What this means':'What this means for your people';
   var interpLead=fin
-    ? 'In budget terms, this plan is '+(d.coInvest?'largely':'fully')+' covered by levy you have already paid. Below: your exposure, the recoverable risk, and the rule change to plan around.'
-    : 'In people terms, this is a structured investment in your workforce — who develops, how, and the difference it makes beyond your own teams.';
+    ? 'Beyond the totals above — how hard your levy is working, what to do next, and the rule change to plan around:'
+    : 'Beyond the headcount above — what your people gain, where they could go next, and the impact beyond your own teams:';
+  var finAction=d.expiry?('Commit or gift '+lvK(d.giftable)+' before it ages out to recover otherwise-lost funding.'):(d.coInvest?('Defer or spread the EPA payments, or gift surplus earlier, to trim the '+lvK(d.coInvest)+' co-investment.'):'Hold the current commitment level — the levy is being used efficiently.');
+  var fin2026='Co-investment rises 5%→25% and expiry shortens 24→12 months from Aug 2026 — '+(d.expiry?'acting before then protects '+lvK(d.giftable)+'.':'front-load new starts to stay ahead.');
+  var progLab=d.maxLevel?('Level '+(d.maxLevel+1)+(d.maxLevel+2<=7?'–'+(d.maxLevel+2):'')+' standards'):'higher or specialist standards';
+  var progText=d.maxLevel?('Completers are well placed to progress to '+progLab+' — '+(d.maxLevel>=5?'senior, specialist or degree-level roles':'higher technical or first-line management roles')+'.'):'Completers can progress to higher or specialist standards in the same areas.';
+  var learnGain=(d.subjectNames&&d.subjectNames.length)?('Capability in '+d.subjectNames.slice(0,3).join(', ')+(d.subjectNames.length>3?' and more':'')+' — developed on the job and evidenced at end-point assessment.'):'Role-specific capability, developed on the job and evidenced at end-point assessment.';
+  var svText=d.giftable?(lvK(d.giftable)+' of levy could fund ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' for SMEs or charities — measurable social value.'):'Your levy is fully directed to developing your own people.';
   var cards=fin
-    ? [['Affordability',d.coInvest?lvK(d.coInvest)+' employer co-investment on a '+lvK(d.planCost)+' plan':'Fully funded by your levy — no cash outlay'],
-       ['Recoverable risk',d.expiry?lvK(d.expiry)+' forecast to expire — recoverable if committed or gifted':'No levy forecast to expire'],
-       ['2026 outlook','Co-investment rises to 25% and expiry shortens to 12 months from Aug 2026 — front-load commitments']]
-    : [['Reach',d.heads+' people developed across '+d.progCount+' programme'+(d.progCount!==1?'s':'')],
-       ['How','Structured off-the-job training plus on-the-job exposure, evidenced at end-point assessment'],
-       ['Wider impact',d.giftable?lvK(d.giftable)+' could extend development to ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'Your levy is fully directed to your own people']];
+    ? [['Levy utilisation',Math.round(d.util*100)+'% put to work over '+d.years+'y — '+d.stage],
+       ['Recommended action',finAction],
+       ['2026 rule impact',fin2026]]
+    : [['What learners gain',learnGain],
+       ['Ready to progress to',progText],
+       ['Wider impact',svText]];
   var cardsHtml=cards.map(function(c){return '<div class="lvy-card"><div class="lvy-card-t">'+c[0]+'</div><div class="lvy-card-b">'+c[1]+'</div></div>';}).join('');
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
-      '<div class="lvy-head"><div><div class="lvy-brand">arthur curtis education</div><div class="lvy-title">Affordability report</div></div>'+
-        '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:4px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
+      '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
+        '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(255,255,255,0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
       '<div class="lvy-figs">'+figures+'</div>'+
       '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
-      '<div class="lvy-note">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.</div>'+
+      '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.</div>'+
     '</div></div>';
 }
 function levyPage2(d,framing){
@@ -1488,7 +1504,7 @@ function levyPage2(d,framing){
     ? lvK(d.expiry)+' of levy is forecast to expire unused. You could gift up to '+lvK(d.giftable)+' to an SME, charity or supply-chain partner'+(d.svEnabled?' — funding ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'')+'. '+(fin?'Turns a write-off into measurable social value.':'Evidences the UK Social Value Model theme &ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;, reportable in tenders and CSR.')
     : 'No levy is currently forecast to expire — your plan puts the available funding to work.';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><div class="lvy-brand">arthur curtis education</div><div class="lvy-title">Detail &amp; action</div></div>'+
+    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">Programme breakdown</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Learners</th><th class="r">Band</th><th class="r">Training (80%)</th><th class="r">EPA (20%)</th><th class="r">Start &rarr; EPA</th></tr></thead><tbody>'+rows+'</tbody></table>'+
@@ -1496,7 +1512,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+leftTitle+'</div><div class="lvy-body">'+leftBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account. Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account. Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
 }
 function downloadLevyReport(btn){
