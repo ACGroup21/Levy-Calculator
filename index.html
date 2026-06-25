@@ -135,7 +135,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-risk-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#8ba0b6;white-space:nowrap}
 .lvy-risk-item i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 24px}
-.lvy-note{margin-top:auto;padding-top:22px;font-size:10.5px;color:#6e8499;line-height:1.5}
+.lvy-note{margin-top:auto;padding-top:14px;font-size:10.5px;color:#6e8499;line-height:1.5}
 .lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
@@ -721,7 +721,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26f</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1094,12 +1094,12 @@ const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
 const SCEN_KEY='ac_scenario_v1';
 const RULES_VERSION=RULEBOOK.version;
 const SCEN_SCHEMA=1;
-let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null;
+let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null, scnDataAck=null, lastDataFindings=[];
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1110,6 +1110,7 @@ function applyScenario(s){
   if(s.goal!==undefined)scnGoal=s.goal;
   if(s.talent!==undefined)scnTalent=s.talent;
   if(s.cohortMin!==undefined)scnCohortMin=s.cohortMin;
+  if(s.dataAck!==undefined)scnDataAck=s.dataAck;
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function persistScenario(force){
@@ -1226,6 +1227,7 @@ function parseESFA(text){
 }
 
 function buildLevyData(mm,tI,tO,rc,issues){
+  scnDataAck=null; // new data — any prior confirmation no longer applies
   const byMonth=Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])).map(([month,v])=>{
     const mk=mKey(new Date(month.length===7?month+'-01':month));
     const ew=expMo(mk);
@@ -1259,16 +1261,30 @@ function validateLevyData(byMonth,issues){
 function inc1(bm){return bm.filter(m=>m.income>0).length;}
 function renderDataQuality(findings){
   const el=document.getElementById('dataQuality');if(!el)return;
-  findings=findings||[];
+  findings=findings||[];lastDataFindings=findings;
   const errs=findings.filter(f=>f.sev==='error').length,warns=findings.filter(f=>f.sev==='warn').length;
   const head=errs?{c:'#ff8fa3',bg:'rgba(255,76,106,0.08)',bd:'rgba(255,76,106,0.35)',t:'△ Data needs attention'}
     :warns?{c:'#E0A43B',bg:'rgba(224,164,59,0.08)',bd:'rgba(224,164,59,0.3)',t:'△ Review before you rely on the number'}
     :{c:'#2DD4B2',bg:'rgba(45,212,178,0.07)',bd:'rgba(45,212,178,0.3)',t:'✓ Data looks consistent'};
   const items=findings.map(f=>'<li style="margin:3px 0">'+(f.sev==='error'?'⛔ ':f.sev==='warn'?'△ ':'· ')+f.msg+'</li>').join('');
+  const acked=!!scnDataAck;
+  const ackRow='<label style="display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:var(--text2);cursor:pointer">'+
+    '<input type="checkbox" '+(acked?'checked':'')+' onchange="setDataAck(this.checked)" style="margin-top:2px;flex:none">'+
+    '<span>I’ve reviewed this summary and confirm it reflects my levy account.'+(acked?' <strong style="color:#2DD4B2">Confirmed '+scnDataAck+'.</strong>':' <span style="color:var(--text3)">Your report records whether this has been confirmed.</span>')+'</span></label>';
   el.innerHTML='<div style="background:'+head.bg+';border:1px solid '+head.bd+';border-radius:12px;padding:12px 16px;margin-bottom:1.25rem">'+
     '<div style="font-weight:700;color:'+head.c+';margin-bottom:'+(findings.length?'7px':'0')+'">'+head.t+'</div>'+
     (items?'<ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text2);line-height:1.55">'+items+'</ul>':'<div style="font-size:12px;color:var(--text3)">Months are sequential, values are numeric, and the totals add up.</div>')+
+    ackRow+
   '</div>';
+}
+function setDataAck(on){
+  scnDataAck=on?todayStr:null;
+  persistScenario(true);renderDataQuality(lastDataFindings);
+}
+function dataAckNote(){
+  return scnDataAck
+    ? ' Levy data confirmed by the employer on '+new Date(scnDataAck).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.'
+    : ' Levy data not yet confirmed by the employer.';
 }
 
 function loadDemo(){
@@ -1735,7 +1751,7 @@ function levyPage1(d,framing){
       '<div class="lvy-figs">'+figures+'</div>'+
       utilSection+
       '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
-      '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.</div>'+
+      '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.'+dataAckNote()+'</div>'+
     '</div></div>';
 }
 function levyPage2(d,framing){
@@ -1803,7 +1819,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
 }
 function levyPage3(d,framing){
