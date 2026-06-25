@@ -715,7 +715,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ab</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ac</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1711,10 +1711,10 @@ function levyPage3(d,framing){
   var fin=framing==='finance';
   var noRate=!(d.payRate>0);
   var otjRows=d.programmes.map(function(p){
-    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td class="r">'+(p.hours||0)+' h total</td><td class="r">'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td></tr>';}
+    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td>'+(p.hours||0)+' h total</td><td>'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td></tr>';}
     var oh=(planCfg.otj||{})[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
-    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+oh+' h/wk</td><td class="r">'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
+    return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
   }).join('');
   var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div></div>'+
     '<div class="lvy-true-op">+</div>'+
@@ -1730,7 +1730,7 @@ function levyPage3(d,framing){
     '<div class="lvy-sec">True cost of ownership</div>'+trueRow+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Off-the-job commitment by programme</div>'+
-    '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Off-the-job</th><th class="r">Duration</th><th class="r">Learners</th><th class="r">Time cost</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
+    '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Off-the-job time valued at &pound;'+(d.payRate||0)+'/hr (set in the Plan section). Off-the-job training is a statutory minimum of 6 hours/week, averaged over the practical period — paid working time, not the apprentice&rsquo;s own. Indicative only.</div>'+
   '</div></div>';
 }
