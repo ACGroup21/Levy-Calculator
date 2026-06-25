@@ -697,7 +697,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25v</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1343,14 +1343,20 @@ function simulateLevyFIFO(income,tot,pmk,M){
 function coInvRate(mk){return mk<RULE_MK?RULEBOOK.coInvest.before:RULEBOOK.coInvest.from;}
 // Real account model: balance floors at 0; any month's uncovered cost triggers co-investment
 // (employer share), settled that month — never repaid by later surplus.
-function simCoInvest(income,tot,pmk){
+// Co-investment with optional unit drawdown. Rule: full apprenticeships are paid from the
+// pot BEFORE units; the leftover funds units; any apprenticeship shortfall co-invests at the
+// 5/25% rate, any unit shortfall at the flat 5% unit rate. Omitting uTot is byte-identical to
+// the apprenticeship-only model (the unit step is skipped entirely).
+function simCoInvest(income,tot,pmk,uTot){
   let bal=levyData.balance,total=0;const months=[];
   for(let i=0;i<tot.length;i++){
     bal+=income[i];
-    if(tot[i]>bal+0.5){
-      const uncovered=tot[i]-bal,rate=coInvRate(pmk+i),share=uncovered*rate;
-      total+=share;months.push({i,uncovered,share,rate});bal=0;
-    }else bal-=tot[i];
+    let aUnc=0,aShare=0,uUnc=0,uShare=0;
+    if(tot[i]>bal+0.5){aUnc=tot[i]-bal;aShare=aUnc*coInvRate(pmk+i);bal=0;}
+    else bal-=tot[i];
+    if(uTot){const u=uTot[i]||0; if(u>bal+0.5){uUnc=u-bal;uShare=uUnc*RULEBOOK.unit.coInvest;bal=0;} else bal-=u;}
+    const share=aShare+uShare;
+    if(share>1e-6){total+=share;months.push({i,uncovered:aUnc+uUnc,share,rate:coInvRate(pmk+i)});}
   }
   return{total,months};
 }
