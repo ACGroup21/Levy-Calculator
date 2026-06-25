@@ -697,7 +697,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25u</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2899,7 +2899,7 @@ function commitGoalNote(){
   const ni=document.getElementById('goalNote');if(!ni)return;
   if((scnGoal.note||'')===ni.value)return; // unchanged — nothing to commit
   scnGoal.note=ni.value;persistScenario(true);
-  renderGoalConfirm();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);
+  renderGoalConfirm();if(lastGoalCtx)renderGoalEmphasis(lastGoalCtx);renderGoalSuggest();
   const sv=document.getElementById('goalNoteSaved');if(sv)sv.style.display='block';
 }
 
@@ -2924,12 +2924,17 @@ function matchGoalText(text){
 function renderGoalSuggest(){
   const el=document.getElementById('goalSuggest');if(!el)return;
   if(!scnGoal||scnGoal.key!=='other'){el.style.display='none';el.innerHTML='';return;}
-  const ni=document.getElementById('goalNote');
-  const m=matchGoalText(ni?ni.value:'');
-  if(!m){el.style.display='none';el.innerHTML='';return;}
+  const ni=document.getElementById('goalNote');const txt=ni?ni.value:'';
+  if(!txt||txt.trim().length<3){el.style.display='none';el.innerHTML='';return;}
+  const m=matchGoalText(txt);
+  if(!m){
+    el.style.display='block';
+    el.innerHTML='<span style="color:var(--text3)">&#129517; We can&rsquo;t match that to a goal just yet — it&rsquo;s saved as your note. Pick a goal above when you&rsquo;re ready, or keep building your plan and the forecast will help reveal it.</span>';
+    return;
+  }
   let html='<span style="color:var(--text3)">Sounds like</span> <button type="button" class="goal-suggest-btn" onclick="applySuggestedGoal(\''+m.key+'\')">'+m.label+'</button>';
   if(m.second)html+=' <span style="color:var(--text3)">or</span> <button type="button" class="goal-suggest-btn" onclick="applySuggestedGoal(\''+m.second.key+'\')">'+m.second.label+'</button>';
-  html+=' <span style="color:var(--text3)">— use this goal?</span>';
+  html+=' <span style="color:var(--text3)">&mdash; use it? (we&rsquo;ll switch your goal)</span>';
   el.style.display='block';el.innerHTML=html;
 }
 function applySuggestedGoal(key){commitGoalNote();setGoal(key);}
