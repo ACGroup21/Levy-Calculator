@@ -589,13 +589,14 @@ footer span{color:var(--teal)}
         <div class="date-pair">
           <div class="date-pair-field">
             <label>Training start date</label>
-            <input type="date" id="inp-start">
+            <input type="date" id="inp-start" oninput="updateDurReadout()">
           </div>
           <div class="date-pair-field">
             <label>EPA date <span class="epa-chip">20% due here</span></label>
-            <input type="date" id="inp-epa">
+            <input type="date" id="inp-epa" oninput="updateDurReadout()">
           </div>
         </div>
+        <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
         <div style="display:flex;align-items:flex-end;gap:10px">
           <button class="btn-add" onclick="addProgramme()" style="flex:1">+ Add programme</button>
           <button class="btn-clear" onclick="clearProgForm()">Clear</button>
@@ -715,7 +716,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ac</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ad</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1009,6 +1010,7 @@ const todayStr=today.toISOString().slice(0,10);
 const defEPA=new Date(today);defEPA.setMonth(defEPA.getMonth()+18);
 document.getElementById('inp-start').value=todayStr;
 document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
+setTimeout(function(){updateDurReadout();},0);
 
 function onStandardChange(){
   const idx=parseInt(sel.value),s=STANDARDS[idx];
@@ -1020,6 +1022,21 @@ function onStandardChange(){
     if(s.dur){const sd=document.getElementById('inp-start').value||todayStr;const d=new Date(sd);d.setMonth(d.getMonth()+s.dur);document.getElementById('inp-epa').value=d.toISOString().slice(0,10);}
   }
   showStandardWarn(s);
+  updateDurReadout();
+}
+
+function updateDurReadout(){
+  var el=document.getElementById('durReadout');if(!el)return;
+  var s=document.getElementById('inp-start').value, e=document.getElementById('inp-epa').value;
+  if(!s||!e||new Date(e)<=new Date(s)){el.textContent='';return;}
+  var m=mBetween(s,e), min=RULEBOOK.apprenticeshipMinMonths;
+  if(m<min){
+    el.style.color='#ff8fa3';
+    el.innerHTML='△ Duration '+m+' months — below the '+min+'-month apprenticeship minimum, so not levy-eligible as an apprenticeship. An apprenticeship <strong>unit</strong> may fit instead.';
+  }else{
+    el.style.color='#7e95ab';
+    el.textContent='Duration: '+m+' months';
+  }
 }
 
 function showStandardWarn(s){
@@ -1302,9 +1319,11 @@ function addProgramme(overrides){
     if(!cost){alert('Enter a negotiated price.');return;}
     if(!start||!epa){alert('Enter start and EPA dates.');return;}
     if(new Date(epa)<=new Date(start)){alert('EPA date must be after start date.');return;}
+    if(mBetween(start,epa)<RULEBOOK.apprenticeshipMinMonths&&!confirm('This apprenticeship runs '+mBetween(start,epa)+' months — under the '+RULEBOOK.apprenticeshipMinMonths+'-month minimum, so it would not be levy-eligible as an apprenticeship. Add it anyway?'))return;
     sel.value=0;onStandardChange();
     ['inp-name-custom','inp-cost','inp-count'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('inp-start').value=todayStr;document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
+    updateDurReadout();
   }
   programmes.push({name,cost,count,start,epa});
   renderProgrammes();renderProjection();saveState();
@@ -1320,6 +1339,7 @@ function clearProgForm(){
   document.getElementById('inp-start').value=todayStr;
   document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
   document.getElementById('standardWarn').style.display='none';
+  updateDurReadout();
 }
 
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
