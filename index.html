@@ -108,7 +108,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-page{position:relative;width:1123px;max-width:100%;border-radius:6px;overflow:hidden;margin-bottom:18px;box-shadow:0 12px 40px rgba(0,0,0,0.55);color:#fff;background:radial-gradient(900px 520px at 80% -10%,rgba(45,212,178,0.12),transparent 60%),radial-gradient(760px 520px at -8% 112%,rgba(123,97,255,0.10),transparent 55%),linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%)}
 .lvy-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px;opacity:.45;pointer-events:none}
 .lvy-page::after{content:'';position:absolute;inset:6px;border:1px solid rgba(45,212,178,0.16);border-radius:5px;pointer-events:none}
-.lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:38px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
+.lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:30px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
 #lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
 #levyReportPages{position:relative;z-index:1;margin-top:44px}
 .lvy-interp{margin-top:16px}
@@ -130,19 +130,21 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-verdict{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border:1px solid;border-radius:14px;padding:20px 24px;margin-bottom:22px}
 .lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 24px}
 .lvy-note{margin-top:auto;padding-top:22px;font-size:10.5px;color:#6e8499;line-height:1.5}
-.lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:6px 0 10px}
+.lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
-.lvy-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
+.lvy-table td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
 .lvy-table td.r,.lvy-table th.r{text-align:right;font-variant-numeric:tabular-nums}
 .lvy-money{display:inline-flex;justify-content:flex-start;gap:1px;min-width:84px;font-variant-numeric:tabular-nums;text-align:left}
-.lvy-money .cur{opacity:.6}
+.lvy-money .cur{opacity:1}
 .lvy-figs .lvy-fv{font-variant-numeric:tabular-nums}
-.lvy-cols{display:flex;gap:22px;margin-top:16px}
-.lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 18px}
+.lvy-cols{display:flex;gap:22px;margin-top:10px}
+.lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 15px}
 .lvy-body{font-size:12.5px;color:#c7d6e2;line-height:1.6}
-.lvy-move{margin-top:14px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:13px 18px}
+.lvy-move{margin-top:9px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:11px 16px}
 .lvy-move-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin-bottom:6px}
+.lvy-ol{margin:7px 0 0;padding-left:20px}
+.lvy-ol li{margin-bottom:5px;line-height:1.5}
 .step-sub{font-size:13px;color:var(--text3);margin-bottom:1rem}
 
 .upload-zone{border:1.5px dashed rgba(45,212,178,0.3);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(45,212,178,0.03)}
@@ -681,7 +683,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25l</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1538,10 +1540,27 @@ function levyPage2(d,framing){
   var passBody='<strong style="color:#fff">'+Math.round(bench*100)+'%</strong> minimum to stay on track <span style="color:#7e95ab">(national average — below this you fall behind the sector)</span>.<br><br>'+
     'Aim <strong style="color:#fff">'+Math.round(tgt*100)+'%</strong>: ~'+compAt(tgt)+' of '+d.heads+' achieve · '+lvK(expAt(tgt))+' of training exposed if completion falls short.<br><br>'+
     'Sector-leading '+Math.round(lead*100)+'%: ~'+compAt(lead)+' of '+d.heads+'.';
-  var move;
-  if(d.stage==='Under-using'){var extra=d.perHead?Math.floor(d.expiry/d.perHead):0;move='Your levy has headroom — about '+lvK(d.expiry)+' is forecast to go unused. <strong style="color:#fff">Next move:</strong> commit it to roughly '+extra+' more apprentice'+(extra!==1?'s':'')+' (≈'+lvK(d.perHead)+' each), or a Level '+(d.maxLevel+1)+' for your strongest completers — turning idle levy into capability before it expires.';}
-  else if(d.stage==='Scaling'){move='You are near capacity, with co-investment appearing. <strong style="color:#fff">Next move:</strong> add people through shorter or lower-band routes, or stagger starts, to grow without raising the '+lvK(d.coInvest)+' co-investment.';}
-  else{move='Your levy is well-used. <strong style="color:#fff">Next move:</strong> depth over volume — progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.';}
+  var trough=(d.yearUtil&&d.yearUtil.length>1)?d.yearUtil.indexOf(Math.min.apply(null,d.yearUtil)):-1;
+  var troughTxt=trough>=0?('Year '+(trough+1)+' (only '+Math.round(d.yearUtil[trough]*100)+'% of that year&rsquo;s levy used)'):'your lowest-utilisation period';
+  var moveLead, moveList;
+  if(d.stage==='Under-using'){
+    var extra=d.perHead?Math.floor(d.expiry/d.perHead):0;
+    moveLead='Your levy has headroom — about '+lvK(d.expiry)+' is forecast to go unused.';
+    moveList=['Commit it to ~'+extra+' more apprentice'+(extra!==1?'s':'')+' (&asymp;'+lvK(d.perHead)+' each), staggered into '+troughTxt+' — landing the extra drawdown in your quietest period.',
+      'Or progress your strongest completers to a Level '+(d.maxLevel+1)+' to deepen capability.',
+      'Or gift '+lvK(d.giftable)+' to an SME or charity before it expires — measurable social value.'];
+  } else if(d.stage==='Scaling'){
+    moveLead='You are near capacity, with '+lvK(d.coInvest)+' of co-investment appearing.';
+    moveList=['Add people through shorter or lower-band routes to grow without raising co-investment.',
+      'Stagger new starts into '+troughTxt+' so they don&rsquo;t stack onto your peak-drawdown months.',
+      'Or defer / spread the EPA completion payments to flatten the peaks.'];
+  } else {
+    moveLead='Your levy is well-used across the plan.';
+    moveList=['Progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.',
+      'Use '+troughTxt+' to add a new start without straining the budget.',
+      'Protect the surplus and timing — the levy is working efficiently.'];
+  }
+  var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
