@@ -714,7 +714,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25x</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25y</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1280,7 +1280,7 @@ function addUnit(){
   const start=document.getElementById('inp-unit-start').value;
   const weeks=Math.min(16,Math.max(1,parseInt(document.getElementById('inp-unit-weeks').value)||4));
   if(!start){alert('Enter a start date for the unit.');return;}
-  programmes.push({type:'unit',name:u.name,cost:rate,count:count,start:start,weeks:weeks});
+  programmes.push({type:'unit',name:u.name,cost:rate,count:count,start:start,weeks:weeks,hours:u.hours});
   renderProgrammes();renderProjection();saveState();
   document.getElementById('levySummary').classList.remove('hidden');
   document.getElementById('progTable').classList.remove('hidden');
@@ -1420,9 +1420,9 @@ function simCoInvest(income,tot,pmk,uTot){
   }
   return{total,months};
 }
-function renderShortfallAdvice(income,tot,ev,labels,pmk){
+function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
-  const base=simCoInvest(income,tot,pmk);
+  const base=simCoInvest(income,tot,pmk,uTot);
   if(base.total<1){el.innerHTML='';return;}
   const N=income.length;
   let recs='';
@@ -1430,13 +1430,13 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk){
     let mvBest=-1,mvTc=base.total;
     for(let j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){
       const t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;
-      const c=simCoInvest(income,t2,pmk).total;if(c<mvTc-1){mvTc=c;mvBest=j;}
+      const c=simCoInvest(income,t2,pmk,uTot).total;if(c<mvTc-1){mvTc=c;mvBest=j;}
     }
     let spK=0,spTc=base.total;
     for(let k=2;k<=6&&e.idx+k-1<N;k++){
       const t2=tot.slice();t2[e.idx]-=e.amount;const per=e.amount/k;
       for(let m=0;m<k;m++)t2[e.idx+m]+=per;
-      const c=simCoInvest(income,t2,pmk).total;
+      const c=simCoInvest(income,t2,pmk,uTot).total;
       if(c<1){spK=k;spTc=c;break;}
       if(c<spTc-1){spTc=c;spK=k;}
     }
@@ -1462,17 +1462,25 @@ function lvyLevel(name){var m=(name||'').match(/\b(?:l|lvl|level)\s*(\d+)\b/i);r
 function levyReportData(){
   var M=projYears*12, ps=new Date(today.getFullYear(),today.getMonth(),1), pmk=mKey(ps);
   var income=Array(M).fill(levyData.monthlyAvg);
-  var ts=Array(M).fill(0),es=Array(M).fill(0),ev=[];
+  var ts=Array(M).fill(0),es=Array(M).fill(0),us=Array(M).fill(0),ev=[];
   programmes.forEach(function(p){
+    if(p.type==='unit'){
+      var usm=mKey(p.start),uwks=Math.max(1,+p.weeks||4),urate=(+p.cost||0)*(+p.count||0);
+      var ui1=usm+Math.round(uwks*0.30/4.345)-pmk; if(ui1>=0&&ui1<M)us[ui1]+=urate*RULEBOOK.unit.m1;
+      var ui2=usm+Math.round(uwks/4.345)-pmk; if(ui2>=0&&ui2<M)us[ui2]+=urate*RULEBOOK.unit.m2;
+      return;
+    }
     var sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
     var mt=(p.cost*RULEBOOK.draw.training/dur)*p.count, et=p.cost*RULEBOOK.draw.epa*p.count;
     for(var mk=sm;mk<em;mk++){var i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
     var ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
   var tot=ts.map(function(s,i){return s+es[i];});
-  var b=levyData.balance, bals=tot.map(function(s,i){b=Math.max(0,b+income[i]-s);return b;});
+  var combined=tot.map(function(s,i){return s+us[i];});
+  var b=levyData.balance, bals=combined.map(function(s,i){b=Math.max(0,b+income[i]-s);return b;});
   var tT=ts.reduce(function(a,c){return a+c;},0), tE=es.reduce(function(a,c){return a+c;},0);
-  var ci=simCoInvest(income,tot,pmk), exp=simulateLevyFIFO(income,tot,pmk,M);
+  var unitDraw=us.reduce(function(a,c){return a+c;},0);
+  var ci=simCoInvest(income,tot,pmk,us), exp=simulateLevyFIFO(income,combined,pmk,M);
   var heads=programmes.reduce(function(a,p){return a+(+p.count||0);},0);
   var planCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
   var annual=levyData.monthlyAvg*12, transferCap=annual*RULEBOOK.transferCapPct;
@@ -1482,14 +1490,15 @@ function levyReportData(){
   var subjectNames=Object.keys(subjMap).map(function(k){return subjMap[k];});
   var levels=programmes.map(function(p){return lvyLevel(p.name);}).filter(Boolean);
   var maxLevel=levels.length?Math.max.apply(null,levels):0;
-  var incomeTotal=levyData.monthlyAvg*M, util=incomeTotal?(tT+tE)/incomeTotal:0;
+  var incomeTotal=levyData.monthlyAvg*M, util=incomeTotal?(tT+tE+unitDraw)/incomeTotal:0;
   var stage=ci.total>0?'Scaling':(expVal>annual*0.15?'Under-using':'Optimising');
   var yearUtil=[];
-  for(var yy=0;yy<projYears;yy++){var dd=0,ip=0;for(var mm=0;mm<12;mm++){var ix=yy*12+mm;if(ix<M){dd+=tot[ix];ip+=income[ix];}}yearUtil.push(ip?dd/ip:0);}
-  // Off-the-job / true cost — same model as the Plan section (otj[level] x weeks x count x rate)
+  for(var yy=0;yy<projYears;yy++){var dd=0,ip=0;for(var mm=0;mm<12;mm++){var ix=yy*12+mm;if(ix<M){dd+=combined[ix];ip+=income[ix];}}yearUtil.push(ip?dd/ip:0);}
+  // Off-the-job / true cost — apprenticeship: otj[level] x weeks x count x rate; unit: delivery hours x count x rate
   var otjMap=planCfg.otj||{}, payRate=planCfg.rate||0, weekHrs=planCfg.hours||37.5;
   var otjCost=0, otjHrsWk=0, otjFTE=0;
   programmes.forEach(function(p){
+    if(p.type==='unit'){var uh=(+p.hours||0),uw=Math.max(1,+p.weeks||4),uc=(+p.count||0);otjCost+=uh*uc*payRate;otjHrsWk+=(uh/uw)*uc;otjFTE+=(uh/uw)*uc/weekHrs;return;}
     var oh=otjMap[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     otjCost+=oh*weeks*(+p.count||0)*payRate; otjHrsWk+=oh*(+p.count||0); otjFTE+=oh*(+p.count||0)/weekHrs;
   });
@@ -1602,10 +1611,10 @@ function levyPage1(d,framing){
   var utilSection='<div class="lvy-util"><div class="lvy-sec">Levy utilisation by year</div><div class="lvy-util-rows">'+utilBars+'</div></div>';
   // Board decision: the recommendation (the "ask") + a 3-dimension risk-on-a-page, each grounded in a real signal
   var finRisk=d.coInvest>d.planCost*0.10?2:((d.coInvest>0||d.expiry>d.annual*0.15)?1:0);
-  var cohMin=scnCohortMin||0, belowCoh=cohMin?d.programmes.some(function(p){return (+p.count||0)<cohMin;}):false;
+  var cohMin=scnCohortMin||0, belowCoh=cohMin?d.programmes.some(function(p){return p.type!=='unit'&&(+p.count||0)<cohMin;}):false;
   var capBuffer=(planCfg.headcount||1)*(planCfg.hours||37.5)*((planCfg.dip||10)/100);
   var delivRisk=(d.otjHrsWk>capBuffer)?2:(belowCoh?1:0);
-  var compRisk=d.programmes.every(function(p){return mBetween(p.start,p.epa)>=RULEBOOK.apprenticeshipMinMonths;})?0:2;
+  var compRisk=d.programmes.filter(function(p){return p.type!=='unit';}).every(function(p){return mBetween(p.start,p.epa)>=RULEBOOK.apprenticeshipMinMonths;})?0:2;
   var rWord=['Low','Watch','High'], rCol=['#2DD4B2','#E0A43B','#e0607a'];
   var rec=d.coInvest<1?('Proceed — your levy funds this plan in full; approve the '+d.heads+' planned start'+(d.heads!==1?'s':'')+'.')
     :(d.coInvest<d.planCost*0.10?('Proceed — approve a co-investment budget of '+lvK(d.coInvest)+' over '+d.years+' years.')
@@ -1628,8 +1637,12 @@ function levyPage1(d,framing){
 function levyPage2(d,framing){
   var fin=framing==='finance';
   var cohortMin=scnCohortMin||0;
-  var below=cohortMin?d.programmes.filter(function(p){return (+p.count||0)<cohortMin;}).length:0;
+  var below=cohortMin?d.programmes.filter(function(p){return p.type!=='unit'&&(+p.count||0)<cohortMin;}).length:0;
   var rows=d.programmes.map(function(p){
+    if(p.type==='unit'){
+      var um1=p.cost*RULEBOOK.unit.m1*p.count,um2=p.cost*RULEBOOK.unit.m2*p.count;
+      return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(um1)+'</td><td class="r" style="color:#a78bfa">'+lvMoney(um2)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &middot; '+p.weeks+'w</td></tr>';
+    }
     var training=p.cost*RULEBOOK.draw.training*p.count, epa=p.cost*RULEBOOK.draw.epa*p.count;
     var flag=(cohortMin&&(+p.count||0)<cohortMin)?' <span style="color:#E0A43B" title="below minimum cohort">&#9888;</span>':'';
     return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+flag+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(training)+'</td><td class="r" style="color:#E0A43B">'+lvMoney(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
@@ -1692,6 +1705,7 @@ function levyPage3(d,framing){
   var fin=framing==='finance';
   var noRate=!(d.payRate>0);
   var otjRows=d.programmes.map(function(p){
+    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td class="r">'+(p.hours||0)+' h total</td><td class="r">'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td></tr>';}
     var oh=(planCfg.otj||{})[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
     return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+oh+' h/wk</td><td class="r">'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
@@ -1777,7 +1791,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk);updateSectionNav();
+  renderShortfallAdvice(income,tot,ev,labels,pmk,us);updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
