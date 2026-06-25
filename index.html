@@ -616,7 +616,7 @@ footer span{color:var(--teal)}
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
       <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
         <button class="btn-demo" onclick="openLevyReport()">&#128196;&nbsp; View affordability report</button>
-        <span style="font-size:12px;color:var(--text3)">Do you know your provider's minimum cohort size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"></span>
+        <span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span>
       </div>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
@@ -683,7 +683,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1522,8 +1522,8 @@ function levyPage2(d,framing){
     return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+flag+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(training)+'</td><td class="r" style="color:#E0A43B">'+lvMoney(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
   }).join('');
   var cohortNote=cohortMin
-    ? (below?(' '+below+' programme'+(below!==1?'s':'')+' fall below your minimum cohort of '+cohortMin+' (&#9888;) — you may need more learners, a shared cohort, or different provider terms.'):(' All programmes meet your stated minimum cohort of '+cohortMin+'.'))
-    : ' Numbers assume each programme runs at the planned size — providers commonly require a minimum cohort (often 6&ndash;20), which affects deliverability and price.';
+    ? (below?(' '+below+' programme'+(below!==1?'s':'')+' fall below your closed-cohort minimum of '+cohortMin+' (&#9888;) — run these in an open/shared cohort, add learners, or expect different terms.'):(' All programmes meet your stated closed-cohort minimum of '+cohortMin+'.'))
+    : ' Numbers assume each programme runs at the planned size. A closed (employer-exclusive) cohort commonly needs a minimum (often 6&ndash;20); open or shared cohorts have no minimum, so smaller numbers can still be delivered.';
   var leftTitle=fin?'Optimisation &amp; risk':'Development plan';
   var leftBody=fin
     ? (d.coInvest
