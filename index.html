@@ -612,7 +612,10 @@ footer span{color:var(--teal)}
       </div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
-      <div style="margin-top:14px"><button class="btn-demo" onclick="openLevyReport()">&#128196;&nbsp; View affordability report</button></div>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <button class="btn-demo" onclick="openLevyReport()">&#128196;&nbsp; View affordability report</button>
+        <span style="font-size:12px;color:var(--text3)">Do you know your provider's minimum cohort size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"></span>
+      </div>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
 
@@ -678,7 +681,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25k</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1033,12 +1036,12 @@ const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
 const SCEN_KEY='ac_scenario_v1';
 const RULES_VERSION=RULEBOOK.version;
 const SCEN_SCHEMA=1;
-let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null;
+let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null;
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1048,6 +1051,7 @@ function applyScenario(s){
   if(s.plan)planCfg={...planCfg,...s.plan,otj:{...planCfg.otj,...(s.plan.otj||{})}};
   if(s.goal!==undefined)scnGoal=s.goal;
   if(s.talent!==undefined)scnTalent=s.talent;
+  if(s.cohortMin!==undefined)scnCohortMin=s.cohortMin;
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function persistScenario(force){
@@ -1429,6 +1433,7 @@ function openLevyReport(){
   renderLevyReport();lvyBg.start();
 }
 function closeLevyReport(){document.getElementById('levyReportOverlay').style.display='none';lvyBg.stop();}
+function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
 /* Animated backdrop for the report overlay: drifting network + rising motes (on-screen only;
    sits behind the opaque pages, so PDFs stay crisp). */
 var lvyBg=(function(){
@@ -1507,10 +1512,16 @@ function levyPage1(d,framing){
 }
 function levyPage2(d,framing){
   var fin=framing==='finance';
+  var cohortMin=scnCohortMin||0;
+  var below=cohortMin?d.programmes.filter(function(p){return (+p.count||0)<cohortMin;}).length:0;
   var rows=d.programmes.map(function(p){
     var training=p.cost*RULEBOOK.draw.training*p.count, epa=p.cost*RULEBOOK.draw.epa*p.count;
-    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(training)+'</td><td class="r" style="color:#E0A43B">'+lvMoney(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
+    var flag=(cohortMin&&(+p.count||0)<cohortMin)?' <span style="color:#E0A43B" title="below minimum cohort">&#9888;</span>':'';
+    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+flag+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(training)+'</td><td class="r" style="color:#E0A43B">'+lvMoney(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
   }).join('');
+  var cohortNote=cohortMin
+    ? (below?(' '+below+' programme'+(below!==1?'s':'')+' fall below your minimum cohort of '+cohortMin+' (&#9888;) — you may need more learners, a shared cohort, or different provider terms.'):(' All programmes meet your stated minimum cohort of '+cohortMin+'.'))
+    : ' Numbers assume each programme runs at the planned size — providers commonly require a minimum cohort (often 6&ndash;20), which affects deliverability and price.';
   var leftTitle=fin?'Optimisation &amp; risk':'Development plan';
   var leftBody=fin
     ? (d.coInvest
@@ -1542,7 +1553,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account. Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
 }
 function downloadLevyReport(btn){
@@ -2875,6 +2886,7 @@ loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();u
 // Restore any previously saved data on load
 loadState();
 renderGoalGrid();
+(function(){var ci=document.getElementById('cohortMin');if(ci&&scnCohortMin)ci.value=scnCohortMin;})();
 </script>
 <div class="lvy-overlay" id="levyReportOverlay">
   <canvas id="lvyReportBg"></canvas>
