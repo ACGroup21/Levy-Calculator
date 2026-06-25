@@ -683,7 +683,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25o</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1576,12 +1576,9 @@ function levyPage2(d,framing){
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
 }
-function downloadLevyReport(btn){
-  if(!window.html2canvas||!(window.jspdf||window.jsPDF)){alert('Report libraries not available.');return;}
+function buildLevyPdf(){
   var JsPDF=(window.jspdf&&window.jspdf.jsPDF)||window.jsPDF;
   var pages=[].slice.call(document.querySelectorAll('#levyReportPages .lvy-page'));
-  if(!pages.length)return;
-  var lbl=btn?btn.innerHTML:''; if(btn){btn.disabled=true;btn.innerHTML='&#8987; Generating…';}
   var doc=new JsPDF({unit:'pt',orientation:'landscape',format:'a4'});
   var seq=Promise.resolve();
   pages.forEach(function(p,idx){
@@ -1595,11 +1592,17 @@ function downloadLevyReport(btn){
       });
     });
   });
-  seq.then(function(){
-    doc.save('Affordability-report-'+(LEVY_FRAMING==='hr'?'HR':'Finance')+'.pdf');
-    if(btn){btn.disabled=false;btn.innerHTML=lbl;}
-  }).catch(function(e){alert('PDF generation failed: '+e);if(btn){btn.disabled=false;btn.innerHTML=lbl;}});
+  return seq.then(function(){return doc;});
 }
+function lvyPdfRun(btn,action){
+  if(!window.html2canvas||!(window.jspdf||window.jsPDF)){alert('Report libraries not available.');return;}
+  if(!document.querySelectorAll('#levyReportPages .lvy-page').length)return;
+  var lbl=btn?btn.innerHTML:''; if(btn){btn.disabled=true;btn.innerHTML='&#8987; Generating…';}
+  buildLevyPdf().then(function(doc){action(doc);if(btn){btn.disabled=false;btn.innerHTML=lbl;}})
+    .catch(function(e){alert('PDF generation failed: '+e);if(btn){btn.disabled=false;btn.innerHTML=lbl;}});
+}
+function downloadLevyReport(btn){lvyPdfRun(btn,function(doc){doc.save('Affordability-report-'+(LEVY_FRAMING==='hr'?'HR':'Finance')+'.pdf');});}
+function openLevyReportTab(btn){lvyPdfRun(btn,function(doc){var url=doc.output('bloburl');window.open(url,'_blank');});}
 function setProjYears(y){
   projYears=y;
   document.querySelectorAll('#projRange button').forEach(b=>b.classList.toggle('on',+b.dataset.y===y));
@@ -2916,6 +2919,7 @@ renderGoalGrid();
       <button data-f="hr" onclick="setLevyFraming('hr')">HR / L&amp;D</button>
     </div>
     <div class="lvy-spacer"></div>
+    <button class="lvy-btn" onclick="openLevyReportTab(this)">&#8599;&nbsp; Open in new tab</button>
     <button class="lvy-btn" id="lvyDl" onclick="downloadLevyReport(this)">&#11015;&nbsp; Download PDF</button>
     <button class="lvy-btn" onclick="closeLevyReport()">&#10005;&nbsp; Close</button>
   </div>
