@@ -716,7 +716,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ad</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26a</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1444,12 +1444,12 @@ function simCoInvest(income,tot,pmk,uTot){
   }
   return{total,months};
 }
-function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot){
+function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
   const base=simCoInvest(income,tot,pmk,uTot);
   if(base.total<1){el.innerHTML='';return;}
   const N=income.length;
-  let recs='';
+  let recs=durTip?('<li>'+durTip+'</li>'):'';
   ev.slice().sort((a,b)=>b.amount-a.amount).forEach(e=>{
     let mvBest=-1,mvTc=base.total;
     for(let j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){
@@ -1805,6 +1805,22 @@ function renderProjection(){
   });
   const tot=ts.map((s,i)=>s+es[i]);
   const combined=tot.map((s,i)=>s+us[i]); // total levy demand per month (appr + unit)
+  // Duration sensitivity: re-run the real co-invest engine on a +6-month hypothetical per programme
+  const apprTot=(progs)=>{const t=Array(M).fill(0);progs.forEach(p=>{if(p.type==='unit')return;const sm=mKey(p.start),em=mKey(p.epa),dr=mBetween(p.start,p.epa);const mt=(p.cost*RULEBOOK.draw.training/dr)*p.count,et=p.cost*RULEBOOK.draw.epa*p.count;for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)t[i]+=mt;}const ei=em-pmk;if(ei>=0&&ei<M)t[ei]+=et;});return t;};
+  const ciBase=simCoInvest(income,tot,pmk,us);
+  let durTip='';
+  if(ciBase.total>1){
+    let best=null;
+    programmes.forEach((p,idx)=>{
+      if(p.type==='unit')return;
+      const curDur=mBetween(p.start,p.epa),ne=new Date(p.epa);ne.setMonth(ne.getMonth()+6);
+      if(mKey(ne)-pmk>=M)return; // keep the EPA inside the projection horizon to assess honestly
+      const progs2=programmes.map((q,j)=>j===idx?Object.assign({},q,{epa:ne.toISOString().slice(0,10)}):q);
+      const saving=ciBase.total-simCoInvest(income,apprTot(progs2),pmk,us).total;
+      if(saving>50&&(!best||saving>best.saving))best={name:p.name,curDur,saving};
+    });
+    if(best)durTip=`<strong>Extend duration:</strong> running <strong>${best.name}</strong> over <strong>${best.curDur+6} months</strong> instead of ${best.curDur} would cut co-investment by about <strong>${fmt(best.saving)}</strong> — a longer programme spreads the 80% training draw across more months, lowering the monthly peak that triggers it.`;
+  }
   let bal=levyData.balance;
   const bals=combined.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
   const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
@@ -1817,7 +1833,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk,us);updateSectionNav();
+  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
