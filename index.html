@@ -542,6 +542,7 @@ footer span{color:var(--teal)}
   <!-- SUMMARY -->
   <div id="levySummary" class="hidden">
     <div class="metrics" id="metricCards"></div>
+    <div id="dataQuality"></div>
     <details style="margin-bottom:1.5rem">
       <summary>&#9654;&nbsp; Monthly levy breakdown</summary>
       <div class="sw" style="margin-top:10px">
@@ -720,7 +721,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26e</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1209,16 +1210,22 @@ function parseESFA(text){
   if(iL<0){setStatus('Could not match "Levy declared" column. Found columns: '+hdr.filter(Boolean).join(', '),'warn');return;}
   const rows=lines.slice(1).filter(l=>l.trim()).map(l=>l.split(sep).map(c=>c.trim().replace(/^"|"$/g,'')));
   const mm={};let tI=0,tO=0;
+  const numFail=raw=>{const s=(raw||'').toString().replace(/[£,\s]/g,'');return s!==''&&isNaN(parseFloat(s));};
+  const issues={badCells:0,badExamples:[],unknownMonth:0};
   rows.forEach(r=>{
+    if(numFail(r[iL])){issues.badCells++;if(issues.badExamples.length<3)issues.badExamples.push(r[iL]);}
     const lv=nv(r[iL]),tp=iT>=0?nv(r[iT]):0,pd=iF>=0?nv(r[iF]):0;
-    const mk=iP>=0?r[iP]:(iD>=0?r[iD].slice(0,7):'Unknown');
+    let mk;
+    if(iP>=0&&r[iP]&&r[iP].trim())mk=r[iP].trim();
+    else if(iD>=0&&r[iD]&&r[iD].length>=7)mk=r[iD].slice(0,7);
+    else{mk='Unknown';issues.unknownMonth++;}
     if(!mm[mk])mm[mk]={levy:0,topup:0,paid:0};
     mm[mk].levy+=lv;mm[mk].topup+=tp;mm[mk].paid+=pd;tI+=lv+tp;tO+=pd;
   });
-  buildLevyData(mm,tI,tO,rows.length);
+  buildLevyData(mm,tI,tO,rows.length,issues);
 }
 
-function buildLevyData(mm,tI,tO,rc){
+function buildLevyData(mm,tI,tO,rc,issues){
   const byMonth=Object.entries(mm).sort((a,b)=>a[0].localeCompare(b[0])).map(([month,v])=>{
     const mk=mKey(new Date(month.length===7?month+'-01':month));
     const ew=expMo(mk);
@@ -1228,7 +1235,40 @@ function buildLevyData(mm,tI,tO,rc){
   const avg=inc.length?inc.reduce((a,b)=>a+b.income,0)/inc.length:0;
   levyData={monthlyAvg:avg,balance:Math.max(0,tI-tO),byMonth};
   setStatus((rc?`[OK] Parsed ${byMonth.length} payroll months across ${rc} rows. `:'')+`Average monthly income: ${fmt(avg)}`,'ok');
-  renderSummary();renderMonthTable();saveState();
+  renderSummary();renderMonthTable();renderDataQuality(validateLevyData(byMonth,issues));saveState();
+}
+
+// ── Data integrity: surface what the parser skipped / coerced, and flag anomalies (the trust front door)
+function validateLevyData(byMonth,issues){
+  issues=issues||{};const f=[];
+  if(issues.badCells)f.push({sev:'warn',msg:issues.badCells+' value'+(issues.badCells>1?'s':'')+' in the “Levy declared” column couldn’t be read as a number and '+(issues.badCells>1?'were':'was')+' treated as £0'+(issues.badExamples&&issues.badExamples.length?' (e.g. “'+issues.badExamples.join('”, “')+'”)':'')+' — check those rows in your export.'});
+  if(issues.unknownMonth)f.push({sev:'warn',msg:issues.unknownMonth+' row'+(issues.unknownMonth>1?'s':'')+' had no readable month and '+(issues.unknownMonth>1?'were':'was')+' grouped under “Unknown”.'});
+  if(!byMonth.length){f.push({sev:'error',msg:'No usable rows were found in this file.'});return f;}
+  const totalInc=byMonth.reduce((a,m)=>a+m.income,0);
+  if(totalInc<=0)f.push({sev:'error',msg:'Total levy income across all months is £0 — the projection can’t be relied on. Check the column mapping.'});
+  const mks=byMonth.map(m=>m.mk).filter(k=>!isNaN(k)).sort((a,b)=>a-b);
+  if(mks.length>1){let gaps=0;for(let i=1;i<mks.length;i++)gaps+=Math.max(0,mks[i]-mks[i-1]-1);if(gaps>0)f.push({sev:'info',msg:gaps+(gaps>1?' months are':' month is')+' missing between '+mkLbl(mks[0])+' and '+mkLbl(mks[mks.length-1])+' — the projection treats these as £0 income.'});}
+  if(byMonth.some(m=>m.income<0||m.paid<0))f.push({sev:'warn',msg:'One or more months show negative values — usually an adjustment or refund row. Confirm these are intended.'});
+  const over=byMonth.filter(m=>m.paid>m.income+0.5).length;
+  if(over)f.push({sev:'info',msg:over+(over>1?' months':' month')+' paid out more than was declared that month — normal when drawing on an earlier surplus, but worth a glance.'});
+  if(inc1(byMonth)===1)f.push({sev:'info',msg:'Only one month of income — the monthly average rests on a single data point.'});
+  const incs=byMonth.map(m=>m.income).filter(v=>v>0).sort((a,b)=>a-b);
+  if(incs.length>=4){const med=incs[Math.floor(incs.length/2)];const out=byMonth.filter(m=>m.income>0&&(m.income>med*3||m.income<med/3));if(out.length)f.push({sev:'info',msg:out.length+(out.length>1?' months look':' month looks')+' far from the typical level ('+fmt(med)+'/mo) — e.g. '+out.slice(0,2).map(m=>m.month+' '+fmt(m.income)).join(', ')+'. Check for a typo or a one-off.'});}
+  return f;
+}
+function inc1(bm){return bm.filter(m=>m.income>0).length;}
+function renderDataQuality(findings){
+  const el=document.getElementById('dataQuality');if(!el)return;
+  findings=findings||[];
+  const errs=findings.filter(f=>f.sev==='error').length,warns=findings.filter(f=>f.sev==='warn').length;
+  const head=errs?{c:'#ff8fa3',bg:'rgba(255,76,106,0.08)',bd:'rgba(255,76,106,0.35)',t:'△ Data needs attention'}
+    :warns?{c:'#E0A43B',bg:'rgba(224,164,59,0.08)',bd:'rgba(224,164,59,0.3)',t:'△ Review before you rely on the number'}
+    :{c:'#2DD4B2',bg:'rgba(45,212,178,0.07)',bd:'rgba(45,212,178,0.3)',t:'✓ Data looks consistent'};
+  const items=findings.map(f=>'<li style="margin:3px 0">'+(f.sev==='error'?'⛔ ':f.sev==='warn'?'△ ':'· ')+f.msg+'</li>').join('');
+  el.innerHTML='<div style="background:'+head.bg+';border:1px solid '+head.bd+';border-radius:12px;padding:12px 16px;margin-bottom:1.25rem">'+
+    '<div style="font-weight:700;color:'+head.c+';margin-bottom:'+(findings.length?'7px':'0')+'">'+head.t+'</div>'+
+    (items?'<ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text2);line-height:1.55">'+items+'</ul>':'<div style="font-size:12px;color:var(--text3)">Months are sequential, values are numeric, and the totals add up.</div>')+
+  '</div>';
 }
 
 function loadDemo(){
