@@ -98,7 +98,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .proj-range button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .proj-range button:hover{color:var(--text)}
 .proj-range button.on{background:var(--teal);color:#06121f;font-weight:600}
-.lvy-overlay{position:fixed;inset:0;z-index:500;background:rgba(3,8,16,0.9);backdrop-filter:blur(6px);display:none;flex-direction:column;align-items:center;overflow:auto;padding:18px}
+.lvy-overlay{position:fixed;left:-30000px;top:0;display:none}
 .lvy-bar{position:fixed;top:0;left:0;right:0;margin:0 auto;z-index:3;display:flex;align-items:center;gap:14px;max-width:1159px;padding:12px 18px;flex-wrap:wrap;background:rgba(3,8,16,0.55);backdrop-filter:blur(9px);border-radius:0 0 14px 14px}
 .lvy-bar .lvy-spacer{flex:1}
 .lvy-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:9px;padding:2px}
@@ -110,7 +110,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-page::after{content:'';position:absolute;inset:6px;border:1px solid rgba(45,212,178,0.16);border-radius:5px;pointer-events:none}
 .lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:30px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
 #lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
-#levyReportPages{position:relative;z-index:1;margin-top:44px}
+#levyReportPages{position:relative;z-index:1}
 .lvy-interp{margin-top:16px}
 .lvy-lead{font-size:13px;color:#aebecb;line-height:1.55;max-width:780px;margin-bottom:9px}
 .lvy-cards{display:flex;gap:16px}
@@ -626,10 +626,12 @@ footer span{color:var(--teal)}
       </div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
-      <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <button class="btn-demo" onclick="openLevyReport()">&#128196;&nbsp; View affordability report</button>
-        <span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span>
+      <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--text3)">Affordability report &mdash; opens in a new tab:</span>
+        <button class="btn-demo" onclick="openLevyReport('finance',this)">&#128196;&nbsp; Finance / SLT &#8599;</button>
+        <button class="btn-demo" onclick="openLevyReport('hr',this)">&#128196;&nbsp; HR / L&amp;D &#8599;</button>
       </div>
+      <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
 
@@ -695,7 +697,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25r</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1450,12 +1452,23 @@ function levyHeadline(d,framing){
   else {num=d.coInvest?lvK(d.coInvest):'£0';lab='employer co-investment'+(d.years?' ('+d.years+'y)':'');sub=d.coInvest?('Across '+d.coMonths+' month'+(d.coMonths!==1?'s':'')):'Fully covered by your levy';}
   return {num:num,lab:lab,sub:sub};
 }
-function openLevyReport(){
+function openLevyReport(framing, btn){
   if(!programmes.length){alert('Add at least one apprenticeship programme first.');return;}
-  document.getElementById('levyReportOverlay').style.display='flex';
-  renderLevyReport();lvyBg.start();
+  if(!window.html2canvas||!(window.jspdf||window.jsPDF)){alert('Report libraries not available.');return;}
+  // open the tab synchronously (within the click) so pop-up blockers don't stop it; fill it once ready
+  var win=window.open('','_blank');
+  if(!win){alert('Allow pop-ups to open the affordability report in a new tab.');return;}
+  try{win.document.write('<!doctype html><title>Affordability report</title><body style="margin:0;background:#06172E;color:#8fb8cc;font-family:Inter,Arial,sans-serif"><div style="padding:30px;font-size:14px">Generating affordability report&hellip;</div></body>');win.document.close();}catch(e){}
+  LEVY_FRAMING=framing||'finance';
+  var ov=document.getElementById('levyReportOverlay'); ov.style.display='block';
+  renderLevyReport();
+  var lbl=btn?btn.innerHTML:''; if(btn){btn.disabled=true;btn.innerHTML='&#8987; Generating&hellip;';}
+  buildLevyPdf().then(function(doc){
+    win.location.href=doc.output('bloburl');
+    ov.style.display='none';
+    if(btn){btn.disabled=false;btn.innerHTML=lbl;}
+  }).catch(function(e){try{win.close();}catch(_){}ov.style.display='none';alert('Report generation failed: '+e);if(btn){btn.disabled=false;btn.innerHTML=lbl;}});
 }
-function closeLevyReport(){document.getElementById('levyReportOverlay').style.display='none';lvyBg.stop();}
 function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
 /* Animated backdrop for the report overlay: drifting network + rising motes (on-screen only;
    sits behind the opaque pages, so PDFs stay crisp). */
@@ -2970,19 +2983,6 @@ loadState();
 renderGoalGrid();
 (function(){var ci=document.getElementById('cohortMin');if(ci&&scnCohortMin)ci.value=scnCohortMin;})();
 </script>
-<div class="lvy-overlay" id="levyReportOverlay">
-  <canvas id="lvyReportBg"></canvas>
-  <div class="lvy-bar">
-    <div class="lvy-toggle" id="levyFramingToggle">
-      <button data-f="finance" class="on" onclick="setLevyFraming('finance')">Finance / SLT</button>
-      <button data-f="hr" onclick="setLevyFraming('hr')">HR / L&amp;D</button>
-    </div>
-    <div class="lvy-spacer"></div>
-    <button class="lvy-btn" onclick="openLevyReportTab(this)">&#8599;&nbsp; Open in new tab</button>
-    <button class="lvy-btn" id="lvyDl" onclick="downloadLevyReport(this)">&#11015;&nbsp; Download PDF</button>
-    <button class="lvy-btn" onclick="closeLevyReport()">&#10005;&nbsp; Close</button>
-  </div>
-  <div id="levyReportPages"></div>
-</div>
+<div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
 </body>
 </html>
