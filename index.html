@@ -112,7 +112,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 #lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
 #levyReportPages{position:relative;z-index:1}
 .lvy-interp{margin-top:16px}
-.lvy-lead{font-size:13px;color:#aebecb;line-height:1.55;max-width:780px;margin-bottom:9px}
+.lvy-lead{font-size:13px;color:#aebecb;line-height:1.5;max-width:780px;margin-bottom:6px}
 .lvy-cards{display:flex;gap:16px}
 .lvy-card{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:12px 16px}
 .lvy-card-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#2DD4B2;margin-bottom:7px}
@@ -139,15 +139,15 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
-.lvy-table td{padding:5px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
+.lvy-table td{padding:3px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
 .lvy-table td.r,.lvy-table th.r{text-align:right;font-variant-numeric:tabular-nums}
 .lvy-money{display:inline-flex;justify-content:flex-start;gap:1px;min-width:84px;font-variant-numeric:tabular-nums;text-align:left}
 .lvy-money .cur{opacity:1}
 .lvy-figs .lvy-fv{font-variant-numeric:tabular-nums}
-.lvy-cols{display:flex;gap:22px;margin-top:10px}
+.lvy-cols{display:flex;gap:22px;margin-top:6px}
 .lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 15px}
 .lvy-body{font-size:12.5px;color:#c7d6e2;line-height:1.6}
-.lvy-move{margin-top:9px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:11px 16px}
+.lvy-move{margin-top:6px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:8px 16px}
 .lvy-move-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin-bottom:6px}
 .lvy-ol{margin:7px 0 0;padding-left:20px}
 .lvy-ol li{margin-bottom:5px;line-height:1.5}
@@ -714,7 +714,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25z</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1597,7 +1597,7 @@ function levyPage1(d,framing){
   var fin2026='Co-investment rises 5%→25% and expiry shortens 24→12 months from Aug 2026 — '+(d.expiry?'acting before then protects '+lvK(d.giftable)+'.':'front-load new starts to stay ahead.');
   var progLab=d.maxLevel?('Level '+(d.maxLevel+1)+(d.maxLevel+2<=7?'–'+(d.maxLevel+2):'')+' standards'):'higher or specialist standards';
   var progText=d.maxLevel?('Completers are well placed to progress to '+progLab+' — '+(d.maxLevel>=5?'senior, specialist or degree-level roles':'higher technical or first-line management roles')+'.'):'Completers can progress to higher or specialist standards in the same areas.';
-  var learnGain=(d.subjectNames&&d.subjectNames.length)?('Capability in '+d.subjectNames.slice(0,3).join(', ')+(d.subjectNames.length>3?' and more':'')+' — developed on the job and evidenced at end-point assessment.'):'Role-specific capability, developed on the job and evidenced at end-point assessment.';
+  var learnGain=(d.subjectNames&&d.subjectNames.length)?('Capability in '+d.subjectNames.slice(0,2).join(', ')+(d.subjectNames.length>2?' and more':'')+' — developed on the job, evidenced at assessment.'):'Role-specific capability, developed on the job and evidenced at assessment.';
   var svText=d.giftable?(lvK(d.giftable)+' of levy could fund ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' for SMEs or charities — measurable social value.'):'Your levy is fully directed to developing your own people.';
   var cards=fin
     ? [['Levy utilisation',Math.round(d.util*100)+'% put to work over '+d.years+'y — '+d.stage],
@@ -1668,22 +1668,23 @@ function levyPage2(d,framing){
     'Sector-leading '+Math.round(lead*100)+'%: ~'+compAt(lead)+' of '+d.heads+'.';
   var trough=(d.yearUtil&&d.yearUtil.length>1)?d.yearUtil.indexOf(Math.min.apply(null,d.yearUtil)):-1;
   var troughTxt=trough>=0?('Year '+(trough+1)+' (only '+Math.round(d.yearUtil[trough]*100)+'% of that year&rsquo;s levy used)'):'your lowest-utilisation period';
+  var uMin=Math.min.apply(null,UNIT_PRESETS.map(function(u){return u.rate;})), uMax=Math.max.apply(null,UNIT_PRESETS.map(function(u){return u.rate;}));
   var moveLead, moveList;
   if(d.stage==='Under-using'){
     var extra=d.perHead?Math.floor(d.expiry/d.perHead):0;
     moveLead='Your levy has headroom — about '+lvK(d.expiry)+' is forecast to go unused.';
-    moveList=['Commit it to ~'+extra+' more apprentice'+(extra!==1?'s':'')+' (&asymp;'+lvK(d.perHead)+' each), staggered into '+troughTxt+' — landing the extra drawdown in your quietest period.',
-      'Or progress your strongest completers to a Level '+(d.maxLevel+1)+' to deepen capability.',
-      'Or gift '+lvK(d.giftable)+' to an SME or charity before it expires — measurable social value.'];
+    moveList=['Commit it to ~'+extra+' more apprentice'+(extra!==1?'s':'')+' (&asymp;'+lvK(d.perHead)+' each), staggered into '+troughTxt+'.',
+      'Or take the affordable rung — an <strong style="color:#a78bfa">apprenticeship unit</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, fully levy-covered, weeks not years) builds one capability element now.',
+      'Or gift '+lvK(d.giftable)+' to an SME or charity before it expires — social value.'];
   } else if(d.stage==='Scaling'){
     moveLead='You are near capacity, with '+lvK(d.coInvest)+' of co-investment appearing.';
-    moveList=['Add people through shorter or lower-band routes to grow without raising co-investment.',
+    moveList=['Add people through <strong style="color:#a78bfa">apprenticeship units</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, single-element, ~5% co-invest) — cheaper and faster than a full standard.',
       'Stagger new starts into '+troughTxt+' so they don&rsquo;t stack onto your peak-drawdown months.',
       'Or defer / spread the EPA completion payments to flatten the peaks.'];
   } else {
     moveLead='Your levy is well-used across the plan.';
     moveList=['Progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.',
-      'Use '+troughTxt+' to add a new start without straining the budget.',
+      'Top up a specific skill with an <strong style="color:#a78bfa">apprenticeship unit</strong> ('+lvK(uMin)+'+/learner, weeks) — no full programme required.',
       'Protect the surplus and timing — the levy is working efficiently.'];
   }
   var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
