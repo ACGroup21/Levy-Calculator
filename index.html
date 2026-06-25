@@ -249,8 +249,10 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-stat .ps{font-size:11px;color:var(--text3);margin-top:4px}
 .plan-rec{padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;margin-top:10px}
 .plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
-.plan-prog-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:12.5px}
-.plan-prog-row .ppn{color:var(--text2)}.plan-prog-row .ppv{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
+.plan-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;column-gap:18px;font-size:12.5px;margin-top:6px}
+.plan-prog-grid>span{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.plan-prog-grid .ppn{color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-prog-grid .ppc{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
 .plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:9px;padding:10px 14px;background:rgba(129,140,248,0.04)}
 .plan-collapse summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);user-select:none;list-style:none}
 .plan-collapse summary::-webkit-details-marker{display:none}
@@ -718,7 +720,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26d</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2035,7 +2037,7 @@ function renderPlan(){
     const weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     const overlay=oh*weeks*p.count*rate, fte=oh*p.count/hours;
     totalOverlay+=overlay;lostHrs+=oh*p.count;totalFTE+=fte;
-    rows+=`<div class="plan-prog-row"><span class="ppn">${p.name} &times;${p.count}</span><span class="ppv">${oh}h/wk &middot; ${weeks}w &middot; ${fmt(overlay)} &middot; ${fte.toFixed(2)} FTE</span></div>`;
+    rows+=`<span class="ppn">${p.name} &times;${p.count}</span><span class="ppc">${oh}h/wk</span><span class="ppc">${weeks}w</span><span class="ppc">${fmt(overlay)}</span><span class="ppc">${fte.toFixed(2)} FTE</span>`;
   });
   const withinBuffer=lostHrs<=bufferHrs;
   const spareHrs=Math.max(0,bufferHrs-lostHrs);
@@ -2112,7 +2114,7 @@ function renderPlan(){
     html+=`<details class="plan-collapse" style="margin-top:14px"><summary>Bank holidays in the next 36 months (${winHols.length})</summary><div class="exp-years" id="bhYears" style="margin-top:8px"></div><div id="bhBody"></div></details>`;
   }
   // per-programme breakdown — collapsible, open by default only for small lists
-  html+=`<details class="plan-collapse" style="margin-top:14px"${programmes.length<=3?' open':''}><summary>Per-programme breakdown (${programmes.length})</summary><div style="margin-top:6px">${rows}</div></details>`;
+  html+=`<details class="plan-collapse" style="margin-top:14px"${programmes.length<=3?' open':''}><summary>Per-programme breakdown (${programmes.length})</summary><div class="plan-prog-grid">${rows}</div></details>`;
   document.getElementById('planResults').innerHTML=html;
   if(document.getElementById('bhYears'))renderBhList();
   updateSectionNav();
