@@ -715,7 +715,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25aa</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25ab</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1489,6 +1489,7 @@ function levyReportData(){
   var planCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
   var annual=levyData.monthlyAvg*12, transferCap=annual*RULEBOOK.transferCapPct;
   var expVal=exp.total>1?exp.total:0, perHead=heads?planCost/heads:0;
+  var expiry12=(exp.byMonth||[]).filter(function(m){return m.mk-pmk<12;}).reduce(function(a,m){return a+m.amount;},0);
   var giftable=expVal?Math.min(expVal,transferCap):0, svEnabled=perHead?Math.floor(giftable/perHead):0;
   var subjMap={}; programmes.forEach(function(p){var s=lvySubject(p.name); if(s)subjMap[s.toLowerCase()]=s;});
   var subjectNames=Object.keys(subjMap).map(function(k){return subjMap[k];});
@@ -1509,7 +1510,7 @@ function levyReportData(){
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
-    levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiryFirst:exp.byMonth&&exp.byMonth[0],
+    levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
     programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
     subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil,
@@ -1663,7 +1664,7 @@ function levyPage2(d,framing){
     : d.heads+' people develop through '+d.progCount+' programme'+(d.progCount!==1?'s':'')+', building capability on the job alongside structured off-the-job training. Each completion is evidenced at end-point assessment (EPA). Use the JD Matcher to confirm each programme covers the skills the role needs.';
   var rightTitle=fin?'Expiry &amp; gifting':'Wider impact';
   var rightBody=d.expiry
-    ? lvK(d.expiry)+' of levy is forecast to expire unused. You could gift up to '+lvK(d.giftable)+' to an SME, charity or supply-chain partner'+(d.svEnabled?' — funding ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'')+'. '+(fin?'Turns a write-off into measurable social value.':'Evidences the UK Social Value Model theme &ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;, reportable in tenders and CSR.')
+    ? lvK(d.expiry)+' of levy is forecast to expire unused'+(d.expiry12>1?' &mdash; <strong style="color:#fff">'+lvK(d.expiry12)+' of it within the next 12 months</strong>':'')+'. You could gift up to '+lvK(d.giftable)+' to an SME, charity or supply-chain partner'+(d.svEnabled?' — funding ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'')+'. '+(fin?'Turns a write-off into measurable social value.':'Evidences the UK Social Value Model theme &ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;, reportable in tenders and CSR.')
     : 'No levy is currently forecast to expire — your plan puts the available funding to work.';
   var bench=RULEBOOK.achievementBenchmark, tgt=Math.min(bench+RULEBOOK.ambitionMargin.aboveAverage,0.90), lead=Math.min(bench+RULEBOOK.ambitionMargin.sectorLeading,0.90);
   var compAt=function(r){return Math.round(d.heads*r);}, expAt=function(r){return (1-r)*d.planCost;};
@@ -1803,7 +1804,8 @@ function renderProjection(){
     ew.style.display='block';
     lastExp=exp;
     const firstMk=exp.byMonth[0].mk;
-    ew.innerHTML=`${goalTag('expiry','Serves your goal — act before funds expire')}<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong><span style="color:var(--text)">. The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</span></div>
+    const exp12=exp.byMonth.filter(m=>m.mk-pmk<12).reduce((a,m)=>a+m.amount,0);
+    ew.innerHTML=`${goalTag('expiry','Serves your goal — act before funds expire')}<div class="expiry-head"><strong>&#9651; Expiry risk: ${fmt(exp.total)} forecast to expire unused</strong><span style="color:var(--text)">. The first ${fmt(exp.byMonth[0].amount)} ages out in <strong>${mkLbl(firstMk)}</strong>${exp12>1?` &mdash; of which <strong>${fmt(exp12)}</strong> within the next 12 months`:''}. Levy funds expire <strong>12 months</strong> after they're declared (24 months for funds declared before Aug 2026) — commit or gift them before they're lost.</span></div>
       <div class="exp-years" id="expYears"></div>
       <div id="expiryDetailBody"></div>`;
     renderExpiryTables();
