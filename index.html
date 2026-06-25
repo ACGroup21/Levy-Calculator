@@ -145,6 +145,12 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-move-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin-bottom:6px}
 .lvy-ol{margin:7px 0 0;padding-left:20px}
 .lvy-ol li{margin-bottom:5px;line-height:1.5}
+.lvy-true{display:flex;align-items:stretch;gap:14px;margin-top:4px}
+.lvy-true-cell{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 18px;text-align:center}
+.lvy-true-lab{font-size:11px;color:#8ba0b6;margin-bottom:8px}
+.lvy-true-num{font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.lvy-true-sub{font-size:11px;color:#7e95ab;margin-top:6px}
+.lvy-true-op{display:flex;align-items:center;font-size:22px;color:#7e95ab;font-weight:300}
 .step-sub{font-size:13px;color:var(--text3);margin-bottom:1rem}
 
 .upload-zone{border:1.5px dashed rgba(45,212,178,0.3);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(45,212,178,0.03)}
@@ -683,7 +689,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25p</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1406,13 +1412,21 @@ function levyReportData(){
   var stage=ci.total>0?'Scaling':(expVal>annual*0.15?'Under-using':'Optimising');
   var yearUtil=[];
   for(var yy=0;yy<projYears;yy++){var dd=0,ip=0;for(var mm=0;mm<12;mm++){var ix=yy*12+mm;if(ix<M){dd+=tot[ix];ip+=income[ix];}}yearUtil.push(ip?dd/ip:0);}
+  // Off-the-job / true cost — same model as the Plan section (otj[level] x weeks x count x rate)
+  var otjMap=planCfg.otj||{}, payRate=planCfg.rate||0, weekHrs=planCfg.hours||37.5;
+  var otjCost=0, otjHrsWk=0, otjFTE=0;
+  programmes.forEach(function(p){
+    var oh=otjMap[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
+    otjCost+=oh*weeks*(+p.count||0)*payRate; otjHrsWk+=oh*(+p.count||0); otjFTE+=oh*(+p.count||0)/weekHrs;
+  });
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
     programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
-    subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil};
+    subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil,
+    otjCost:otjCost,otjHrsWk:otjHrsWk,otjFTE:otjFTE,trueCost:planCost+otjCost,payRate:payRate};
 }
 function levyRag(d){
   if(d.coInvest<1) return {label:'Comfortably Covered',col:'#2DD4B2'};
@@ -1469,7 +1483,7 @@ function setLevyFraming(f){
 }
 function renderLevyReport(){
   var d=levyReportData();
-  document.getElementById('levyReportPages').innerHTML=levyPage1(d,LEVY_FRAMING)+levyPage2(d,LEVY_FRAMING);
+  document.getElementById('levyReportPages').innerHTML=levyPage1(d,LEVY_FRAMING)+levyPage2(d,LEVY_FRAMING)+levyPage3(d,LEVY_FRAMING);
 }
 function levyPage1(d,framing){
   var rag=levyRag(d), h=levyHeadline(d,framing), fin=framing==='finance';
@@ -1574,6 +1588,32 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+  '</div></div>';
+}
+function levyPage3(d,framing){
+  var fin=framing==='finance';
+  var noRate=!(d.payRate>0);
+  var otjRows=d.programmes.map(function(p){
+    var oh=(planCfg.otj||{})[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
+    var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
+    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+oh+' h/wk</td><td class="r">'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
+  }).join('');
+  var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div></div>'+
+    '<div class="lvy-true-op">+</div>'+
+    '<div class="lvy-true-cell"><div class="lvy-true-lab">Off-the-job time</div><div class="lvy-true-num" style="color:#E0A43B">'+(noRate?'set rate':'&asymp;'+lvK(d.otjCost))+'</div><div class="lvy-true-sub">'+d.otjFTE.toFixed(1)+' FTE &middot; '+Math.round(d.otjHrsWk)+' hrs/wk released</div></div>'+
+    '<div class="lvy-true-op">=</div>'+
+    '<div class="lvy-true-cell"><div class="lvy-true-lab">Full cost of ownership</div><div class="lvy-true-num" style="color:#2DD4B2">'+(noRate?lvK(d.planCost)+'+':'&asymp;'+lvK(d.trueCost))+'</div></div></div>';
+  var narr=noRate
+    ? 'The levy covers the training fee. The larger commitment is usually the paid time apprentices spend off the job ('+Math.round(d.otjHrsWk)+' hrs/week &middot; '+d.otjFTE.toFixed(1)+' FTE) — set an hourly rate in the Plan section to cost it.'
+    : 'The levy covers the training fee; the larger commitment is often the <strong style="color:#fff">'+Math.round(d.otjHrsWk)+' hours a week</strong> of paid time apprentices spend off the job ('+d.otjFTE.toFixed(1)+' FTE of capacity). '+(fin?'It is real cost, not just levy spend — factor it into the business case.':'Plan release and backfill so delivery does not strain the team.');
+  return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
+    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
+      '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
+    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+
+    '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
+    '<div class="lvy-sec" style="margin-top:18px">Off-the-job commitment by programme</div>'+
+    '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Off-the-job</th><th class="r">Duration</th><th class="r">Learners</th><th class="r">Time cost</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Off-the-job time valued at &pound;'+(d.payRate||0)+'/hr (set in the Plan section). Off-the-job training is a statutory minimum of 6 hours/week, averaged over the practical period — paid working time, not the apprentice&rsquo;s own. Indicative only.</div>'+
   '</div></div>';
 }
 function buildLevyPdf(){
