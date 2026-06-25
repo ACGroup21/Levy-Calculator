@@ -141,6 +141,8 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-cols{display:flex;gap:22px;margin-top:16px}
 .lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 18px}
 .lvy-body{font-size:12.5px;color:#c7d6e2;line-height:1.6}
+.lvy-move{margin-top:14px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:13px 18px}
+.lvy-move-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin-bottom:6px}
 .step-sub{font-size:13px;color:var(--text3);margin-bottom:1rem}
 
 .upload-zone{border:1.5px dashed rgba(45,212,178,0.3);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(45,212,178,0.03)}
@@ -676,7 +678,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25j</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1011,6 +1013,8 @@ const RULEBOOK={
   coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
   expiryMonths:{before:24,from:12}, // unused funds expire after N months (by declaration date)
   apprenticeshipMinMonths:8,        // minimum apprenticeship duration (reserved for units/duration work)
+  achievementBenchmark:0.60,        // national apprenticeship QAR (~60%, FY2024/25) — the "stay on track" floor; update annually
+  ambitionMargin:{keepPace:0,aboveAverage:0.10,sectorLeading:0.20}, // added to the benchmark by ambition; target capped at 90%
   unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
 };
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
@@ -1518,14 +1522,25 @@ function levyPage2(d,framing){
   var rightBody=d.expiry
     ? lvK(d.expiry)+' of levy is forecast to expire unused. You could gift up to '+lvK(d.giftable)+' to an SME, charity or supply-chain partner'+(d.svEnabled?' — funding ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'')+'. '+(fin?'Turns a write-off into measurable social value.':'Evidences the UK Social Value Model theme &ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;, reportable in tenders and CSR.')
     : 'No levy is currently forecast to expire — your plan puts the available funding to work.';
+  var bench=RULEBOOK.achievementBenchmark, tgt=Math.min(bench+RULEBOOK.ambitionMargin.aboveAverage,0.90), lead=Math.min(bench+RULEBOOK.ambitionMargin.sectorLeading,0.90);
+  var compAt=function(r){return Math.round(d.heads*r);}, expAt=function(r){return (1-r)*d.planCost;};
+  var passBody='<strong style="color:#fff">'+Math.round(bench*100)+'%</strong> minimum to stay on track <span style="color:#7e95ab">(national average — below this you fall behind the sector)</span>.<br><br>'+
+    'Aim <strong style="color:#fff">'+Math.round(tgt*100)+'%</strong>: ~'+compAt(tgt)+' of '+d.heads+' achieve · '+lvK(expAt(tgt))+' of training exposed if completion falls short.<br><br>'+
+    'Sector-leading '+Math.round(lead*100)+'%: ~'+compAt(lead)+' of '+d.heads+'.';
+  var move;
+  if(d.stage==='Under-using'){var extra=d.perHead?Math.floor(d.expiry/d.perHead):0;move='Your levy has headroom — about '+lvK(d.expiry)+' is forecast to go unused. <strong style="color:#fff">Next move:</strong> commit it to roughly '+extra+' more apprentice'+(extra!==1?'s':'')+' (≈'+lvK(d.perHead)+' each), or a Level '+(d.maxLevel+1)+' for your strongest completers — turning idle levy into capability before it expires.';}
+  else if(d.stage==='Scaling'){move='You are near capacity, with co-investment appearing. <strong style="color:#fff">Next move:</strong> add people through shorter or lower-band routes, or stagger starts, to grow without raising the '+lvK(d.coInvest)+' co-investment.';}
+  else{move='Your levy is well-used. <strong style="color:#fff">Next move:</strong> depth over volume — progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.';}
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">Programme breakdown</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Learners</th><th class="r">Band</th><th class="r">Training (80%)</th><th class="r">EPA (20%)</th><th class="r">Start &rarr; EPA</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div class="lvy-move"><div class="lvy-move-t">&#128640; A movement forward</div><div class="lvy-body">'+move+'</div></div>'+
     '<div class="lvy-cols">'+
       '<div class="lvy-col"><div class="lvy-sec">'+leftTitle+'</div><div class="lvy-body">'+leftBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
+      '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account. Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
