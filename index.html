@@ -108,15 +108,22 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-page{position:relative;width:1123px;max-width:100%;border-radius:6px;overflow:hidden;margin-bottom:18px;box-shadow:0 12px 40px rgba(0,0,0,0.55);color:#fff;background:radial-gradient(900px 520px at 80% -10%,rgba(45,212,178,0.12),transparent 60%),radial-gradient(760px 520px at -8% 112%,rgba(123,97,255,0.10),transparent 55%),linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%)}
 .lvy-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px;opacity:.45;pointer-events:none}
 .lvy-page::after{content:'';position:absolute;inset:6px;border:1px solid rgba(45,212,178,0.16);border-radius:5px;pointer-events:none}
-.lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:46px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
+.lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:38px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
 #lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
 #levyReportPages{position:relative;z-index:1}
-.lvy-interp{margin-top:24px}
-.lvy-lead{font-size:13px;color:#aebecb;line-height:1.6;max-width:780px;margin-bottom:14px}
+.lvy-interp{margin-top:16px}
+.lvy-lead{font-size:13px;color:#aebecb;line-height:1.55;max-width:780px;margin-bottom:9px}
 .lvy-cards{display:flex;gap:16px}
-.lvy-card{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:15px 17px}
+.lvy-card{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:12px 16px}
 .lvy-card-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#2DD4B2;margin-bottom:7px}
 .lvy-card-b{font-size:12.5px;color:#d2dde7;line-height:1.5}
+.lvy-util{margin-top:15px}
+.lvy-util-rows{display:flex;flex-direction:column;gap:9px;max-width:640px}
+.lvy-util-row{display:flex;align-items:center;gap:12px}
+.lvy-util-row .yr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#8ba0b6;min-width:52px}
+.lvy-util-row .bar{flex:1;height:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:99px;overflow:hidden}
+.lvy-util-row .bar .fill{height:100%;border-radius:99px}
+.lvy-util-row .pct{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
 .lvy-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
 .lvy-brand{font-size:13px;color:#8ba0b6;letter-spacing:.02em}
 .lvy-title{font-size:30px;font-weight:800;margin-top:2px}
@@ -669,7 +676,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25h</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1387,12 +1394,14 @@ function levyReportData(){
   var maxLevel=levels.length?Math.max.apply(null,levels):0;
   var incomeTotal=levyData.monthlyAvg*M, util=incomeTotal?(tT+tE)/incomeTotal:0;
   var stage=ci.total>0?'Scaling':(expVal>annual*0.15?'Under-using':'Optimising');
+  var yearUtil=[];
+  for(var yy=0;yy<projYears;yy++){var dd=0,ip=0;for(var mm=0;mm<12;mm++){var ix=yy*12+mm;if(ix<M){dd+=tot[ix];ip+=income[ix];}}yearUtil.push(ip?dd/ip:0);}
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
     programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
-    subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage};
+    subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil};
 }
 function levyRag(d){
   if(d.coInvest<1) return {label:'Comfortably Covered',col:'#2DD4B2'};
@@ -1478,6 +1487,8 @@ function levyPage1(d,framing){
        ['Ready to progress to',progText],
        ['Wider impact',svText]];
   var cardsHtml=cards.map(function(c){return '<div class="lvy-card"><div class="lvy-card-t">'+c[0]+'</div><div class="lvy-card-b">'+c[1]+'</div></div>';}).join('');
+  var utilBars=(d.yearUtil||[]).map(function(u,i){var pct=Math.round(u*100),over=pct>100,col=over?'#e0607a':(pct>=85?'#E0A43B':'#2DD4B2');return '<div class="lvy-util-row"><span class="yr">Year '+(i+1)+'</span><div class="bar"><div class="fill" style="width:'+Math.min(100,pct)+'%;background:'+col+'"></div></div><span class="pct" style="color:'+col+'">'+pct+'%</span></div>';}).join('');
+  var utilSection='<div class="lvy-util"><div class="lvy-sec">Levy utilisation by year</div><div class="lvy-util-rows">'+utilBars+'</div></div>';
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
       '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
@@ -1485,6 +1496,7 @@ function levyPage1(d,framing){
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(255,255,255,0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
       '<div class="lvy-figs">'+figures+'</div>'+
+      utilSection+
       '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
       '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.</div>'+
     '</div></div>';
