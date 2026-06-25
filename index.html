@@ -128,6 +128,8 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
 .lvy-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
 .lvy-table td.r,.lvy-table th.r{text-align:right;font-variant-numeric:tabular-nums}
+.lvy-money{display:inline-flex;justify-content:space-between;gap:6px;min-width:74px;font-variant-numeric:tabular-nums;text-align:left}
+.lvy-money .cur{opacity:.6}
 .lvy-figs .lvy-fv{font-variant-numeric:tabular-nums}
 .lvy-cols{display:flex;gap:22px;margin-top:16px}
 .lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:16px 18px}
@@ -667,7 +669,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25g</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1398,6 +1400,7 @@ function levyRag(d){
   return {label:'Significant Co-investment',col:'#e0607a'};
 }
 function lvK(v){return '£'+Math.round(v).toLocaleString('en-GB');}
+function lvMoney(v){return '<span class="lvy-money"><span class="cur">£</span><span>'+Math.round(v).toLocaleString('en-GB')+'</span></span>';}
 /* goal picks the lead metric; framing picks the voice */
 function levyHeadline(d,framing){
   var g=(scnGoal&&scnGoal.key)||'cash', num,lab,sub;
@@ -1490,7 +1493,7 @@ function levyPage2(d,framing){
   var fin=framing==='finance';
   var rows=d.programmes.map(function(p){
     var training=p.cost*RULEBOOK.draw.training*p.count, epa=p.cost*RULEBOOK.draw.epa*p.count;
-    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+'</td><td class="r">'+lvK(p.cost)+'</td><td class="r">'+lvK(training)+'</td><td class="r" style="color:#E0A43B">'+lvK(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
+    return '<tr><td style="color:#fff">'+p.name+'</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(training)+'</td><td class="r" style="color:#E0A43B">'+lvMoney(epa)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &rarr; '+fmtD(p.epa)+'</td></tr>';
   }).join('');
   var leftTitle=fin?'Optimisation &amp; risk':'Development plan';
   var leftBody=fin
