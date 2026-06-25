@@ -697,7 +697,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25w</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1690,28 +1690,35 @@ function renderProjection(){
   document.getElementById('projectionSection').classList.remove('hidden');
   const M=projYears*12,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
   const income=Array(M).fill(levyData.monthlyAvg);
-  const ts=Array(M).fill(0),es=Array(M).fill(0),ev=[];
+  const ts=Array(M).fill(0),es=Array(M).fill(0),us=Array(M).fill(0),ev=[];
   programmes.forEach(p=>{
+    if(p.type==='unit'){ // 30% milestone at 30% of delivery weeks, 70% at completion
+      const sm=mKey(p.start),wks=Math.max(1,+p.weeks||4),rate=(+p.cost||0)*(+p.count||0);
+      const i1=sm+Math.round(wks*0.30/4.345)-pmk; if(i1>=0&&i1<M)us[i1]+=rate*RULEBOOK.unit.m1;
+      const i2=sm+Math.round(wks/4.345)-pmk; if(i2>=0&&i2<M)us[i2]+=rate*RULEBOOK.unit.m2;
+      return;
+    }
     const sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
     const mt=(p.cost*RULEBOOK.draw.training/dur)*p.count,et=p.cost*RULEBOOK.draw.epa*p.count;
     for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
     const ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
   const tot=ts.map((s,i)=>s+es[i]);
+  const combined=tot.map((s,i)=>s+us[i]); // total levy demand per month (appr + unit)
   let bal=levyData.balance;
-  const bals=tot.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
+  const bals=combined.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
   const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
   const tc=ts.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>tot[i]>income[i]?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
   if(projChart)projChart.destroy();
-  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
+  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:'rgba(123,97,255,0.72)',stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Shortfall months</div><div class="mv ${sf>0?'c-red':'c-teal'}">${sf}</div><div class="ms">${sf>0?'Review timing or volume':'All months covered'}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
   renderShortfallAdvice(income,tot,ev,labels,pmk);updateSectionNav();
-  const exp=simulateLevyFIFO(income,tot,pmk,M);
+  const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
     ew.style.display='block';
@@ -1743,7 +1750,7 @@ function renderProjection(){
     sv.style.display='block';
     sv.innerHTML=`&#129309; <strong>Social value.</strong> Gifting <span class="amt">${fmt(svGift)}</span> of ${src} levy to an SME, charity or supply-chain partner ${enabled>=1?`could fully fund <span class="amt">~${enabled}</span> apprenticeship${enabled!==1?'s':''} elsewhere`:'contributes toward funding an apprenticeship elsewhere'} <span style="color:var(--text3)">(based on your average programme cost of ${fmt(svPerHead)} per apprentice)</span>. Evidences the UK Social Value Model theme <strong>&ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;</strong>, reportable in tenders and CSR. <span style="color:var(--text3)">Indicative, based on your figures.</span>`;
   }else sv.style.display='none';
-  const ci=simCoInvest(income,tot,pmk);
+  const ci=simCoInvest(income,tot,pmk,us);
   lastGoalCtx={endBal:bals[M-1],exp,ci,ev,income,tot};
   renderGoalEmphasis(lastGoalCtx);
   renderPlan();
