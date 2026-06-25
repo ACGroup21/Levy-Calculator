@@ -683,7 +683,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1407,6 +1407,7 @@ function levyReportData(){
   var yearUtil=[];
   for(var yy=0;yy<projYears;yy++){var dd=0,ip=0;for(var mm=0;mm<12;mm++){var ix=yy*12+mm;if(ix<M){dd+=tot[ix];ip+=income[ix];}}yearUtil.push(ip?dd/ip:0);}
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
+    levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
@@ -1475,8 +1476,8 @@ function levyPage1(d,framing){
   var goalChip=(scnGoal&&scnGoal.key)?'<span style="display:inline-flex;align-items:center;gap:7px;font-size:11px"><span style="width:7px;height:7px;border-radius:50%;background:#2DD4B2;box-shadow:0 0 9px #2DD4B2,0 0 4px #2DD4B2"></span><span style="color:#2DD4B2;text-shadow:0 0 9px rgba(45,212,178,0.75);font-weight:700;letter-spacing:.02em">Goal</span><span style="color:#c7d6e2">&nbsp;'+scnGoal.label+'</span></span>':'';
   var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figures=fin
-    ? fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+fig('Account balance',lvK(d.balance))
-    : fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+fig('Levy per head',lvK(d.perHead));
+    ? fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+fig('Account balance',lvK(d.balance))
+    : fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+fig('Levy per head',lvK(d.perHead));
   var narrative=fin
     ? 'Your levy carries this plan. '+(d.stage==='Under-using'?'The priority now is putting more of it to work before it expires.':d.stage==='Scaling'?'Keep co-investment in view as your commitments grow.':'It is working efficiently — protect the surplus and the timing.')
     : 'A structured investment in '+d.heads+' of your people'+(d.subjectCount>1?' across '+d.subjectCount+' skill areas':'')+', building capability that is evidenced at assessment, not assumed.';
