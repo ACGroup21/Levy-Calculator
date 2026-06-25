@@ -684,6 +684,7 @@ footer span{color:var(--teal)}
         </div>
         <label class="plan-label">Your business calendar — click a month to cycle: Normal → <span style="color:var(--red)">Peak (avoid)</span> → <span style="color:var(--teal)">Quiet (good to start)</span></label>
         <div class="month-grid" id="monthGrid"></div>
+        <div style="display:flex;justify-content:flex-end;margin:-0.75rem 0 1.1rem"><button class="btn-clear" onclick="clearMonths()" style="padding:5px 12px;font-size:12px">Clear calendar</button></div>
         <details class="otj-details">
           <summary>Off-the-job hours per week, by level <span style="color:var(--text3);font-weight:400">(editable — higher levels study more)</span></summary>
           <div class="otj-grid" id="otjGrid"></div>
@@ -717,7 +718,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26c</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1935,6 +1936,10 @@ let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj
 function resetPlan(){
   planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6.5,4:7.5,5:8,6:10,7:12}};
   syncPlanInputs();buildMonthGrid();buildOtjGrid();savePlanCfg();renderPlan();
+}
+function clearMonths(){
+  planCfg.months=Array(12).fill(0);
+  buildMonthGrid();renderPlan();savePlanCfg();
 }
 let bhYear=new Date().getFullYear();
 function setBhYear(y){bhYear=Number(y);renderBhList();}
