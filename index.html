@@ -105,8 +105,18 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-toggle button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:7px;padding:6px 13px;cursor:pointer;white-space:nowrap}
 .lvy-toggle button.on{background:var(--teal);color:#06121f;font-weight:600}
 .lvy-btn{font-size:13px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);border-radius:8px;padding:8px 15px;cursor:pointer}
-.lvy-page{width:1123px;max-width:100%;background:linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%);border-radius:6px;overflow:hidden;margin-bottom:18px;box-shadow:0 12px 40px rgba(0,0,0,0.5);color:#fff}
-.lvy-inner{box-sizing:border-box;min-height:794px;padding:46px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
+.lvy-page{position:relative;width:1123px;max-width:100%;border-radius:6px;overflow:hidden;margin-bottom:18px;box-shadow:0 12px 40px rgba(0,0,0,0.55);color:#fff;background:radial-gradient(900px 520px at 80% -10%,rgba(45,212,178,0.12),transparent 60%),radial-gradient(760px 520px at -8% 112%,rgba(123,97,255,0.10),transparent 55%),linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%)}
+.lvy-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px;opacity:.45;pointer-events:none}
+.lvy-page::after{content:'';position:absolute;inset:6px;border:1px solid rgba(45,212,178,0.16);border-radius:5px;pointer-events:none}
+.lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:46px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
+#lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
+#levyReportPages{position:relative;z-index:1}
+.lvy-interp{margin-top:24px}
+.lvy-lead{font-size:13px;color:#aebecb;line-height:1.6;max-width:780px;margin-bottom:14px}
+.lvy-cards{display:flex;gap:16px}
+.lvy-card{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:15px 17px}
+.lvy-card-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#2DD4B2;margin-bottom:7px}
+.lvy-card-b{font-size:12.5px;color:#d2dde7;line-height:1.5}
 .lvy-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
 .lvy-brand{font-size:13px;color:#8ba0b6;letter-spacing:.02em}
 .lvy-title{font-size:30px;font-weight:800;margin-top:2px}
@@ -656,7 +666,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25e</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1390,9 +1400,34 @@ function levyHeadline(d,framing){
 function openLevyReport(){
   if(!programmes.length){alert('Add at least one apprenticeship programme first.');return;}
   document.getElementById('levyReportOverlay').style.display='flex';
-  renderLevyReport();
+  renderLevyReport();lvyBg.start();
 }
-function closeLevyReport(){document.getElementById('levyReportOverlay').style.display='none';}
+function closeLevyReport(){document.getElementById('levyReportOverlay').style.display='none';lvyBg.stop();}
+/* Animated backdrop for the report overlay: drifting network + rising motes (on-screen only;
+   sits behind the opaque pages, so PDFs stay crisp). */
+var lvyBg=(function(){
+  var raf=null,cv,ctx,w,h,nodes,motes,bound=false,DPR=Math.min(window.devicePixelRatio||1,2);
+  function resize(){
+    if(!cv)return;
+    w=cv.width=innerWidth*DPR;h=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';
+    var n=Math.min(64,Math.round(innerWidth*innerHeight/24000));
+    nodes=Array.from({length:n},function(){return{x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*0.15*DPR,vy:(Math.random()-.5)*0.15*DPR,r:(Math.random()*1.5+0.6)*DPR};});
+    motes=Array.from({length:26},function(){return{x:Math.random()*w,y:Math.random()*h,vy:-(Math.random()*0.4+0.12)*DPR,r:(Math.random()*1.2+0.5)*DPR,a:Math.random()*0.35+0.1};});
+  }
+  var LINK=145;
+  function frame(){
+    var lk=LINK*DPR;ctx.clearRect(0,0,w,h);
+    for(var i=0;i<nodes.length;i++){var n=nodes[i];n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;}
+    for(var i=0;i<nodes.length;i++)for(var j=i+1;j<nodes.length;j++){var a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<lk){var o=(1-d/lk)*0.13;ctx.strokeStyle='rgba(45,212,178,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.55;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+    for(var i=0;i<nodes.length;i++){var n=nodes[i];ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.fillStyle='rgba(120,210,196,0.5)';ctx.fill();}
+    for(var i=0;i<motes.length;i++){var m=motes[i];m.y+=m.vy;if(m.y<0){m.y=h;m.x=Math.random()*w;}ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fillStyle='rgba(167,139,250,'+m.a.toFixed(2)+')';ctx.fill();}
+    raf=requestAnimationFrame(frame);
+  }
+  return {
+    start:function(){cv=document.getElementById('lvyReportBg');if(!cv||raf)return;ctx=cv.getContext('2d');resize();if(!bound){addEventListener('resize',resize);bound=true;}frame();},
+    stop:function(){if(raf){cancelAnimationFrame(raf);raf=null;}}
+  };
+})();
 function setLevyFraming(f){
   LEVY_FRAMING=f;
   document.querySelectorAll('#levyFramingToggle button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-f')===f);});
@@ -1412,6 +1447,18 @@ function levyPage1(d,framing){
   var narrative=fin
     ? 'On the data provided, '+lvK(d.levyCovered)+' of your '+lvK(d.planCost)+' apprenticeship plan is met from your levy'+(d.coInvest?', with '+lvK(d.coInvest)+' employer co-investment across '+d.coMonths+' month'+(d.coMonths!==1?'s':''):' with no employer co-investment')+'.'+(d.expiry?' '+lvK(d.expiry)+' is forecast to expire unused unless committed or gifted.':'')
     : 'This plan develops '+d.heads+' people across '+d.progCount+' programme'+(d.progCount!==1?'s':'')+', investing '+lvK(d.planCost)+' in skills'+(d.coInvest?' for '+lvK(d.coInvest)+' of employer co-investment':' at no additional cost beyond your levy')+'.'+(d.expiry?' '+lvK(d.expiry)+' of levy could fund further development before it expires.':'');
+  var interpHead=fin?'What this means':'What this means for your people';
+  var interpLead=fin
+    ? 'In budget terms, this plan is '+(d.coInvest?'largely':'fully')+' covered by levy you have already paid. Below: your exposure, the recoverable risk, and the rule change to plan around.'
+    : 'In people terms, this is a structured investment in your workforce — who develops, how, and the difference it makes beyond your own teams.';
+  var cards=fin
+    ? [['Affordability',d.coInvest?lvK(d.coInvest)+' employer co-investment on a '+lvK(d.planCost)+' plan':'Fully funded by your levy — no cash outlay'],
+       ['Recoverable risk',d.expiry?lvK(d.expiry)+' forecast to expire — recoverable if committed or gifted':'No levy forecast to expire'],
+       ['2026 outlook','Co-investment rises to 25% and expiry shortens to 12 months from Aug 2026 — front-load commitments']]
+    : [['Reach',d.heads+' people developed across '+d.progCount+' programme'+(d.progCount!==1?'s':'')],
+       ['How','Structured off-the-job training plus on-the-job exposure, evidenced at end-point assessment'],
+       ['Wider impact',d.giftable?lvK(d.giftable)+' could extend development to ~'+d.svEnabled+' apprenticeship'+(d.svEnabled!==1?'s':'')+' elsewhere':'Your levy is fully directed to your own people']];
+  var cardsHtml=cards.map(function(c){return '<div class="lvy-card"><div class="lvy-card-t">'+c[0]+'</div><div class="lvy-card-b">'+c[1]+'</div></div>';}).join('');
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
       '<div class="lvy-head"><div><div class="lvy-brand">arthur curtis education</div><div class="lvy-title">Affordability report</div></div>'+
@@ -1419,6 +1466,7 @@ function levyPage1(d,framing){
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(255,255,255,0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
       '<div class="lvy-figs">'+figures+'</div>'+
+      '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
       '<div class="lvy-note">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.</div>'+
     '</div></div>';
 }
@@ -2783,6 +2831,7 @@ loadState();
 renderGoalGrid();
 </script>
 <div class="lvy-overlay" id="levyReportOverlay">
+  <canvas id="lvyReportBg"></canvas>
   <div class="lvy-bar">
     <div class="lvy-toggle" id="levyFramingToggle">
       <button data-f="finance" class="on" onclick="setLevyFraming('finance')">Finance / SLT</button>
