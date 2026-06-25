@@ -127,7 +127,13 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
 .lvy-brand{font-size:13px;color:#8ba0b6;letter-spacing:.02em}
 .lvy-title{font-size:30px;font-weight:800;margin-top:2px}
-.lvy-verdict{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border:1px solid;border-radius:14px;padding:20px 24px;margin-bottom:22px}
+.lvy-verdict{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border:1px solid;border-radius:14px;padding:14px 20px;margin-bottom:13px}
+.lvy-decide{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;margin-bottom:12px}
+.lvy-decide-rec{flex:1;min-width:300px;font-size:13px;color:#dfe9f2;line-height:1.45}
+.lvy-decide-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#2DD4B2;display:block;margin-bottom:3px}
+.lvy-risk{display:flex;gap:16px;flex-wrap:wrap}
+.lvy-risk-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#8ba0b6;white-space:nowrap}
+.lvy-risk-item i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 24px}
 .lvy-note{margin-top:auto;padding-top:22px;font-size:10.5px;color:#6e8499;line-height:1.5}
 .lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
@@ -689,7 +695,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25q</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1515,10 +1521,23 @@ function levyPage1(d,framing){
   var cardsHtml=cards.map(function(c){return '<div class="lvy-card"><div class="lvy-card-t">'+c[0]+'</div><div class="lvy-card-b">'+c[1]+'</div></div>';}).join('');
   var utilBars=(d.yearUtil||[]).map(function(u,i){var pct=Math.round(u*100),over=pct>100,col=over?'#e0607a':(pct>=85?'#E0A43B':'#2DD4B2');return '<div class="lvy-util-row"><span class="yr">Year '+(i+1)+'</span><div class="bar"><div class="fill" style="width:'+Math.min(100,pct)+'%;background:'+col+'"></div></div><span class="pct" style="color:'+col+'">'+pct+'%</span></div>';}).join('');
   var utilSection='<div class="lvy-util"><div class="lvy-sec">Levy utilisation by year</div><div class="lvy-util-rows">'+utilBars+'</div></div>';
+  // Board decision: the recommendation (the "ask") + a 3-dimension risk-on-a-page, each grounded in a real signal
+  var finRisk=d.coInvest>d.planCost*0.10?2:((d.coInvest>0||d.expiry>d.annual*0.15)?1:0);
+  var cohMin=scnCohortMin||0, belowCoh=cohMin?d.programmes.some(function(p){return (+p.count||0)<cohMin;}):false;
+  var capBuffer=(planCfg.headcount||1)*(planCfg.hours||37.5)*((planCfg.dip||10)/100);
+  var delivRisk=(d.otjHrsWk>capBuffer)?2:(belowCoh?1:0);
+  var compRisk=d.programmes.every(function(p){return mBetween(p.start,p.epa)>=RULEBOOK.apprenticeshipMinMonths;})?0:2;
+  var rWord=['Low','Watch','High'], rCol=['#2DD4B2','#E0A43B','#e0607a'];
+  var rec=d.coInvest<1?('Proceed — your levy funds this plan in full; approve the '+d.heads+' planned start'+(d.heads!==1?'s':'')+'.')
+    :(d.coInvest<d.planCost*0.10?('Proceed — approve a co-investment budget of '+lvK(d.coInvest)+' over '+d.years+' years.')
+    :('Review scope or phasing before approval — '+lvK(d.coInvest)+' co-investment is significant against the '+lvK(d.planCost)+' plan.'));
+  function riskItem(lab,lvl){return '<span class="lvy-risk-item"><i style="background:'+rCol[lvl]+'"></i>'+lab+' <b style="color:'+rCol[lvl]+'">'+rWord[lvl]+'</b></span>';}
+  var decideStrip='<div class="lvy-decide"><div class="lvy-decide-rec"><span class="lvy-decide-t">RECOMMENDATION</span>'+rec+'</div><div class="lvy-risk">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div></div>';
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
       '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
         '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
+      decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(255,255,255,0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
       '<div class="lvy-figs">'+figures+'</div>'+
