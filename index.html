@@ -603,6 +603,23 @@ footer span{color:var(--teal)}
       </div>
     </div>
 
+    <div class="card" style="margin-top:14px">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px">Or add an apprenticeship unit <span style="color:var(--text3);text-transform:none;letter-spacing:0">&mdash; short, single-element training, levy-funded (live Apr 2026)</span></div>
+      <div class="form-grid">
+        <div class="field" style="grid-column:span 2">
+          <label>Unit</label>
+          <select id="inp-unit" onchange="onUnitChange()"></select>
+        </div>
+        <div class="field"><label>Funding rate (£)</label><input type="number" id="inp-unit-rate" min="0"></div>
+        <div class="field"><label>Learners</label><input type="number" id="inp-unit-count" min="1" value="1"></div>
+        <div class="date-pair">
+          <div class="date-pair-field"><label>Start date</label><input type="date" id="inp-unit-start"></div>
+          <div class="date-pair-field"><label>Delivery weeks <span class="epa-chip">1&ndash;16</span></label><input type="number" id="inp-unit-weeks" min="1" max="16"></div>
+        </div>
+        <div style="display:flex;align-items:flex-end"><button class="btn-add" onclick="addUnit()" style="flex:1;background:rgba(123,97,255,0.12);color:#a78bfa;border-color:rgba(123,97,255,0.4)">+ Add unit</button></div>
+      </div>
+    </div>
+
     <div id="progTable" class="card hidden">
       <div class="sw">
         <table style="min-width:700px">
@@ -697,7 +714,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-25x</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1230,6 +1247,44 @@ function renderMonthTable(){
   </tr>`).join('');
 }
 
+/* Apprenticeship units (live 28 Apr 2026) — Skills England funding rates + min delivery hours.
+   Rate is the fixed funding cap (= drawn from levy), same as an apprenticeship band. Verify vs gov.uk. */
+const UNIT_PRESETS=[
+  {name:'Permanent modular building assembly',rate:3200,hours:140},
+  {name:'Welding (mechanised)',rate:2100,hours:90},
+  {name:'Mechanical fitting and assembly',rate:1650,hours:70},
+  {name:'Electrical fitting and assembly',rate:1650,hours:70},
+  {name:'Battery manufacturing',rate:1650,hours:70},
+  {name:'EV charging point installation & maintenance',rate:950,hours:35},
+  {name:'Solar PV installation & maintenance',rate:950,hours:35},
+  {name:'AI leadership – AI delivery & organisational transformation',rate:750,hours:30},
+  {name:'AI leadership – AI adoption, procurement & governance',rate:750,hours:30},
+  {name:'AI leadership – AI strategy & opportunity',rate:750,hours:30}
+];
+function buildUnitSelect(){
+  const sl=document.getElementById('inp-unit');if(!sl)return;
+  sl.innerHTML=UNIT_PRESETS.map((u,i)=>'<option value="'+i+'">'+u.name+' — £'+u.rate.toLocaleString('en-GB')+' / '+u.hours+'h</option>').join('');
+  onUnitChange();
+  const us=document.getElementById('inp-unit-start');if(us&&!us.value)us.value=todayStr;
+}
+function onUnitChange(){
+  const i=parseInt(document.getElementById('inp-unit').value)||0,u=UNIT_PRESETS[i];if(!u)return;
+  document.getElementById('inp-unit-rate').value=u.rate;
+  document.getElementById('inp-unit-weeks').value=Math.min(16,Math.max(1,Math.round(u.hours/9)));
+}
+function addUnit(){
+  const i=parseInt(document.getElementById('inp-unit').value);if(isNaN(i)||!UNIT_PRESETS[i]){alert('Select a unit.');return;}
+  const u=UNIT_PRESETS[i];
+  const rate=parseFloat(document.getElementById('inp-unit-rate').value)||u.rate;
+  const count=parseInt(document.getElementById('inp-unit-count').value)||1;
+  const start=document.getElementById('inp-unit-start').value;
+  const weeks=Math.min(16,Math.max(1,parseInt(document.getElementById('inp-unit-weeks').value)||4));
+  if(!start){alert('Enter a start date for the unit.');return;}
+  programmes.push({type:'unit',name:u.name,cost:rate,count:count,start:start,weeks:weeks});
+  renderProgrammes();renderProjection();saveState();
+  document.getElementById('levySummary').classList.remove('hidden');
+  document.getElementById('progTable').classList.remove('hidden');
+}
 function addProgramme(overrides){
   let name,cost,count,start,epa;
   if(overrides){({name,cost,count,start,epa}=overrides);}
@@ -1269,6 +1324,11 @@ function renderProgrammes(){
   const pt=document.getElementById('progTable');
   pt.classList.toggle('hidden',!programmes.length);
   document.getElementById('progBody').innerHTML=programmes.map((p,i)=>{
+    if(p.type==='unit'){
+      const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
+      const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
+      return`<tr><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
@@ -2994,7 +3054,7 @@ function renderGoalEmphasis(o){
 }
 
 // Init "things to consider" planner
-loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();updateSectionNav();
+loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();buildUnitSelect();updateSectionNav();
 
 // Restore any previously saved data on load
 loadState();
