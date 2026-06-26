@@ -723,7 +723,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26i</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1287,6 +1287,10 @@ function dataAckNote(){
   return scnDataAck
     ? ' Levy data confirmed by the employer on '+new Date(scnDataAck).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.'
     : ' Levy data not yet confirmed by the employer.';
+}
+function methodNote(){
+  var b=RULEBOOK,pc=function(x){return Math.round(x*100)+'%';};
+  return ' Method: '+Math.round(b.draw.training*100)+'/'+Math.round(b.draw.epa*100)+' drawdown; co-investment '+pc(b.coInvest.before)+'→'+pc(b.coInvest.from)+' on any month the levy account is short; unused funds expire '+b.expiryMonths.before+'→'+b.expiryMonths.from+' months after declaration, oldest first.';
 }
 
 // ── Show-the-working: the RULEBOOK made human-readable (every figure traces back to one of these)
@@ -1884,7 +1888,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+methodNote()+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
   '</div></div>';
 }
 function levyPage3(d,framing){
