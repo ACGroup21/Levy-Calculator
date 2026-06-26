@@ -649,6 +649,7 @@ footer span{color:var(--teal)}
       </div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
+      <div id="projWorking"></div>
       <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:13px;color:var(--text3)">Affordability report &mdash; opens in a new tab:</span>
         <button class="btn-demo" onclick="openLevyReport('finance',this)">&#128196;&nbsp; Finance / SLT &#8599;</button>
@@ -722,7 +723,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26h</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1313,6 +1314,42 @@ function renderRulesRef(){
   el.innerHTML='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:6px 16px 14px;margin-top:8px">'+rows+
     '<div style="margin-top:12px;font-size:11px;color:var(--text3);border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">Rules version <strong style="color:var(--text2)">'+RULEBOOK.version+'</strong> · as of '+RULEBOOK.asOf+' · source: <a href="'+RULEBOOK.source+'" target="_blank" rel="noopener" style="color:var(--blue)">gov.uk apprenticeship funding rules ↗</a>. The engine reads every figure from these values — update them once a year and all projections follow.</div>'+
   '</div>';
+}
+// ── Show-the-working part 1: trace each headline figure to its actual inputs + the rule behind it
+function renderProjWorking(d){
+  var pw=document.getElementById('projWorking');if(!pw)return;
+  if(!programmes.length){pw.innerHTML='';return;}
+  var apprs=programmes.filter(function(p){return p.type!=='unit';});
+  var unitsArr=programmes.filter(function(p){return p.type==='unit';});
+  var T=Math.round(RULEBOOK.draw.training*100),E=Math.round(RULEBOOK.draw.epa*100);
+  function row(label,calc){return '<div style="padding:9px 0;border-top:1px solid rgba(255,255,255,0.06)"><div style="font-weight:600;color:var(--text);font-size:13px;margin-bottom:3px">'+label+'</div><div style="font-size:12px;color:var(--text2);line-height:1.55">'+calc+'</div></div>';}
+  var html='';
+  if(apprs.length){
+    html+=row(T+'% training draw = '+fmt(d.tT)+' <span style="color:var(--text3);font-weight:400">· rule: '+T+'/'+E+' drawdown</span>',
+      apprs.map(function(p){return p.name+' &times;'+p.count+': '+fmt(p.cost)+' &times; '+p.count+' &times; '+T+'% = <strong style="color:var(--text)">'+fmt(p.cost*RULEBOOK.draw.training*p.count)+'</strong> spread over '+mBetween(p.start,p.epa)+' months';}).join('<br>'));
+    html+=row(E+'% EPA payments = '+fmt(d.tE)+' <span style="color:var(--text3);font-weight:400">· rule: '+T+'/'+E+' drawdown</span>',
+      apprs.map(function(p){return p.name+' &times;'+p.count+': '+fmt(p.cost)+' &times; '+p.count+' &times; '+E+'% = <strong style="color:var(--text)">'+fmt(p.cost*RULEBOOK.draw.epa*p.count)+'</strong> at end-point assessment';}).join('<br>'));
+  }
+  if(unitsArr.length){
+    var ut=unitsArr.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
+    html+=row('Apprenticeship units = '+fmt(ut)+' <span style="color:var(--text3);font-weight:400">· rule: units '+Math.round(RULEBOOK.unit.m1*100)+'/'+Math.round(RULEBOOK.unit.m2*100)+'</span>',
+      unitsArr.map(function(p){return p.name+' &times;'+p.count+': '+fmt((+p.cost||0)*(+p.count||0))+' ('+Math.round(RULEBOOK.unit.m1*100)+'% at '+Math.round(RULEBOOK.unit.m1*100)+'% of delivery, '+Math.round(RULEBOOK.unit.m2*100)+'% on completion)';}).join('<br>'));
+  }
+  html+=row('Co-investment = '+fmt(d.ci.total)+' <span style="color:var(--text3);font-weight:400">· rule: '+Math.round(RULEBOOK.coInvest.before*100)+'% → '+Math.round(RULEBOOK.coInvest.from*100)+'%</span>',
+    d.ci.total>1
+      ? 'In '+d.ci.months.length+' month'+(d.ci.months.length>1?'s':'')+' ('+d.ci.months.map(function(m){return d.labels[m.i];}).join(', ')+') the levy account is exhausted; the employer pays '+Math.round(RULEBOOK.coInvest.before*100)+'% (25% from Aug 2026) of the uncovered cost and the government pays the rest. Each month stands alone — next month’s levy can’t repay it.'
+      : 'The levy covers every month of demand across the horizon — no co-investment is triggered.');
+  html+=row('Funds forecast to expire = '+fmt(d.exp.total)+' <span style="color:var(--text3);font-weight:400">· rule: '+RULEBOOK.expiryMonths.before+' → '+RULEBOOK.expiryMonths.from+'-month expiry</span>',
+    d.exp.total>1
+      ? 'Unused funds expire '+RULEBOOK.expiryMonths.before+' months after declaration ('+RULEBOOK.expiryMonths.from+' from Aug 2026), oldest spent first. The first '+fmt(d.exp.byMonth[0].amount)+' ages out in '+mkLbl(d.exp.byMonth[0].mk)+'.'
+      : 'No funds are forecast to age out unused within the '+d.M+'-month horizon.');
+  var totalInc=d.income.reduce(function(a,b){return a+b;},0);
+  html+=row('Closing balance = '+fmt(d.bals[d.M-1])+' <span style="color:var(--text3);font-weight:400">· opening + income − drawdown</span>',
+    'Opening '+fmt(levyData.balance)+', plus '+fmt(totalInc)+' levy income, less the training / EPA / unit amounts above, over '+d.M+' months. The balance is floored at £0 — in any exhausted month the shortfall becomes co-investment, not a negative pot.');
+  pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
+    '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:4px 16px 12px;margin-top:8px">'+html+
+    '<div style="margin-top:11px;font-size:11px;color:var(--text3);border-top:1px solid rgba(255,255,255,0.06);padding-top:9px">Every rate above is read from the funding rulebook (see “Funding rules applied” near the top). Figures use the data you provided'+(scnDataAck?'.':' — not yet confirmed.')+'</div>'+
+  '</div></details>';
 }
 
 function loadDemo(){
@@ -1969,6 +2006,7 @@ function renderProjection(){
       <div id="expiryDetailBody"></div>`;
     renderExpiryTables();
   }else ew.style.display='none';
+  renderProjWorking({tT,tE,ci:ciBase,exp,bals,M,income,labels,pmk});
   renderAffordLadder(ciBase.total,exp.total);
   const epaList=document.getElementById('epaList');
   if(ev.length){epaList.classList.remove('hidden');document.getElementById('epaBody').innerHTML=ev.map(e=>{const ok=tot[e.idx]<=income[e.idx];return`<tr><td class="mono">${labels[e.idx]}</td><td class="td-name">${e.name}</td><td class="r mono">${e.count}</td><td class="r mono c-amber">${fmt(e.amount)}</td><td class="r mono">${fmt(income[e.idx])}</td><td><span class="badge ${ok?'badge-ok':'badge-bad'}">${ok?'COVERED':'SHORTFALL'}</span></td></tr>`;}).join('');}else epaList.classList.add('hidden');
