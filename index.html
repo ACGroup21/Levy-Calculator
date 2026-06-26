@@ -478,6 +478,7 @@ footer span{color:var(--teal)}
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
       <span><strong>Rule change — August 2026:</strong> Levy funds declared before August 2026 expire after <strong>24 months</strong>. From August 2026 onwards, funds expire after <strong>12 months</strong>. This tool applies the correct window per declaration date automatically.</span>
     </div>
+    <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
   <!-- STEP 00: GOAL -->
@@ -721,7 +722,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26g</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1285,6 +1286,33 @@ function dataAckNote(){
   return scnDataAck
     ? ' Levy data confirmed by the employer on '+new Date(scnDataAck).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.'
     : ' Levy data not yet confirmed by the employer.';
+}
+
+// ── Show-the-working: the RULEBOOK made human-readable (every figure traces back to one of these)
+function fundingRulesRef(){
+  var b=RULEBOOK, pc=function(x){return Math.round(x*100)+'%';};
+  return [
+    {label:'Levy top-up',value:'+'+pc(b.topUpRate),eff:'all declarations',detail:'The government adds '+pc(b.topUpRate)+' to every levy declaration before it reaches your account.'},
+    {label:'Drawdown split',value:pc(b.draw.training)+' / '+pc(b.draw.epa),eff:'per programme',detail:pc(b.draw.training)+' of each funding band is drawn in equal monthly instalments across the practical period; the final '+pc(b.draw.epa)+' is released on end-point assessment.'},
+    {label:'Co-investment',value:pc(b.coInvest.before)+' → '+pc(b.coInvest.from),eff:'boundary Aug 2026',detail:'When the account can’t cover a month, the employer pays this share of the uncovered cost (government pays the rest). Rises from '+pc(b.coInvest.before)+' to '+pc(b.coInvest.from)+' for costs from Aug 2026.'},
+    {label:'Fund expiry',value:b.expiryMonths.before+'mo → '+b.expiryMonths.from+'mo',eff:'boundary Aug 2026',detail:'Unused funds expire this many months after declaration ('+b.expiryMonths.before+'mo before Aug 2026, '+b.expiryMonths.from+'mo from), oldest spent first (FIFO).'},
+    {label:'Transfer cap',value:pc(b.transferCapPct),eff:'annual',detail:'You may gift up to '+pc(b.transferCapPct)+' of your annual levy to other employers; they receive 100% funding for the training.'},
+    {label:'Apprenticeship minimum',value:b.apprenticeshipMinMonths+' months',eff:'from 2025',detail:'An apprenticeship must run at least '+b.apprenticeshipMinMonths+' months to be levy-fundable; shorter needs go via a unit.'},
+    {label:'Apprenticeship units',value:pc(b.unit.coInvest)+' · '+pc(b.unit.m1)+'/'+pc(b.unit.m2),eff:'from Apr 2026',detail:b.unit.minHours+'–'+b.unit.maxHours+'h single-element units: '+pc(b.unit.m1)+' drawn at '+pc(b.unit.m1)+' of delivery, '+pc(b.unit.m2)+' on completion, '+pc(b.unit.coInvest)+' co-invest, paid after apprenticeships.'},
+    {label:'Achievement benchmark',value:pc(b.achievementBenchmark),eff:'QAR FY2024/25',detail:'National apprenticeship achievement rate (~'+pc(b.achievementBenchmark)+') — the “stay on track” floor the report measures ambition against.'}
+  ];
+}
+function renderRulesRef(){
+  var el=document.getElementById('rulesRef');if(!el)return;
+  var rows=fundingRulesRef().map(function(r){
+    return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;padding:9px 0;border-top:1px solid rgba(255,255,255,0.06)">'+
+      '<div><div style="font-weight:600;color:var(--text);font-size:13.5px">'+r.label+'</div><div style="font-size:12px;color:var(--text3);line-height:1.45;margin-top:2px">'+r.detail+'</div></div>'+
+      '<div style="text-align:right;white-space:nowrap"><div style="font-family:\'JetBrains Mono\',monospace;color:var(--teal);font-size:13px">'+r.value+'</div><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+r.eff+'</div></div>'+
+    '</div>';
+  }).join('');
+  el.innerHTML='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:6px 16px 14px;margin-top:8px">'+rows+
+    '<div style="margin-top:12px;font-size:11px;color:var(--text3);border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">Rules version <strong style="color:var(--text2)">'+RULEBOOK.version+'</strong> · as of '+RULEBOOK.asOf+' · source: <a href="'+RULEBOOK.source+'" target="_blank" rel="noopener" style="color:var(--blue)">gov.uk apprenticeship funding rules ↗</a>. The engine reads every figure from these values — update them once a year and all projections follow.</div>'+
+  '</div>';
 }
 
 function loadDemo(){
@@ -3217,6 +3245,7 @@ loadPlanCfg();syncPlanInputs();buildMonthGrid();buildOtjGrid();buildJdSelect();b
 loadState();
 renderGoalGrid();
 (function(){var ci=document.getElementById('cohortMin');if(ci&&scnCohortMin)ci.value=scnCohortMin;})();
+renderRulesRef();
 </script>
 <div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
 </body>
