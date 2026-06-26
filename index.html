@@ -514,6 +514,15 @@ footer span{color:var(--teal)}
       <button id="clearDataBtn" onclick="clearSavedData()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:6px 12px">Clear saved data</button>
     </div>
     <div id="csvStatus" class="status"></div>
+    <details style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:13px">
+      <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128200;</span>Don&rsquo;t have your ESFA export? <span style="color:var(--teal)">Estimate from payroll &#9662;</span></summary>
+      <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
+        <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <button class="btn-demo" onclick="estimateLevyFromPayroll()" style="white-space:nowrap">Estimate my levy</button>
+      </div>
+      <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
+    </details>
   </div>
 
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
@@ -723,7 +732,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26j</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1071,6 +1080,8 @@ const RULEBOOK={
   source:'https://www.gov.uk/government/publications/apprenticeship-funding-rules',
   boundaryMk:2026*12+7,             // Aug 2026 rule-change boundary (month-key = year*12 + monthIndex)
   topUpRate:0.10,                   // 10% government top-up on levy declarations
+  levyRate:0.005,                   // apprenticeship levy = 0.5% of annual pay bill
+  levyAllowance:15000,              // annual levy allowance (only pay bill > £3m actually pays)
   draw:{training:0.80,epa:0.20},    // 80% drawn over the practical period, 20% at EPA completion
   transferCapPct:0.50,              // employer may gift up to 50% of annual levy
   coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
@@ -1242,9 +1253,29 @@ function buildLevyData(mm,tI,tO,rc,issues){
   renderSummary();renderMonthTable();renderDataQuality(validateLevyData(byMonth,issues));saveState();
 }
 
+// ── #10d: estimate the levy from pay bill when there's no ESFA export (new/first-time payers)
+function estimateLevyFromPayroll(){
+  var gv=function(id){return parseFloat((document.getElementById(id).value||'').toString().replace(/[£,\s]/g,''))||0;};
+  var pb=gv('est-paybill');
+  if(pb<=0){setStatus('Enter your annual pay bill to estimate your levy.','warn');return;}
+  var annualLevy=Math.max(0, pb*RULEBOOK.levyRate - RULEBOOK.levyAllowance);
+  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
+  var openBal=gv('est-balance');
+  var base=mKey(today), byMonth=[];
+  for(var i=0;i<12;i++){var mk=base+i, ew=expMo(mk);byMonth.push({month:isoMo(mk),levy:monthlyLevy,topup:monthlyTopup,paid:0,mk:mk,income:monthlyIncome,net:monthlyIncome,ew:ew,expiresLabel:mkLbl(mk+ew)});}
+  levyData={monthlyAvg:monthlyIncome,balance:openBal,byMonth:byMonth,estimated:true};
+  scnDataAck=null;
+  renderSummary();renderMonthTable();renderDataQuality(validateLevyData(byMonth,{estimate:true}));
+  document.getElementById('levySummary').classList.remove('hidden');
+  if(programmes.length)renderProjection();
+  saveState();
+  setStatus('[ESTIMATE] '+(annualLevy>0?('Annual levy ≈ '+fmt(annualLevy)+' ('+fmt(monthlyIncome)+'/mo incl. 10% top-up)'):'Pay bill is below the £3m threshold — no levy is due.')+' Confirm against your ESFA account when available.','ok');
+}
+
 // ── Data integrity: surface what the parser skipped / coerced, and flag anomalies (the trust front door)
 function validateLevyData(byMonth,issues){
   issues=issues||{};const f=[];
+  if(issues.estimate)f.push({sev:'info',msg:'These figures are <strong>estimated from your annual pay bill</strong> — not actual ESFA data. The account is assumed to open at '+fmt(levyData.balance||0)+' and the levy to accrue evenly each month. Confirm against your apprenticeship service account when you have it.'});
   if(issues.badCells)f.push({sev:'warn',msg:issues.badCells+' value'+(issues.badCells>1?'s':'')+' in the “Levy declared” column couldn’t be read as a number and '+(issues.badCells>1?'were':'was')+' treated as £0'+(issues.badExamples&&issues.badExamples.length?' (e.g. “'+issues.badExamples.join('”, “')+'”)':'')+' — check those rows in your export.'});
   if(issues.unknownMonth)f.push({sev:'warn',msg:issues.unknownMonth+' row'+(issues.unknownMonth>1?'s':'')+' had no readable month and '+(issues.unknownMonth>1?'were':'was')+' grouped under “Unknown”.'});
   if(!byMonth.length){f.push({sev:'error',msg:'No usable rows were found in this file.'});return f;}
@@ -1297,6 +1328,7 @@ function methodNote(){
 function fundingRulesRef(){
   var b=RULEBOOK, pc=function(x){return Math.round(x*100)+'%';};
   return [
+    {label:'Levy calculation',value:'0.5% − £15k',eff:'pay bill > £3m',detail:'The apprenticeship levy is 0.5% of your annual pay bill minus a £15,000 allowance — only employers with a pay bill above £3m pay it. (Used by the estimate-from-payroll option.)'},
     {label:'Levy top-up',value:'+'+pc(b.topUpRate),eff:'all declarations',detail:'The government adds '+pc(b.topUpRate)+' to every levy declaration before it reaches your account.'},
     {label:'Drawdown split',value:pc(b.draw.training)+' / '+pc(b.draw.epa),eff:'per programme',detail:pc(b.draw.training)+' of each funding band is drawn in equal monthly instalments across the practical period; the final '+pc(b.draw.epa)+' is released on end-point assessment.'},
     {label:'Co-investment',value:pc(b.coInvest.before)+' → '+pc(b.coInvest.from),eff:'boundary Aug 2026',detail:'When the account can’t cover a month, the employer pays this share of the uncovered cost (government pays the rest). Rises from '+pc(b.coInvest.before)+' to '+pc(b.coInvest.from)+' for costs from Aug 2026.'},
