@@ -732,7 +732,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1633,8 +1633,14 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   recs+=`<li>You can also gift surplus levy earlier (so less is drawn down later), stagger programme starts, or accept the co-investment as a planned cost.</li>`;
   const mList=base.months.map(m=>labels[m.i]).join(', ');
   const has25=base.months.some(m=>m.rate>=0.25);
+  // unavoidable floor: co-investment from the training draw alone — deferring/spreading EPA can't touch this
+  var trainOnly=tot.slice(); ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});
+  var floorCo=simCoInvest(income,trainOnly,pmk,uTot).total;
+  var unavoid=floorCo>1
+    ? '<div style="margin-top:10px;padding:10px 12px;background:rgba(255,76,106,0.06);border:1px solid rgba(255,76,106,0.28);border-radius:8px"><strong style="color:#ff8fa3">&#9888; Some co-investment is unavoidable.</strong> About <strong>'+fmt(floorCo)+'</strong> comes from your monthly training draw out-pacing the levy &mdash; not EPA timing &mdash; so deferring or spreading payments won&rsquo;t remove it. Reduce it by extending durations, staggering starts or fewer concurrent learners; whatever remains is a real cost to <strong>budget for</strong>'+(has25?', charged at <strong>25%</strong> for spend from Aug 2026.':' (5%).')+' It is carried into the cost report.</div>'
+    : '<div style="margin-top:8px;font-size:12px;color:var(--text3)">Retiming the EPA payments above can bring co-investment close to nil. Anything you don&rsquo;t retime is a real cost to budget for'+(has25?' (25% from Aug 2026)':' (5%)')+' &mdash; it is carried into the cost report.</div>';
   el.innerHTML=`<div class="sf-box bad">${goalTag('cash','Serves your goal — minimise cash')}<strong>&#9888; Co-investment cost: ${fmt(base.total)}.</strong> In ${base.months.length} month${base.months.length>1?'s':''} (${mList}) your levy account is exhausted, so you co-invest on the uncovered cost — employer pays <strong>5%</strong> before Aug 2026${has25?' and <strong>25%</strong> from Aug 2026':''}, the government pays the rest. Each month stands alone: next month's levy can't repay an earlier month's co-investment, so act ahead of time.
-    <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul></div>`;
+    <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul>${unavoid}</div>`;
 }
 
 function renderAffordLadder(coInvest,expiry){
