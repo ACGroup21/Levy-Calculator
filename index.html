@@ -733,7 +733,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26p</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1965,10 +1965,10 @@ function levyPage3(d,framing){
   var fin=framing==='finance';
   var noRate=!(d.payRate>0);
   var otjRows=d.programmes.map(function(p){
-    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td>'+(p.hours||0)+' h total</td><td>'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td></tr>';}
+    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td>'+(p.hours||0)+' h total</td><td>'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+(+p.hours||0)*(d.payRate||0))+'</td></tr>';}
     var oh=(planCfg.otj||{})[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
-    return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
+    return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+oh*weeks*(d.payRate||0))+'</td></tr>';
   }).join('');
   var coNote = d.coInvest>1
     ? '<div style="margin-top:11px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(255,76,106,0.05);border:1px solid rgba(255,76,106,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#ff8fa3">Co-investment &asymp;'+lvK(d.coInvest)+' is your cash, not levy.</strong> In '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+' the account is exhausted, so you fund part of the band directly'+(d.coFloor>1?' &mdash; about '+lvK(d.coFloor)+' of it is unavoidable (training draw out-pacing the levy)':'')+', charged at '+(d.co25?'<strong>25%</strong> from Aug 2026':'5%')+'.'+(noRate?'':' Your direct cash for this plan &asymp; <strong>'+lvK(d.coInvest+d.otjCost)+'</strong> (co-investment + off-the-job time).')+'</div>'
@@ -1986,8 +1986,8 @@ function levyPage3(d,framing){
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
-    '<div class="lvy-sec" style="margin-top:18px">Off-the-job commitment by programme</div>'+
-    '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
+    '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
+    '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th><th class="r">Full / learner</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Off-the-job time valued at &pound;'+(d.payRate||0)+'/hr (set in the Plan section). Off-the-job training is a statutory minimum of 6 hours/week, averaged over the practical period — paid working time, not the apprentice&rsquo;s own. Indicative only.</div>'+
   '</div></div>';
 }
