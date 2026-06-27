@@ -593,7 +593,7 @@ footer span{color:var(--teal)}
         </div>
         <div class="field">
           <label>Negotiated price (£)</label>
-          <input type="number" id="inp-cost" placeholder="8000" min="0">
+          <input type="number" id="inp-cost" placeholder="8000" min="0" oninput="renderLearnerCost()">
         </div>
         <div class="field">
           <label>Learners</label>
@@ -602,11 +602,11 @@ footer span{color:var(--teal)}
         <div class="date-pair">
           <div class="date-pair-field">
             <label>Training start date</label>
-            <input type="date" id="inp-start" oninput="updateDurReadout()">
+            <input type="date" id="inp-start" oninput="updateDurReadout();renderLearnerCost()">
           </div>
           <div class="date-pair-field">
             <label>EPA date <span class="epa-chip">20% due here</span></label>
-            <input type="date" id="inp-epa" oninput="updateDurReadout()">
+            <input type="date" id="inp-epa" oninput="updateDurReadout();renderLearnerCost()">
           </div>
         </div>
         <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
@@ -614,6 +614,7 @@ footer span{color:var(--teal)}
           <button class="btn-add" onclick="addProgramme()" style="flex:1">+ Add programme</button>
           <button class="btn-clear" onclick="clearProgForm()">Clear</button>
         </div>
+        <div id="learnerCost"></div>
       </div>
     </div>
 
@@ -732,7 +733,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26o</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1039,6 +1040,36 @@ function onStandardChange(){
   }
   showStandardWarn(s);
   updateDurReadout();
+  renderLearnerCost();
+}
+
+function lcCell(lab,val,sub,col){
+  return '<div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:9px 11px;min-width:0">'+
+    '<div style="font-size:10.5px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
+    '<div style="font-family:\'JetBrains Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
+    '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4">'+sub+'</div></div>';
+}
+// #20 slice 1: cost for a single learner on the selected standard — reuses the engine's rates, before adding to the plan
+function renderLearnerCost(){
+  var el=document.getElementById('learnerCost');if(!el)return;
+  var idx=parseInt(sel.value), s=STANDARDS[idx];
+  var band=parseFloat((document.getElementById('inp-cost').value||'').toString().replace(/[£,\s]/g,''))||0;
+  if(!idx||!s||s.name==='Other / custom'||!band){el.innerHTML='';return;}
+  var start=document.getElementById('inp-start').value, epa=document.getElementById('inp-epa').value;
+  var dur=(start&&epa&&new Date(epa)>new Date(start))?mBetween(start,epa):(s.dur||12);
+  var weeks=Math.max(1,Math.round(dur*4.345));
+  var lvl=s.level||3, otj=(planCfg.otj||{})[lvl]||6, rate=planCfg.rate||0, noRate=!rate;
+  var T=Math.round(RULEBOOK.draw.training*100), E=Math.round(RULEBOOK.draw.epa*100);
+  var training=band*RULEBOOK.draw.training, epaAmt=band*RULEBOOK.draw.epa;
+  var otjCost=Math.round(otj*weeks*rate), fullCost=band+otjCost;
+  var rows=lcCell('Funding band <span style="color:#2DD4B2">levy-funded</span>',fmt(band),T+'% '+fmt(training)+' over '+dur+'mo + '+E+'% '+fmt(epaAmt)+' at EPA','#2DD4B2')+
+    lcCell('Off-the-job time <span style="color:#E0A43B">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set rate in Plan':' &times; £'+rate+'/hr'),'#E0A43B')+
+    lcCell('Full cost of ownership',noRate?fmt(band)+'+':'&asymp;'+fmt(fullCost),'band + off-the-job time','#fff')+
+    lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it','#a78bfa');
+  el.innerHTML='<div style="margin-top:14px;background:rgba(45,212,178,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:12px;padding:13px 16px">'+
+    '<div style="font-weight:700;color:#fff;margin-bottom:2px">Cost per learner <span style="font-weight:400;color:var(--text3);font-size:12px">— '+s.name+'</span></div>'+
+    '<div style="font-size:11.5px;color:var(--text3);margin-bottom:11px">One learner, before adding to your plan. The band is levy-funded; your real cash is the off-the-job time (plus co-investment only if your account runs short).</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px">'+rows+'</div></div>';
 }
 
 function updateDurReadout(){
@@ -1500,7 +1531,7 @@ function clearProgForm(){
   document.getElementById('inp-start').value=todayStr;
   document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
   document.getElementById('standardWarn').style.display='none';
-  updateDurReadout();
+  updateDurReadout();renderLearnerCost();
 }
 
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
