@@ -733,7 +733,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28a</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1025,8 +1025,8 @@ rebuildSelect();
 const today=new Date();
 const todayStr=today.toISOString().slice(0,10);
 const defEPA=new Date(today);defEPA.setMonth(defEPA.getMonth()+18);
-document.getElementById('inp-start').value=todayStr;
-document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
+document.getElementById('inp-start').value='';
+document.getElementById('inp-epa').value='';
 setTimeout(function(){updateDurReadout();},0);
 
 function onStandardChange(){
@@ -1036,7 +1036,9 @@ function onStandardChange(){
   document.getElementById('custom-name-wrap').classList.toggle('hidden',!isC);
   if(idx>0&&!isC){
     document.getElementById('inp-cost').value=s.band||'';
-    if(s.dur){const sd=document.getElementById('inp-start').value||todayStr;const d=new Date(sd);d.setMonth(d.getMonth()+s.dur);document.getElementById('inp-epa').value=d.toISOString().slice(0,10);}
+    var startEl=document.getElementById('inp-start');
+    if(!startEl.value)startEl.value=todayStr;
+    var dur=s.dur||12;const d=new Date(startEl.value);d.setMonth(d.getMonth()+dur);document.getElementById('inp-epa').value=d.toISOString().slice(0,10);
   }
   showStandardWarn(s);
   updateDurReadout();
@@ -1514,7 +1516,7 @@ function addProgramme(overrides){
     if(mBetween(start,epa)<RULEBOOK.apprenticeshipMinMonths&&!confirm('This apprenticeship runs '+mBetween(start,epa)+' months — under the '+RULEBOOK.apprenticeshipMinMonths+'-month minimum, so it would not be levy-eligible as an apprenticeship. Add it anyway?'))return;
     sel.value=0;onStandardChange();
     ['inp-name-custom','inp-cost','inp-count'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('inp-start').value=todayStr;document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
+    document.getElementById('inp-start').value='';document.getElementById('inp-epa').value='';
     updateDurReadout();
   }
   programmes.push({name,cost,count,start,epa});
@@ -1528,8 +1530,8 @@ function clearProgForm(){
   sel.value='';onStandardChange();
   ['inp-name-custom','inp-cost','inp-count'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('inp-count').value='1';
-  document.getElementById('inp-start').value=todayStr;
-  document.getElementById('inp-epa').value=defEPA.toISOString().slice(0,10);
+  document.getElementById('inp-start').value='';
+  document.getElementById('inp-epa').value='';
   document.getElementById('standardWarn').style.display='none';
   updateDurReadout();renderLearnerCost();
 }
