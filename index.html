@@ -134,8 +134,8 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-risk{display:flex;gap:16px;flex-wrap:wrap}
 .lvy-risk-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#8ba0b6;white-space:nowrap}
 .lvy-risk-item i{width:9px;height:9px;border-radius:50%;display:inline-block}
-.lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px 24px}
-.lvy-note{margin-top:auto;padding-top:14px;font-size:10.5px;color:#6e8499;line-height:1.5}
+.lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px 24px}
+.lvy-note{margin-top:auto;padding-top:10px;font-size:10.5px;color:#6e8499;line-height:1.5}
 .lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
 .lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
@@ -732,7 +732,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1707,6 +1707,7 @@ function levyReportData(){
   var tT=ts.reduce(function(a,c){return a+c;},0), tE=es.reduce(function(a,c){return a+c;},0);
   var unitDraw=us.reduce(function(a,c){return a+c;},0);
   var ci=simCoInvest(income,tot,pmk,us), exp=simulateLevyFIFO(income,combined,pmk,M);
+  var coFloor=0; if(ci.total>1){var trainOnly=tot.slice();ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});coFloor=simCoInvest(income,trainOnly,pmk,us).total;}
   var heads=programmes.reduce(function(a,p){return a+(+p.count||0);},0);
   var planCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
   var annual=levyData.monthlyAvg*12, transferCap=annual*RULEBOOK.transferCapPct;
@@ -1731,7 +1732,7 @@ function levyReportData(){
   });
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
-    planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coMonths:ci.months.length,
+    planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coFloor:coFloor,co25:ci.months.some(function(m){return m.rate>=0.25;}),coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
     programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
@@ -1938,7 +1939,10 @@ function levyPage3(d,framing){
     var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
     return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td></tr>';
   }).join('');
-  var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div></div>'+
+  var coNote = d.coInvest>1
+    ? '<div style="margin-top:11px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(255,76,106,0.05);border:1px solid rgba(255,76,106,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#ff8fa3">Co-investment &asymp;'+lvK(d.coInvest)+' is your cash, not levy.</strong> In '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+' the account is exhausted, so you fund part of the band directly'+(d.coFloor>1?' &mdash; about '+lvK(d.coFloor)+' of it is unavoidable (training draw out-pacing the levy)':'')+', charged at '+(d.co25?'<strong>25%</strong> from Aug 2026':'5%')+'.'+(noRate?'':' Your direct cash for this plan &asymp; <strong>'+lvK(d.coInvest+d.otjCost)+'</strong> (co-investment + off-the-job time).')+'</div>'
+    : '';
+  var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div>'+(d.coInvest>1?'<div class="lvy-true-sub" style="color:#ff8fa3">incl. &asymp;'+lvK(d.coInvest)+' your co-invest</div>':'')+'</div>'+
     '<div class="lvy-true-op">+</div>'+
     '<div class="lvy-true-cell"><div class="lvy-true-lab">Off-the-job time</div><div class="lvy-true-num" style="color:#E0A43B">'+(noRate?'set rate':'&asymp;'+lvK(d.otjCost))+'</div><div class="lvy-true-sub">'+d.otjFTE.toFixed(1)+' FTE &middot; '+Math.round(d.otjHrsWk)+' hrs/wk released</div></div>'+
     '<div class="lvy-true-op">=</div>'+
@@ -1949,7 +1953,7 @@ function levyPage3(d,framing){
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
-    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+
+    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Off-the-job commitment by programme</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
