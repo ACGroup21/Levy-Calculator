@@ -614,6 +614,10 @@ footer span{color:var(--teal)}
           <button class="btn-add" onclick="addProgramme()" style="flex:1">+ Add programme</button>
           <button class="btn-clear" onclick="clearProgForm()">Clear</button>
         </div>
+        <div id="lcWageWrap" style="display:none;margin-top:13px">
+          <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Learner&rsquo;s hourly wage <span style="opacity:.7">— optional, sharpens the off-the-job cost</span></label>
+          <input id="lc-wage" type="number" min="0" step="0.5" placeholder="defaults to plan rate" oninput="renderLearnerCost()" style="width:200px;max-width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
+        </div>
         <div id="learnerCost"></div>
       </div>
     </div>
@@ -733,7 +737,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28c</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1053,25 +1057,28 @@ function lcCell(lab,val,sub,col){
 }
 // #20 slice 1: cost for a single learner on the selected standard — reuses the engine's rates, before adding to the plan
 function renderLearnerCost(){
-  var el=document.getElementById('learnerCost');if(!el)return;
+  var el=document.getElementById('learnerCost'), wrap=document.getElementById('lcWageWrap');if(!el)return;
   var idx=parseInt(sel.value), s=STANDARDS[idx];
   var band=parseFloat((document.getElementById('inp-cost').value||'').toString().replace(/[£,\s]/g,''))||0;
-  if(!idx||!s||s.name==='Other / custom'||!band){el.innerHTML='';return;}
+  if(!idx||!s||s.name==='Other / custom'||!band){el.innerHTML='';if(wrap)wrap.style.display='none';return;}
+  if(wrap)wrap.style.display='block';
   var start=document.getElementById('inp-start').value, epa=document.getElementById('inp-epa').value;
   var dur=(start&&epa&&new Date(epa)>new Date(start))?mBetween(start,epa):(s.dur||12);
   var weeks=Math.max(1,Math.round(dur*4.345));
-  var lvl=s.level||3, otj=(planCfg.otj||{})[lvl]||6, rate=planCfg.rate||0, noRate=!rate;
+  var lvl=s.level||3, otj=(planCfg.otj||{})[lvl]||6;
+  var wage=parseFloat((document.getElementById('lc-wage').value||'').toString().replace(/[£,\s]/g,''))||0;
+  var rate=wage>0?wage:(planCfg.rate||0), noRate=!rate, rateSrc=wage>0?'learner wage':'plan rate';
   var T=Math.round(RULEBOOK.draw.training*100), E=Math.round(RULEBOOK.draw.epa*100);
   var training=band*RULEBOOK.draw.training, epaAmt=band*RULEBOOK.draw.epa;
   var otjCost=Math.round(otj*weeks*rate), fullCost=band+otjCost;
   var rows=lcCell('Funding band <span style="color:#2DD4B2">levy-funded</span>',fmt(band),T+'% '+fmt(training)+' over '+dur+'mo + '+E+'% '+fmt(epaAmt)+' at EPA','#2DD4B2')+
-    lcCell('Off-the-job time <span style="color:#E0A43B">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set rate in Plan':' &times; £'+rate+'/hr'),'#E0A43B')+
+    lcCell('Off-the-job time <span style="color:#E0A43B">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),'#E0A43B')+
     lcCell('Full cost of ownership',noRate?fmt(band)+'+':'&asymp;'+fmt(fullCost),'band + off-the-job time','#fff')+
     lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it','#a78bfa');
-  el.innerHTML='<div style="margin-top:14px;background:rgba(45,212,178,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:12px;padding:13px 16px">'+
+  el.innerHTML='<div style="margin-top:13px;background:rgba(45,212,178,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:12px;padding:13px 16px">'+
     '<div style="font-weight:700;color:#fff;margin-bottom:2px">Cost per learner <span style="font-weight:400;color:var(--text3);font-size:12px">— '+s.name+'</span></div>'+
     '<div style="font-size:11.5px;color:var(--text3);margin-bottom:11px">One learner, before adding to your plan. The band is levy-funded; your real cash is the off-the-job time (plus co-investment only if your account runs short).</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px">'+rows+'</div></div>';
+    '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'+rows+'</div></div>';
 }
 
 function updateDurReadout(){
