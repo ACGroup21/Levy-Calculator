@@ -732,7 +732,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-26k</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1958,11 +1958,11 @@ function buildLevyPdf(){
   pages.forEach(function(p,idx){
     seq=seq.then(function(){
       var prevH=p.style.height; p.style.height=p.getAttribute('data-h')+'px';
-      return html2canvas(p,{scale:2,backgroundColor:'#06172E',useCORS:true,logging:false}).then(function(canvas){
+      return html2canvas(p,{scale:3,backgroundColor:'#06172E',useCORS:true,logging:false}).then(function(canvas){
         p.style.height=prevH;
         var iw=doc.internal.pageSize.getWidth(), ih=doc.internal.pageSize.getHeight();
         if(idx>0)doc.addPage();
-        doc.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,iw,ih);
+        doc.addImage(canvas.toDataURL('image/jpeg',0.96),'JPEG',0,0,iw,ih);
       });
     });
   });
