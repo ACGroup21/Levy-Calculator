@@ -586,6 +586,7 @@ footer span{color:var(--teal)}
           <select id="inp-standard" onchange="onStandardChange()"></select>
           <div id="standardCount" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
           <div id="standardWarn" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;padding:9px 12px;border-radius:8px"></div>
+          <div id="standardLink" style="margin-top:7px"></div>
         </div>
         <div class="field hidden" id="custom-name-wrap">
           <label>Custom name</label>
@@ -738,7 +739,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28f</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1036,16 +1037,18 @@ setTimeout(function(){updateDurReadout();},0);
 
 function onStandardChange(){
   const idx=parseInt(sel.value),s=STANDARDS[idx];
-  if(!s){document.getElementById('custom-name-wrap').classList.add('hidden');showStandardWarn(null);return;}
+  if(!s){document.getElementById('custom-name-wrap').classList.add('hidden');showStandardWarn(null);var lk0=document.getElementById('standardLink');if(lk0)lk0.innerHTML='';return;}
   const isC=s.name==='Other / custom';
   document.getElementById('custom-name-wrap').classList.toggle('hidden',!isC);
-  if(idx>0&&!isC){
+  if(!isC){
     document.getElementById('inp-cost').value=s.band||'';
     var startEl=document.getElementById('inp-start');
     if(!startEl.value)startEl.value=todayStr;
     var dur=s.dur||12;const d=new Date(startEl.value);d.setMonth(d.getMonth()+dur);document.getElementById('inp-epa').value=d.toISOString().slice(0,10);
   }
   showStandardWarn(s);
+  var lk=document.getElementById('standardLink');
+  if(lk)lk.innerHTML=(!isC&&s.ifate_url)?'<a href="'+s.ifate_url+'" target="_blank" rel="noopener" style="font-size:12px;color:#39A0D4;text-decoration:none">&#8599;&nbsp; View this standard on IfATE — official funding band, duration &amp; KSBs</a>':'';
   updateDurReadout();
   renderLearnerCost();
 }
