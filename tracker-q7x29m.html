@@ -116,6 +116,7 @@ const CAT={
   web:{label:'website app', col:'#a78bfa'},
   data:{label:'data', col:'#39A0D4'},
   quality:{label:'quality', col:'#8FB4C6'},
+  client:{label:'client build', col:'#E0A43B'},
   parked:{label:'parked', col:'#5d7e93'},
 };
 const PROJECTS=[
@@ -143,6 +144,10 @@ const PROJECTS=[
    goal:'Per-standard, single-learner cost + honest ROI — so an employer can size one apprentice before committing to a plan.',
    steps:[{d:1,t:'Cost-per-learner panel (band + off-the-job + your direct cash)'},{d:1,t:'Per-learner cost column in the affordability report'},{d:1,t:'Optional learner-wage override for accuracy'},{d:0,t:'Cost-efficiency ROI — vs a commercial course / hiring already-skilled (employer-supplied)'},{d:0,t:'Optional employer-assumption ROI layer (their own benefit inputs)'}],
    next:'Build the cost-efficiency ROI comparison — real money saved, no fabricated benefit multipliers.'},
+ {t:'Landmark Group — apprentice tracker',cat:'client',stage:'live',
+   goal:'First external client build. Apprentice progress tracker + learner-review app + training-provider data reconciliation.',
+   steps:[{d:1,t:'Learner review form (Reviews tab) — capture / save / list / edit / export CSV+JSON'},{d:0,t:'Confirm review fields against Landmark\'s actual template'},{d:0,t:'Topline dashboard — % complete vs programme · dated session schedule · theme summaries'},{d:0,t:'Ingest training-provider data (roadmap + progress reports) → compare & report'}],
+   next:'Get Landmark\'s review template + one anonymised provider progress report + the programme roadmap.'},
  {t:'Transfers / gifting — social value',cat:'levy',stage:'live',
    goal:'Model levy transfers and frame unspent levy as measurable social value.',
    steps:[{d:1,t:'Social-value gifting panel (UK Social Value Model theme; no fabricated monetisation)'},{d:0,t:'Model receiving a transfer (up to 50% of another employer\'s levy)'},{d:0,t:'Full transfers modelling — inbound + outbound'}],
