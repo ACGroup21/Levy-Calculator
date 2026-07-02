@@ -72,7 +72,7 @@
   .saved-msg{color:var(--green);font-size:13px;font-weight:600}
 
   .rev-list{margin-top:4px}
-  .rev-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:10px 14px;align-items:center;padding:11px 4px;border-top:1px solid var(--line);font-size:13.5px}
+  .rev-row{display:grid;grid-template-columns:1fr auto auto auto;gap:10px 14px;align-items:center;padding:11px 4px;border-top:1px solid var(--line);font-size:13.5px}
   .rev-row:first-child{border-top:none}
   .rev-name{font-weight:600;color:var(--ink)}
   .rev-meta{font-family:var(--mono);font-size:12px;color:var(--text3)}
@@ -177,16 +177,36 @@
     </div>
 
     <div class="sec">
-      <h2>Progress</h2>
+      <h2>Coach assessment</h2>
+      <div class="field wide"><label>How does your view compare to OneFile?</label>
+        <div class="checks" style="gap:22px;padding-top:2px">
+          <label><input type="radio" name="assess" value="agree" checked onchange="onAssessMode()"> Agree with OneFile</label>
+          <label><input type="radio" name="assess" value="own" onchange="onAssessMode()"> Apply my own view</label>
+        </div>
+      </div>
+      <div id="agreeNote" class="mini" style="margin-top:8px"></div>
+      <div id="ownBox" style="display:none;margin-top:12px">
+        <div class="grid">
+          <div class="field"><label>Your assessment</label>
+            <select id="f-ownrag"><option value="on">On track</option><option value="risk">At risk</option><option value="behind">Behind</option></select></div>
+        </div>
+        <div class="grid" style="margin-top:12px">
+          <div class="field wide"><label>Why does your view differ from the OneFile data?</label><textarea id="f-ownreason" placeholder="e.g. OneFile shows behind, but the learner has strong evidence not yet uploaded to the portfolio"></textarea></div>
+        </div>
+      </div>
+      <div class="mini" style="margin-top:12px;color:var(--text3)">OneFile owns % complete, units &amp; tasks — imported on the Dashboard tab, not re-keyed here. This form captures the coaching view OneFile can&rsquo;t.</div>
+    </div>
+
+    <div class="sec">
+      <h2>Progress detail</h2>
       <div class="grid three">
-        <div class="field"><label>On-track status</label>
-          <select id="f-rag"><option value="on">On track</option><option value="risk">At risk</option><option value="behind">Behind</option></select></div>
-        <div class="field"><label>% complete (to date)</label><input id="f-pct" type="number" min="0" max="100" placeholder="e.g. 45"></div>
-        <div class="field"><label>English &amp; maths</label>
-          <select id="f-em"><option value="">—</option><option>Achieved / exempt</option><option>In progress</option><option>Not started</option></select></div>
         <div class="field"><label>Off-the-job — this period (hrs)</label><input id="f-otj" type="number" min="0" step="0.5"></div>
         <div class="field"><label>Off-the-job — cumulative (hrs)</label><input id="f-otjc" type="number" min="0" step="0.5"></div>
         <div class="field"><label>Off-the-job — target (hrs)</label><input id="f-otjt" type="number" min="0" step="0.5"></div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <div class="field"><label>English &amp; maths</label>
+          <select id="f-em"><option value="">—</option><option>Achieved / exempt</option><option>In progress</option><option>Not started</option></select></div>
       </div>
       <div class="grid" style="margin-top:12px">
         <div class="field wide"><label>KSBs / units covered this period</label><textarea id="f-ksbs"></textarea></div>
@@ -245,7 +265,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.9 &middot; build 2026-07-02a &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.10 &middot; build 2026-07-02b &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -268,9 +288,31 @@ function renderTabs(){
   });
 }
 
-const F=['learner','prog','date','coach','rag','pct','em','otj','otjc','otjt','ksbs','assign','well','chal','well2','actions','next'];
+const F=['learner','prog','date','coach','em','otj','otjc','otjt','ksbs','assign','ownrag','ownreason','well','chal','well2','actions','next'];
 function gv(id){return document.getElementById('f-'+id).value;}
 function sv(id,v){document.getElementById('f-'+id).value=v==null?'':v;}
+
+// ===== Coach assessment (agree with OneFile · or apply own view) =====
+function getAssess(){const r=document.querySelector('input[name="assess"]:checked');return r?r.value:'agree';}
+function setAssess(v){document.querySelectorAll('input[name="assess"]').forEach(x=>x.checked=(x.value===(v||'agree')));onAssessMode();}
+function onAssessMode(){document.getElementById('ownBox').style.display=getAssess()==='own'?'':'none';updateAgreeNote();}
+function providerFor(name){const nm=normName(name);if(provider[nm])return provider[nm];for(const pk in provider){if(nameMatch(nm,pk))return provider[pk];}return null;}
+function updateAgreeNote(){
+  const el=document.getElementById('agreeNote');if(!el)return;
+  if(getAssess()!=='agree'){el.textContent='';return;}
+  const nm=(gv('learner')||'').trim();if(!nm){el.textContent='';return;}
+  const p=providerFor(nm);
+  if(p&&p.deviation!=null){const st=p.deviation<=-10?['Behind','var(--red)']:(p.deviation<0?['At risk','var(--gold)']:['On track','var(--green)']);
+    el.innerHTML='Headline will follow OneFile: <b style="color:'+st[1]+'">'+st[0]+'</b>'+(p.progress!=null?' &middot; '+p.progress+'% vs target '+(p.target!=null?p.target+'%':'—'):'')+'.';}
+  else{el.textContent='No OneFile record imported for this learner yet — the headline status applies once you import the OneFile export on the Dashboard tab.';}
+}
+// coach's assessment for a review, tolerant of legacy records (which stored a plain rag)
+function coachAssess(r){
+  if(!r)return {mode:'agree',rag:'',reason:''};
+  if(r.assessMode==='own')return {mode:'own',rag:r.ownrag||'',reason:r.ownreason||''};
+  if(r.assessMode==='agree')return {mode:'agree',rag:'',reason:''};
+  return r.rag?{mode:'own',rag:r.rag,reason:''}:{mode:'agree',rag:'',reason:''};
+}
 
 function saveReview(){
   const learner=gv('learner').trim();
@@ -278,6 +320,8 @@ function saveReview(){
   const rec={id:editId||('r'+reviews.length+'-'+Object.keys(reviews).length),
     present:{learner:document.getElementById('p-learner').checked,coach:document.getElementById('p-coach').checked,manager:document.getElementById('p-manager').checked}};
   F.forEach(k=>rec[k]=gv(k));
+  rec.assessMode=getAssess();
+  if(rec.assessMode!=='own'){rec.ownrag='';rec.ownreason='';}
   if(editId){const i=reviews.findIndex(r=>r.id===editId);reviews[i]=rec;}
   else{rec.id='r'+Date.now().toString(36);reviews.push(rec);}
   persist();
@@ -286,10 +330,12 @@ function saveReview(){
   resetForm();renderList();renderTabs();
 }
 function resetForm(){editId=null;document.getElementById('formTitle').textContent='New learner review';
-  F.forEach(k=>sv(k,''));['p-learner','p-coach'].forEach(i=>document.getElementById(i).checked=true);document.getElementById('p-manager').checked=false;}
+  F.forEach(k=>sv(k,''));['p-learner','p-coach'].forEach(i=>document.getElementById(i).checked=true);document.getElementById('p-manager').checked=false;
+  setAssess('agree');}
 function editReview(id){const r=reviews.find(x=>x.id===id);if(!r)return;editId=id;
   document.getElementById('formTitle').textContent='Editing review — '+(r.learner||'');
   F.forEach(k=>sv(k,r[k]));
+  const a=coachAssess(r);setAssess(a.mode);if(a.mode==='own'){sv('ownrag',a.rag);sv('ownreason',a.reason);}
   document.getElementById('p-learner').checked=!!(r.present&&r.present.learner);
   document.getElementById('p-coach').checked=!!(r.present&&r.present.coach);
   document.getElementById('p-manager').checked=!!(r.present&&r.present.manager);
@@ -298,21 +344,22 @@ function delReview(id){if(!confirm('Delete this review?'))return;reviews=reviews
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(reviews));}catch(e){alert('Could not save — storage unavailable.');}}
 
 function ragChip(v){const m={on:['on','On track'],risk:['risk','At risk'],behind:['behind','Behind']}[v]||['on','—'];return '<span class="rag '+m[0]+'">'+m[1]+'</span>';}
+function assessChip(r){const a=coachAssess(r);
+  return a.mode==='own'?ragChip(a.rag):'<span class="rev-meta" title="Defers to OneFile status">↳ agrees w/ OneFile</span>';}
 function renderList(){
   const el=document.getElementById('revList');document.getElementById('revCount').textContent=reviews.length?'('+reviews.length+')':'';
   if(!reviews.length){el.innerHTML='<div class="empty">No reviews yet — fill the form above and save one.</div>';return;}
   el.innerHTML=reviews.slice().reverse().map(r=>
     '<div class="rev-row"><div><span class="rev-name">'+esc(r.learner)+'</span>'+(r.prog?' <span class="rev-meta">· '+esc(r.prog)+'</span>':'')+'</div>'+
-    '<span class="rev-meta">'+(r.date||'—')+'</span>'+ragChip(r.rag)+
-    '<span class="rev-meta">'+(r.pct?r.pct+'%':'—')+'</span>'+
+    '<span class="rev-meta">'+(r.date||'—')+'</span>'+assessChip(r)+
     '<span><button class="link" onclick="editReview(\''+r.id+'\')">edit</button> &nbsp; <button class="link del" onclick="delReview(\''+r.id+'\')">delete</button></span></div>').join('');
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 function exportJson(){dl('landmark-reviews.json',JSON.stringify(reviews,null,2),'application/json');}
 function exportCsv(){
-  const cols=['learner','prog','date','coach','rag','pct','em','otj','otjc','otjt','ksbs','assign','well','chal','well2','actions','next'];
-  const head=['Learner','Programme','Review date','Coach','Status','% complete','Eng & maths','OTJ period','OTJ cumulative','OTJ target','KSBs/units','Assignments','Going well','Challenges','Wellbeing','Actions','Next review'];
+  const cols=['learner','prog','date','coach','assessMode','ownrag','ownreason','em','otj','otjc','otjt','ksbs','assign','well','chal','well2','actions','next'];
+  const head=['Learner','Programme','Review date','Coach','Assessment mode','Coach RAG (own view)','Reason for own view','Eng & maths','OTJ period','OTJ cumulative','OTJ target','KSBs/units','Assignments','Going well','Challenges','Wellbeing','Actions','Next review'];
   const q=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
   const rows=[head.map(q).join(',')].concat(reviews.map(r=>cols.map(c=>q(r[c])).join(',')));
   dl('landmark-reviews.csv',rows.join('\r\n'),'text/csv');
@@ -409,9 +456,11 @@ function renderDashboard(){
   // OneFile is the source of truth for status. Bands on Target Deviation (actual − target):
   //   >= 0% on track · -1..-9% at risk · <= -10% behind.
   // Coach RAG is only used as a fallback for learners with no OneFile record (so they're not missed).
+  const ofStatus=p=>p&&p.deviation!=null?(p.deviation<=-10?'behind':(p.deviation<0?'risk':'on')):'';
   const statusOf=x=>{
-    if(x.p&&x.p.deviation!=null) return x.p.deviation<=-10?'behind':(x.p.deviation<0?'risk':'on');
-    if(x.cl&&x.cl.rag) return x.cl.rag;
+    const s=ofStatus(x.p);if(s)return s;
+    const a=x.cl?coachAssess(x.cl):null;
+    if(a&&a.mode==='own'&&a.rag)return a.rag;
     return '';
   };
   const behind=entries.filter(x=>statusOf(x)==='behind').length;
@@ -423,12 +472,15 @@ function renderDashboard(){
   entries.forEach(x=>{
     const name=x.name;const l=x.cl,p=x.p,list=byDate(x.list);
     const prog=l?l.prog:(p?p.aim:'');
+    const st=statusOf(x);
     html+='<div class="lcard"><div class="lh"><div><div class="ln">'+esc(name)+'</div>'+(prog?'<div class="lp">'+esc(prog)+'</div>':'')+'</div>';
-    if(l)html+='<div style="text-align:right"><span class="rag '+(l.rag||'on')+'">'+ragLabel(l.rag)+'</span><div class="mini" style="margin-top:5px">'+list.length+' review'+(list.length>1?'s':'')+' logged</div></div>';
+    if(st||l)html+='<div style="text-align:right">'+(st?'<span class="rag '+st+'">'+ragLabel(st)+'</span>':'')+(l?'<div class="mini" style="margin-top:5px">'+list.length+' review'+(list.length>1?'s':'')+' logged</div>':'')+'</div>';
     html+='</div>';
-    if(l){const pct=Math.max(0,Math.min(100,parseFloat(l.pct)||0));const col=ragColor(l.rag);
-      html+='<div class="src">Your review</div><div class="bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>'+
-        '<div class="pctline"><span>'+pct+'% complete (your estimate)</span><span>updated '+fmtDate(l.date)+'</span></div>';}
+    if(l){const a=coachAssess(l);
+      html+='<div class="src">Coach assessment</div>';
+      if(a.mode==='own'){html+='<div class="pctline"><span>Coach&rsquo;s own view: <span class="rag '+a.rag+'">'+ragLabel(a.rag)+'</span></span><span>updated '+fmtDate(l.date)+'</span></div>';
+        if(a.reason)html+='<div class="mini" style="margin-top:6px">&ldquo;'+esc(a.reason)+'&rdquo;</div>';}
+      else html+='<div class="pctline"><span>Defers to OneFile'+(p?'':' &mdash; applies once imported')+'</span><span>updated '+fmtDate(l.date)+'</span></div>';}
     if(p){
       html+='<div class="src">OneFile · Ginger Nut</div>';
       if(p.progress!=null){const prg=Math.max(0,Math.min(100,p.progress));const tgt=p.target!=null?Math.max(0,Math.min(100,p.target)):null;
@@ -441,8 +493,9 @@ function renderDashboard(){
       if(p.nextreview)meta.push('Next review '+p.nextreview);
       if(p.completion)meta.push('Est. completion '+p.completion);
       if(meta.length)html+='<div class="sched">'+meta.map(m=>'<span class="dchip">'+esc(m)+'</span>').join('')+'</div>';
-      if(l&&p.progress!=null&&!isNaN(parseFloat(l.pct))){const gap=Math.round((parseFloat(l.pct)-p.progress)*10)/10;
-        if(Math.abs(gap)>=10)html+='<div class="gap">⚠ Gap: your estimate '+parseFloat(l.pct)+'% vs OneFile '+p.progress+'% ('+(gap>0?'+':'')+gap+'%) — worth checking.</div>';}
+      if(l){const a=coachAssess(l);const ofs=ofStatus(p);
+        if(a.mode==='own'&&a.rag&&ofs&&a.rag!==ofs)
+          html+='<div class="gap">⚠ Coach&rsquo;s view (<b>'+ragLabel(a.rag)+'</b>) differs from OneFile (<b>'+ragLabel(ofs)+'</b>)'+(a.reason?': '+esc(a.reason.replace(/[.\s]+$/,'')):'')+'. OneFile stays the headline; the coach view is flagged here for context.</div>';}
     }
     if(list.length){
       let chips=list.filter(r=>r.date).map(r=>'<span class="dchip">'+fmtDate(r.date)+'</span>').join('');
@@ -460,12 +513,12 @@ function renderDashboard(){
 // ===== Demo data (a realistic 5-learner cohort, both sources) =====
 const DEMO={
   reviews:[
-    {id:'demo-p1',present:{learner:true,coach:true,manager:false},learner:'Preetii Sharma',prog:'L3 Team Leader',date:'2026-01-02',coach:'You',rag:'on',pct:'40',em:'In progress',otj:'22',otjc:'120',otjt:'329',ksbs:'K2 leading teams; S4 delivering results',assign:'Assignment 1 submitted',well:'Confident presenting',chal:'Time management alongside BAU',well2:'',actions:'Draft assignment 2',next:'2026-02-03'},
-    {id:'demo-p2',present:{learner:true,coach:true,manager:true},learner:'Preetii Sharma',prog:'L3 Team Leader',date:'2026-02-03',coach:'You',rag:'risk',pct:'45',em:'In progress',otj:'18',otjc:'138',otjt:'329',ksbs:'K4 stakeholder comms; S6 records management',assign:'Assignment 2 in progress; Assignment 3 due 10/03',well:'Good stakeholder feedback',chal:'Falling behind on off-the-job hours',well2:'Workload high — flagged to line manager',actions:'Catch up OTJ log; book assignment 2 tutorial',next:'2026-03-04'},
-    {id:'demo-m1',present:{learner:true,coach:true,manager:false},learner:'Marcus Webb',prog:'L3 Business Administrator',date:'2026-01-15',coach:'You',rag:'behind',pct:'40',em:'Not started',otj:'10',otjc:'40',otjt:'280',ksbs:'K1 organisational governance',assign:'Induction workbook in progress',well:'Engaged in sessions',chal:'Functional skills not started; low portfolio activity',well2:'',actions:'Enrol on maths; complete 2 portfolio tasks',next:'2026-02-15'},
-    {id:'demo-a1',present:{learner:true,coach:true,manager:false},learner:'Aisha Khan',prog:'L3 Data Technician',date:'2026-01-20',coach:'You',rag:'on',pct:'70',em:'Achieved / exempt',otj:'25',otjc:'210',otjt:'300',ksbs:'K7 data visualisation; S9 SQL queries',assign:'Assignment 4 submitted; project brief agreed',well:'Strong technical progress',chal:'',well2:'',actions:'Begin EPA preparation',next:'2026-02-20'},
-    {id:'demo-t1',present:{learner:true,coach:true,manager:false},learner:'Tomasz Nowak',prog:'L3 Customer Service Specialist',date:'2026-01-10',coach:'You',rag:'risk',pct:'35',em:'In progress',otj:'15',otjc:'95',otjt:'270',ksbs:'K3 service culture; S2 complaint handling',assign:'Assignment 2 due — not started',well:'Excellent with customers',chal:'Portfolio evidence gaps',well2:'',actions:'Gather 3 witness statements',next:'2026-02-10'},
-    {id:'demo-c1',present:{learner:true,coach:true,manager:true},learner:'Chloe Bennett',prog:'L3 Team Leader',date:'2026-01-08',coach:'You',rag:'on',pct:'88',em:'Achieved / exempt',otj:'30',otjc:'300',otjt:'329',ksbs:'K8 project management; S10 coaching others',assign:'All assignments complete; gateway prep',well:'Ready for EPA gateway',chal:'',well2:'',actions:'Book gateway meeting',next:'2026-02-08'}
+    {id:'demo-p1',present:{learner:true,coach:true,manager:false},learner:'Preetii Sharma',prog:'L3 Team Leader',date:'2026-01-02',coach:'You',assessMode:'agree',em:'In progress',otj:'22',otjc:'120',otjt:'329',ksbs:'K2 leading teams; S4 delivering results',assign:'Assignment 1 submitted',well:'Confident presenting',chal:'Time management alongside BAU',well2:'',actions:'Draft assignment 2',next:'2026-02-03'},
+    {id:'demo-p2',present:{learner:true,coach:true,manager:true},learner:'Preetii Sharma',prog:'L3 Team Leader',date:'2026-02-03',coach:'You',assessMode:'agree',em:'In progress',otj:'18',otjc:'138',otjt:'329',ksbs:'K4 stakeholder comms; S6 records management',assign:'Assignment 2 in progress; Assignment 3 due 10/03',well:'Good stakeholder feedback',chal:'Falling behind on off-the-job hours',well2:'Workload high — flagged to line manager',actions:'Catch up OTJ log; book assignment 2 tutorial',next:'2026-03-04'},
+    {id:'demo-m1',present:{learner:true,coach:true,manager:false},learner:'Marcus Webb',prog:'L3 Business Administrator',date:'2026-01-15',coach:'You',assessMode:'agree',em:'Not started',otj:'10',otjc:'40',otjt:'280',ksbs:'K1 organisational governance',assign:'Induction workbook in progress',well:'Engaged in sessions',chal:'Functional skills not started; low portfolio activity',well2:'',actions:'Enrol on maths; complete 2 portfolio tasks',next:'2026-02-15'},
+    {id:'demo-a1',present:{learner:true,coach:true,manager:false},learner:'Aisha Khan',prog:'L3 Data Technician',date:'2026-01-20',coach:'You',assessMode:'agree',em:'Achieved / exempt',otj:'25',otjc:'210',otjt:'300',ksbs:'K7 data visualisation; S9 SQL queries',assign:'Assignment 4 submitted; project brief agreed',well:'Strong technical progress',chal:'',well2:'',actions:'Begin EPA preparation',next:'2026-02-20'},
+    {id:'demo-t1',present:{learner:true,coach:true,manager:false},learner:'Tomasz Nowak',prog:'L3 Customer Service Specialist',date:'2026-01-10',coach:'You',assessMode:'own',ownrag:'behind',ownreason:'Portfolio evidence gaps run deeper than the % suggests — three witness statements still outstanding.',em:'In progress',otj:'15',otjc:'95',otjt:'270',ksbs:'K3 service culture; S2 complaint handling',assign:'Assignment 2 due — not started',well:'Excellent with customers',chal:'Portfolio evidence gaps',well2:'',actions:'Gather 3 witness statements',next:'2026-02-10'},
+    {id:'demo-c1',present:{learner:true,coach:true,manager:true},learner:'Chloe Bennett',prog:'L3 Team Leader',date:'2026-01-08',coach:'You',assessMode:'agree',em:'Achieved / exempt',otj:'30',otjc:'300',otjt:'329',ksbs:'K8 project management; S10 coaching others',assign:'All assignments complete; gateway prep',well:'Ready for EPA gateway',chal:'',well2:'',actions:'Book gateway meeting',next:'2026-02-08'}
   ],
   provider:{
     'preetii sharma':{learner:'Preetii Sharma',aim:'Team Leader Apprenticeship Standard (September 2024)',progress:17,target:26,deviation:-9,completion:'01/03/2027',nextreview:'06/07/2026',unitsDone:3,unitsTotal:8,tasks:10},
@@ -492,7 +545,8 @@ function exportPDF(){
   setTimeout(()=>window.print(),60);
 }
 
-wireProvInput();updateProvState();renderTabs();renderList();
+document.getElementById('f-learner').addEventListener('input',updateAgreeNote);
+wireProvInput();updateProvState();renderTabs();renderList();updateAgreeNote();
 </script>
 </body>
 </html>
