@@ -71,6 +71,15 @@
   .btn-ghost:hover{border-color:var(--purple);color:var(--purple)}
   .saved-msg{color:var(--green);font-size:13px;font-weight:600}
 
+  /* pill buttons — badge-styled, for utility toolbars (import/export/clear) */
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
+    border-radius:99px;padding:8px 15px;cursor:pointer;line-height:1;
+    border:1px solid var(--panelb);background:rgba(255,255,255,0.05);color:var(--text);transition:all .15s}
+  .pill:hover{border-color:var(--purple);color:var(--purple)}
+  .pill.accent{color:var(--orange);background:rgba(232,114,93,0.12);border-color:rgba(232,114,93,0.42)}
+  .pill.accent:hover{background:rgba(232,114,93,0.20);color:var(--orange)}
+  .pill.danger:hover{border-color:var(--red);color:var(--red)}
+
   .rev-list{margin-top:4px}
   .rev-row{display:grid;grid-template-columns:1fr auto auto auto;gap:10px 14px;align-items:center;padding:11px 4px;border-top:1px solid var(--line);font-size:13.5px}
   .rev-row:first-child{border-top:none}
@@ -239,8 +248,8 @@
     <div class="sec">
       <h2>Saved reviews <span style="color:var(--text3);font-weight:400" id="revCount"></span></h2>
       <div class="toolbar">
-        <button class="btn btn-ghost" onclick="exportCsv()">Export CSV</button>
-        <button class="btn btn-ghost" onclick="exportJson()">Export JSON (feeds tracker)</button>
+        <button class="pill" onclick="exportCsv()">↓ Export CSV</button>
+        <button class="pill" onclick="exportJson()">↓ Export JSON (feeds tracker)</button>
       </div>
       <div class="rev-list" id="revList"></div>
     </div>
@@ -251,9 +260,9 @@
     <div class="sec" id="provSec">
       <h2>Provider data — OneFile (Ginger Nut Training)</h2>
       <div class="toolbar">
-        <label class="btn btn-ghost" style="cursor:pointer">Import OneFile export (CSV)<input type="file" id="provFile" accept=".csv,.txt" style="display:none"></label>
-        <button class="btn btn-ghost" onclick="clearProvider()">Clear provider data</button>
-        <button class="btn btn-primary" onclick="exportPDF()">Export report (PDF)</button>
+        <label class="pill accent" style="cursor:pointer">↑ Import OneFile CSV<input type="file" id="provFile" accept=".csv,.txt" style="display:none"></label>
+        <button class="pill accent" onclick="exportPDF()">↓ Export report (PDF)</button>
+        <button class="pill danger" onclick="clearProvider()">Clear data</button>
         <span class="saved-msg" id="provMsg"></span>
       </div>
       <div class="mini" id="provState"></div>
@@ -265,7 +274,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.10 &middot; build 2026-07-02b &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.10 &middot; build 2026-07-02c &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
