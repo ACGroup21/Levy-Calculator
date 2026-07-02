@@ -405,8 +405,16 @@ function renderDashboard(){
   entries.forEach(e=>{e.cl=e.list.length?byDate(e.list).slice(-1)[0]:null;e.pctAvg=e.p&&e.p.progress!=null?e.p.progress:(e.cl?parseFloat(e.cl.pct):NaN);});
   const pcts=entries.map(x=>x.pctAvg).filter(v=>!isNaN(v));
   const avg=pcts.length?Math.round(pcts.reduce((a,b)=>a+b,0)/pcts.length):0;
-  const behind=entries.filter(x=>x.p&&x.p.deviation!=null?x.p.deviation<0:(x.cl&&x.cl.rag==='behind')).length;
-  const risk=entries.filter(x=>x.p&&x.p.deviation!=null?(x.p.deviation<0&&x.p.deviation>=-5):(x.cl&&x.cl.rag==='risk')).length;
+  // OneFile is the source of truth for status. Bands on Target Deviation (actual − target):
+  //   >= 0% on track · -1..-9% at risk · <= -10% behind.
+  // Coach RAG is only used as a fallback for learners with no OneFile record (so they're not missed).
+  const statusOf=x=>{
+    if(x.p&&x.p.deviation!=null) return x.p.deviation<=-10?'behind':(x.p.deviation<0?'risk':'on');
+    if(x.cl&&x.cl.rag) return x.cl.rag;
+    return '';
+  };
+  const behind=entries.filter(x=>statusOf(x)==='behind').length;
+  const risk=entries.filter(x=>statusOf(x)==='risk').length;
   const src=Object.keys(provider).length?'Avg. progress':'Avg. completion';
   let html='<div class="dash-top">'+stat(entries.length,'Apprentices')+stat(avg+'%',src)+stat(risk,'At risk')+stat(behind,'Behind target')+'</div>';
   entries.sort((a,b)=>a.name.localeCompare(b.name));
