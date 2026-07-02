@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Arthur Curtis — Project Tracker</title>
+<style>
+  :root{
+    --bg:#070f1c; --bg2:#0c1726; --panel:rgba(255,255,255,0.025); --panelb:rgba(255,255,255,0.08);
+    --text:#e9f3fa; --text2:#8fb8cc; --text3:#5d7e93;
+    --teal:#2DD4B2; --gold:#E0A43B; --purple:#a78bfa; --blue:#39A0D4; --slate:#8FB4C6; --red:#e0607a;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 700px at 70% -10%,rgba(45,212,178,0.07),transparent),var(--bg);
+    color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;padding:32px 22px 64px}
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+  h1{font-size:26px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--text2);font-size:14px;margin-bottom:20px}
+  .sub b{color:var(--teal);font-weight:600}
+
+  .loop{display:flex;align-items:center;flex-wrap:wrap;gap:8px;background:var(--bg2);border:1px solid var(--panelb);
+    border-radius:14px;padding:13px 16px;margin-bottom:20px}
+  .loop .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--text3);margin-right:6px}
+  .loop .pill{background:rgba(255,255,255,0.04);border:1px solid var(--panelb);border-radius:99px;padding:5px 13px;font-size:13px}
+  .loop .arr{color:var(--text3)}
+
+  .prog{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+  .prog-pct{font-family:var(--mono);font-size:26px;font-weight:600;color:var(--teal);min-width:62px;text-shadow:0 0 16px rgba(45,212,178,0.4)}
+  .prog-mid{flex:1;max-width:480px}
+  .prog-bar{height:10px;background:rgba(255,255,255,0.06);border:1px solid var(--panelb);border-radius:99px;overflow:hidden}
+  .prog-fill{height:100%;width:0;background:linear-gradient(90deg,var(--teal),#6fe9d2);border-radius:99px;transition:width 1.1s cubic-bezier(.2,.7,.2,1);box-shadow:0 0 14px rgba(45,212,178,0.5)}
+  .prog-lab{font-size:12px;color:var(--text3);margin-top:7px}
+
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;border-bottom:1px solid var(--panelb);padding-bottom:2px}
+  .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-size:14px;font-weight:500;
+    padding:9px 14px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;transition:all .15s}
+  .tab:hover{color:var(--text)}
+  .tab.on{color:var(--text)}
+  .tab.on.current{border-bottom-color:var(--gold)} .tab.on.queued{border-bottom-color:var(--blue)} .tab.on.complete{border-bottom-color:var(--teal)}
+  .tab .ct{font-family:var(--mono);font-size:11px;border-radius:99px;padding:1px 8px;background:rgba(255,255,255,0.06);color:var(--text3)}
+  .tab.on .ct{background:rgba(255,255,255,0.1);color:var(--text2)}
+
+  .lane-hint{font-size:12.5px;color:var(--text3);margin:-4px 0 16px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+  .card.parked{border-style:dashed;opacity:.78}
+  .card .stat{flex:0 0 auto;margin-top:2px;font-size:14px;width:16px;text-align:center}
+  .card .body{flex:1;min-width:0}
+  .card .name{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .card .desc{font-size:12px;color:var(--text3);line-height:1.45;margin-top:3px}
+  .chip{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:1px 6px;border:1px solid}
+  .pulse{width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold);animation:p 1.6s infinite;display:inline-block}
+  @keyframes p{0%,100%{opacity:1}50%{opacity:.35}}
+  .divider{grid-column:1/-1;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--text3);margin:10px 0 2px;display:flex;align-items:center;gap:10px}
+  .divider::after{content:'';flex:1;height:1px;background:var(--panelb)}
+
+  .curpanel{background:var(--panel);border:1px solid var(--panelb);border-radius:14px;padding:16px 18px;margin-bottom:14px}
+  .curpanel .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+  .curpanel .ttl{font-size:16px;font-weight:700}
+  .curpanel .prog2{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3)}
+  .curpanel .goal{font-size:13px;color:var(--text2);margin-bottom:11px}
+  .step{display:flex;align-items:flex-start;gap:9px;font-size:13px;padding:5px 0;color:var(--text)}
+  .step .mk{flex:0 0 auto;width:15px;text-align:center;margin-top:1px}
+  .step.done{color:var(--text3)} .step.done .mk{color:var(--teal)}
+  .next-chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;color:var(--gold);border:1px solid rgba(224,164,59,0.45);border-radius:5px;padding:0 5px;margin-left:7px}
+  .curnext{margin-top:11px;padding-top:10px;border-top:1px solid var(--panelb);font-size:13px;color:var(--text2)}
+  .curnext b{color:var(--gold)}
+  .ctx{margin-top:18px;background:var(--bg2);border:1px solid var(--panelb);border-radius:12px;padding:12px 16px}
+  .ctx .row{display:flex;gap:7px;align-items:baseline;flex-wrap:wrap;margin:5px 0}
+  .ctx .rl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3);min-width:128px}
+  .ctx .ch2{font-size:12px;background:rgba(255,255,255,0.04);border:1px solid var(--panelb);border-radius:99px;padding:2px 10px;color:var(--text2)}
+  .foot{margin-top:26px;background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)}
+  .foot b{color:var(--text);font-weight:600}
+  .stamp{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="wrap">
+  <h1>Arthur Curtis — Project Tracker</h1>
+  <div class="sub">Levy &amp; talent toolset + website apps &middot; lifecycle board &middot; <b>trust</b> as the north star &middot; <b style="color:#f0883e">world-class site live by Sept 2026</b></div>
+
+  <div class="prog">
+    <div class="prog-pct" id="progPct">0%</div>
+    <div class="prog-mid"><div class="prog-bar"><div class="prog-fill" id="progFill"></div></div><div class="prog-lab" id="progLab"></div></div>
+  </div>
+
+  <div class="loop">
+    <span class="eyebrow">THE LOOP</span>
+    <span class="pill">Goal</span><span class="arr">&rarr;</span>
+    <span class="pill">Talent map</span><span class="arr">&rarr;</span>
+    <span class="pill">Standards / units</span><span class="arr">&rarr;</span>
+    <span class="pill">Affordability</span><span class="arr">&rarr;</span>
+    <span class="pill">Report / compare</span>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="lane-hint" id="laneHint"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="foot">
+    <b>Flow:</b> Queued &rarr; (starts) Live &rarr; (ships) Complete.
+    <b>North star:</b> a CFO would stake a budget on the number without checking elsewhere.
+    <b>Rabbit-hole filter:</b> off the loop = a separate product. <b>Parked</b> = deferred, backend/business-dependent.
+    <div class="stamp" id="stamp"></div>
+  </div>
+</div>
+
+<script>
+// cat = which surface: levy calc · website app · data/ops · quality · parked
+const CAT={
+  levy:{label:'levy app', col:'#2DD4B2'},
+  web:{label:'website app', col:'#a78bfa'},
+  data:{label:'data', col:'#39A0D4'},
+  quality:{label:'quality', col:'#8FB4C6'},
+  client:{label:'client build', col:'#E0A43B'},
+  site:{label:'site core', col:'#f0883e'},
+  parked:{label:'parked', col:'#5d7e93'},
+};
+const PROJECTS=[
+ // ---------- COMPLETE ----------
+ {t:'JD Matcher',cat:'levy',stage:'complete',d:'role JD → KSB gaps, work-exposure plan, interactive report + PDF'},
+ {t:'Levy affordability engine',cat:'levy',stage:'complete',d:'36-month projection, co-investment (5/25%, FIFO, expiry), shortfall advisor'},
+ {t:'Report engine',cat:'levy',stage:'complete',d:'landscape A4, accessible, large-text, image-based PDF (sharper for sharing)'},
+ {t:'Funding copilot',cat:'levy',stage:'complete',d:'funding-rules Q&A, gov.uk-sourced'},
+ {t:'Standards / KSB database',cat:'levy',stage:'complete',d:'322 standards embedded; KSBs power the JD Matcher'},
+ {t:'App shell',cat:'levy',stage:'complete',d:'sectioned UI, side nav, state persistence, demo data'},
+ {t:'Shared scenario',cat:'levy',stage:'complete',d:'canonical object — single source of truth, schema + rules-version stamp'},
+ {t:'Goal intake',cat:'levy',stage:'complete',d:'capture + suggest-and-confirm + drives projection / shortfall / expiry'},
+ {t:'Affordability report',cat:'levy',stage:'complete',d:'Finance ⇄ HR framing, goal-led, 3-page PDF, per-learner cost column'},
+ {t:'Apprenticeship units + ladder',cat:'levy',stage:'complete',d:'unit → foundation → full ladder; 30/70 milestones, 5% co-invest, apprenticeships-first'},
+ {t:'Duration as a variable',cat:'levy',stage:'complete',d:'8-month-minimum read-out + guardrail; duration→co-invest sensitivity lever'},
+ {t:'Dated rulebook',cat:'levy',stage:'complete',d:'single governed source of all funding rules; engine reads from it'},
+ {t:'Data ingestion & validation',cat:'levy',stage:'complete',d:'integrity scan (skipped cells, gaps, outliers) + acknowledgement gate → provenance'},
+ {t:'Levy estimate from payroll',cat:'levy',stage:'complete',d:'estimate from pay bill (0.5% − £15k + 10%); new-payer empty-pot model'},
+ {t:'Show-the-working',cat:'levy',stage:'complete',d:'per-figure working + data trace · funding-rules reference · report method line'},
+ {t:'Cost-per-learner',cat:'levy',stage:'complete',d:'per-learner cost panel (band + off-the-job + direct cash) + report column + optional learner wage'},
+ {t:'Funding bands + defunding data',cat:'data',stage:'complete',d:'all bands/durations from the Skills England CSV; non-fundable (paused/retired/in-dev) filtered from the picker'},
+
+ // ---------- LIVE ----------
+ {t:'Cost-per-learner — ROI',cat:'levy',stage:'live',
+   goal:'Per-standard, single-learner cost + honest ROI — so an employer can size one apprentice before committing to a plan.',
+   steps:[{d:1,t:'Cost-per-learner panel (band + off-the-job + your direct cash)'},{d:1,t:'Per-learner cost column in the affordability report'},{d:1,t:'Optional learner-wage override for accuracy'},{d:0,t:'Cost-efficiency ROI — vs a commercial course / hiring already-skilled (employer-supplied)'},{d:0,t:'Optional employer-assumption ROI layer (their own benefit inputs)'}],
+   next:'Build the cost-efficiency ROI comparison — real money saved, no fabricated benefit multipliers.'},
+ {t:'Landmark Group — apprentice tracker',cat:'client',stage:'live',
+   goal:'First external client build. Two-source model: coach review form (Landmark\'s own record) + provider CSV export (OneFile/Bud) → dashboard reconciles both.',
+   steps:[{d:1,t:'Learner review form (Reviews tab) — capture / save / list / edit / export CSV+JSON'},{d:1,t:'Landmark navy/coral identity restyle (white logo, serif display, animated bg)'},{d:1,t:'Topline dashboard — per-learner % complete · session schedule · theme/assignment boxes + cohort topline'},{d:1,t:'CSV import of OneFile export — tolerant column mapping (progress/target/deviation/units/tasks)'},{d:1,t:'Reconcile coach view vs OneFile view — merged card, tolerant name-match, gap flag'},{d:1,t:'Demo cohort loader + one-click PDF report + version stamp (v0.9)'},{d:1,t:'OneFile = gospel: status/topline from deviation bands (≥0 on / -1..-9 risk / ≤-10 behind)'},{d:0,t:'PAUSED — scope the coach-assessment model (agree-with-OneFile vs discretionary view + reason)'},{d:0,t:'RETROFIT the review form (demo-first build): capture only what OneFile can\'t — drop duplicated progress/OTJ/units, keep coach-only layer'},{d:0,t:'Test against a REAL Ginger Nut/OneFile export'}],
+   next:'PAUSED 2026-07-02 at v0.9. Resume in a few days to scope the coach-assessment model → v1.0. Live: acgroup21.github.io/Levy-Calculator/landmark-demo-9f4k2m.html'},
+ {t:'Transfers / gifting — social value',cat:'levy',stage:'live',
+   goal:'Model levy transfers and frame unspent levy as measurable social value.',
+   steps:[{d:1,t:'Social-value gifting panel (UK Social Value Model theme; no fabricated monetisation)'},{d:0,t:'Model receiving a transfer (up to 50% of another employer\'s levy)'},{d:0,t:'Full transfers modelling — inbound + outbound'}],
+   next:'Model the inbound side — receiving a transfer.'},
+
+ // ---------- QUEUED ----------
+ // --- WORLD-CLASS SITE (target: live by Sept 2026) · self-serve funnel ---
+ {t:'Cross-tool scenario spine',cat:'site',stage:'queued',d:'THE connective tissue: one input set (pay bill · goal · standards · learners · ages) entered once → localStorage + shareable URL + emailable; every public tool reads/writes it, and it powers the lite→full handoff. Build FIRST — everything hangs off it. (distinct from the calculator\'s internal Shared scenario)'},
+ {t:'Tools Hub page',cat:'site',stage:'queued',d:'self-serve hub — each lite tool a launchable card; extends the calculator-upfront / answer-first principle across the whole site'},
+ {t:'Booking + lead capture (scenario handoff)',cat:'site',stage:'queued',d:'Cal.com/Calendly embed; "email my results" + "book a call" attach the scenario so the consultant opens the EXACT numbers the visitor built; gated full-PDF report behind an email. This is the lead-gen mechanism + the lite→full bridge'},
+ {t:'Content / credibility system',cat:'site',stage:'queued',d:'case studies · insights/blog · resource guides (CMS or markdown pipeline, editable without a dev); each tool doubles as an SEO landing page; replace placeholder stats (£3.5bn / 98%) with real numbers'},
+ {t:'Measurement',cat:'site',stage:'queued',d:'analytics + tool-usage events — which tools used, drop-off, conversion to booking'},
+ {t:'Foundations pass (site)',cat:'site',stage:'queued',d:'WCAG accessibility · performance budget · SEO · privacy / cookie / data-handling for captured emails & scenarios'},
+ {t:'Lite Levy Calculator (public)',cat:'web',stage:'queued',d:'self-contained standalone: pot / top-up / #appr / monthly + NI & L7 age gate; no save / multi-scenario; funnels to book-a-call / full. (Hero estimator already live on the homepage)'},
+ {t:'Lite JD Matcher (public)',cat:'web',stage:'queued',d:'paste a JD → top-3 standards + coverage %; no PDF / deep KSB gap plan; funnels to full'},
+ {t:'Lite Cost-per-learner (public)',cat:'web',stage:'queued',d:'single standard → indicative per-learner cost; funnels to full'},
+ {t:'Apprenticeship Status Checker',cat:'web',stage:'queued',d:'PUBLIC/lite Tools-Hub app: search a standard → funding status / band / defunding date, from the Skills England CSV + RSS; reads/writes the scenario spine'},
+ {t:'Talent Programme Builder',cat:'web',stage:'queued',d:'PUBLIC/lite Tools-Hub app: goal → suggested capability sequence incl. non-apprenticeship options (CPD/courses); no affordability engine; feeds the scenario spine'},
+ {t:'Pathway Builder',cat:'web',stage:'queued',d:'PUBLIC/lite: unit → short → full progression; element vs separate-but-linked — decide the job at build; feeds the scenario spine'},
+ {t:'Expand to all fundable standards',cat:'data',stage:'queued',d:'add the ~401 fundable standards not yet carried (band/duration from CSV; KSB-less for now)'},
+ {t:'RSS auto-refresh routine',cat:'data',stage:'queued',d:'watch the Skills England feed → re-pull CSV → rebuild when standards add / retire / defund'},
+ {t:'Talent mapping',cat:'levy',stage:'queued',d:'thin bridge: workforce gaps → fundable options → affordability'},
+ {t:'Levy calc — v2 "unbeatable" rescope',cat:'levy',stage:'queued',d:'calculator → decision engine. Unbeatable-4: recommendation/optimiser (ranked best-moves, engine-costed) · stress test/downside · levy→delivery loop (link tracker → completion-adjusted ROI) · full lifecycle (transfers-in, 100% waivers, £1k incentives, group levy). + workforce gap→pathway ladder; trust keystones = golden-case suite/#15. See levy-product-map memory.'},
+ {t:'Landmark tracker — v2 "unbeatable" rescope',cat:'client',stage:'queued',d:'reconciliation/oversight layer. Signature-4: trajectory snapshots (direction/momentum) · finish-on-time projection · multi-metric reconciliation (OTJ/units/FS) · OTJ compliance layer. + compliance (E&M, review-overdue, EPA gateway, audit trail), per-learner/line-manager reports, levy value view (links levy calc). Enabler: shared store + roles (backend). See landmark-group-tracker-app memory.'},
+ {t:'Compare / snapshot + safety',cat:'levy',stage:'queued',d:'versioned reports over time, "still within budget?", provenance, liability comms'},
+ {t:'What-if comparison',cat:'levy',stage:'queued',d:'compare options now — defer vs spread vs unit-first vs full standard'},
+ {t:'Programme-stage read-out',cat:'levy',stage:'queued',d:'derived utilisation → 3 honest bands (under-using / scaling / optimising)'},
+ {t:'Suggest standards from a JD',cat:'levy',stage:'queued',d:'paste a JD in the programme picker → top-3 matching standards to add (reuse the JD-Matcher tokeniser/stemmer + standard role-keywords); pair with the strengthened matcher (#17) so it\'s accurate, not just plausible'},
+ {t:'Policy writer',cat:'levy',stage:'queued',d:'generate a tailored, HR-ready apprenticeship / training & development policy document from the employer\'s goal + plan context (uses the governed rulebook so the funding mechanics are correct)'},
+ {t:'Age/size co-investment waiver',cat:'levy',stage:'queued',d:'16–18 / <50-staff 100% funding — verify vs gov.uk first'},
+ {t:'Age-driven NI + L7 gate',cat:'levy',stage:'queued',d:'apprentice age as ONE input (16–18 / 19–21 / 22–24 / 25+) → cascades into: employer-NI exemption for under-25s (0% to £50,270, ~£2.5k/yr saved) + L7 defunding gate (levy-funded 16–21 only from Jan 2026; 22+ self-fund) → net cost-per-learner (training − NI saving). The 22–24 band is the money insight: self-fund L7 yet still bank the NI saving. Verify rates vs gov.uk. Feeds Cost-per-learner ROI'},
+ {t:'Golden-case tests + engine/UI split',cat:'quality',stage:'queued',d:'reproduce gov.uk worked examples to the penny (also a trust artifact)'},
+ {t:'Bundled fonts',cat:'quality',stage:'queued',d:'true offline + deterministic pagination'},
+ {t:'Strengthened matcher',cat:'quality',stage:'queued',d:'synonyms / weighting / stemming'},
+ {t:'Accessibility (WCAG) pass',cat:'quality',stage:'queued',d:'contrast, keyboard, screen-reader'},
+ {t:'Mobile / responsive build',cat:'quality',stage:'queued',d:'phase 2 — calculator is PC-screen only for now'},
+
+ // ---------- PARKED (shown at the foot of Queued) ----------
+ {t:'Provider / multi-client mode',cat:'parked',stage:'queued',d:'manage many employer scenarios — needs backend + beachhead decision'},
+ {t:'Benchmarking / data flywheel',cat:'parked',stage:'queued',d:'"employers like you typically…" — needs backend + data scale'},
+ {t:'Live notifications / alerts',cat:'parked',stage:'queued',d:'a static tool can\'t watch a position — backend territory'},
+ {t:'Running audit log',cat:'parked',stage:'queued',d:'history beyond report-reproducibility — backend'},
+];
+
+const STAGES=[
+  {key:'current',label:'Current',hint:'What\'s live right now — full context: what\'s done, what\'s left, what\'s next.',filter:'live',detail:true},
+  {key:'queued',label:'Queued',hint:'On the to-do list — starts move up to Current.',filter:'queued'},
+  {key:'complete',label:'Complete',hint:'Shipped & live.',filter:'complete'},
+];
+let activeStage='current';
+const tabsEl=document.getElementById('tabs'), gridEl=document.getElementById('grid'), hintEl=document.getElementById('laneHint');
+
+function render(){
+  const cur=STAGES.find(s=>s.key===activeStage);
+  tabsEl.innerHTML='';
+  STAGES.forEach(s=>{
+    const n=PROJECTS.filter(p=>p.stage===s.filter).length;
+    const b=document.createElement('button');
+    b.className='tab '+s.key+(s.key===activeStage?' on':'');
+    b.innerHTML=s.label+' <span class="ct">'+n+'</span>';
+    b.onclick=()=>{activeStage=s.key;render();};
+    tabsEl.appendChild(b);
+  });
+  hintEl.textContent=cur.hint;
+  if(cur.detail){gridEl.style.display='block';renderCurrent();return;}
+  gridEl.style.display='grid';
+  let items=PROJECTS.filter(p=>p.stage===cur.filter).slice().sort((a,b)=>(a.cat==='parked')-(b.cat==='parked'));
+  gridEl.innerHTML=''; let parkedShown=false;
+  items.forEach(p=>{
+    if(p.cat==='parked'&&!parkedShown){parkedShown=true;const d=document.createElement('div');d.className='divider';d.textContent='⏸ PARKED — deferred, backend / business-dependent';gridEl.appendChild(d);}
+    const c=CAT[p.cat];
+    const stat=p.stage==='complete'?'<span class="stat" style="color:var(--teal)">&#10003;</span>'
+      :p.stage==='live'?'<span class="stat"><span class="pulse"></span></span>'
+      :'<span class="stat" style="color:'+c.col+'">&#9675;</span>';
+    const card=document.createElement('div');
+    card.className='card'+(p.cat==='parked'?' parked':'');
+    card.innerHTML=stat+'<div class="body"><div class="name">'+p.t+
+      ' <span class="chip" style="color:'+c.col+';border-color:'+c.col+'55">'+c.label+'</span></div>'+
+      (p.d?'<div class="desc">'+p.d+'</div>':'')+'</div>';
+    gridEl.appendChild(card);
+  });
+}
+function renderCurrent(){
+  var live=PROJECTS.filter(p=>p.stage==='live');
+  var html=live.map(function(p){
+    var c=CAT[p.cat], steps=p.steps||[], done=steps.filter(s=>s.d).length, nextIdx=steps.findIndex(s=>!s.d);
+    var sh=steps.map(function(s,i){return '<div class="step'+(s.d?' done':'')+'"><span class="mk">'+(s.d?'✓':'○')+'</span><span>'+s.t+(i===nextIdx?' <span class="next-chip">NEXT</span>':'')+'</span></div>';}).join('');
+    return '<div class="curpanel"><div class="top"><span class="ttl">'+p.t+'</span>'+
+      '<span class="chip" style="color:'+c.col+';border-color:'+c.col+'55">'+c.label+'</span>'+
+      '<span class="prog2">'+done+' / '+steps.length+' done</span></div>'+
+      (p.goal?'<div class="goal">'+p.goal+'</div>':'')+sh+
+      (p.next?'<div class="curnext"><b>Next:</b> '+p.next+'</div>':'')+'</div>';
+  }).join('');
+  if(!live.length) html='<div class="curpanel" style="color:var(--text3)">Nothing live right now — pull a card up from <b style="color:#39A0D4">Queued</b> to start.</div>';
+  var shipped=PROJECTS.filter(p=>p.stage==='complete').slice(-5).reverse();
+  var upnext=PROJECTS.filter(p=>p.stage==='queued'&&p.cat!=='parked').slice(0,5);
+  html+='<div class="ctx"><div class="row"><span class="rl">RECENTLY SHIPPED</span>'+shipped.map(p=>'<span class="ch2">✓ '+p.t+'</span>').join('')+'</div>'+
+    '<div class="row"><span class="rl">UP NEXT &middot; QUEUE</span>'+upnext.map(p=>'<span class="ch2">○ '+p.t+'</span>').join('')+'</div></div>';
+  gridEl.innerHTML=html;
+}
+render();
+
+// progress = complete / (all non-parked)
+(function(){
+  const tot=PROJECTS.filter(p=>p.cat!=='parked').length;
+  const done=PROJECTS.filter(p=>p.cat!=='parked'&&p.stage==='complete').length;
+  const live=PROJECTS.filter(p=>p.stage==='live').length, q=PROJECTS.filter(p=>p.stage==='queued').length;
+  const pct=Math.round(done/tot*100);
+  document.getElementById('progPct').textContent=pct+'%';
+  document.getElementById('progLab').textContent=done+' complete · '+live+' live · '+q+' queued (excl. parked)';
+  setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',150);
+  document.getElementById('stamp').textContent='Updated 2026-07-02 · calculator build 2026-06-28h · '+done+' shipped · '+live+' live · '+q+' queued · TARGET: world-class site live by Sept 2026';
+})();
+
+// drifting network bg
+(function(){
+  var cv=document.getElementById('bg');if(!cv)return;var ctx=cv.getContext('2d');
+  var DPR=Math.min(window.devicePixelRatio||1,2),w,h,nodes,motes;
+  function resize(){
+    w=cv.width=innerWidth*DPR;h=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';
+    var n=Math.min(80,Math.round(innerWidth*innerHeight/20000));
+    nodes=Array.from({length:n},function(){return{x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*0.16*DPR,vy:(Math.random()-.5)*0.16*DPR,r:(Math.random()*1.5+0.6)*DPR};});
+    motes=Array.from({length:28},function(){return{x:Math.random()*w,y:Math.random()*h,vy:-(Math.random()*0.4+0.12)*DPR,r:(Math.random()*1.2+0.5)*DPR,a:Math.random()*0.35+0.1};});
+  }
+  function frame(){
+    var lk=140*DPR;ctx.clearRect(0,0,w,h);
+    for(var i=0;i<nodes.length;i++){var nn=nodes[i];nn.x+=nn.vx;nn.y+=nn.vy;if(nn.x<0||nn.x>w)nn.vx*=-1;if(nn.y<0||nn.y>h)nn.vy*=-1;}
+    for(var i=0;i<nodes.length;i++)for(var j=i+1;j<nodes.length;j++){var a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<lk){var o=(1-d/lk)*0.13;ctx.strokeStyle='rgba(45,212,178,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.55;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+    for(var i=0;i<nodes.length;i++){var nn=nodes[i];ctx.beginPath();ctx.arc(nn.x,nn.y,nn.r,0,7);ctx.fillStyle='rgba(120,210,196,0.5)';ctx.fill();}
+    for(var i=0;i<motes.length;i++){var m=motes[i];m.y+=m.vy;if(m.y<0){m.y=h;m.x=Math.random()*w;}ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fillStyle='rgba(167,139,250,'+m.a.toFixed(2)+')';ctx.fill();}
+    requestAnimationFrame(frame);
+  }
+  addEventListener('resize',resize);resize();frame();
+})();
+</script>
+</body>
+</html>
