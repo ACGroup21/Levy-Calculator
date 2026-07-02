@@ -81,7 +81,7 @@
 <canvas id="bg"></canvas>
 <div class="wrap">
   <h1>Arthur Curtis — Project Tracker</h1>
-  <div class="sub">Levy &amp; talent toolset + website apps &middot; lifecycle board &middot; <b>trust</b> as the north star</div>
+  <div class="sub">Levy &amp; talent toolset + website apps &middot; lifecycle board &middot; <b>trust</b> as the north star &middot; <b style="color:#f0883e">world-class site live by Sept 2026</b></div>
 
   <div class="prog">
     <div class="prog-pct" id="progPct">0%</div>
@@ -117,6 +117,7 @@ const CAT={
   data:{label:'data', col:'#39A0D4'},
   quality:{label:'quality', col:'#8FB4C6'},
   client:{label:'client build', col:'#E0A43B'},
+  site:{label:'site core', col:'#f0883e'},
   parked:{label:'parked', col:'#5d7e93'},
 };
 const PROJECTS=[
@@ -145,27 +146,40 @@ const PROJECTS=[
    steps:[{d:1,t:'Cost-per-learner panel (band + off-the-job + your direct cash)'},{d:1,t:'Per-learner cost column in the affordability report'},{d:1,t:'Optional learner-wage override for accuracy'},{d:0,t:'Cost-efficiency ROI — vs a commercial course / hiring already-skilled (employer-supplied)'},{d:0,t:'Optional employer-assumption ROI layer (their own benefit inputs)'}],
    next:'Build the cost-efficiency ROI comparison — real money saved, no fabricated benefit multipliers.'},
  {t:'Landmark Group — apprentice tracker',cat:'client',stage:'live',
-   goal:'First external client build. Apprentice progress tracker + learner-review app + training-provider data reconciliation.',
-   steps:[{d:1,t:'Learner review form (Reviews tab) — capture / save / list / edit / export CSV+JSON'},{d:0,t:'Confirm review fields against Landmark\'s actual template'},{d:0,t:'Topline dashboard — % complete vs programme · dated session schedule · theme summaries'},{d:0,t:'Ingest training-provider data (roadmap + progress reports) → compare & report'}],
-   next:'Get Landmark\'s review template + one anonymised provider progress report + the programme roadmap.'},
+   goal:'First external client build. Two-source model: coach review form (Landmark\'s own record) + provider CSV export (OneFile/Bud) → dashboard reconciles both.',
+   steps:[{d:1,t:'Learner review form (Reviews tab) — capture / save / list / edit / export CSV+JSON'},{d:1,t:'Landmark navy/coral identity restyle (white logo, serif display, animated bg)'},{d:1,t:'Topline dashboard — per-learner % complete · session schedule · theme/assignment boxes + cohort topline'},{d:1,t:'CSV import of OneFile export — tolerant column mapping (progress/target/deviation/units/tasks)'},{d:1,t:'Reconcile coach view vs OneFile view — merged card, tolerant name-match, gap flag'},{d:1,t:'Demo cohort loader + one-click PDF report + version stamp (v0.9)'},{d:1,t:'OneFile = gospel: status/topline from deviation bands (≥0 on / -1..-9 risk / ≤-10 behind)'},{d:0,t:'PAUSED — scope the coach-assessment model (agree-with-OneFile vs discretionary view + reason)'},{d:0,t:'RETROFIT the review form (demo-first build): capture only what OneFile can\'t — drop duplicated progress/OTJ/units, keep coach-only layer'},{d:0,t:'Test against a REAL Ginger Nut/OneFile export'}],
+   next:'PAUSED 2026-07-02 at v0.9. Resume in a few days to scope the coach-assessment model → v1.0. Live: acgroup21.github.io/Levy-Calculator/landmark-demo-9f4k2m.html'},
  {t:'Transfers / gifting — social value',cat:'levy',stage:'live',
    goal:'Model levy transfers and frame unspent levy as measurable social value.',
    steps:[{d:1,t:'Social-value gifting panel (UK Social Value Model theme; no fabricated monetisation)'},{d:0,t:'Model receiving a transfer (up to 50% of another employer\'s levy)'},{d:0,t:'Full transfers modelling — inbound + outbound'}],
    next:'Model the inbound side — receiving a transfer.'},
 
  // ---------- QUEUED ----------
- {t:'Apprenticeship Status Checker',cat:'web',stage:'queued',d:'website Tools Hub: search a standard → funding status / defunding lookup, from the Skills England CSV + RSS'},
- {t:'Talent Programme Builder',cat:'web',stage:'queued',d:'website Tools Hub: sequence capability steps incl. non-apprenticeship options (CPD/courses)'},
- {t:'Pathway Builder',cat:'web',stage:'queued',d:'unit → short → full progression; element vs separate-but-linked — decide the job at build'},
+ // --- WORLD-CLASS SITE (target: live by Sept 2026) · self-serve funnel ---
+ {t:'Cross-tool scenario spine',cat:'site',stage:'queued',d:'THE connective tissue: one input set (pay bill · goal · standards · learners · ages) entered once → localStorage + shareable URL + emailable; every public tool reads/writes it, and it powers the lite→full handoff. Build FIRST — everything hangs off it. (distinct from the calculator\'s internal Shared scenario)'},
+ {t:'Tools Hub page',cat:'site',stage:'queued',d:'self-serve hub — each lite tool a launchable card; extends the calculator-upfront / answer-first principle across the whole site'},
+ {t:'Booking + lead capture (scenario handoff)',cat:'site',stage:'queued',d:'Cal.com/Calendly embed; "email my results" + "book a call" attach the scenario so the consultant opens the EXACT numbers the visitor built; gated full-PDF report behind an email. This is the lead-gen mechanism + the lite→full bridge'},
+ {t:'Content / credibility system',cat:'site',stage:'queued',d:'case studies · insights/blog · resource guides (CMS or markdown pipeline, editable without a dev); each tool doubles as an SEO landing page; replace placeholder stats (£3.5bn / 98%) with real numbers'},
+ {t:'Measurement',cat:'site',stage:'queued',d:'analytics + tool-usage events — which tools used, drop-off, conversion to booking'},
+ {t:'Foundations pass (site)',cat:'site',stage:'queued',d:'WCAG accessibility · performance budget · SEO · privacy / cookie / data-handling for captured emails & scenarios'},
+ {t:'Lite Levy Calculator (public)',cat:'web',stage:'queued',d:'self-contained standalone: pot / top-up / #appr / monthly + NI & L7 age gate; no save / multi-scenario; funnels to book-a-call / full. (Hero estimator already live on the homepage)'},
+ {t:'Lite JD Matcher (public)',cat:'web',stage:'queued',d:'paste a JD → top-3 standards + coverage %; no PDF / deep KSB gap plan; funnels to full'},
+ {t:'Lite Cost-per-learner (public)',cat:'web',stage:'queued',d:'single standard → indicative per-learner cost; funnels to full'},
+ {t:'Apprenticeship Status Checker',cat:'web',stage:'queued',d:'PUBLIC/lite Tools-Hub app: search a standard → funding status / band / defunding date, from the Skills England CSV + RSS; reads/writes the scenario spine'},
+ {t:'Talent Programme Builder',cat:'web',stage:'queued',d:'PUBLIC/lite Tools-Hub app: goal → suggested capability sequence incl. non-apprenticeship options (CPD/courses); no affordability engine; feeds the scenario spine'},
+ {t:'Pathway Builder',cat:'web',stage:'queued',d:'PUBLIC/lite: unit → short → full progression; element vs separate-but-linked — decide the job at build; feeds the scenario spine'},
  {t:'Expand to all fundable standards',cat:'data',stage:'queued',d:'add the ~401 fundable standards not yet carried (band/duration from CSV; KSB-less for now)'},
  {t:'RSS auto-refresh routine',cat:'data',stage:'queued',d:'watch the Skills England feed → re-pull CSV → rebuild when standards add / retire / defund'},
  {t:'Talent mapping',cat:'levy',stage:'queued',d:'thin bridge: workforce gaps → fundable options → affordability'},
+ {t:'Levy calc — v2 "unbeatable" rescope',cat:'levy',stage:'queued',d:'calculator → decision engine. Unbeatable-4: recommendation/optimiser (ranked best-moves, engine-costed) · stress test/downside · levy→delivery loop (link tracker → completion-adjusted ROI) · full lifecycle (transfers-in, 100% waivers, £1k incentives, group levy). + workforce gap→pathway ladder; trust keystones = golden-case suite/#15. See levy-product-map memory.'},
+ {t:'Landmark tracker — v2 "unbeatable" rescope',cat:'client',stage:'queued',d:'reconciliation/oversight layer. Signature-4: trajectory snapshots (direction/momentum) · finish-on-time projection · multi-metric reconciliation (OTJ/units/FS) · OTJ compliance layer. + compliance (E&M, review-overdue, EPA gateway, audit trail), per-learner/line-manager reports, levy value view (links levy calc). Enabler: shared store + roles (backend). See landmark-group-tracker-app memory.'},
  {t:'Compare / snapshot + safety',cat:'levy',stage:'queued',d:'versioned reports over time, "still within budget?", provenance, liability comms'},
  {t:'What-if comparison',cat:'levy',stage:'queued',d:'compare options now — defer vs spread vs unit-first vs full standard'},
  {t:'Programme-stage read-out',cat:'levy',stage:'queued',d:'derived utilisation → 3 honest bands (under-using / scaling / optimising)'},
  {t:'Suggest standards from a JD',cat:'levy',stage:'queued',d:'paste a JD in the programme picker → top-3 matching standards to add (reuse the JD-Matcher tokeniser/stemmer + standard role-keywords); pair with the strengthened matcher (#17) so it\'s accurate, not just plausible'},
  {t:'Policy writer',cat:'levy',stage:'queued',d:'generate a tailored, HR-ready apprenticeship / training & development policy document from the employer\'s goal + plan context (uses the governed rulebook so the funding mechanics are correct)'},
  {t:'Age/size co-investment waiver',cat:'levy',stage:'queued',d:'16–18 / <50-staff 100% funding — verify vs gov.uk first'},
+ {t:'Age-driven NI + L7 gate',cat:'levy',stage:'queued',d:'apprentice age as ONE input (16–18 / 19–21 / 22–24 / 25+) → cascades into: employer-NI exemption for under-25s (0% to £50,270, ~£2.5k/yr saved) + L7 defunding gate (levy-funded 16–21 only from Jan 2026; 22+ self-fund) → net cost-per-learner (training − NI saving). The 22–24 band is the money insight: self-fund L7 yet still bank the NI saving. Verify rates vs gov.uk. Feeds Cost-per-learner ROI'},
  {t:'Golden-case tests + engine/UI split',cat:'quality',stage:'queued',d:'reproduce gov.uk worked examples to the penny (also a trust artifact)'},
  {t:'Bundled fonts',cat:'quality',stage:'queued',d:'true offline + deterministic pagination'},
  {t:'Strengthened matcher',cat:'quality',stage:'queued',d:'synonyms / weighting / stemming'},
@@ -246,7 +260,7 @@ render();
   document.getElementById('progPct').textContent=pct+'%';
   document.getElementById('progLab').textContent=done+' complete · '+live+' live · '+q+' queued (excl. parked)';
   setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',150);
-  document.getElementById('stamp').textContent='Updated 2026-06-28 · calculator build 2026-06-28h · '+done+' shipped · '+live+' live · '+q+' queued';
+  document.getElementById('stamp').textContent='Updated 2026-07-02 · calculator build 2026-06-28h · '+done+' shipped · '+live+' live · '+q+' queued · TARGET: world-class site live by Sept 2026';
 })();
 
 // drifting network bg
