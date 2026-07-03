@@ -674,6 +674,7 @@ footer span{color:var(--teal)}
       </div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
+      <div id="projCapacity"></div>
       <div id="projWorking"></div>
       <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span style="font-size:13px;color:var(--text3)">Affordability report &mdash; opens in a new tab:</span>
@@ -749,7 +750,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02b</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1685,6 +1686,26 @@ function simCoInvest(income,tot,pmk,uTot){
   }
   return{total,months};
 }
+// Training capacity + over-commitment warning (display-only — reads levyReportData figures, no engine change).
+// Capacity = how many apprentices the levy funds at the plan's own average cost. Warn when the plan exceeds it.
+function renderCapacity(d){
+  var el=document.getElementById('projCapacity');if(!el)return;
+  if(!d||!d.heads||!d.perHead||d.levyAvail<=0){el.innerHTML='';return;}
+  var cap=Math.floor(d.levyAvail/d.perHead);            // people fundable at their average programme cost
+  var over=d.planCost>d.levyAvail+0.5;                  // planned cost exceeds levy available over the horizon
+  var yrs=d.years, yl=yrs+' year'+(yrs!==1?'s':''), avgTxt=fmt(Math.round(d.perHead));
+  if(!over){
+    var head=Math.max(0,cap-d.heads);
+    el.innerHTML='<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.28);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
+      '<div style="font-weight:700;color:#2DD4B2;margin-bottom:5px">&#128101; Training capacity &mdash; about '+cap+' apprentice'+(cap!==1?'s':'')+'</div>'+
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy (&asymp;&nbsp;'+fmt(Math.round(d.levyAvail))+' over '+yl+') funds about <strong>'+cap+'</strong> at your average programme cost of '+avgTxt+' each. You&rsquo;ve planned <strong>'+d.heads+'</strong>'+(head>0?(' &mdash; headroom for about <strong>'+head+' more</strong>'):' &mdash; you&rsquo;re at capacity')+'.</div></div>';
+  }else{
+    var gap=d.planCost-d.levyAvail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
+    el.innerHTML='<div style="background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.4);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
+      '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your levy</div>'+
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your plan commits <strong>'+fmt(Math.round(d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but your levy provides <strong>'+fmt(Math.round(d.levyAvail))+'</strong> &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, or reduce/adjust programmes &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div></div>';
+  }
+}
 function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
   const base=simCoInvest(income,tot,pmk,uTot);
@@ -2120,7 +2141,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);updateSectionNav();
+  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
