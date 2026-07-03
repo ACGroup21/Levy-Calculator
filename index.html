@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02g</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1719,7 +1719,7 @@ function renderCapacity(d){
   var el=document.getElementById('projCapacity');if(!el)return;
   if(!d||!d.heads||!d.perHead||d.levyAvail<=0){el.innerHTML='';return;}
   var cap=Math.floor(d.levyAvail/d.perHead);            // people fundable at their average programme cost
-  var over=d.planCost>d.levyAvail+0.5;                  // planned cost exceeds levy available over the horizon
+  var over=(d.levyPlanCost||d.planCost)>d.levyAvail+0.5; // levy-eligible cost exceeds levy available over the horizon (L7 22+ self-fund already excluded)
   var yrs=d.years, yl=yrs+' year'+(yrs!==1?'s':''), avgTxt=fmt(Math.round(d.perHead));
   if(!over){
     var head=Math.max(0,cap-d.heads);
@@ -1727,17 +1727,17 @@ function renderCapacity(d){
       '<div style="font-weight:700;color:#2DD4B2;margin-bottom:5px">&#128101; Training capacity &mdash; about '+cap+' apprentice'+(cap!==1?'s':'')+'</div>'+
       '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy (&asymp;&nbsp;'+fmt(Math.round(d.levyAvail))+' over '+yl+') funds about <strong>'+cap+'</strong> at your average programme cost of '+avgTxt+' each. You&rsquo;ve planned <strong>'+d.heads+'</strong>'+(head>0?(' &mdash; headroom for about <strong>'+head+' more</strong>'):' &mdash; you&rsquo;re at capacity')+'.</div></div>';
   }else{
-    var gap=d.planCost-d.levyAvail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
+    var gap=(d.levyPlanCost||d.planCost)-d.levyAvail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
     el.innerHTML='<div style="background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.4);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
       '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your levy</div>'+
-      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your plan commits <strong>'+fmt(Math.round(d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but your levy provides <strong>'+fmt(Math.round(d.levyAvail))+'</strong> &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, or reduce/adjust programmes &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div></div>';
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but your levy provides <strong>'+fmt(Math.round(d.levyAvail))+'</strong> &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, or reduce/adjust programmes &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div></div>';
   }
   if(d.niRelief>0.5){
     el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
   }
   if(d.l7SelfFund>0){
     el.innerHTML+='<div style="margin-top:10px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.55">'+
-      '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; on your Level 7 programme(s), <strong>'+d.l7SelfFund+'</strong> learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ can no longer be levy-funded (from <strong>1 Jan 2026</strong>) and must <strong>self-fund about '+fmt(Math.round(d.l7SelfFundCost))+'</strong> of training.'+
+      '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; on your Level 7 programme(s), <strong>'+d.l7SelfFund+'</strong> learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ can no longer be levy-funded (from <strong>1 Jan 2026</strong>) and must <strong>self-fund about '+fmt(Math.round(d.l7SelfFundCost))+'</strong> of training (now excluded from your levy-funded figures above).'+
       (d.l7Crossover>0?' Of those, <strong style="color:#2DD4B2">'+d.l7Crossover+' aged 22&ndash;24</strong> still qualify for the under-25 NI relief &mdash; so it&rsquo;s self-funded training, but you keep the NI saving.':'')+
       ' <a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk</a></div>';
   }
@@ -1822,6 +1822,10 @@ function renderAffordLadder(coInvest,expiry){
 var LEVY_FRAMING='finance';
 function lvySubject(name){return (name||'').replace(/\b(?:l|lvl|level)\s*\d+\b/ig,'').replace(/\s+/g,' ').trim();}
 function lvyLevel(name){var m=(name||'').match(/\b(?:l|lvl|level)\s*(\d+)\b/i);return m?+m[1]:0;}
+// Learners the LEVY actually funds. From 1 Jan 2026, 22+ on Level 7 can't be levy-funded (they self-fund),
+// so an L7 programme with an age mix only draws its 16-21 learners. Without an age mix, or for non-L7,
+// this returns the full count → the engine is byte-identical to before this change.
+function lvyEligCount(p){var c=+p.count||0;if(p&&p.age&&(lvyLevel(p.name)||0)>=7)c=+p.age.y||0;return c;}
 function levyReportData(){
   var M=projYears*12, ps=new Date(today.getFullYear(),today.getMonth(),1), pmk=mKey(ps);
   var income=Array(M).fill(levyData.monthlyAvg);
@@ -1834,7 +1838,7 @@ function levyReportData(){
       return;
     }
     var sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
-    var mt=(p.cost*RULEBOOK.draw.training/dur)*p.count, et=p.cost*RULEBOOK.draw.epa*p.count;
+    var ec=lvyEligCount(p), mt=(p.cost*RULEBOOK.draw.training/dur)*ec, et=p.cost*RULEBOOK.draw.epa*ec;
     for(var mk=sm;mk<em;mk++){var i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
     var ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
@@ -1847,6 +1851,8 @@ function levyReportData(){
   var coFloor=0; if(ci.total>1){var trainOnly=tot.slice();ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});coFloor=simCoInvest(income,trainOnly,pmk,us).total;}
   var heads=programmes.reduce(function(a,p){return a+(+p.count||0);},0);
   var planCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
+  var levyPlanCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*lvyEligCount(p);},0); // excludes L7 22+ self-fund
+  var selfFundCost=Math.max(0,planCost-levyPlanCost);
   var annual=levyData.monthlyAvg*12, transferCap=annual*RULEBOOK.transferCapPct;
   var expVal=exp.total>1?exp.total:0, perHead=heads?planCost/heads:0;
   var expiry12=(exp.byMonth||[]).filter(function(m){return m.mk-pmk<12;}).reduce(function(a,m){return a+m.amount;},0);
@@ -1884,7 +1890,8 @@ function levyReportData(){
     l7SelfFund:l7SelfFund,l7Crossover:l7Crossover,l7SelfFundCost:l7SelfFundCost,l7Names:Object.keys(l7NameSet),
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coFloor:coFloor,co25:ci.months.some(function(m){return m.rate>=0.25;}),coMonths:ci.months.length,
-    levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
+    levyPlanCost:levyPlanCost,selfFundCost:selfFundCost,
+    levyCovered:Math.max(0,levyPlanCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
     heads:heads,progCount:programmes.length,perHead:perHead,endBal:bals[M-1],transferCap:transferCap,
     programmes:programmes.slice(),giftable:giftable,svEnabled:svEnabled,
     subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil,
@@ -2096,7 +2103,10 @@ function levyPage3(d,framing){
   var niNote = d.niRelief>1
     ? '<div style="margin-top:9px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#2DD4B2">Less employer NI relief &asymp;'+lvK(d.niRelief)+'.</strong> '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' carry 0% employer NIC up to &pound;50,270, so net cost of ownership &asymp; <strong style="color:#2DD4B2">'+lvK(Math.max(0,d.trueCost-d.niRelief))+'</strong>. A tax relief (separate from the levy), estimated on the plan wage.</div>'
     : '';
-  var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div>'+(d.coInvest>1?'<div class="lvy-true-sub" style="color:#ff8fa3">incl. &asymp;'+lvK(d.coInvest)+' your co-invest</div>':'')+'</div>'+
+  var selfFundNote = d.selfFundCost>1
+    ? '<div style="margin-top:9px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(224,164,59,0.05);border:1px solid rgba(224,164,59,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#E0A43B">Plus employer self-fund &asymp;'+lvK(d.selfFundCost)+'.</strong> Level&nbsp;7 training for '+d.l7SelfFund+' learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ isn&rsquo;t levy-eligible from 1 Jan 2026, so it is excluded from the levy fee above and funded directly by you.</div>'
+    : '';
+  var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.levyPlanCost)+'</div>'+(d.coInvest>1?'<div class="lvy-true-sub" style="color:#ff8fa3">incl. &asymp;'+lvK(d.coInvest)+' your co-invest</div>':'')+'</div>'+
     '<div class="lvy-true-op">+</div>'+
     '<div class="lvy-true-cell"><div class="lvy-true-lab">Off-the-job time</div><div class="lvy-true-num" style="color:#E0A43B">'+(noRate?'set rate':'&asymp;'+lvK(d.otjCost))+'</div><div class="lvy-true-sub">'+d.otjFTE.toFixed(1)+' FTE &middot; '+Math.round(d.otjHrsWk)+' hrs/wk released</div></div>'+
     '<div class="lvy-true-op">=</div>'+
@@ -2107,7 +2117,7 @@ function levyPage3(d,framing){
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
-    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+niNote+
+    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+selfFundNote+niNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th><th class="r">Full / learner</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
@@ -2159,14 +2169,14 @@ function renderProjection(){
       return;
     }
     const sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
-    const mt=(p.cost*RULEBOOK.draw.training/dur)*p.count,et=p.cost*RULEBOOK.draw.epa*p.count;
+    const ec=lvyEligCount(p),mt=(p.cost*RULEBOOK.draw.training/dur)*ec,et=p.cost*RULEBOOK.draw.epa*ec;
     for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
     const ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
   const tot=ts.map((s,i)=>s+es[i]);
   const combined=tot.map((s,i)=>s+us[i]); // total levy demand per month (appr + unit)
   // Duration sensitivity: re-run the real co-invest engine on a +6-month hypothetical per programme
-  const apprTot=(progs)=>{const t=Array(M).fill(0);progs.forEach(p=>{if(p.type==='unit')return;const sm=mKey(p.start),em=mKey(p.epa),dr=mBetween(p.start,p.epa);const mt=(p.cost*RULEBOOK.draw.training/dr)*p.count,et=p.cost*RULEBOOK.draw.epa*p.count;for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)t[i]+=mt;}const ei=em-pmk;if(ei>=0&&ei<M)t[ei]+=et;});return t;};
+  const apprTot=(progs)=>{const t=Array(M).fill(0);progs.forEach(p=>{if(p.type==='unit')return;const sm=mKey(p.start),em=mKey(p.epa),dr=mBetween(p.start,p.epa);const ec=lvyEligCount(p),mt=(p.cost*RULEBOOK.draw.training/dr)*ec,et=p.cost*RULEBOOK.draw.epa*ec;for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)t[i]+=mt;}const ei=em-pmk;if(ei>=0&&ei<M)t[ei]+=et;});return t;};
   const ciBase=simCoInvest(income,tot,pmk,us);
   let durTip='';
   if(ciBase.total>1){
@@ -3134,7 +3144,7 @@ function processQuery(q){
   // GIFTING
   if(intent.isGifting){
     if(!hasLevy){aiMsg(`Upload your ESFA levy CSV first so I can calculate your gifting headroom.`);return;}
-    const n12=programmes.reduce((t,p)=>{const dur=mBetween(p.start,p.epa);return t+(p.cost*RULEBOOK.draw.training/dur)*p.count*Math.min(12,dur);},0);
+    const n12=programmes.reduce((t,p)=>{const dur=mBetween(p.start,p.epa);return t+(p.cost*RULEBOOK.draw.training/dur)*lvyEligCount(p)*Math.min(12,dur);},0);
     const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
     aiMsg(`<strong>Gifting / transfer headroom</strong><div class="r-section"><div class="r-label">Annual levy pot</div><div class="r-val">${fmt(annual)}</div></div><div class="r-section"><div class="r-label">Statutory max gift (50%)</div><div class="r-val">${fmt(annual*RULEBOOK.transferCapPct)}</div></div><div class="r-section"><div class="r-label">Own 12m commitment</div><div class="r-val">${fmt(n12)}</div></div><div class="r-section"><div class="r-label">Safe gift promise</div><div class="r-val">${fmt(safe)}</div></div>You can transfer up to <strong>${fmt(safe)}</strong> to a charity, SME, or supply chain partner — covering 100% of their apprenticeship costs.`);
     return;
