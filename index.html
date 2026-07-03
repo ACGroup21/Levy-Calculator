@@ -523,6 +523,16 @@ footer span{color:var(--teal)}
       </div>
       <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
     </details>
+    <details style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:13px">
+      <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
+      <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <button class="btn-demo" onclick="estimateLevyFromContributions()" style="white-space:nowrap">Work back my pay bill</button>
+      </div>
+      <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
+    </details>
   </div>
 
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
@@ -739,7 +749,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-06-28h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02a</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1318,6 +1328,28 @@ function estimateLevyFromPayroll(){
   if(programmes.length)renderProjection();
   saveState();
   setStatus('[ESTIMATE] '+(annualLevy>0?('Annual levy ≈ '+fmt(annualLevy)+' ('+fmt(monthlyIncome)+'/mo incl. 10% top-up)'):'Pay bill is below the £3m threshold — no levy is due.')+' Confirm against your ESFA account when available.','ok');
+}
+
+// Reverse of estimateLevyFromPayroll: known DECLARED levy (before 10% top-up) → work back the annual pay bill, then feed the engine.
+function estimateLevyFromContributions(){
+  var gv=function(id){return parseFloat((document.getElementById(id).value||'').toString().replace(/[£,\s]/g,''))||0;};
+  var lv=gv('rev-levy');
+  if(lv<=0){setStatus('Enter your declared levy to work back to your pay bill.','warn');return;}
+  var annualLevy=(document.getElementById('rev-period').value==='year')?lv:lv*12;
+  // reverse the levy formula: annualLevy = payBill×rate − allowance  →  payBill = (annualLevy + allowance) / rate
+  var pb=(annualLevy+RULEBOOK.levyAllowance)/RULEBOOK.levyRate;
+  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
+  var openBal=gv('rev-balance');
+  var base=mKey(today), byMonth=[];
+  for(var i=0;i<12;i++){var mk=base+i, ew=expMo(mk);byMonth.push({month:isoMo(mk),levy:monthlyLevy,topup:monthlyTopup,paid:0,mk:mk,income:monthlyIncome,net:monthlyIncome,ew:ew,expiresLabel:mkLbl(mk+ew)});}
+  levyData={monthlyAvg:monthlyIncome,balance:openBal,byMonth:byMonth,estimated:true};
+  scnDataAck=null;
+  var pbInput=document.getElementById('est-paybill');if(pbInput)pbInput.value=Math.round(pb); // reflect the worked-back pay bill for transparency
+  renderSummary();renderMonthTable();renderDataQuality(validateLevyData(byMonth,{estimate:true}));
+  document.getElementById('levySummary').classList.remove('hidden');
+  if(programmes.length)renderProjection();
+  saveState();
+  setStatus('[ESTIMATE] Your annual pay bill works back to ≈ '+fmt(pb)+' (from '+fmt(annualLevy)+' declared levy/yr). Monthly income ≈ '+fmt(monthlyIncome)+' incl. 10% top-up. Confirm against your ESFA account.','ok');
 }
 
 // ── Data integrity: surface what the parser skipped / coerced, and flag anomalies (the trust front door)
