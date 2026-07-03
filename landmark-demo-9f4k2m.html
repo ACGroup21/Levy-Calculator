@@ -119,6 +119,17 @@
   .attn-f{color:var(--text2);text-align:right}
   .kchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
   .summary-notes{min-height:74px;margin-top:2px}
+  /* KSB coverage (Team Leader standard) */
+  .ksb-head{display:flex;align-items:center;gap:12px;margin-top:2px}
+  .ksb-bar{flex:1;height:9px;background:rgba(255,255,255,0.12);border-radius:6px;overflow:hidden}
+  .ksb-bar>span{display:block;height:100%;background:var(--green);border-radius:6px}
+  .ksb-count{font-family:var(--mono);font-size:12px;color:var(--text2);white-space:nowrap}
+  .ksb-grid{margin-top:8px}
+  .ksb-grp{font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--text3);margin:9px 0 5px}
+  .kchip{display:inline-block;font-family:var(--mono);font-size:11px;padding:3px 7px;margin:0 5px 5px 0;border-radius:6px;
+    background:rgba(255,255,255,0.06);border:1px solid var(--panelb);color:var(--text2);cursor:pointer;user-select:none;transition:all .12s}
+  .kchip:hover{border-color:var(--purple);color:var(--ink)}
+  .kchip.on{background:rgba(79,209,139,0.16);border-color:rgba(79,209,139,0.5);color:var(--green)}
   .stat{background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(31,29,65,0.04)}
   .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1}
   .stat .l{font-size:11.5px;color:var(--text2);margin-top:6px}
@@ -164,6 +175,7 @@
     .lcard,.stat,.sec,.tbox,.hero{break-inside:avoid;box-shadow:none}
     .summary{break-after:page}
     .summary-notes{border:1px solid var(--panelb);background:#fff;color:var(--text)}
+    .ksb-grid,.ksb-toggle{display:none!important}  /* report shows the coverage bar + count, not the edit grid */
     .dash-top{margin-bottom:16px}
     .head{margin-bottom:6px}
   }
@@ -296,7 +308,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.12 &middot; build 2026-07-02f &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.13 &middot; build 2026-07-04a &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -466,6 +478,35 @@ const KEYN='landmark_summary_notes_v1';
 let summaryNotes=''; try{summaryNotes=localStorage.getItem(KEYN)||'';}catch(e){}
 function saveNotes(v){summaryNotes=v;try{localStorage.setItem(KEYN,v);}catch(e){}}
 
+// ===== KSB coverage — standard's own KSB list is the fixed, mandatory set (roadmap can't add/drop). =====
+// Team Leader ST0384 v1.3/v1.4 — 47 KSBs, verified 2026-07-04 against the TQUK Standard Specification
+// (reproduces the Skills England/IfATE standard). Coverage = a fact recorded against these codes; no pacing (deferred to a real roadmap).
+const KSB_TL={code:'ST0384',name:'Team Leader',
+ K:{K1:"Performance management techniques.",K2:"How to identify the learning needs of others and solutions to address them.",K3:"Processes and policies which support the delivery of operational requirements.",K4:"Project management tools and techniques.",K5:"Relevant regulation, legislation, and compliance that impacts their role and the organisation.",K6:"Organisational strategy and objectives and how their role impacts on them.",K7:"How to manage resources to implement operational and team plans.",K8:"Time management and prioritisation tools.",K9:"Communication techniques including presentation skills, negotiation and influencing skills.",K10:"Policy and procedure relating to people and organisational culture.",K11:"Stakeholder management.",K12:"Problem-solving and decision-making principles.",K13:"Principles of change management and continuous improvement.",K14:"IT and software used to support the activities of the business.",K15:"External factors that affect the workplace, such as sustainability and net carbon zero, and how they are managed.",K16:"The impact that internal and external factors such as environmental impacts, have on their role.",K17:"Leadership and management approaches.",K18:"The purpose of their role within the organisation, including their level of responsibility and accountability.",K19:"The impact that cross-team working has in the delivery of organisational objectives.",K20:"How to collate, interpret and communicate data and information to meet the needs of different audiences.",K21:"The wider social and economic environment in which the organisation operates.",K22:"Approaches to managing budgets, and options and choices to maximise efficient use of resources.",K23:"Principles of equity, diversity and inclusion in the workplace and their impact on the organisation and the team."},
+ S:{S1:"Use resources to implement operational and team plans.",S2:"Use tools to organise, prioritise and allocate daily and weekly work activities.",S3:"Able to collate and interpret data and information and create reports.",S4:"Identify and support the development of the team through informal coaching and continuous professional development.",S5:"Use information and problem-solving techniques to provide solutions and influence the decision-making process.",S6:"Use digital tools for planning and project management to monitor project progress, taking corrective action to deliver against the project plan.",S7:"Review work processes to identify opportunities to improve performance and for continuous improvement.",S8:"Use technology and software to produce documentation, such as spreadsheets and presentation packages to communicate information.",S9:"Manage individual or team performance by setting objectives, monitoring progress, and providing clear guidance and feedback.",S10:"Manage others through change by identifying challenges and the activities to resolve them.",S11:"Interpret organisational strategy and communicate how this impacts others.",S12:"Interpret and apply regulation and legislation, share best practices, and advise stakeholders on their application.",S13:"Communicate information through different media, such as face-to-face meetings, emails, reports, and presentations to enable key stakeholders to understand what is required.",S14:"Collaborate with stakeholders in the organisation to ensure the delivery of operational goals.",S15:"Manage and maintain relationships with a diverse workforce and stakeholders.",S16:"Negotiate with and challenge stakeholders to manage change and reduce conflict.",S17:"Interpret policy and support the delivery of equity, diversity and inclusion in the workplace and monitor their impact on their team.",S18:"Identify future changes in the sector such as technology advances that may impact their organisation.",S19:"Monitor the use of technology and the potential to reduce energy consumption through their optimisation in day-to-day tasks, such as reducing the use of paper and switching off items when not in use."},
+ B:{B1:"Acts professionally, ethically and with integrity.",B2:"Supports an inclusive culture, treating colleagues and external stakeholders fairly and with respect.",B3:"Takes accountability and ownership of their tasks and workload.",B4:"Seeks learning opportunities and continuous professional development.",B5:"Works flexibly and adapts to circumstances."}};
+const KEYK='landmark_ksb_v1';
+let ksbCov={}; try{ksbCov=JSON.parse(localStorage.getItem(KEYK)||'{}');}catch(e){ksbCov={};}
+function persistKsb(){try{localStorage.setItem(KEYK,JSON.stringify(ksbCov));}catch(e){}}
+function ksbSetFor(prog,aim){const s=((prog||'')+' '+(aim||'')).toLowerCase();return /team leader|st0384/.test(s)?KSB_TL:null;}
+function refCodes(ref){return [...Object.keys(ref.K),...Object.keys(ref.S),...Object.keys(ref.B)];}
+function detectKsb(list){const set=new Set();(list||[]).forEach(r=>{(String(r.ksbs||'').match(/\b[KSB]\d{1,2}\b/g)||[]).forEach(c=>set.add(c.toUpperCase()));});return set;}
+// Covered set: explicit stored coverage once the coach has edited; otherwise auto-seeded from KSB codes in review notes.
+function coveredSet(nk,list,all){
+  if(ksbCov[nk]&&Array.isArray(ksbCov[nk]))return new Set(ksbCov[nk].filter(c=>all.indexOf(c)>=0));
+  return new Set([...detectKsb(list)].filter(c=>all.indexOf(c)>=0));
+}
+function toggleKsbPanel(btn){const g=btn.closest('.ksb-head').nextElementSibling;const open=g.style.display==='none';g.style.display=open?'':'none';btn.textContent=open?'done':'edit';}
+function toggleKsb(el,nk){
+  el.classList.toggle('on');
+  const grid=el.closest('.ksb-grid'),chips=grid.querySelectorAll('.kchip');
+  const covered=[...chips].filter(c=>c.classList.contains('on')).map(c=>c.dataset.code);
+  ksbCov[nk]=covered;persistKsb();
+  const head=grid.previousElementSibling;
+  const cnt=head.querySelector('.ksb-count');if(cnt)cnt.textContent=covered.length+' of '+chips.length;
+  const bar=head.querySelector('.ksb-bar>span');if(bar)bar.style.width=(covered.length/chips.length*100)+'%';
+}
+
 // ===== Dashboard — reconciles your reviews (coach view) with OneFile (provider view) =====
 function fmtDate(d){if(!d)return '';const p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0].slice(2):d;}
 function parseDMY(s){if(!s)return null;s=String(s).trim();let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return null;}
@@ -559,6 +600,11 @@ function renderDashboard(){
   s+=attn.length?'<div class="attn">'+attn.map(a=>'<div class="attn-row"><span class="attn-n">'+esc(a.name)+'</span><span class="attn-f">'+a.flags.map(esc).join(' &middot; ')+'</span></div>').join('')+'</div>'
     :'<div class="mini">No flags — all learners on or above target with no coach concerns or overdue reviews.</div>';
   if(uTot>0)s+='<div class="subh">Units signed off (OneFile)</div><div class="kchips"><span class="dchip">'+uDone+' of '+uTot+' units across the cohort</span></div>';
+  // KSB coverage — only for standards with a curated KSB list (Team Leader). Others simply don't appear.
+  const tlE=entries.filter(x=>ksbSetFor(x.cl?x.cl.prog:'',x.p?x.p.aim:''));
+  if(tlE.length){const all=refCodes(KSB_TL);const per=tlE.map(x=>coveredSet(normName(x.name),x.list,all).size);
+    const avg=Math.round(per.reduce((a,b)=>a+b,0)/per.length);
+    s+='<div class="subh">KSB coverage — Team Leader (ST0384)</div><div class="kchips"><span class="dchip">'+avg+' of '+all.length+' KSBs covered on average &middot; '+tlE.length+' learner'+(tlE.length>1?'s':'')+'</span></div>';}
   s+='<div class="subh">Coach summary &amp; suggestions</div>'+
      '<textarea id="summaryNotes" class="summary-notes" placeholder="Priorities for next quarter, KSB gaps to target, cohort-wide themes… (saved on this device; appears on the PDF report)"></textarea>'+
      '</div>';
@@ -602,6 +648,20 @@ function renderDashboard(){
       html+='<div class="themes"><div class="tbox"><h4>Themes / KSBs covered</h4><div class="tc">'+(esc(lastNonEmpty('ksbs'))||dash)+'</div></div>'+
         '<div class="tbox"><h4>Assignments</h4><div class="tc">'+(esc(lastNonEmpty('assign'))||dash)+'</div></div></div>';
     } else if(p){html+='<div class="gap info">No coach review logged for this learner yet — provider data only.</div>';}
+    // KSB coverage — only where a curated standard list exists (Team Leader). Coverage = fact, no pacing.
+    const ref=ksbSetFor(prog,p?p.aim:'');
+    if(ref){const nk=normName(name),all=refCodes(ref),cov=coveredSet(nk,list,all);
+      html+='<div class="src" style="margin-top:14px">KSB coverage &middot; '+ref.name+' ('+ref.code+')</div>'+
+        '<div class="ksb-head"><div class="ksb-bar"><span style="width:'+(cov.size/all.length*100).toFixed(1)+'%"></span></div>'+
+        '<span class="ksb-count">'+cov.size+' of '+all.length+'</span>'+
+        '<button class="link ksb-toggle" onclick="toggleKsbPanel(this)">edit</button></div>';
+      let grid='<div class="ksb-grid" style="display:none">';
+      [['Knowledge',ref.K],['Skills',ref.S],['Behaviours',ref.B]].forEach(g=>{
+        grid+='<div class="ksb-grp">'+g[0]+'</div>';
+        Object.keys(g[1]).forEach(code=>{grid+='<span class="kchip'+(cov.has(code)?' on':'')+'" data-code="'+code+'" title="'+esc(code+' — '+g[1][code])+'" onclick="toggleKsb(this,\''+nk+'\')">'+code+'</span>';});
+      });
+      html+=grid+'</div>';
+    }
     html+='</div>';
   });
   host.innerHTML=html;
@@ -630,7 +690,7 @@ const DEMO={
 function loadDemo(){reviews=DEMO.reviews.map(r=>Object.assign({},r));provider=JSON.parse(JSON.stringify(DEMO.provider));persist();persistProv();
   active='dashboard';document.getElementById('tab-reviews').style.display='none';document.getElementById('tab-dashboard').style.display='';
   renderTabs();renderList();updateProvState();renderDashboard();window.scrollTo({top:0,behavior:'smooth'});}
-function clearAll(){if(!confirm('Clear ALL reviews and provider data?'))return;reviews=[];provider={};editId=null;persist();persistProv();
+function clearAll(){if(!confirm('Clear ALL reviews and provider data?'))return;reviews=[];provider={};ksbCov={};editId=null;persist();persistProv();persistKsb();
   resetForm();renderTabs();renderList();updateProvState();renderDashboard();}
 
 function exportPDF(){
