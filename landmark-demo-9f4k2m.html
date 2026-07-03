@@ -109,6 +109,16 @@
   .ragbar>span{display:block;height:100%}
   .raglegend{font-family:var(--mono);font-size:11.5px;color:var(--text2);margin-top:7px}
   .dash-top{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+  /* cohort summary (report page 1) */
+  .summary .subh{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:16px 0 7px}
+  .summary .subh:first-of-type{margin-top:2px}
+  .attn{display:flex;flex-direction:column;gap:7px}
+  .attn-row{display:flex;gap:12px;justify-content:space-between;align-items:baseline;font-size:13px;border-top:1px solid var(--line);padding-top:7px}
+  .attn-row:first-child{border-top:none;padding-top:0}
+  .attn-n{font-weight:600;color:var(--ink);white-space:nowrap}
+  .attn-f{color:var(--text2);text-align:right}
+  .kchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .summary-notes{min-height:74px;margin-top:2px}
   .stat{background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(31,29,65,0.04)}
   .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1}
   .stat .l{font-size:11.5px;color:var(--text2);margin-top:6px}
@@ -152,6 +162,8 @@
     .printonly{display:block}
     .bar{background:#e9e7f1}
     .lcard,.stat,.sec,.tbox,.hero{break-inside:avoid;box-shadow:none}
+    .summary{break-after:page}
+    .summary-notes{border:1px solid var(--panelb);background:#fff;color:var(--text)}
     .dash-top{margin-bottom:16px}
     .head{margin-bottom:6px}
   }
@@ -284,7 +296,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.11 &middot; build 2026-07-02e &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.12 &middot; build 2026-07-02f &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -449,8 +461,14 @@ function wireProvInput(){const f=document.getElementById('provFile');if(!f)retur
     updateProvState();renderDashboard();f.value='';};
   rd.readAsText(file);};}
 
+// ===== Cohort summary notes (report page 1; editable, persisted; JD-Matcher can auto-fill later) =====
+const KEYN='landmark_summary_notes_v1';
+let summaryNotes=''; try{summaryNotes=localStorage.getItem(KEYN)||'';}catch(e){}
+function saveNotes(v){summaryNotes=v;try{localStorage.setItem(KEYN,v);}catch(e){}}
+
 // ===== Dashboard — reconciles your reviews (coach view) with OneFile (provider view) =====
 function fmtDate(d){if(!d)return '';const p=String(d).split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0].slice(2):d;}
+function parseDMY(s){if(!s)return null;s=String(s).trim();let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return null;}
 function ragLabel(v){return {on:'On track',risk:'At risk',behind:'Behind'}[v]||'—';}
 function ragColor(v){return {on:'var(--green)',risk:'var(--gold)',behind:'var(--red)'}[v]||'var(--text3)';}
 function stat(n,l){return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
@@ -510,6 +528,42 @@ function renderDashboard(){
       ragbar+'<div class="raglegend">'+(leg||'No status yet')+'</div></div></div>';
   }
   let html=hero+'<div class="dash-top">'+stat(entries.length,'Apprentices')+stat(avg+'%',src)+stat(risk,'At risk')+stat(behind,'Behind target')+'</div>';
+
+  // ── Cohort summary (report page 1): OTJ, attention list, units, editable notes ──
+  // Off-the-job: sum each learner's latest cumulative vs their programme target (coach-entered).
+  let otjcSum=0,otjtSum=0; const otjLow=[];
+  entries.forEach(x=>{const l=x.cl;if(!l)return;const c=parseFloat(l.otjc),t=parseFloat(l.otjt);
+    if(!isNaN(c)&&!isNaN(t)&&t>0){otjcSum+=c;otjtSum+=t;otjLow.push({name:x.name,pct:Math.round(c/t*100)});}});
+  const otjPct=otjtSum>0?Math.round(otjcSum/otjtSum*100):null;
+  // Units signed off (OneFile) — closest real KSB signal until JD-Matcher gap integration exists.
+  let uDone=0,uTot=0; entries.forEach(x=>{if(x.p&&x.p.unitsTotal){uDone+=x.p.unitsDone||0;uTot+=x.p.unitsTotal;}});
+  // Needs-attention list — real, data-driven flags only.
+  const today=new Date(); today.setHours(0,0,0,0);
+  const attn=[];
+  entries.forEach(x=>{const p=x.p,l=x.cl,flags=[],s=ofStatus(p);
+    if(s==='behind')flags.push('Behind target (OneFile '+p.deviation+'%)');
+    else if(s==='risk')flags.push('At risk (OneFile '+p.deviation+'%)');
+    if(l){const a=coachAssess(l);if(a.mode==='own'&&a.rag&&s&&a.rag!==s)flags.push('Coach flags '+ragLabel(a.rag).toLowerCase()+(a.reason?' — '+a.reason:''));}
+    const nd=parseDMY((p&&p.nextreview)||(l&&l.next)); if(nd&&nd<today)flags.push('Review overdue (due '+(nd.getDate()+'/'+(nd.getMonth()+1)+'/'+nd.getFullYear())+')');
+    if(flags.length)attn.push({name:x.name,flags:flags});});
+
+  let s='<div class="summary sec"><h2>Cohort summary</h2>';
+  if(otjPct!=null){
+    otjLow.sort((a,b)=>a.pct-b.pct);const low=otjLow.filter(o=>o.pct<40);
+    s+='<div class="subh">Off-the-job hours — logged vs programme target</div>'+
+      '<div class="bar"><span style="width:'+Math.min(100,otjPct)+'%;background:var(--blue)"></span></div>'+
+      '<div class="pctline"><span>'+otjcSum+' of '+otjtSum+' hrs logged across the cohort</span><span>'+otjPct+'% of programme target</span></div>'+
+      (low.length?'<div class="mini" style="margin-top:8px">Lowest OTJ: '+low.map(o=>esc(o.name)+' ('+o.pct+'%)').join(' &middot; ')+'</div>':'');
+  }
+  s+='<div class="subh">Needs attention'+(attn.length?' ('+attn.length+')':'')+'</div>';
+  s+=attn.length?'<div class="attn">'+attn.map(a=>'<div class="attn-row"><span class="attn-n">'+esc(a.name)+'</span><span class="attn-f">'+a.flags.map(esc).join(' &middot; ')+'</span></div>').join('')+'</div>'
+    :'<div class="mini">No flags — all learners on or above target with no coach concerns or overdue reviews.</div>';
+  if(uTot>0)s+='<div class="subh">Units signed off (OneFile)</div><div class="kchips"><span class="dchip">'+uDone+' of '+uTot+' units across the cohort</span></div>';
+  s+='<div class="subh">Coach summary &amp; suggestions</div>'+
+     '<textarea id="summaryNotes" class="summary-notes" placeholder="Priorities for next quarter, KSB gaps to target, cohort-wide themes… (saved on this device; appears on the PDF report)"></textarea>'+
+     '</div>';
+  html+=s;
+
   entries.sort((a,b)=>a.name.localeCompare(b.name));
   const dash='<span style="color:var(--text3)">—</span>';
   entries.forEach(x=>{
@@ -551,6 +605,8 @@ function renderDashboard(){
     html+='</div>';
   });
   host.innerHTML=html;
+  const nt=document.getElementById('summaryNotes');
+  if(nt){nt.value=summaryNotes;nt.oninput=function(){saveNotes(nt.value);};}
 }
 
 // ===== Demo data (a realistic 5-learner cohort, both sources) =====
@@ -565,10 +621,10 @@ const DEMO={
   ],
   provider:{
     'preetii sharma':{learner:'Preetii Sharma',aim:'Team Leader Apprenticeship Standard (September 2024)',progress:17,target:26,deviation:-9,completion:'01/03/2027',nextreview:'06/07/2026',unitsDone:3,unitsTotal:8,tasks:10},
-    'marcus webb':{learner:'Marcus Webb',aim:'Business Administrator (Level 3)',progress:20,target:30,deviation:-10,completion:'12/09/2026',nextreview:'15/02/2026',unitsDone:2,unitsTotal:9,tasks:12},
-    'aisha khan':{learner:'Aisha Khan',aim:'Data Technician (Level 3)',progress:72,target:65,deviation:7,completion:'30/06/2026',nextreview:'20/02/2026',unitsDone:6,unitsTotal:8,tasks:2},
-    'tomasz nowak':{learner:'Tomasz Nowak',aim:'Customer Service Specialist (Level 3)',progress:31,target:40,deviation:-9,completion:'15/11/2026',nextreview:'10/02/2026',unitsDone:3,unitsTotal:7,tasks:8},
-    'chloe bennett':{learner:'Chloe Bennett',aim:'Team Leader Apprenticeship Standard (January 2025)',progress:90,target:85,deviation:5,completion:'01/04/2026',nextreview:'08/02/2026',unitsDone:8,unitsTotal:8,tasks:0}
+    'marcus webb':{learner:'Marcus Webb',aim:'Business Administrator (Level 3)',progress:20,target:30,deviation:-10,completion:'12/09/2026',nextreview:'20/06/2026',unitsDone:2,unitsTotal:9,tasks:12},
+    'aisha khan':{learner:'Aisha Khan',aim:'Data Technician (Level 3)',progress:72,target:65,deviation:7,completion:'30/06/2026',nextreview:'15/08/2026',unitsDone:6,unitsTotal:8,tasks:2},
+    'tomasz nowak':{learner:'Tomasz Nowak',aim:'Customer Service Specialist (Level 3)',progress:31,target:40,deviation:-9,completion:'15/11/2026',nextreview:'08/07/2026',unitsDone:3,unitsTotal:7,tasks:8},
+    'chloe bennett':{learner:'Chloe Bennett',aim:'Team Leader Apprenticeship Standard (January 2025)',progress:90,target:85,deviation:5,completion:'01/04/2026',nextreview:'22/08/2026',unitsDone:8,unitsTotal:8,tasks:0}
   }
 };
 function loadDemo(){reviews=DEMO.reviews.map(r=>Object.assign({},r));provider=JSON.parse(JSON.stringify(DEMO.provider));persist();persistProv();
