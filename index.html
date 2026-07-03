@@ -750,7 +750,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02d</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1094,10 +1094,24 @@ function renderLearnerCost(){
     lcCell('Off-the-job time <span style="color:#E0A43B">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),'#E0A43B')+
     lcCell('Full cost of ownership',noRate?fmt(band)+'+':'&asymp;'+fmt(fullCost),'band + off-the-job time','#fff')+
     lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it','#a78bfa');
+  // How many of THIS standard could the levy fund? (uses the standard's real band — no fabrication)
+  var capHtml='', M=(typeof projYears==='number'?projYears:3)*12;
+  var levyAvail=levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0;
+  if(levyAvail>0&&band>0){
+    var nFund=Math.floor(levyAvail/band), yl=(M/12)+' year'+((M/12)!==1?'s':'');
+    capHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:var(--text2);line-height:1.5">&#128101; <strong style="color:#fff">How many can I train?</strong> At '+fmt(band)+'/learner, your levy (&asymp;&nbsp;'+fmt(Math.round(levyAvail))+' over '+yl+') funds about <strong style="color:#2DD4B2">'+nFund+'</strong> at this standard.</div>';
+  }
+  // Level 7 age gate — verified against gov.uk (DfE update 28 May 2025), effective 1 Jan 2026
+  var l7Html='';
+  if((s.level||0)>=7){
+    l7Html='<div style="margin-top:11px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.55">'+
+      '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; from <strong>1 January 2026</strong>, Level 7 apprenticeships are levy-funded only for ages <strong>16&ndash;21</strong> (or under-25 care leavers / EHCP-holders at the start). Apprentices <strong>22 and over must self-fund</strong>. Anyone who started before 1 Jan 2026 stays funded to completion. '+
+      '<a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk source</a></div>';
+  }
   el.innerHTML='<div style="margin-top:13px;background:rgba(45,212,178,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:12px;padding:13px 16px">'+
     '<div style="font-weight:700;color:#fff;margin-bottom:2px">Cost per learner <span style="font-weight:400;color:var(--text3);font-size:12px">— '+s.name+'</span></div>'+
     '<div style="font-size:11.5px;color:var(--text3);margin-bottom:11px">One learner, before adding to your plan. The band is levy-funded; your real cash is the off-the-job time (plus co-investment only if your account runs short).</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'+rows+'</div></div>';
+    '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'+rows+'</div>'+capHtml+l7Html+'</div>';
 }
 
 function updateDurReadout(){
