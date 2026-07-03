@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02f</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1735,6 +1735,12 @@ function renderCapacity(d){
   if(d.niRelief>0.5){
     el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
   }
+  if(d.l7SelfFund>0){
+    el.innerHTML+='<div style="margin-top:10px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.55">'+
+      '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; on your Level 7 programme(s), <strong>'+d.l7SelfFund+'</strong> learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ can no longer be levy-funded (from <strong>1 Jan 2026</strong>) and must <strong>self-fund about '+fmt(Math.round(d.l7SelfFundCost))+'</strong> of training.'+
+      (d.l7Crossover>0?' Of those, <strong style="color:#2DD4B2">'+d.l7Crossover+' aged 22&ndash;24</strong> still qualify for the under-25 NI relief &mdash; so it&rsquo;s self-funded training, but you keep the NI saving.':'')+
+      ' <a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk</a></div>';
+  }
 }
 function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
@@ -1864,14 +1870,18 @@ function levyReportData(){
   // Employer NIC relief on under-25 apprentices (0% ST→AUST). Salary est = plan hourly rate x weekly hours x 52. gov.uk 2025-26.
   var niSalary=(planCfg.rate||0)*(planCfg.hours||37.5)*52;
   var niPerYr=Math.max(0,RULEBOOK.ni.empRate*(Math.min(niSalary,RULEBOOK.ni.aust)-RULEBOOK.ni.secThreshold));
-  var niUnder25=0,niRelief=0;
+  var niUnder25=0,niRelief=0,l7SelfFund=0,l7Crossover=0,l7SelfFundCost=0,l7NameSet={};
   programmes.forEach(function(p){
-    if(!p.age)return; var u=(+p.age.y||0)+(+p.age.m||0); if(!u)return; // 16-21 + 22-24 = under 25
+    if(!p.age)return;
+    var y=(+p.age.y||0),m=(+p.age.m||0),o=(+p.age.o||0),u=y+m; // 16-21 + 22-24 = under 25
     var pdur=(p.type==='unit')?Math.max(1,(+p.weeks||4))/4.345:(p.start&&p.epa?mBetween(p.start,p.epa):12);
-    niUnder25+=u; niRelief+=u*niPerYr*(pdur/12);
+    if(u){niUnder25+=u;niRelief+=u*niPerYr*(pdur/12);}
+    // L7 age gate: from Jan 2026, 22+ on Level 7 can't be levy-funded → self-fund. 22-24 keep the NI relief (the crossover).
+    if((lvyLevel(p.name)||0)>=7){var sf=m+o;if(sf>0){l7SelfFund+=sf;l7Crossover+=m;l7SelfFundCost+=(+p.cost||0)*sf;l7NameSet[p.name]=1;}}
   });
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
     niRelief:niRelief,niUnder25:niUnder25,niPerYr:niPerYr,niSalary:niSalary,
+    l7SelfFund:l7SelfFund,l7Crossover:l7Crossover,l7SelfFundCost:l7SelfFundCost,l7Names:Object.keys(l7NameSet),
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coFloor:coFloor,co25:ci.months.some(function(m){return m.rate>=0.25;}),coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
