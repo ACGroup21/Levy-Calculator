@@ -621,6 +621,15 @@ footer span{color:var(--teal)}
           </div>
         </div>
         <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
+        <details style="margin:9px 0 2px;grid-column:1/-1">
+          <summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
+          <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5">Under-25 apprentices carry <strong>0% employer NIC</strong> up to &pound;50,270 (a real saving); at Level&nbsp;7, only 16&ndash;21 stay levy-funded from Jan 2026. Leave blank to skip &mdash; the plan just uses the total learner count.</div>
+        </details>
         <div style="display:flex;align-items:flex-end;gap:10px">
           <button class="btn-add" onclick="addProgramme()" style="flex:1">+ Add programme</button>
           <button class="btn-clear" onclick="clearProgForm()">Clear</button>
@@ -750,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02e</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1155,6 +1164,7 @@ const RULEBOOK={
   topUpRate:0.10,                   // 10% government top-up on levy declarations
   levyRate:0.005,                   // apprenticeship levy = 0.5% of annual pay bill
   levyAllowance:15000,              // annual levy allowance (only pay bill > £3m actually pays)
+  ni:{empRate:0.15,secThreshold:5000,aust:50270}, // employer NIC: 15%, Secondary Threshold £5k, Apprentice Upper Secondary Threshold £50,270 — 0% employer NIC ST→AUST for under-25 apprentices (gov.uk 2025-26)
   draw:{training:0.80,epa:0.20},    // 80% drawn over the practical period, 20% at EPA completion
   transferCapPct:0.50,              // employer may gift up to 50% of annual levy
   coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
@@ -1563,8 +1573,8 @@ function addUnit(){
   document.getElementById('progTable').classList.remove('hidden');
 }
 function addProgramme(overrides){
-  let name,cost,count,start,epa;
-  if(overrides){({name,cost,count,start,epa}=overrides);}
+  let name,cost,count,start,epa,age;
+  if(overrides){({name,cost,count,start,epa,age}=overrides);}
   else{
     const idx=parseInt(sel.value);if(!idx){alert('Select an apprenticeship standard.');return;}
     const s=STANDARDS[idx],isC=s.name==='Other / custom';
@@ -1576,12 +1586,15 @@ function addProgramme(overrides){
     if(!start||!epa){alert('Enter start and EPA dates.');return;}
     if(new Date(epa)<=new Date(start)){alert('EPA date must be after start date.');return;}
     if(mBetween(start,epa)<RULEBOOK.apprenticeshipMinMonths&&!confirm('This apprenticeship runs '+mBetween(start,epa)+' months — under the '+RULEBOOK.apprenticeshipMinMonths+'-month minimum, so it would not be levy-eligible as an apprenticeship. Add it anyway?'))return;
+    var a1=parseInt(document.getElementById('inp-age1621').value)||0,a2=parseInt(document.getElementById('inp-age2224').value)||0,a3=parseInt(document.getElementById('inp-age25').value)||0;
+    if(a1+a2+a3>0)age={y:a1,m:a2,o:a3};
     sel.value=0;onStandardChange();
-    ['inp-name-custom','inp-cost','inp-count'].forEach(id=>document.getElementById(id).value='');
+    ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('inp-start').value='';document.getElementById('inp-epa').value='';
     updateDurReadout();
   }
-  programmes.push({name,cost,count,start,epa});
+  var prog={name,cost,count,start,epa};if(age)prog.age=age;
+  programmes.push(prog);
   renderProgrammes();renderProjection();saveState();
   document.getElementById('levySummary').classList.remove('hidden');
   document.getElementById('progTable').classList.remove('hidden');
@@ -1590,7 +1603,7 @@ function clearProgForm(){
   const ss=document.getElementById('standardSearch');if(ss)ss.value='';
   setLevelFilter('all',document.querySelector('.lvl-pill[data-lvl="all"]'));
   sel.value='';onStandardChange();
-  ['inp-name-custom','inp-cost','inp-count'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('inp-count').value='1';
   document.getElementById('inp-start').value='';
   document.getElementById('inp-epa').value='';
@@ -1719,6 +1732,9 @@ function renderCapacity(d){
       '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your levy</div>'+
       '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your plan commits <strong>'+fmt(Math.round(d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but your levy provides <strong>'+fmt(Math.round(d.levyAvail))+'</strong> &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, or reduce/adjust programmes &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div></div>';
   }
+  if(d.niRelief>0.5){
+    el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
+  }
 }
 function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
@@ -1845,7 +1861,17 @@ function levyReportData(){
     var oh=otjMap[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     otjCost+=oh*weeks*(+p.count||0)*payRate; otjHrsWk+=oh*(+p.count||0); otjFTE+=oh*(+p.count||0)/weekHrs;
   });
+  // Employer NIC relief on under-25 apprentices (0% ST→AUST). Salary est = plan hourly rate x weekly hours x 52. gov.uk 2025-26.
+  var niSalary=(planCfg.rate||0)*(planCfg.hours||37.5)*52;
+  var niPerYr=Math.max(0,RULEBOOK.ni.empRate*(Math.min(niSalary,RULEBOOK.ni.aust)-RULEBOOK.ni.secThreshold));
+  var niUnder25=0,niRelief=0;
+  programmes.forEach(function(p){
+    if(!p.age)return; var u=(+p.age.y||0)+(+p.age.m||0); if(!u)return; // 16-21 + 22-24 = under 25
+    var pdur=(p.type==='unit')?Math.max(1,(+p.weeks||4))/4.345:(p.start&&p.epa?mBetween(p.start,p.epa):12);
+    niUnder25+=u; niRelief+=u*niPerYr*(pdur/12);
+  });
   return {years:projYears,M:M,balance:levyData.balance,avg:levyData.monthlyAvg,annual:annual,
+    niRelief:niRelief,niUnder25:niUnder25,niPerYr:niPerYr,niSalary:niSalary,
     levyAvail:levyData.balance+levyData.monthlyAvg*M,
     planCost:planCost,drawn:tT+tE,tT:tT,tE:tE,coInvest:ci.total,coFloor:coFloor,co25:ci.months.some(function(m){return m.rate>=0.25;}),coMonths:ci.months.length,
     levyCovered:Math.max(0,planCost-ci.total),expiry:expVal,expiry12:expiry12,expiryFirst:exp.byMonth&&exp.byMonth[0],
@@ -2057,6 +2083,9 @@ function levyPage3(d,framing){
   var coNote = d.coInvest>1
     ? '<div style="margin-top:11px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(255,76,106,0.05);border:1px solid rgba(255,76,106,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#ff8fa3">Co-investment &asymp;'+lvK(d.coInvest)+' is your cash, not levy.</strong> In '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+' the account is exhausted, so you fund part of the band directly'+(d.coFloor>1?' &mdash; about '+lvK(d.coFloor)+' of it is unavoidable (training draw out-pacing the levy)':'')+', charged at '+(d.co25?'<strong>25%</strong> from Aug 2026':'5%')+'.'+(noRate?'':' Your direct cash for this plan &asymp; <strong>'+lvK(d.coInvest+d.otjCost)+'</strong> (co-investment + off-the-job time).')+'</div>'
     : '';
+  var niNote = d.niRelief>1
+    ? '<div style="margin-top:9px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.22);border-radius:9px;padding:9px 14px"><strong style="color:#2DD4B2">Less employer NI relief &asymp;'+lvK(d.niRelief)+'.</strong> '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' carry 0% employer NIC up to &pound;50,270, so net cost of ownership &asymp; <strong style="color:#2DD4B2">'+lvK(Math.max(0,d.trueCost-d.niRelief))+'</strong>. A tax relief (separate from the levy), estimated on the plan wage.</div>'
+    : '';
   var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.planCost)+'</div>'+(d.coInvest>1?'<div class="lvy-true-sub" style="color:#ff8fa3">incl. &asymp;'+lvK(d.coInvest)+' your co-invest</div>':'')+'</div>'+
     '<div class="lvy-true-op">+</div>'+
     '<div class="lvy-true-cell"><div class="lvy-true-lab">Off-the-job time</div><div class="lvy-true-num" style="color:#E0A43B">'+(noRate?'set rate':'&asymp;'+lvK(d.otjCost))+'</div><div class="lvy-true-sub">'+d.otjFTE.toFixed(1)+' FTE &middot; '+Math.round(d.otjHrsWk)+' hrs/wk released</div></div>'+
@@ -2068,7 +2097,7 @@ function levyPage3(d,framing){
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
-    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+
+    '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+niNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th><th class="r">Full / learner</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
