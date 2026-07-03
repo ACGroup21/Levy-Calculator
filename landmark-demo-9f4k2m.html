@@ -99,6 +99,15 @@
   .foot{margin-top:22px;font-size:11.5px;color:var(--text3);line-height:1.6}
 
   /* dashboard */
+  .hero{display:flex;gap:22px;align-items:center;background:var(--panel);border:1px solid var(--panelb);border-radius:14px;padding:18px 22px;margin-bottom:12px;box-shadow:0 1px 2px rgba(31,29,65,0.04)}
+  .hero-fig{font-family:var(--serif);font-size:46px;font-weight:600;line-height:1;min-width:104px;text-align:center}
+  .hero-body{flex:1;min-width:0}
+  .hero-l{font-size:11px;font-family:var(--mono);letter-spacing:.09em;text-transform:uppercase;color:var(--text3)}
+  .hero-v{font-size:14px;color:var(--text);margin:4px 0 11px}
+  .hero-v .mini{color:var(--text3)}
+  .ragbar{display:flex;height:10px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,0.08)}
+  .ragbar>span{display:block;height:100%}
+  .raglegend{font-family:var(--mono);font-size:11.5px;color:var(--text2);margin-top:7px}
   .dash-top{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
   .stat{background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(31,29,65,0.04)}
   .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1}
@@ -142,7 +151,7 @@
     #tab-dashboard{display:block!important}
     .printonly{display:block}
     .bar{background:#e9e7f1}
-    .lcard,.stat,.sec,.tbox{break-inside:avoid;box-shadow:none}
+    .lcard,.stat,.sec,.tbox,.hero{break-inside:avoid;box-shadow:none}
     .dash-top{margin-bottom:16px}
     .head{margin-bottom:6px}
   }
@@ -275,7 +284,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.10 &middot; build 2026-07-02d &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.11 &middot; build 2026-07-02e &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -475,8 +484,32 @@ function renderDashboard(){
   };
   const behind=entries.filter(x=>statusOf(x)==='behind').length;
   const risk=entries.filter(x=>statusOf(x)==='risk').length;
+  const on=entries.filter(x=>statusOf(x)==='on').length;
+  const none=entries.filter(x=>statusOf(x)==='').length;
   const src=Object.keys(provider).length?'Avg. progress':'Avg. completion';
-  let html='<div class="dash-top">'+stat(entries.length,'Apprentices')+stat(avg+'%',src)+stat(risk,'At risk')+stat(behind,'Behind target')+'</div>';
+  // ── Cohort "figure of truth": average OneFile Target Deviation (actual − target). ──
+  // Progress alone has no verdict; deviation says whether the cohort is where it should be.
+  const devs=entries.filter(x=>x.p&&x.p.deviation!=null).map(x=>x.p.deviation);
+  const devAvg=devs.length?Math.round(devs.reduce((a,b)=>a+b,0)/devs.length):null;
+  const total=entries.length;
+  const seg=(n,c)=>n?'<span style="width:'+(n/total*100).toFixed(2)+'%;background:'+c+'"></span>':'';
+  const ragbar='<div class="ragbar">'+seg(on,'var(--green)')+seg(risk,'var(--gold)')+seg(behind,'var(--red)')+seg(none,'rgba(255,255,255,0.12)')+'</div>';
+  const leg=[on?on+' on track':'',risk?risk+' at risk':'',behind?behind+' behind':'',none?none+' no OneFile data':''].filter(Boolean).join(' &middot; ');
+  let hero;
+  if(devAvg!=null){
+    const c=devAvg>=0?'var(--green)':(devAvg<=-10?'var(--red)':'var(--gold)');
+    const verdict=devAvg>=0?'On or ahead of target across the cohort.':(devAvg>=-5?'Slightly behind where the cohort should be.':(devAvg>=-10?'Behind target overall — worth attention.':'Significantly behind target.'));
+    hero='<div class="hero"><div class="hero-fig" style="color:'+c+'">'+(devAvg>0?'+':'')+devAvg+'%</div>'+
+      '<div class="hero-body"><div class="hero-l">Cohort tracking vs target</div>'+
+      '<div class="hero-v">'+verdict+' <span class="mini">Average of '+devs.length+' OneFile target-deviation'+(devs.length!=1?'s':'')+'.</span></div>'+
+      ragbar+'<div class="raglegend">'+leg+'</div></div></div>';
+  } else {
+    hero='<div class="hero"><div class="hero-fig" style="color:var(--text3)">&mdash;</div>'+
+      '<div class="hero-body"><div class="hero-l">Cohort tracking vs target</div>'+
+      '<div class="hero-v">Import a OneFile export to see how the cohort is tracking against target. <span class="mini">Status below is from coach reviews only.</span></div>'+
+      ragbar+'<div class="raglegend">'+(leg||'No status yet')+'</div></div></div>';
+  }
+  let html=hero+'<div class="dash-top">'+stat(entries.length,'Apprentices')+stat(avg+'%',src)+stat(risk,'At risk')+stat(behind,'Behind target')+'</div>';
   entries.sort((a,b)=>a.name.localeCompare(b.name));
   const dash='<span style="color:var(--text3)">—</span>';
   entries.forEach(x=>{
