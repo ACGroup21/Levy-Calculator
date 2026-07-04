@@ -71,6 +71,13 @@
   .btn-ghost{background:rgba(255,255,255,0.06);border:1px solid var(--panelb);color:var(--text)}
   .btn-ghost:hover{border-color:var(--purple);color:var(--purple)}
   .saved-msg{color:var(--green);font-size:13px;font-weight:600}
+  /* since-last-review continuity */
+  .picker-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;color:var(--text2);font-size:13px}
+  .picker-bar select{width:auto;max-width:300px}
+  .since-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+  .since-row:first-child{border-top:none}
+  .since-row select{width:auto;min-width:118px}
+  .since-ref{margin-top:12px;font-size:12.5px;color:var(--text2);background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:9px;padding:9px 11px;line-height:1.5}
 
   /* pill buttons — badge-styled, for utility toolbars (import/export/clear) */
   .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;
@@ -166,7 +173,7 @@
     body{background:#fff;padding:0}
     body::before{display:none}
     .wrap{max-width:100%}
-    .tabs,.intro,.foot,#tab-reviews,#provSec,.toolbar,#dashActions,.badge{display:none!important}
+    .tabs,.intro,.foot,#tab-reviews,#provSec,.toolbar,#dashActions,.badge,.newrev{display:none!important}
     .brand .logo{filter:invert(1)}
     .brand .rule{background:#ccc}
     #tab-dashboard{display:block!important}
@@ -200,6 +207,11 @@
 
   <!-- ============ REVIEWS TAB ============ -->
   <div id="tab-reviews">
+    <div class="picker-bar">
+      <label for="learnerPicker">Continue a learner&rsquo;s journey:</label>
+      <select id="learnerPicker" onchange="onPickLearner()"><option value="">— start a new review below —</option></select>
+      <span class="mini">pre-fills their details &amp; last review&rsquo;s actions</span>
+    </div>
     <div class="sec">
       <h2 id="formTitle">New learner review</h2>
       <form id="revForm" onsubmit="return false">
@@ -217,6 +229,12 @@
           </div>
         </div>
       </form>
+    </div>
+
+    <div class="sec" id="sinceSec" style="display:none">
+      <h2>Since last review <span id="sinceDate" style="color:var(--text3);font-weight:400"></span></h2>
+      <div id="sinceActions"></div>
+      <div id="sinceFlags"></div>
     </div>
 
     <div class="sec">
@@ -308,7 +326,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.13 &middot; build 2026-07-04a &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.14 &middot; build 2026-07-04b &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -357,6 +375,40 @@ function coachAssess(r){
   return r.rag?{mode:'own',rag:r.rag,reason:''}:{mode:'agree',rag:'',reason:''};
 }
 
+// ===== Since-last-review continuity: pre-fill context + follow up on agreed actions =====
+let sincePrevDate='';
+function distinctLearners(){const seen={},out=[];reviews.slice().reverse().forEach(r=>{const k=normName(r.learner);if(r.learner&&!seen[k]){seen[k]=1;out.push(r.learner);}});return out.sort((a,b)=>a.localeCompare(b));}
+function populateLearnerPicker(){const sel=document.getElementById('learnerPicker');if(!sel)return;const cur=sel.value;
+  sel.innerHTML='<option value="">— start a new review below —</option>'+distinctLearners().map(n=>'<option>'+esc(n)+'</option>').join('');
+  if([...sel.options].some(o=>o.value===cur))sel.value=cur;}
+function latestReviewFor(name){const nk=normName(name);const rs=reviews.filter(r=>normName(r.learner)===nk);
+  if(!rs.length)return null;rs.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));return rs[rs.length-1];}
+function actionItems(text){return String(text||'').split(/[;\n]+/).map(s=>s.trim()).filter(Boolean);}
+function onPickLearner(){const n=document.getElementById('learnerPicker').value;if(n)startReviewFor(n);else resetForm();}
+function startReviewFor(name){
+  resetForm();
+  document.getElementById('f-learner').value=name;
+  const last=latestReviewFor(name);
+  if(last){sv('prog',last.prog);sv('coach',last.coach);buildSince(last);}
+  active='reviews';document.getElementById('tab-reviews').style.display='';document.getElementById('tab-dashboard').style.display='none';renderTabs();
+  const pk=document.getElementById('learnerPicker');if(pk&&[...pk.options].some(o=>o.value===name))pk.value=name;
+  updateAgreeNote();window.scrollTo({top:0,behavior:'smooth'});
+}
+function sinceActionRow(text,status){return '<div class="since-row"><span>'+esc(text)+'</span>'+
+  '<select data-txt="'+esc(text)+'"><option value="">—</option>'+['Done','Partly','Not done'].map(o=>'<option'+(status===o?' selected':'')+'>'+o+'</option>').join('')+'</select></div>';}
+function buildSince(last){
+  sincePrevDate=last.date||'';
+  document.getElementById('sinceDate').textContent=last.date?'· agreed '+fmtDate(last.date):'';
+  const items=actionItems(last.actions),host=document.getElementById('sinceActions');
+  host.innerHTML=items.length
+    ?'<div class="mini" style="margin-bottom:6px">Did the actions you agreed last time happen?</div>'+items.map(t=>sinceActionRow(t,'')).join('')
+    :'<div class="mini">No actions were recorded in the last review.</div>';
+  const refs=[];if((last.chal||'').trim())refs.push('<b>Challenges:</b> '+esc(last.chal));if((last.well2||'').trim())refs.push('<b>Wellbeing:</b> '+esc(last.well2));
+  document.getElementById('sinceFlags').innerHTML=refs.length?'<div class="since-ref">Last time you flagged — '+refs.join(' &nbsp;&middot;&nbsp; ')+'. Worth checking whether these have changed.</div>':'';
+  document.getElementById('sinceSec').style.display='';
+}
+function collectSince(){return [...document.querySelectorAll('#sinceActions .since-row select')].map(s=>({text:s.getAttribute('data-txt'),status:s.value})).filter(x=>x.status);}
+
 function saveReview(){
   const learner=gv('learner').trim();
   if(!learner){document.getElementById('savedMsg').textContent='';document.getElementById('f-learner').focus();alert('Enter the learner name.');return;}
@@ -365,6 +417,8 @@ function saveReview(){
   F.forEach(k=>rec[k]=gv(k));
   rec.assessMode=getAssess();
   if(rec.assessMode!=='own'){rec.ownrag='';rec.ownreason='';}
+  const since=collectSince();
+  if(since.length){rec.prevActionsReview=since;rec.prevReviewDate=sincePrevDate;}
   if(editId){const i=reviews.findIndex(r=>r.id===editId);reviews[i]=rec;}
   else{rec.id='r'+Date.now().toString(36);reviews.push(rec);}
   persist();
@@ -374,11 +428,19 @@ function saveReview(){
 }
 function resetForm(){editId=null;document.getElementById('formTitle').textContent='New learner review';
   F.forEach(k=>sv(k,''));['p-learner','p-coach'].forEach(i=>document.getElementById(i).checked=true);document.getElementById('p-manager').checked=false;
-  setAssess('agree');}
+  setAssess('agree');
+  sincePrevDate='';document.getElementById('sinceSec').style.display='none';
+  document.getElementById('sinceActions').innerHTML='';document.getElementById('sinceFlags').innerHTML='';
+  const pk=document.getElementById('learnerPicker');if(pk)pk.value='';}
 function editReview(id){const r=reviews.find(x=>x.id===id);if(!r)return;editId=id;
   document.getElementById('formTitle').textContent='Editing review — '+(r.learner||'');
   F.forEach(k=>sv(k,r[k]));
   const a=coachAssess(r);setAssess(a.mode);if(a.mode==='own'){sv('ownrag',a.rag);sv('ownreason',a.reason);}
+  if(r.prevActionsReview&&r.prevActionsReview.length){sincePrevDate=r.prevReviewDate||'';
+    document.getElementById('sinceDate').textContent=r.prevReviewDate?'· agreed '+fmtDate(r.prevReviewDate):'';
+    document.getElementById('sinceActions').innerHTML='<div class="mini" style="margin-bottom:6px">Did the actions you agreed last time happen?</div>'+r.prevActionsReview.map(x=>sinceActionRow(x.text,x.status)).join('');
+    document.getElementById('sinceFlags').innerHTML='';document.getElementById('sinceSec').style.display='';}
+  else{sincePrevDate='';document.getElementById('sinceSec').style.display='none';}
   document.getElementById('p-learner').checked=!!(r.present&&r.present.learner);
   document.getElementById('p-coach').checked=!!(r.present&&r.present.coach);
   document.getElementById('p-manager').checked=!!(r.present&&r.present.manager);
@@ -390,6 +452,7 @@ function ragChip(v){const m={on:['on','On track'],risk:['risk','At risk'],behind
 function assessChip(r){const a=coachAssess(r);
   return a.mode==='own'?ragChip(a.rag):'<span class="rev-meta" title="Defers to OneFile status">↳ agrees w/ OneFile</span>';}
 function renderList(){
+  populateLearnerPicker();
   const el=document.getElementById('revList');document.getElementById('revCount').textContent=reviews.length?'('+reviews.length+')':'';
   if(!reviews.length){el.innerHTML='<div class="empty">No reviews yet — fill the form above and save one.</div>';return;}
   el.innerHTML=reviews.slice().reverse().map(r=>
@@ -605,6 +668,9 @@ function renderDashboard(){
   if(tlE.length){const all=refCodes(KSB_TL);const per=tlE.map(x=>coveredSet(normName(x.name),x.list,all).size);
     const avg=Math.round(per.reduce((a,b)=>a+b,0)/per.length);
     s+='<div class="subh">KSB coverage — Team Leader (ST0384)</div><div class="kchips"><span class="dchip">'+avg+' of '+all.length+' KSBs covered on average &middot; '+tlE.length+' learner'+(tlE.length>1?'s':'')+'</span></div>';}
+  // Action follow-through across the cohort (from each learner's latest review)
+  let ftDone=0,ftTot=0,ftPartly=0; entries.forEach(x=>{const l=x.cl;if(l&&l.prevActionsReview){ftTot+=l.prevActionsReview.length;ftDone+=l.prevActionsReview.filter(a=>a.status==='Done').length;ftPartly+=l.prevActionsReview.filter(a=>a.status==='Partly').length;}});
+  if(ftTot>0)s+='<div class="subh">Action follow-through (since last review)</div><div class="kchips"><span class="dchip">'+ftDone+' of '+ftTot+' agreed actions completed'+(ftPartly?' &middot; '+ftPartly+' partly':'')+'</span></div>';
   s+='<div class="subh">Coach summary &amp; suggestions</div>'+
      '<textarea id="summaryNotes" class="summary-notes" placeholder="Priorities for next quarter, KSB gaps to target, cohort-wide themes… (saved on this device; appears on the PDF report)"></textarea>'+
      '</div>';
@@ -624,6 +690,8 @@ function renderDashboard(){
       if(a.mode==='own'){html+='<div class="pctline"><span>Coach&rsquo;s own view: <span class="rag '+a.rag+'">'+ragLabel(a.rag)+'</span></span><span>updated '+fmtDate(l.date)+'</span></div>';
         if(a.reason)html+='<div class="mini" style="margin-top:6px">&ldquo;'+esc(a.reason)+'&rdquo;</div>';}
       else html+='<div class="pctline"><span>Defers to OneFile'+(p?'':' &mdash; applies once imported')+'</span><span>updated '+fmtDate(l.date)+'</span></div>';}
+    if(l&&l.prevActionsReview&&l.prevActionsReview.length){const pa=l.prevActionsReview,d=pa.filter(a=>a.status==='Done').length,pt=pa.filter(a=>a.status==='Partly').length;
+      html+='<div class="mini" style="margin-top:8px">Follow-through: <b>'+d+' of '+pa.length+'</b> agreed actions completed'+(pt?' ('+pt+' partly)':'')+'</div>';}
     if(p){
       html+='<div class="src">OneFile · Ginger Nut</div>';
       if(p.progress!=null){const prg=Math.max(0,Math.min(100,p.progress));const tgt=p.target!=null?Math.max(0,Math.min(100,p.target)):null;
@@ -662,11 +730,13 @@ function renderDashboard(){
       });
       html+=grid+'</div>';
     }
+    html+='<div style="margin-top:14px"><button class="pill newrev" data-name="'+esc(name)+'">＋ New review for '+esc(name.split(' ')[0])+'</button></div>';
     html+='</div>';
   });
   host.innerHTML=html;
   const nt=document.getElementById('summaryNotes');
   if(nt){nt.value=summaryNotes;nt.oninput=function(){saveNotes(nt.value);};}
+  host.querySelectorAll('.newrev').forEach(b=>b.onclick=function(){startReviewFor(b.getAttribute('data-name'));});
 }
 
 // ===== Demo data (a realistic 5-learner cohort, both sources) =====
