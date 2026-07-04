@@ -141,7 +141,20 @@
   .stat .n{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);line-height:1}
   .stat .l{font-size:11.5px;color:var(--text2);margin-top:6px}
   .lcard{background:var(--panel);border:1px solid var(--panelb);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(31,29,65,0.04)}
-  .lcard .lh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .lcard .lh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;cursor:pointer;user-select:none}
+  .lcard.collapsed .lh{margin-bottom:0}
+  .lcard.collapsed .lcard-body{display:none}
+  .lcard .lh-r{display:flex;align-items:center;gap:10px;white-space:nowrap}
+  .chev{color:var(--text3);font-size:12px;transition:transform .15s;display:inline-block}
+  .lcard.collapsed .chev{transform:rotate(-90deg)}
+  .lmeta{font-family:var(--mono);font-size:12px;color:var(--text2);margin-top:5px}
+  .lmeta .warn{color:var(--gold)}
+  .lcard-detailwrap{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+  .detail-toggle{font-family:var(--mono);font-size:11.5px}
+  .lcard-detail{margin-top:8px}
+  .newrev-wrap{margin-top:14px}
+  .cards-bar{display:flex;justify-content:space-between;align-items:center;margin:2px 2px 12px;font-family:var(--mono);font-size:12px;color:var(--text3)}
+  .cards-bar .link{font-size:12px}
   .lcard .ln{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink)}
   .lcard .lp{font-size:12.5px;color:var(--text2);margin-top:1px}
   .bar{height:9px;background:rgba(255,255,255,0.12);border-radius:6px;overflow:hidden;margin:10px 0 4px}
@@ -166,25 +179,39 @@
   #phMeta .ph-t{font-size:20px;font-weight:700;color:var(--ink)}
   #phMeta .ph-m{font-size:12px;color:var(--text2);margin-top:4px}
   @media print{
-    @page{margin:14mm}
+    @page{margin:13mm}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     /* report on white paper — flip vars back to light for readability */
     :root{--ink:#1F1C40;--text:#2a2846;--text2:#565478;--text3:#8b88a6;--panel:#fff;--panelb:#d7d4e6;--line:#e6e4f0}
-    body{background:#fff;padding:0}
+    body{background:#fff;padding:0;font-size:12px}
     body::before{display:none}
     .wrap{max-width:100%}
-    .tabs,.intro,.foot,#tab-reviews,#provSec,.toolbar,#dashActions,.badge,.newrev{display:none!important}
+    .tabs,.intro,.foot,#tab-reviews,#provSec,.toolbar,#dashActions,.badge,.newrev,.newrev-wrap,.cards-bar,.chev,.detail-toggle,.lmeta{display:none!important}
     .brand .logo{filter:invert(1)}
     .brand .rule{background:#ccc}
     #tab-dashboard{display:block!important}
     .printonly{display:block}
     .bar{background:#e9e7f1}
-    .lcard,.stat,.sec,.tbox,.hero{break-inside:avoid;box-shadow:none}
-    .summary{break-after:page}
-    .summary-notes{border:1px solid var(--panelb);background:#fff;color:var(--text)}
+    /* the report is always fully expanded, regardless of on-screen collapse state */
+    .lcard.collapsed .lcard-body{display:block!important}
+    .lcard-detail{display:block!important}
+    .lcard .lh{cursor:auto;margin-bottom:6px}
     .ksb-grid,.ksb-toggle{display:none!important}  /* report shows the coverage bar + count, not the edit grid */
-    .dash-top{margin-bottom:16px}
-    .head{margin-bottom:6px}
+    .lcard,.stat,.sec,.tbox,.hero{break-inside:avoid;box-shadow:none}
+    /* — tightened report spacing — */
+    .lcard,.sec,.hero,.stat{padding:11px 14px;margin-bottom:9px}
+    .summary{break-after:page;margin-bottom:0}
+    .dash-top{margin-bottom:10px;gap:9px}
+    .hero{gap:16px}.hero-fig{font-size:38px;min-width:86px}
+    .hero-v{margin:3px 0 8px}
+    .src{margin-top:9px}.src:first-of-type{margin-top:0}
+    .themes{margin-top:9px;gap:9px}.tbox{padding:8px 10px}
+    .lcard-detailwrap{margin-top:9px;padding-top:8px}
+    .gap{margin-top:7px;padding:7px 10px}
+    .bar{margin:7px 0 3px}.sched{margin-top:5px}
+    .subh{margin:11px 0 6px}.subh:first-of-type{margin-top:0}
+    .head{margin-bottom:6px}h1{font-size:22px}
+    .summary-notes{border:1px solid var(--panelb);background:#fff;color:var(--text);min-height:52px}
   }
 </style>
 </head>
@@ -326,7 +353,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.15 &middot; build 2026-07-04d &middot; Arthur Curtis Education</div>
+    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.16 &middot; build 2026-07-04e &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
@@ -559,6 +586,10 @@ function coveredSet(nk,list,all){
   return new Set([...detectKsb(list)].filter(c=>all.indexOf(c)>=0));
 }
 function toggleKsbPanel(btn){const g=btn.closest('.ksb-head').nextElementSibling;const open=g.style.display==='none';g.style.display=open?'':'none';btn.textContent=open?'done':'edit';}
+// ── card collapse (Tier 3) + details toggle (Tier 2) ──
+function toggleCard(lh){lh.closest('.lcard').classList.toggle('collapsed');}
+function toggleDetail(btn){const d=btn.nextElementSibling;const open=d.style.display==='none';d.style.display=open?'':'none';btn.innerHTML=open?'Details &#9652;':'Details &#9662;';}
+function setAllCards(collapsed){document.querySelectorAll('#dashBody .lcard').forEach(c=>c.classList.toggle('collapsed',collapsed));}
 function toggleKsb(el,nk){
   el.classList.toggle('on');
   const grid=el.closest('.ksb-grid'),chips=grid.querySelectorAll('.kchip');
@@ -686,13 +717,22 @@ function renderDashboard(){
 
   entries.sort((a,b)=>a.name.localeCompare(b.name));
   const dash='<span style="color:var(--text3)">—</span>';
+  const attnMap={};attn.forEach(a=>attnMap[normName(a.name)]=a.flags);
+  html+='<div class="cards-bar"><span>Learners ('+entries.length+')</span><span><button class="link" onclick="setAllCards(false)">Expand all</button> &middot; <button class="link" onclick="setAllCards(true)">Collapse all</button></span></div>';
   entries.forEach(x=>{
     const name=x.name;const l=x.cl,p=x.p,list=byDate(x.list);
     const prog=l?l.prog:(p?p.aim:'');
-    const st=statusOf(x);
-    html+='<div class="lcard"><div class="lh"><div><div class="ln">'+esc(name)+'</div>'+(prog?'<div class="lp">'+esc(prog)+'</div>':'')+'</div>';
-    if(st||l)html+='<div style="text-align:right">'+(st?'<span class="rag '+st+'">'+ragLabel(st)+'</span>':'')+(l?'<div class="mini" style="margin-top:5px">'+list.length+' review'+(list.length>1?'s':'')+' logged</div>':'')+'</div>';
-    html+='</div>';
+    const st=statusOf(x);const nk=normName(name);
+    const flags=attnMap[nk]||[];const collapsed=flags.length===0;  // on-track & unflagged collapse; exceptions stay open
+    const mbits=[];
+    if(p&&p.progress!=null)mbits.push(p.progress+'% vs '+(p.target!=null?p.target+'%':'—')+' target');
+    if(flags.length)mbits.push('<span class="warn">⚠ '+flags.length+' flag'+(flags.length>1?'s':'')+'</span>');
+    if(l)mbits.push(list.length+' review'+(list.length>1?'s':''));
+    html+='<div class="lcard'+(collapsed?' collapsed':'')+'">';
+    html+='<div class="lh" onclick="toggleCard(this)"><div><div class="ln">'+esc(name)+'</div>'+(prog?'<div class="lp">'+esc(prog)+'</div>':'')+(mbits.length?'<div class="lmeta">'+mbits.join(' &middot; ')+'</div>':'')+'</div>'+
+      '<div class="lh-r">'+(st?'<span class="rag '+st+'">'+ragLabel(st)+'</span>':'')+'<span class="chev">▾</span></div></div>';
+    html+='<div class="lcard-body">';
+    // ── Tier 1: triage detail (shown when the card is expanded) ──
     if(l){const a=coachAssess(l);
       html+='<div class="src">Coach assessment</div>';
       if(a.mode==='own'){html+='<div class="pctline"><span>Coach&rsquo;s own view: <span class="rag '+a.rag+'">'+ragLabel(a.rag)+'</span></span><span>updated '+fmtDate(l.date)+'</span></div>';
@@ -716,18 +756,20 @@ function renderDashboard(){
         if(a.mode==='own'&&a.rag&&ofs&&a.rag!==ofs)
           html+='<div class="gap">⚠ Coach&rsquo;s view (<b>'+ragLabel(a.rag)+'</b>) differs from OneFile (<b>'+ragLabel(ofs)+'</b>)'+(a.reason?': '+esc(a.reason.replace(/[.\s]+$/,'')):'')+'. OneFile stays the headline; the coach view is flagged here for context.</div>';}
     }
+    if(!list.length&&p)html+='<div class="gap info">No coach review logged for this learner yet — provider data only.</div>';
+    // ── Tier 2: supporting detail, collapsed behind a Details toggle ──
+    let det='';
     if(list.length){
       let chips=list.filter(r=>r.date).map(r=>'<span class="dchip">'+fmtDate(r.date)+'</span>').join('');
       if(l&&l.next)chips+='<span class="dchip next">next · '+fmtDate(l.next)+'</span>';
-      if(chips)html+='<div class="mini" style="margin-top:12px">Your session schedule</div><div class="sched">'+chips+'</div>';
+      if(chips)det+='<div class="mini">Session schedule</div><div class="sched">'+chips+'</div>';
       const lastNonEmpty=key=>{for(let i=list.length-1;i>=0;i--){if((list[i][key]||'').trim())return list[i][key];}return '';};
-      html+='<div class="themes"><div class="tbox"><h4>Themes / KSBs covered</h4><div class="tc">'+(esc(lastNonEmpty('ksbs'))||dash)+'</div></div>'+
+      det+='<div class="themes"><div class="tbox"><h4>Themes / KSBs covered</h4><div class="tc">'+(esc(lastNonEmpty('ksbs'))||dash)+'</div></div>'+
         '<div class="tbox"><h4>Assignments</h4><div class="tc">'+(esc(lastNonEmpty('assign'))||dash)+'</div></div></div>';
-    } else if(p){html+='<div class="gap info">No coach review logged for this learner yet — provider data only.</div>';}
-    // KSB coverage — only where a curated standard list exists (Team Leader). Coverage = fact, no pacing.
+    }
     const ref=ksbSetFor(prog,p?p.aim:'');
-    if(ref){const nk=normName(name),all=refCodes(ref),cov=coveredSet(nk,list,all);
-      html+='<div class="src" style="margin-top:14px">KSB coverage &middot; '+ref.name+' ('+ref.code+')</div>'+
+    if(ref){const all=refCodes(ref),cov=coveredSet(nk,list,all);
+      det+='<div class="src" style="margin-top:14px">KSB coverage &middot; '+ref.name+' ('+ref.code+')</div>'+
         '<div class="ksb-head"><div class="ksb-bar"><span style="width:'+(cov.size/all.length*100).toFixed(1)+'%"></span></div>'+
         '<span class="ksb-count">'+cov.size+' of '+all.length+'</span>'+
         '<button class="link ksb-toggle" onclick="toggleKsbPanel(this)">edit</button></div>';
@@ -736,10 +778,11 @@ function renderDashboard(){
         grid+='<div class="ksb-grp">'+g[0]+'</div>';
         Object.keys(g[1]).forEach(code=>{grid+='<span class="kchip'+(cov.has(code)?' on':'')+'" data-code="'+code+'" title="'+esc(code+' — '+g[1][code])+'" onclick="toggleKsb(this,\''+nk+'\')">'+code+'</span>';});
       });
-      html+=grid+'</div>';
+      det+=grid+'</div>';
     }
-    html+='<div style="margin-top:14px"><button class="pill newrev" data-name="'+esc(name)+'">＋ New review for '+esc(name.split(' ')[0])+'</button></div>';
-    html+='</div>';
+    if(det)html+='<div class="lcard-detailwrap"><button class="link detail-toggle" onclick="toggleDetail(this)">Details ▾</button><div class="lcard-detail" style="display:none">'+det+'</div></div>';
+    html+='<div class="newrev-wrap"><button class="pill newrev" data-name="'+esc(name)+'">＋ New review for '+esc(name.split(' ')[0])+'</button></div>';
+    html+='</div></div>';
   });
   host.innerHTML=html;
   const nt=document.getElementById('summaryNotes');
