@@ -9,10 +9,10 @@
   /* Landmark identity: navy #1F1C40 · coral #E8725D · white · serif display */
   :root{
     --bg:#1F1C40; --bg2:#171533; --panel:rgba(255,255,255,0.05); --panelb:rgba(255,255,255,0.14); --line:rgba(255,255,255,0.09);
-    --ink:#FFFFFF; --text:#E7E6F0; --text2:#ABA9C7; --text3:#7C79A0;
+    --ink:#FFFFFF; --text:#E7E6F0; --text2:#ABA9C7; --text3:#9C99BF;  /* text3 raised to meet WCAG AA (≥4.5:1) on panels */
     --purple:#E8725D; --purple-d:#C2533F; --blue:#8E8CC4;   /* --purple = coral accent */
     --orange:#E8725D; --orange-d:#C2533F;
-    --gold:#E0A43B; --red:#e0607a; --green:#4fd18b;
+    --gold:#E0A43B; --red:#ef7189; --green:#4fd18b;  /* red raised for AA on cards */
     --serif:Georgia,'Times New Roman',serif;
     --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
   }
@@ -182,7 +182,8 @@
     @page{margin:13mm}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     /* report on white paper — flip vars back to light for readability */
-    :root{--ink:#1F1C40;--text:#2a2846;--text2:#565478;--text3:#8b88a6;--panel:#fff;--panelb:#d7d4e6;--line:#e6e4f0}
+    :root{--ink:#1F1C40;--text:#2a2846;--text2:#565478;--text3:#6f6d8a;--panel:#fff;--panelb:#d7d4e6;--line:#e6e4f0;
+      --red:#c2415c;--green:#0f7d45;--gold:#8a6410;--purple:#C2533F}  /* darken semantic + accent for AA on white paper */
     body{background:#fff;padding:0;font-size:12px}
     body::before{display:none}
     .wrap{max-width:100%}
@@ -355,7 +356,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div style="opacity:.4;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.17 &middot; build 2026-07-06a &middot; Arthur Curtis Education</div>
+    <div style="opacity:.7;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.18 &middot; build 2026-07-06b &middot; Arthur Curtis Education</div>
   </div>
 </div>
 
