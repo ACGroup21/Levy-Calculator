@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arthur Curtis — Website Project Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B1B3A;--bg:#05101f;--bg-2:#040b16;--blue:#2563eb;--cyan:#22d3ee;--cyan-soft:#67e8f9;
+    --ink:#eaf2fb;--muted:#8ba0b6;--muted-2:#5f7388;--line:rgba(120,160,210,0.14);--glass:rgba(255,255,255,0.035);
+    --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+    --green:#34d399;--amber:#f5a623;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+  a{color:var(--cyan);text-decoration:none}
+  .mono{font-family:var(--mono)}
+
+  /* header */
+  header{padding:64px 0 30px;border-bottom:1px solid var(--line);background:radial-gradient(90% 140% at 20% 0%,rgba(37,99,235,.16),transparent 60%)}
+  .eyebrow{font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin-bottom:14px}
+  h1{font-size:clamp(32px,4.6vw,52px);font-weight:800;letter-spacing:-.025em;line-height:1.04}
+  h1 .grad{background:linear-gradient(110deg,var(--cyan-soft),var(--cyan) 45%,var(--blue));-webkit-background-clip:text;background-clip:text;color:transparent}
+  header p{color:var(--muted);font-size:18px;max-width:640px;margin-top:18px}
+  .meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:26px;font-size:13px;color:var(--muted)}
+  .meta b{color:var(--ink)}
+
+  section{padding:56px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:12px;color:var(--cyan);letter-spacing:.05em;margin-bottom:8px}
+  h2{font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:8px}
+  .sec-sub{color:var(--muted);font-size:16px;max-width:680px;margin-bottom:30px}
+
+  .card{background:linear-gradient(180deg,var(--glass),transparent);border:1px solid var(--line);border-radius:16px;padding:24px}
+
+  /* thesis */
+  .thesis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .thesis .card h3{font-size:16px;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+  .thesis .card p{color:var(--muted);font-size:14px}
+  .badge{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:14px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3)}
+
+  /* hero concepts */
+  .concepts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+  .concept{position:relative;overflow:hidden}
+  .concept .pick{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:10px;color:#02101e;background:linear-gradient(120deg,var(--cyan),var(--blue));padding:3px 9px;border-radius:20px;font-weight:700}
+  .concept .letter{font-family:var(--mono);font-size:13px;color:var(--cyan)}
+  .concept h3{font-size:19px;margin:8px 0 10px}
+  .concept p{color:var(--muted);font-size:14px;margin-bottom:14px}
+  .concept .role{font-size:12.5px;color:var(--ink);border-top:1px solid var(--line);padding-top:12px}
+  .concept .role span{color:var(--muted)}
+
+  /* sitemap */
+  .pages{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .page{border:1px solid var(--line);border-radius:14px;padding:18px 18px;background:var(--glass)}
+  .page .pn{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;margin-bottom:7px}
+  .page .pn .i{font-family:var(--mono);font-size:12px;color:var(--cyan)}
+  .page p{color:var(--muted);font-size:13.5px}
+  .page .st{margin-top:10px;font-family:var(--mono);font-size:10.5px;padding:3px 9px;border-radius:20px;display:inline-block}
+  .st.core{background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+  .st.next{background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.28)}
+  .st.later{background:rgba(245,166,35,.1);color:var(--amber);border:1px solid rgba(245,166,35,.28)}
+
+  /* phases timeline */
+  .phases{position:relative;padding-left:30px}
+  .phases::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--cyan),var(--blue),transparent)}
+  .phase{position:relative;padding:0 0 26px 0}
+  .phase::before{content:"";position:absolute;left:-29px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--cyan);box-shadow:0 0 12px rgba(34,211,238,.5)}
+  .phase h3{font-size:17px;font-weight:700;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .phase h3 .tag{font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:400}
+  .phase p{color:var(--muted);font-size:14px;margin-top:6px;max-width:720px}
+  .phase.done::before{background:var(--cyan)}
+
+  /* palette */
+  .swatches{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .sw{border:1px solid var(--line);border-radius:12px;overflow:hidden;width:120px}
+  .sw .chip{height:60px}
+  .sw .lab{padding:8px 10px;font-size:11px;font-family:var(--mono);color:var(--muted)}
+  .sw .lab b{color:var(--ink);display:block}
+
+  /* decisions */
+  .decisions{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .dec{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:var(--glass)}
+  .dec .q{font-weight:600;font-size:14.5px;margin-bottom:6px}
+  .dec .a{color:var(--muted);font-size:13px}
+  .dec .a b{color:var(--cyan)}
+
+  .ref{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+  .ref a{font-size:12.5px;border:1px solid var(--line);padding:6px 12px;border-radius:20px;color:var(--ink)}
+  .ref a:hover{border-color:var(--cyan);color:var(--cyan)}
+
+  footer{padding:40px 0 60px;color:var(--muted-2);font-size:12.5px}
+  @media(max-width:820px){.thesis,.concepts,.pages,.decisions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">Website revamp · project map</div>
+    <h1>arthurcurtis.com<br><span class="grad">world-class build plan</span></h1>
+    <p>Futuristic but taken seriously. A restrained, premium canvas with one big living moment — built on the unfair advantage no competitor has: real, working tools.</p>
+    <div class="meta">
+      <span>Status: <b>Planning</b></span>
+      <span>Stack: <b>Static · GitHub Pages</b></span>
+      <span>Brand: <b>New "ac" navy→cyan</b></span>
+      <span>Drafted: <b>26 Jun 2026</b></span>
+    </div>
+  </div>
+</header>
+
+<!-- THESIS -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// the thesis</div>
+    <h2>How we make it futuristic AND serious</h2>
+    <p class="sec-sub">The premium B2B sites (Linear, Stripe, Vercel) earn trust through restraint, not flash. The formula: a calm, high-contrast canvas + exactly one jaw-dropping interaction — and we make that interaction substantive, not decorative.</p>
+    <div class="thesis">
+      <div class="card"><h3><span class="badge">◐</span>Restraint = serious</h3><p>High contrast, generous whitespace, one accent colour (cyan), tight geometric type, obsessive consistency across every page.</p></div>
+      <div class="card"><h3><span class="badge">✦</span>One big moment = futuristic</h3><p>A single high-craft live interaction in the hero. Futurism from depth, not from decorating every corner.</p></div>
+      <div class="card"><h3><span class="badge">⚡</span>Real tools = your edge</h3><p>Stripe animates a gradient because it can't show payments. You can show levy money actually moving — for real.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HERO CONCEPTS -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// the big dynamic feature</div>
+    <h2>Front-page hero — three concepts</h2>
+    <p class="sec-sub">Recommendation: build A as the hero, on a B-style ambient background, with C as the methodology section below. One coherent system.</p>
+    <div class="concepts">
+      <div class="concept card"><span class="pick">RECOMMENDED</span><div class="letter">CONCEPT A</div><h3>Watch your levy work</h3><p>A live mini-tool: visitor sets their pay bill → levy pot resolves → particles stream from the pot into outcomes. Real math, real flow.</p><div class="role"><span>Role:</span> The hero. Funnels straight into the calculator.</div></div>
+      <div class="concept card"><div class="letter">CONCEPT B</div><h3>Living constellation</h3><p>A drifting particle network that resolves into the "ac" mark — pure brand atmosphere via WebGL/canvas.</p><div class="role"><span>Role:</span> The ambient background layer behind A.</div></div>
+      <div class="concept card"><div class="letter">CONCEPT C</div><h3>The loop</h3><p>Goal → Map → Fund → Report animates as you scroll, each stage drawing itself in. Scrollytelling.</p><div class="role"><span>Role:</span> Methodology section under the hero.</div></div>
+    </div>
+    <div class="ref">
+      <span style="color:var(--muted);font-size:12.5px;align-self:center">References:</span>
+      <a href="https://stripe.com" target="_blank">Stripe — flowing gradient</a>
+      <a href="https://linear.app" target="_blank">Linear — consistency</a>
+      <a href="https://vercel.com" target="_blank">Vercel — blueprint grid</a>
+      <a href="https://freefrontend.com/three-js/" target="_blank">Three.js heroes</a>
+    </div>
+  </div>
+</section>
+
+<!-- SITEMAP -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// architecture</div>
+    <h2>Site structure</h2>
+    <p class="sec-sub">Seven pages. Core ships first; insights/blog comes later for SEO.</p>
+    <div class="pages">
+      <div class="page"><div class="pn"><span class="i">01</span>Home</div><p>Dynamic hero → proof strip → the loop → tools showcase → credibility → CTA.</p><span class="st core">CORE</span></div>
+      <div class="page"><div class="pn"><span class="i">02</span>The Approach</div><p>The Goal→Map→Fund→Report method in depth, with scrollytelling.</p><span class="st core">CORE</span></div>
+      <div class="page"><div class="pn"><span class="i">03</span>Tools / Hub</div><p>Self-serve centre: Levy Calculator, JD Matcher, future tools — live.</p><span class="st core">CORE</span></div>
+      <div class="page"><div class="pn"><span class="i">04</span>For Employers</div><p>The levy value prop, who it's for, outcomes, social proof.</p><span class="st next">NEXT</span></div>
+      <div class="page"><div class="pn"><span class="i">05</span>About</div><p>Story, mission, the team (Omari, Leighton, Bisi).</p><span class="st next">NEXT</span></div>
+      <div class="page"><div class="pn"><span class="i">06</span>Contact / Book</div><p>Calendly embed + form (Formspree). Low-friction.</p><span class="st next">NEXT</span></div>
+      <div class="page"><div class="pn"><span class="i">07</span>Insights</div><p>Blog / thought leadership for SEO and authority.</p><span class="st later">LATER</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PHASES -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// build plan</div>
+    <h2>Phases — shipped in slices</h2>
+    <p class="sec-sub">You see something real at every step. Nothing goes live until the domain cutover in the final phase.</p>
+    <div class="phases">
+      <div class="phase done"><h3>Phase 0 — Brand &amp; design system <span class="tag">started</span></h3><p>Logos integrated, palette &amp; tokens, component set, clickable homepage mockup to approve the look. <b style="color:var(--cyan)">← this map + the live prototype are here.</b></p></div>
+      <div class="phase"><h3>Phase 1 — Homepage shell <span class="tag">layout</span></h3><p>Full static homepage with real layout and placeholder hero.</p></div>
+      <div class="phase"><h3>Phase 2 — The hero <span class="tag">centrepiece</span></h3><p>Concept A built and tuned — the live levy-flow interaction.</p></div>
+      <div class="phase"><h3>Phase 3 — Tools hub <span class="tag">integrate</span></h3><p>Wire in the calculator + JD Matcher as the self-serve centre.</p></div>
+      <div class="phase"><h3>Phase 4 — Remaining pages <span class="tag">content</span></h3><p>Approach, For Employers, About, Contact.</p></div>
+      <div class="phase"><h3>Phase 5 — Polish <span class="tag">craft</span></h3><p>Copywriting, responsive, performance, accessibility, SEO/meta, image optimisation.</p></div>
+      <div class="phase"><h3>Phase 6 — Launch <span class="tag">cutover</span></h3><p>DNS from Wix → GitHub Pages. ~10 minutes, zero downtime.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- DESIGN SYSTEM -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// design system</div>
+    <h2>Palette &amp; type</h2>
+    <p class="sec-sub">Drawn straight from the new logo. Cyan is the single accent; everything else is navy, near-black and white.</p>
+    <div class="swatches">
+      <div class="sw"><div class="chip" style="background:#0B1B3A"></div><div class="lab"><b>Navy</b>#0B1B3A</div></div>
+      <div class="sw"><div class="chip" style="background:#05101f"></div><div class="lab"><b>Canvas</b>#05101f</div></div>
+      <div class="sw"><div class="chip" style="background:#2563eb"></div><div class="lab"><b>Blue</b>#2563eb</div></div>
+      <div class="sw"><div class="chip" style="background:#22d3ee"></div><div class="lab"><b>Cyan</b>#22d3ee</div></div>
+      <div class="sw"><div class="chip" style="background:#eaf2fb"></div><div class="lab"><b>Ink</b>#eaf2fb</div></div>
+    </div>
+    <p style="color:var(--muted);font-size:14px">Type: <b style="color:var(--ink)">Inter</b> (geometric, tight, confident) for UI + headings · <b style="color:var(--ink)">JetBrains Mono</b> for numbers &amp; data. Mint green from the old brand: dropped.</p>
+  </div>
+</section>
+
+<!-- DECISIONS -->
+<section>
+  <div class="wrap">
+    <div class="kicker">// open decisions</div>
+    <h2>For you to call (later)</h2>
+    <p class="sec-sub">None of these block the build — defaults shown in cyan.</p>
+    <div class="decisions">
+      <div class="dec"><div class="q">Keep a hint of mint, or drop it?</div><div class="a">My lean: <b>drop it</b> — let the site live in the new logo's navy/cyan world.</div></div>
+      <div class="dec"><div class="q">Real stats &amp; case studies, or stay qualitative?</div><div class="a">Default: <b>qualitative first</b>, swap in real numbers as we get them.</div></div>
+      <div class="dec"><div class="q">Keep "Making people better"?</div><div class="a">Default: <b>keep it</b> — it's strong and already yours.</div></div>
+      <div class="dec"><div class="q">Booking tool?</div><div class="a">Default: <b>Calendly embed</b> on Contact + form via Formspree.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Arthur Curtis — website project map · drafted 26 Jun 2026 · companion to the live homepage prototype (index.html)</div>
+</footer>
+
+</body>
+</html>
