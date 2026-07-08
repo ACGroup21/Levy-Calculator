@@ -18,7 +18,8 @@
     radial-gradient(900px 600px at 10% 110%,rgba(224,164,59,0.05),transparent),var(--bg);
     color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;
     padding:34px 22px 70px;min-height:100vh}
-  .wrap{max-width:1060px;margin:0 auto}
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{max-width:1060px;margin:0 auto;position:relative;z-index:1}
   h1{font-size:27px;font-weight:600;margin:0 0 4px;letter-spacing:-.01em}
   .sub{color:var(--text2);font-size:14px;margin-bottom:20px}
   .sub b{color:var(--teal);font-weight:600}
@@ -27,7 +28,7 @@
   .stat{background:var(--bg2);border:1px solid var(--panelb);border-radius:12px;padding:11px 16px;min-width:96px}
   .stat .n{font-family:var(--mono);font-size:24px;font-weight:600;line-height:1}
   .stat .l{font-size:11px;color:var(--text3);margin-top:5px;letter-spacing:.04em}
-  .stat.i .n{color:var(--teal)} .stat.e .n{color:var(--gold)} .stat.v .n{color:var(--text)}
+  .stat.b .n{color:var(--teal)} .stat.t .n{color:var(--gold)} .stat.v .n{color:var(--text)}
 
   .lane{display:flex;align-items:center;gap:12px;margin:30px 0 14px}
   .lane .lh{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--text2);text-transform:uppercase;white-space:nowrap}
@@ -39,9 +40,15 @@
   .lane .line{flex:1;height:1px;background:var(--panelb)}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:13px}
+  .grp{grid-column:1/-1;display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin:8px 0 0}
+  .grp .gi{font-size:8px}
+  .grp.builds .gi{color:var(--teal)} .grp.trackers .gi{color:var(--gold)}
+  .grp::after{content:'';flex:1;height:1px;background:var(--panelb)}
+
   .card{background:var(--panel);border:1px solid var(--panelb);border-radius:14px;padding:15px 16px;
     display:block;text-decoration:none;color:inherit;position:relative;transition:transform .16s,border-color .16s,background .16s}
-  a.card:hover{transform:translateY(-3px);border-color:rgba(45,212,178,0.4);background:rgba(255,255,255,0.04)}
+  a.card:hover{transform:translateY(-3px);border-color:rgba(45,212,178,0.4);background:rgba(255,255,255,0.045)}
   .card.nolink{cursor:default;border-style:dashed;opacity:.9}
   .card .head{display:flex;align-items:flex-start;gap:10px}
   .card .sdot{flex:0 0 auto;width:9px;height:9px;border-radius:50%;margin-top:6px}
@@ -60,7 +67,6 @@
   .chip.st-live{color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.08)}
   .chip.st-build{color:var(--gold);border-color:rgba(224,164,59,0.4);background:rgba(224,164,59,0.08)}
   .chip.st-discovery{color:var(--blue);border-color:rgba(57,160,212,0.4);background:rgba(57,160,212,0.08)}
-  .chip.flag{color:var(--orange);border-color:rgba(240,136,62,0.35);background:rgba(240,136,62,0.06)}
 
   .foot{margin-top:36px;background:var(--panel);border:1px solid var(--panelb);border-radius:12px;
     padding:15px 17px;font-size:12.5px;color:var(--text2)}
@@ -72,29 +78,40 @@
 </style>
 </head>
 <body>
+<canvas id="bg"></canvas>
 <div class="wrap">
   <h1>Arthur Curtis — Build Hub 🧭</h1>
-  <div class="sub">Every app, tracker &amp; client build in one place &middot; <b>internal</b> vs <b style="color:#E0A43B">external</b> lanes &middot; live links to each</div>
+  <div class="sub">Every app, tracker &amp; client build in one place &middot; <b>internal</b> vs <b style="color:#E0A43B">external</b> lanes, split into <b>builds</b> &amp; <b style="color:#E0A43B">trackers</b></div>
 
   <div class="stats">
-    <div class="stat i"><div class="n">5</div><div class="l">Internal builds</div></div>
-    <div class="stat e"><div class="n">2</div><div class="l">Client builds</div></div>
+    <div class="stat b"><div class="n">4</div><div class="l">Builds (shipped)</div></div>
+    <div class="stat t"><div class="n">3</div><div class="l">Trackers (boards)</div></div>
     <div class="stat v"><div class="n">6</div><div class="l">Live &amp; reachable</div></div>
   </div>
 
   <!-- INTERNAL -->
   <div class="lane internal">
     <span class="lh"><span class="dot"></span>Internal — Arthur Curtis</span>
-    <span class="ct">5 builds</span>
+    <span class="ct">2 builds &middot; 3 trackers</span>
     <span class="line"></span>
   </div>
   <div class="grid">
+
+    <div class="grp builds"><span class="gi">◆</span> Builds</div>
 
     <a class="card" href="https://acgroup21.github.io/Levy-Calculator/" target="_blank" rel="noopener">
       <div class="head"><span class="sdot live"></span><span class="name">Levy Affordability Calculator</span><span class="arrow">↗</span></div>
       <div class="desc">The flagship product. Goal → talent map → standards → affordability → report. Trust is the north star.</div>
       <div class="meta"><span class="chip type">app</span><span class="chip st-live">live</span></div>
     </a>
+
+    <a class="card" href="https://acgroup21.github.io/arthur-curtis-site/" target="_blank" rel="noopener">
+      <div class="head"><span class="sdot build"></span><span class="name">Arthur Curtis Website</span><span class="arrow">↗</span></div>
+      <div class="desc">The public site rebuild — brand + calculator upfront, blueprint hero reveal. World-class site by Sept 2026.</div>
+      <div class="meta"><span class="chip type">site</span><span class="chip st-build">in build</span></div>
+    </a>
+
+    <div class="grp trackers"><span class="gi">◆</span> Trackers</div>
 
     <a class="card" href="https://acgroup21.github.io/Levy-Calculator/roadmap-ac9f3k.html" target="_blank" rel="noopener">
       <div class="head"><span class="sdot build"></span><span class="name">Levy Project Tracker</span><span class="arrow">↗</span></div>
@@ -108,12 +125,6 @@
       <div class="meta"><span class="chip type">tracker</span><span class="chip st-build">in build</span></div>
     </a>
 
-    <a class="card" href="https://acgroup21.github.io/arthur-curtis-site/" target="_blank" rel="noopener">
-      <div class="head"><span class="sdot build"></span><span class="name">Arthur Curtis Website</span><span class="arrow">↗</span></div>
-      <div class="desc">The public site rebuild — brand + calculator upfront, blueprint hero reveal. World-class site by Sept 2026.</div>
-      <div class="meta"><span class="chip type">site</span><span class="chip st-build">in build</span></div>
-    </a>
-
     <a class="card" href="site-map-x8k3.html" target="_blank" rel="noopener">
       <div class="head"><span class="sdot build"></span><span class="name">Website Project Map</span><span class="arrow">↗</span></div>
       <div class="desc">Build tracker for the website itself — hero explorations, page structure, and launch sequencing.</div>
@@ -125,10 +136,12 @@
   <!-- EXTERNAL -->
   <div class="lane external">
     <span class="lh"><span class="dot"></span>External — Client builds</span>
-    <span class="ct">2 builds</span>
+    <span class="ct">2 builds &middot; 0 trackers</span>
     <span class="line"></span>
   </div>
   <div class="grid">
+
+    <div class="grp builds"><span class="gi">◆</span> Builds</div>
 
     <a class="card" href="https://acgroup21.github.io/Levy-Calculator/landmark-demo-9f4k2m.html" target="_blank" rel="noopener">
       <div class="head"><span class="sdot build"></span><span class="name">Landmark Group — Apprentice Tracker</span><span class="arrow">↗</span></div>
@@ -150,10 +163,62 @@
       <span class="lg"><span class="d" style="background:var(--gold)"></span> In build — live but evolving</span>
       <span class="lg"><span class="d" style="background:var(--blue)"></span> Discovery — pre-build</span>
     </div>
-    <b>Lanes:</b> Internal = Arthur Curtis's own products. External = paid client builds.
-    Add a card when a new build starts; flip its dot to teal when it ships.
+    <b>Lanes:</b> Internal = AC's own products · External = paid client builds.
+    <b>Builds</b> = things you ship · <b>Trackers</b> = the boards that monitor them.
     <div class="stamp" id="stamp">Updated 8 Jul 2026</div>
   </div>
 </div>
+
+<script>
+// Ambient blueprint constellation — subtle drifting nodes, faint links.
+(function(){
+  var c=document.getElementById('bg'),x=c.getContext('2d');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var w,h,dpr,pts;
+  function size(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=c.width=innerWidth*dpr; h=c.height=innerHeight*dpr;
+    c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px';
+    var n=Math.min(72,Math.round(innerWidth*innerHeight/22000));
+    pts=[];
+    for(var i=0;i<n;i++){
+      pts.push({
+        x:rand(0,w), y:rand(0,h),
+        vx:rand(-0.12,0.12)*dpr, vy:rand(-0.12,0.12)*dpr,
+        r:rand(0.6,1.9)*dpr,
+        gold:Math.random()<0.14
+      });
+    }
+  }
+  function rand(a,b){ return a+(b-a)*Math.random(); }
+  function frame(){
+    x.clearRect(0,0,w,h);
+    var link=140*dpr;
+    for(var i=0;i<pts.length;i++){
+      var p=pts[i];
+      if(!reduce){ p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0)p.x+=w; if(p.x>w)p.x-=w; if(p.y<0)p.y+=h; if(p.y>h)p.y-=h; }
+      for(var j=i+1;j<pts.length;j++){
+        var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<link){
+          var a=(1-d/link)*0.14;
+          x.strokeStyle='rgba(45,212,178,'+a+')';
+          x.lineWidth=dpr*0.6;
+          x.beginPath(); x.moveTo(p.x,p.y); x.lineTo(q.x,q.y); x.stroke();
+        }
+      }
+    }
+    for(var k=0;k<pts.length;k++){
+      var pt=pts[k];
+      x.beginPath(); x.arc(pt.x,pt.y,pt.r,0,6.2832);
+      x.fillStyle=pt.gold?'rgba(224,164,59,0.55)':'rgba(45,212,178,0.5)';
+      x.fill();
+    }
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  size(); frame();
+  var t; addEventListener('resize',function(){ clearTimeout(t); t=setTimeout(function(){ size(); if(reduce) frame(); },160); });
+})();
+</script>
 </body>
 </html>
