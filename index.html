@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02j</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1689,9 +1689,9 @@ function renderExpiryTables(){
   }
 }
 
-function simulateLevyFIFO(income,tot,pmk,M){
+function simulateLevyFIFO(income,tot,pmk,M,history){
   const decl={},spend={};
-  (levyData.byMonth||[]).forEach(m=>{if(m.mk<pmk){decl[m.mk]=(decl[m.mk]||0)+m.income;spend[m.mk]=(spend[m.mk]||0)+m.paid;}});
+  (history==null?(levyData.byMonth||[]):history).forEach(m=>{if(m.mk<pmk){decl[m.mk]=(decl[m.mk]||0)+m.income;spend[m.mk]=(spend[m.mk]||0)+m.paid;}}); // history defaults to live data → byte-identical for UI; pass [] for pure/testable use
   for(let i=0;i<M;i++){const mk=pmk+i;decl[mk]=(decl[mk]||0)+income[i];spend[mk]=(spend[mk]||0)+tot[i];}
   const mks=Object.keys(decl).map(Number);if(!mks.length)return{total:0,byMonth:[],ledger:[]};
   const minMk=Math.min(...mks),maxMk=pmk+M-1;
@@ -1716,8 +1716,8 @@ function coInvRate(mk){return mk<RULE_MK?RULEBOOK.coInvest.before:RULEBOOK.coInv
 // pot BEFORE units; the leftover funds units; any apprenticeship shortfall co-invests at the
 // 5/25% rate, any unit shortfall at the flat 5% unit rate. Omitting uTot is byte-identical to
 // the apprenticeship-only model (the unit step is skipped entirely).
-function simCoInvest(income,tot,pmk,uTot){
-  let bal=levyData.balance,total=0;const months=[];
+function simCoInvest(income,tot,pmk,uTot,bal0){
+  let bal=(bal0==null?levyData.balance:bal0),total=0;const months=[]; // bal0 defaults to the live balance → byte-identical for UI calls; pass explicit for pure/testable use
   for(let i=0;i<tot.length;i++){
     bal+=income[i];
     let aUnc=0,aShare=0,uUnc=0,uShare=0;
@@ -1729,6 +1729,8 @@ function simCoInvest(income,tot,pmk,uTot){
   }
   return{total,months};
 }
+// Migrate the projection sims into the engine namespace (they default to live levyData; pass explicit state for pure use).
+LevyEngine.simCoInvest=simCoInvest; LevyEngine.simulateLevyFIFO=simulateLevyFIFO; LevyEngine.coInvRate=coInvRate; LevyEngine.expMo=expMo;
 // Training capacity + over-commitment warning (display-only — reads levyReportData figures, no engine change).
 // Capacity = how many apprentices the levy funds at the plan's own average cost. Warn when the plan exceeds it.
 function renderCapacity(d){
@@ -3286,6 +3288,8 @@ document.addEventListener('keydown',e=>{
     ni:'https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2025-to-2026'
   };
   var E=LevyEngine; // test the ACTUAL engine core, not re-implementations
+  var mkB=RULEBOOK.boundaryMk-24, mkF=RULEBOOK.boundaryMk;             // a month before / on the Aug-2026 boundary
+  var pad=function(a,n){var r=a.slice();while(r.length<n)r.push(0);return r;}; // pad an array with zeros to length n
   // [group, case, engine result, gov.uk expected, source key]
   var CASES=[
     ['Levy calculation','Pay bill £5,000,000 → annual levy',E.levyFromPayBill(5000000),10000,'levy'],
@@ -3304,7 +3308,13 @@ document.addEventListener('keydown',e=>{
     ['Non-levy co-investment','Band £9,000, aged 22+ → employer 5%',E.nonLevyEmployerShare(9000),450,'fund'],
     ['Non-levy co-investment','Band £9,000, aged 22+ → government 95%',E.nonLevyGovShare(9000),8550,'fund'],
     ['Employer NI relief (under-25)','Salary £22,000 → annual relief',E.niReliefPerYear(22000),2550,'ni'],
-    ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',E.niReliefPerYear(60000),6790.5,'ni']
+    ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',E.niReliefPerYear(60000),6790.5,'ni'],
+    ['Projection · co-investment sim','Bal £0 · £1,000 draw · £0 income · pre-Aug ’26 → 5%',E.simCoInvest([0],[1000],mkB,null,0).total,50,'fund'],
+    ['Projection · co-investment sim','Bal £0 · £1,000 draw covered by £1,000 income → nil',E.simCoInvest([1000],[1000],mkB,null,0).total,0,'fund'],
+    ['Projection · co-investment sim','Bal £0 · income £600+£600 · £1,000 draw month 1 → £20 (5%)',E.simCoInvest([600,600],[1000,0],mkB,null,0).total,20,'fund'],
+    ['Projection · co-investment sim','Bal £0 · £1,000 draw · £0 income · from Aug ’26 → 25%',E.simCoInvest([0],[1000],mkF,null,0).total,250,'fund'],
+    ['Projection · FIFO expiry','£1,000 declared, undrawn, 30-mo horizon (24-mo rule) → expires',E.simulateLevyFIFO(pad([1000],30),pad([],30),mkB,30,[]).total,1000,'levy'],
+    ['Projection · FIFO expiry','£1,000 declared & fully drawn same month → nil expires',E.simulateLevyFIFO(pad([1000],30),pad([1000],30),mkB,30,[]).total,0,'levy']
   ];
   function fmt(v){var r=Math.round(v*100)/100;return '£'+r.toLocaleString('en-GB',{minimumFractionDigits:(r%1?2:0),maximumFractionDigits:2});}
   window.runGoldenCases=function(){
