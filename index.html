@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02l</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1279,7 +1279,7 @@ const nv=s=>parseFloat((s||'').toString().replace(/[£,\s]/g,''))||0;
 const fmtD=s=>{const d=new Date(s);return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});};
 const RULE_MK=RULEBOOK.boundaryMk;
 function expMo(mk){return mk<RULE_MK?RULEBOOK.expiryMonths.before:RULEBOOK.expiryMonths.from;}
-function mKey(date){const d=new Date(date);return d.getFullYear()*12+d.getMonth();}
+function mKey(date){if(typeof date==='string'){var m=date.match(/^(\d{4})-(\d{1,2})/);if(m)return (+m[1])*12+(+m[2]-1);}const d=new Date(date);return d.getFullYear()*12+d.getMonth();} // parse 'YYYY-MM-DD' by its literal year-month (timezone-independent); Date objects keep local getMonth (byte-identical)
 function mBetween(a,b){return Math.max(1,mKey(b)-mKey(a));}
 function mk2d(mk){return new Date(Math.floor(mk/12),mk%12,1);}
 function mkLbl(mk){return mk2d(mk).toLocaleDateString('en-GB',{month:'short',year:'numeric'});}
@@ -3332,7 +3332,10 @@ document.addEventListener('keydown',e=>{
     ['Projection · unit co-investment','£1,000 unit covered by £1,000 income → nil',E.simCoInvest([1000],[0],mkB,[1000],0).total,0,'fund'],
     ['Projection · full assembly','1 appr £12k band · £1k/mo income · 12-mo → total plan cost',function(){return assemblyD().planCost;},12000,'fund'],
     ['Projection · full assembly','… → co-investment (income covers the 80% draw)',function(){return assemblyD().coInvest;},0,'fund'],
-    ['Projection · full assembly','… → end balance (12 × £200 monthly surplus)',function(){return assemblyD().endBal;},2400,'fund']
+    ['Projection · full assembly','… → end balance (12 × £200 monthly surplus)',function(){return assemblyD().endBal;},2400,'fund'],
+    ['Date handling · timezone-safe','mKey("2026-07-01") → month index July, any timezone',mKey('2026-07-01'),2026*12+6,'levy'],
+    ['Date handling · timezone-safe','Day-of-month invariant: "…-07-01" ≡ "…-07-15"',mKey('2026-07-01')-mKey('2026-07-15'),0,'levy'],
+    ['Date handling · timezone-safe','mBetween("2026-01-01","2027-01-01") → 12 months',mBetween('2026-01-01','2027-01-01'),12,'levy']
   ];
   function fmt(v){var r=Math.round(v*100)/100;return '£'+r.toLocaleString('en-GB',{minimumFractionDigits:(r%1?2:0),maximumFractionDigits:2});}
   window.runGoldenCases=function(){
