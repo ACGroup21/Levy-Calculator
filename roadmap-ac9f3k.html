@@ -86,18 +86,25 @@
   .rm-hmeta{font-size:12px;color:var(--text3);margin-top:7px}
   .rm-hmeta b{color:var(--text2)}
   .rm-deadchip{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:#1c1204;background:var(--gold);border-radius:8px;padding:7px 12px;font-weight:600;white-space:nowrap}
-  .rm-wk{position:relative;display:grid;grid-template-columns:118px 1fr;gap:22px;padding:16px 0 18px 28px;border-left:2px solid var(--panelb);margin-left:6px}
-  .rm-wk::before{content:'';position:absolute;left:-8px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid var(--text3);z-index:1}
+  .rm-wk{position:relative;border-left:2px solid var(--panelb);margin-left:6px}
+  .rm-wk::before{content:'';position:absolute;left:-8px;top:18px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid var(--text3);z-index:1}
   .rm-wk.done{border-left-color:rgba(45,212,178,.4)}
   .rm-wk.done::before{background:var(--teal);border-color:var(--teal);box-shadow:0 0 10px rgba(45,212,178,.5)}
   .rm-wk.cur::before{border-color:var(--gold);box-shadow:0 0 0 4px rgba(224,164,59,.18)}
-  .rm-when .wk{font-size:13px;font-weight:700;color:var(--text)}
-  .rm-when .dt{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:3px}
-  .rm-when .ph{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:5px;border:1px solid var(--panelb);color:var(--text3)}
-  .rm-wk.cur .rm-when .ph{color:var(--gold);border-color:rgba(224,164,59,.45)}
-  .rm-ttl{font-size:16px;font-weight:600;margin-bottom:2px}
-  .rm-here{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--gold);border:1px solid rgba(224,164,59,.45);border-radius:5px;padding:1px 6px;margin-left:8px;vertical-align:middle}
-  .rm-wp{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px}
+  .rm-sum{list-style:none;cursor:pointer;display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:14px 8px 14px 28px}
+  .rm-sum::-webkit-details-marker{display:none}
+  .rm-sum:hover .rm-wkttl{color:#fff}
+  .rm-sum:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
+  .rm-chev{color:var(--text3);font-size:10px;transition:transform .18s;flex:none}
+  details[open]>.rm-sum .rm-chev{transform:rotate(90deg)}
+  .rm-wklab{font-size:13px;font-weight:700;color:var(--text)}
+  .rm-dt2{font-family:var(--mono);font-size:11px;color:var(--text3)}
+  .rm-wkttl{font-size:15px;font-weight:600;color:var(--text2);transition:color .12s}
+  .rm-cnt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--text3);white-space:nowrap}
+  .rm-body{padding:0 8px 18px 28px}
+  .rm-body .ph{display:inline-block;margin-bottom:9px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:5px;border:1px solid var(--panelb);color:var(--text3)}
+  .rm-wk.cur .rm-body .ph{color:var(--gold);border-color:rgba(224,164,59,.45)}
+  .rm-here{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--gold);border:1px solid rgba(224,164,59,.45);border-radius:5px;padding:1px 6px;vertical-align:middle}
   .rm-it{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:5px 0;color:var(--text);cursor:pointer;user-select:none}
   .rm-it:hover{color:#fff}
   .rm-it .bx{flex:0 0 auto;width:16px;height:16px;border:1.5px solid var(--text3);border-radius:5px;margin-top:1px;text-align:center;line-height:13px;font-size:11px;color:transparent;transition:all .12s}
@@ -240,7 +247,7 @@ const PROJECTS=[
 
 const STAGES=[
   {key:'current',label:'Current',hint:'What\'s live right now — full context: what\'s done, what\'s left, what\'s next.',filter:'live',detail:true},
-  {key:'roadmap',label:'Roadmap',hint:'Levy calculator delivery timeline to 23 Aug — tick items as they ship and the marker moves along.',roadmap:true},
+  {key:'roadmap',label:'Roadmap',hint:'Levy calculator delivery timeline to 23 Aug — all levy work, one plan. Weeks collapse; the current one auto-opens. Deliverables auto-fill (dated) as I verify each.',roadmap:true},
   {key:'queued',label:'Queued',hint:'Website apps, client builds & backlog. Levy calculator work is now scheduled in the Roadmap tab → all of it by 23 Aug.',filter:'queued'},
   {key:'complete',label:'Complete',hint:'Shipped & live.',filter:'complete'},
 ];
@@ -332,24 +339,28 @@ function renderRoadmap(){
   // Anchor: the run to 23 Aug builds ON the levy app's verified-complete elements — pulled live from the tracker.
   var found=PROJECTS.filter(p=>p.stage==='complete'&&['levy','data','quality'].indexOf(p.cat)>=0);
   var built=found.length, fitems=found.map(function(p){return '<div class="rm-it on ver"><span class="bx">✓</span><span class="lbl">'+esc(p.t)+'</span></div>';}).join('');
-  h+='<div class="rm-wk done"><div class="rm-when"><div class="wk" style="color:var(--teal)">Foundation</div><div class="dt">already live</div><span class="ph" style="color:var(--teal);border-color:rgba(45,212,178,.4)">Shipped</span></div><div>'+
-    '<div class="rm-ttl">The levy engine is built &amp; live <span class="rm-vdate">✓ '+built+' elements shipped</span></div>'+
-    '<div class="rm-wp" style="margin-bottom:8px">Verified-complete on this tracker — the base the 23 Aug run extends, not replaces:</div>'+
-    fitems+
-    '</div></div>';
+  h+='<details class="rm-wk done"><summary class="rm-sum"><span class="rm-chev">▸</span>'+
+    '<span class="rm-wklab" style="color:var(--teal)">Foundation</span><span class="rm-dt2">already live</span>'+
+    '<span class="rm-wkttl">The levy engine is built &amp; live</span>'+
+    '<span class="rm-cnt"><span class="rm-vdate">✓ '+built+' shipped</span></span></summary>'+
+    '<div class="rm-body"><div style="font-size:11.5px;color:var(--text3);margin-bottom:9px;max-width:64ch">Verified-complete on this tracker — the base the 23 Aug run extends, not replaces:</div>'+
+    fitems+'</div></details>';
   ROADMAP.forEach(function(w,wi){
-    var done=rmWeekDone(wi),cur=(wi===curW);
-    h+='<div class="rm-wk'+(done?' done':'')+(cur?' cur':'')+'"><div class="rm-when"><div class="wk">'+w.wk+'</div><div class="dt">'+w.dt+'</div><span class="ph">'+esc(w.ph)+'</span></div><div>';
-    h+='<div class="rm-ttl">'+esc(w.ttl)+(cur?'<span class="rm-here">YOU ARE HERE</span>':'')+'</div>';
-    var wd=w.items.filter((it,ii)=>rmOn(wi,ii)).length;
-    h+='<div class="rm-wp">'+wd+' / '+w.items.length+' done</div>';
+    var done=rmWeekDone(wi),cur=(wi===curW), wd=w.items.filter((it,ii)=>rmOn(wi,ii)).length;
+    h+='<details class="rm-wk'+(done?' done':'')+(cur?' cur':'')+'"'+(cur?' open':'')+'>'+
+      '<summary class="rm-sum"><span class="rm-chev">▸</span>'+
+      '<span class="rm-wklab">'+w.wk+'</span><span class="rm-dt2">'+w.dt+'</span>'+
+      '<span class="rm-wkttl">'+esc(w.ttl)+'</span>'+
+      (cur?'<span class="rm-here">YOU ARE HERE</span>':'')+
+      '<span class="rm-cnt">'+wd+' / '+w.items.length+'</span></summary>'+
+      '<div class="rm-body"><span class="ph">'+esc(w.ph)+'</span>';
     w.items.forEach(function(it,ii){
       var on=rmOn(wi,ii), ver=!!it.on, lbl=it.soft?('<span class="soft">'+esc(it.t)+' (if time)</span>'):esc(it.t);
       var stamp=ver?'<span class="rm-vdate">✓ verified '+new Date(it.on).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span>':'';
       var attrs=ver?' class="rm-it on ver"':' class="rm-it'+(on?' on':'')+'" onclick="toggleRm('+wi+','+ii+')"';
       h+='<div'+attrs+'><span class="bx">✓</span><span class="lbl">'+lbl+(it.gate?'<span class="gate">GATE</span>':'')+stamp+'</span></div>';
     });
-    h+='</div></div>';
+    h+='</div></details>';
   });
   h+='<div class="rm-dead"><div class="dl">Sat 23 Aug — Launch-ready</div><div class="dd"><b>Done =</b> a good-attitude non-expert produces a client-ready, gov-defensible levy plan unaided — not merely “feature-complete.”</div></div>';
   h+='<div class="rm-link">Full rescope, USP &amp; scope tiers → <a href="'+RM_PLAN+'" target="_blank" rel="noopener">the plan ↗</a></div>';
