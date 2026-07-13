@@ -119,6 +119,14 @@
   .rm-fchips{display:flex;flex-wrap:wrap;gap:6px}
   .rm-fchip{font-size:11.5px;color:var(--text2);background:rgba(45,212,178,.06);border:1px solid rgba(45,212,178,.25);border-radius:6px;padding:3px 9px;line-height:1.35}
   .rm-fchip::before{content:'✓ ';color:var(--teal)}
+  .rm-ckpt{position:relative;margin:4px 0 4px 6px;padding:15px 20px 15px 30px;border:1px solid rgba(45,212,178,.4);background:linear-gradient(90deg,rgba(45,212,178,.10),rgba(45,212,178,.01));border-radius:12px}
+  .rm-ckpt::before{content:'⚑';position:absolute;left:-14px;top:15px;width:26px;height:26px;line-height:23px;text-align:center;border-radius:50%;background:var(--bg2);border:2px solid var(--teal);color:var(--teal);font-size:12px}
+  .rm-ckpt.reached::before{background:var(--teal);color:#04231c}
+  .ck-flag{font-size:15px;font-weight:700;color:var(--teal)}
+  .ck-txt{font-size:12.5px;color:var(--text2);margin-top:4px;max-width:66ch;line-height:1.5}
+  .ck-txt b{color:#fff;font-weight:600}
+  .ck-status{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-top:8px}
+  .rm-ckpt.reached .ck-status{color:var(--teal)}
   .rm-dead{position:relative;padding:16px 20px 4px 28px;margin-left:6px}
   .rm-dead::before{content:'';position:absolute;left:-9px;top:17px;width:15px;height:15px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px rgba(224,164,59,.6)}
   .rm-dead .dl{font-size:18px;font-weight:700;color:var(--gold)}
@@ -361,6 +369,14 @@ function renderRoadmap(){
       h+='<div'+attrs+'><span class="bx">✓</span><span class="lbl">'+lbl+(it.gate?'<span class="gate">GATE</span>':'')+stamp+'</span></div>';
     });
     h+='</div></details>';
+    if(wi===1){ // Internal-ready checkpoint: correctness proven (W2) → fork-able for internal use
+      var reached=rmWeekDone(0)&&rmWeekDone(1);
+      h+='<div class="rm-ckpt'+(reached?' reached':'')+'">'+
+        '<div class="ck-flag">⚑ Internal v1 — fork point</div>'+
+        '<div class="ck-txt">Correctness proven and the core engine complete &mdash; trustworthy for AC coordinators to use in delivery. <b>Fork an internal version here;</b> the build continues past this line toward External v1 (23 Aug) while the internal fork is in use.</div>'+
+        '<div class="ck-status">'+(reached?'✓ Reached — internal fork ready':'Reached once Weeks 1–2 are verified')+'</div>'+
+        '</div>';
+    }
   });
   h+='<div class="rm-dead"><div class="dl">Sat 23 Aug — Launch-ready</div><div class="dd"><b>Done =</b> a good-attitude non-expert produces a client-ready, gov-defensible levy plan unaided — not merely “feature-complete.”</div></div>';
   h+='<div class="rm-link">Full rescope, USP &amp; scope tiers → <a href="'+RM_PLAN+'" target="_blank" rel="noopener">the plan ↗</a></div>';
