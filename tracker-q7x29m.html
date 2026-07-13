@@ -107,6 +107,8 @@
   .rm-it.on .lbl{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25)}
   .rm-it .gate{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--blue);border:1px solid rgba(57,160,212,.4);border-radius:4px;padding:0 5px;margin-left:6px}
   .rm-it .soft{color:var(--text3);font-style:italic}
+  .rm-it.ver{cursor:default} .rm-it.ver:hover{color:var(--text3)}
+  .rm-vdate{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--teal);border:1px solid rgba(45,212,178,.35);border-radius:4px;padding:0 5px;margin-left:7px;white-space:nowrap}
   .rm-dead{position:relative;padding:16px 20px 4px 28px;margin-left:6px}
   .rm-dead::before{content:'';position:absolute;left:-9px;top:17px;width:15px;height:15px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px rgba(224,164,59,.6)}
   .rm-dead .dl{font-size:18px;font-weight:700;color:var(--gold)}
@@ -308,7 +310,7 @@ const ROADMAP=[
 ];
 let rmDone={}; try{rmDone=JSON.parse(localStorage.getItem(RM_KEY)||'{}');}catch(e){rmDone={};}
 function rmK(wi,ii){return wi+'-'+ii;}
-function rmOn(wi,ii){return !!rmDone[rmK(wi,ii)];}
+function rmOn(wi,ii){return !!ROADMAP[wi].items[ii].on || !!rmDone[rmK(wi,ii)];} // .on = date I verified it; localStorage = your manual tick
 function rmTotal(){var n=0;ROADMAP.forEach(w=>n+=w.items.length);return n;}
 function rmDoneN(){var n=0;ROADMAP.forEach((w,wi)=>w.items.forEach((it,ii)=>{if(rmOn(wi,ii))n++;}));return n;}
 function rmPct(){var t=rmTotal();return t?Math.round(rmDoneN()/t*100):0;}
@@ -321,7 +323,7 @@ function renderRoadmap(){
   var pct=rmPct(),curW=rmCurWeek();
   var h='<div class="rm-head"><div class="rm-pct">'+pct+'%</div>'+
     '<div class="rm-hbar"><div class="rm-track"><div class="rm-tfill" id="rmFill"></div></div>'+
-    '<div class="rm-hmeta"><b>'+rmDoneN()+'</b> of '+rmTotal()+' deliverables done · click any item to tick it</div></div>'+
+    '<div class="rm-hmeta"><b>'+rmDoneN()+'</b> of '+rmTotal()+' done · auto-fills (dated) as I build &amp; verify each · your own items stay tickable</div></div>'+
     '<div class="rm-deadchip">'+rmDays()+' days to 23 Aug</div></div>';
   ROADMAP.forEach(function(w,wi){
     var done=rmWeekDone(wi),cur=(wi===curW);
@@ -330,8 +332,10 @@ function renderRoadmap(){
     var wd=w.items.filter((it,ii)=>rmOn(wi,ii)).length;
     h+='<div class="rm-wp">'+wd+' / '+w.items.length+' done</div>';
     w.items.forEach(function(it,ii){
-      var on=rmOn(wi,ii), lbl=it.soft?('<span class="soft">'+esc(it.t)+' (if time)</span>'):esc(it.t);
-      h+='<div class="rm-it'+(on?' on':'')+'" onclick="toggleRm('+wi+','+ii+')"><span class="bx">✓</span><span class="lbl">'+lbl+(it.gate?'<span class="gate">GATE</span>':'')+'</span></div>';
+      var on=rmOn(wi,ii), ver=!!it.on, lbl=it.soft?('<span class="soft">'+esc(it.t)+' (if time)</span>'):esc(it.t);
+      var stamp=ver?'<span class="rm-vdate">✓ verified '+new Date(it.on).toLocaleDateString('en-GB',{day:'numeric',month:'short'})+'</span>':'';
+      var attrs=ver?' class="rm-it on ver"':' class="rm-it'+(on?' on':'')+'" onclick="toggleRm('+wi+','+ii+')"';
+      h+='<div'+attrs+'><span class="bx">✓</span><span class="lbl">'+lbl+(it.gate?'<span class="gate">GATE</span>':'')+stamp+'</span></div>';
     });
     h+='</div></div>';
   });
