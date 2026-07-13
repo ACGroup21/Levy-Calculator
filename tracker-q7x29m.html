@@ -323,8 +323,14 @@ function renderRoadmap(){
   var pct=rmPct(),curW=rmCurWeek();
   var h='<div class="rm-head"><div class="rm-pct">'+pct+'%</div>'+
     '<div class="rm-hbar"><div class="rm-track"><div class="rm-tfill" id="rmFill"></div></div>'+
-    '<div class="rm-hmeta"><b>'+rmDoneN()+'</b> of '+rmTotal()+' done · auto-fills (dated) as I build &amp; verify each · your own items stay tickable</div></div>'+
+    '<div class="rm-hmeta"><b>'+rmDoneN()+' / '+rmTotal()+'</b> launch deliverables · the run to 23 Aug, built on the live foundation below · auto-fills (dated) as I verify each</div></div>'+
     '<div class="rm-deadchip">'+rmDays()+' days to 23 Aug</div></div>';
+  // Anchor: the run to 23 Aug builds ON the mature engine already shipped — not from zero.
+  var built=PROJECTS.filter(p=>p.stage==='complete').length;
+  h+='<div class="rm-wk done"><div class="rm-when"><div class="wk" style="color:var(--teal)">Foundation</div><div class="dt">already live</div><span class="ph" style="color:var(--teal);border-color:rgba(45,212,178,.4)">Shipped</span></div><div>'+
+    '<div class="rm-ttl">The levy engine is built &amp; live <span class="rm-vdate">✓ '+built+' elements shipped</span></div>'+
+    '<div class="rm-wp" style="max-width:64ch">Affordability engine · governed rulebook · 3-page report · units + ladder · goal + scenario · transfers/gifting · NI relief · L7 age gate + self-fund · explainability — the mature base the 23 Aug run extends, not replaces.</div>'+
+    '</div></div>';
   ROADMAP.forEach(function(w,wi){
     var done=rmWeekDone(wi),cur=(wi===curW);
     h+='<div class="rm-wk'+(done?' done':'')+(cur?' cur':'')+'"><div class="rm-when"><div class="wk">'+w.wk+'</div><div class="dt">'+w.dt+'</div><span class="ph">'+esc(w.ph)+'</span></div><div>';
