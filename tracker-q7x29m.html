@@ -75,6 +75,45 @@
   .foot{margin-top:26px;background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)}
   .foot b{color:var(--text);font-weight:600}
   .stamp{margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+
+  /* ---- roadmap / delivery timeline ---- */
+  .tab.on.roadmap{border-bottom-color:#f0883e}
+  .rm-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--bg2);border:1px solid var(--panelb);border-radius:14px;padding:15px 18px;margin-bottom:22px}
+  .rm-pct{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--gold);min-width:54px;text-shadow:0 0 16px rgba(224,164,59,.35)}
+  .rm-hbar{flex:1;min-width:170px;max-width:460px}
+  .rm-track{height:9px;background:rgba(255,255,255,.06);border:1px solid var(--panelb);border-radius:99px;overflow:hidden}
+  .rm-tfill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#f4c778);border-radius:99px;transition:width 1s cubic-bezier(.2,.7,.2,1);box-shadow:0 0 12px rgba(224,164,59,.5)}
+  .rm-hmeta{font-size:12px;color:var(--text3);margin-top:7px}
+  .rm-hmeta b{color:var(--text2)}
+  .rm-deadchip{margin-left:auto;font-family:var(--mono);font-size:11px;letter-spacing:.05em;color:#1c1204;background:var(--gold);border-radius:8px;padding:7px 12px;font-weight:600;white-space:nowrap}
+  .rm-wk{position:relative;display:grid;grid-template-columns:118px 1fr;gap:22px;padding:16px 0 18px 28px;border-left:2px solid var(--panelb);margin-left:6px}
+  .rm-wk::before{content:'';position:absolute;left:-8px;top:19px;width:13px;height:13px;border-radius:50%;background:var(--bg);border:2px solid var(--text3);z-index:1}
+  .rm-wk.done{border-left-color:rgba(45,212,178,.4)}
+  .rm-wk.done::before{background:var(--teal);border-color:var(--teal);box-shadow:0 0 10px rgba(45,212,178,.5)}
+  .rm-wk.cur::before{border-color:var(--gold);box-shadow:0 0 0 4px rgba(224,164,59,.18)}
+  .rm-when .wk{font-size:13px;font-weight:700;color:var(--text)}
+  .rm-when .dt{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:3px}
+  .rm-when .ph{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:5px;border:1px solid var(--panelb);color:var(--text3)}
+  .rm-wk.cur .rm-when .ph{color:var(--gold);border-color:rgba(224,164,59,.45)}
+  .rm-ttl{font-size:16px;font-weight:600;margin-bottom:2px}
+  .rm-here{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--gold);border:1px solid rgba(224,164,59,.45);border-radius:5px;padding:1px 6px;margin-left:8px;vertical-align:middle}
+  .rm-wp{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:8px}
+  .rm-it{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:5px 0;color:var(--text);cursor:pointer;user-select:none}
+  .rm-it:hover{color:#fff}
+  .rm-it .bx{flex:0 0 auto;width:16px;height:16px;border:1.5px solid var(--text3);border-radius:5px;margin-top:1px;text-align:center;line-height:13px;font-size:11px;color:transparent;transition:all .12s}
+  .rm-it:hover .bx{border-color:var(--teal)}
+  .rm-it.on .bx{background:var(--teal);border-color:var(--teal);color:#04231c}
+  .rm-it.on{color:var(--text3)}
+  .rm-it.on .lbl{text-decoration:line-through;text-decoration-color:rgba(255,255,255,.25)}
+  .rm-it .gate{font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;color:var(--blue);border:1px solid rgba(57,160,212,.4);border-radius:4px;padding:0 5px;margin-left:6px}
+  .rm-it .soft{color:var(--text3);font-style:italic}
+  .rm-dead{position:relative;padding:16px 20px 4px 28px;margin-left:6px}
+  .rm-dead::before{content:'';position:absolute;left:-9px;top:17px;width:15px;height:15px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px rgba(224,164,59,.6)}
+  .rm-dead .dl{font-size:18px;font-weight:700;color:var(--gold)}
+  .rm-dead .dd{font-size:12.5px;color:var(--text2);margin-top:4px;max-width:62ch}
+  .rm-dead .dd b{color:var(--text)}
+  .rm-link{margin:16px 0 0 6px;font-size:12px;color:var(--text3)}
+  .rm-link a{color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(224,164,59,.4)}
 </style>
 </head>
 <body>
@@ -179,7 +218,7 @@ const PROJECTS=[
  {t:'Suggest standards from a JD',cat:'levy',stage:'queued',d:'paste a JD in the programme picker → top-3 matching standards to add (reuse the JD-Matcher tokeniser/stemmer + standard role-keywords); pair with the strengthened matcher (#17) so it\'s accurate, not just plausible'},
  {t:'Policy writer',cat:'levy',stage:'queued',d:'generate a tailored, HR-ready apprenticeship / training & development policy document from the employer\'s goal + plan context (uses the governed rulebook so the funding mechanics are correct)'},
  {t:'Age/size co-investment waiver',cat:'levy',stage:'queued',d:'16–18 / <50-staff 100% funding — verify vs gov.uk first'},
- {t:'Age-driven NI + L7 gate',cat:'levy',stage:'queued',d:'apprentice age as ONE input (16–18 / 19–21 / 22–24 / 25+) → cascades into: employer-NI exemption for under-25s (0% to £50,270, ~£2.5k/yr saved) + L7 defunding gate (levy-funded 16–21 only from Jan 2026; 22+ self-fund) → net cost-per-learner (training − NI saving). The 22–24 band is the money insight: self-fund L7 yet still bank the NI saving. Verify rates vs gov.uk. Feeds Cost-per-learner ROI'},
+ {t:'Age-driven NI + L7 gate',cat:'levy',stage:'complete',d:'DONE (build 2026-07-02f). Optional cohort age-mix (16–21/22–24/25+) per programme → employer NI relief for under-25s (0% NIC to £50,270, gov.uk-verified) in the capacity readout + report true-cost (net-of-relief); + L7 age gate flagging 22+ self-fund with the 22–24 crossover (self-fund L7 yet still bank the NI saving). Cohort-level not per-learner.'},
  {t:'Golden-case tests + engine/UI split',cat:'quality',stage:'queued',d:'reproduce gov.uk worked examples to the penny (also a trust artifact)'},
  {t:'Bundled fonts',cat:'quality',stage:'queued',d:'true offline + deterministic pagination'},
  {t:'Strengthened matcher',cat:'quality',stage:'queued',d:'synonyms / weighting / stemming'},
@@ -195,6 +234,7 @@ const PROJECTS=[
 
 const STAGES=[
   {key:'current',label:'Current',hint:'What\'s live right now — full context: what\'s done, what\'s left, what\'s next.',filter:'live',detail:true},
+  {key:'roadmap',label:'Roadmap',hint:'Levy calculator delivery timeline to 23 Aug — tick items as they ship and the marker moves along.',roadmap:true},
   {key:'queued',label:'Queued',hint:'On the to-do list — starts move up to Current.',filter:'queued'},
   {key:'complete',label:'Complete',hint:'Shipped & live.',filter:'complete'},
 ];
@@ -205,7 +245,7 @@ function render(){
   const cur=STAGES.find(s=>s.key===activeStage);
   tabsEl.innerHTML='';
   STAGES.forEach(s=>{
-    const n=PROJECTS.filter(p=>p.stage===s.filter).length;
+    const n=s.roadmap?(rmPct()+'%'):PROJECTS.filter(p=>p.stage===s.filter).length;
     const b=document.createElement('button');
     b.className='tab '+s.key+(s.key===activeStage?' on':'');
     b.innerHTML=s.label+' <span class="ct">'+n+'</span>';
@@ -213,6 +253,7 @@ function render(){
     tabsEl.appendChild(b);
   });
   hintEl.textContent=cur.hint;
+  if(cur.roadmap){gridEl.style.display='block';renderRoadmap();return;}
   if(cur.detail){gridEl.style.display='block';renderCurrent();return;}
   gridEl.style.display='grid';
   let items=PROJECTS.filter(p=>p.stage===cur.filter).slice().sort((a,b)=>(a.cat==='parked')-(b.cat==='parked'));
@@ -249,6 +290,56 @@ function renderCurrent(){
     '<div class="row"><span class="rl">UP NEXT &middot; QUEUE</span>'+upnext.map(p=>'<span class="ch2">○ '+p.t+'</span>').join('')+'</div></div>';
   gridEl.innerHTML=html;
 }
+// ===== Levy calculator delivery roadmap to 23 Aug (live, click to tick) =====
+const RM_KEY='ac_roadmap_v1', RM_DEADLINE=new Date('2026-08-23T23:59:59'), RM_PLAN='https://claude.ai/code/artifact/181b5a1e-a093-49f5-80e7-d27215daecb7';
+const ROADMAP=[
+  {wk:'Week 1',dt:'to 18 Jul',ph:'Lock & prove',ttl:'Lock the plan, start the proof',items:[
+    {t:'Source gov.uk worked examples',gate:1},{t:'Golden-case harness (start)'},{t:'Engine / UI separation (start)'},{t:'Design direction + tokens'},{t:'Business model locked (employer-paid)'}]},
+  {wk:'Week 2',dt:'to 25 Jul',ph:'Correctness',ttl:'Provably correct',items:[
+    {t:'Golden-case suite — to the penny'},{t:'Engine / UI split done'},{t:'Cost-per-learner ROI (slices 2–3)'}]},
+  {wk:'Week 3',dt:'to 1 Aug',ph:'Expertise',ttl:'The expert, encoded',items:[
+    {t:'Recommendation / best-moves + optimiser'},{t:'Guided answer-first mode (v1)'},{t:'Confidence + escalation flags'}]},
+  {wk:'Week 4',dt:'to 8 Aug',ph:'Design & complete',ttl:'Make it look undisputable',items:[
+    {t:'Full visual pass + report polish'},{t:'2026 change navigator'},{t:'Lifecycle quick-wins',soft:1}]},
+  {wk:'Week 5',dt:'to 15 Aug',ph:'Harden',ttl:'Public-sector-grade & solid',items:[
+    {t:'WCAG 2.2 AA'},{t:'Bundled fonts / offline'},{t:'Cross-browser QA'},{t:'Stress-test · lite version',soft:1}]},
+  {wk:'Week 6',dt:'to 22 Aug',ph:'Prove & ship',ttl:'The real acceptance gate',items:[
+    {t:'Non-expert acceptance test',gate:1},{t:'Close stuck-points'},{t:'Final QA + go-live verify'}]},
+];
+let rmDone={}; try{rmDone=JSON.parse(localStorage.getItem(RM_KEY)||'{}');}catch(e){rmDone={};}
+function rmK(wi,ii){return wi+'-'+ii;}
+function rmOn(wi,ii){return !!rmDone[rmK(wi,ii)];}
+function rmTotal(){var n=0;ROADMAP.forEach(w=>n+=w.items.length);return n;}
+function rmDoneN(){var n=0;ROADMAP.forEach((w,wi)=>w.items.forEach((it,ii)=>{if(rmOn(wi,ii))n++;}));return n;}
+function rmPct(){var t=rmTotal();return t?Math.round(rmDoneN()/t*100):0;}
+function rmWeekDone(wi){return ROADMAP[wi].items.every((it,ii)=>rmOn(wi,ii));}
+function rmCurWeek(){for(var i=0;i<ROADMAP.length;i++)if(!rmWeekDone(i))return i;return -1;}
+function rmDays(){return Math.max(0,Math.ceil((RM_DEADLINE-new Date())/864e5));}
+function toggleRm(wi,ii){var k=rmK(wi,ii);if(rmDone[k])delete rmDone[k];else rmDone[k]=1;try{localStorage.setItem(RM_KEY,JSON.stringify(rmDone));}catch(e){}render();}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function renderRoadmap(){
+  var pct=rmPct(),curW=rmCurWeek();
+  var h='<div class="rm-head"><div class="rm-pct">'+pct+'%</div>'+
+    '<div class="rm-hbar"><div class="rm-track"><div class="rm-tfill" id="rmFill"></div></div>'+
+    '<div class="rm-hmeta"><b>'+rmDoneN()+'</b> of '+rmTotal()+' deliverables done · click any item to tick it</div></div>'+
+    '<div class="rm-deadchip">'+rmDays()+' days to 23 Aug</div></div>';
+  ROADMAP.forEach(function(w,wi){
+    var done=rmWeekDone(wi),cur=(wi===curW);
+    h+='<div class="rm-wk'+(done?' done':'')+(cur?' cur':'')+'"><div class="rm-when"><div class="wk">'+w.wk+'</div><div class="dt">'+w.dt+'</div><span class="ph">'+esc(w.ph)+'</span></div><div>';
+    h+='<div class="rm-ttl">'+esc(w.ttl)+(cur?'<span class="rm-here">YOU ARE HERE</span>':'')+'</div>';
+    var wd=w.items.filter((it,ii)=>rmOn(wi,ii)).length;
+    h+='<div class="rm-wp">'+wd+' / '+w.items.length+' done</div>';
+    w.items.forEach(function(it,ii){
+      var on=rmOn(wi,ii), lbl=it.soft?('<span class="soft">'+esc(it.t)+' (if time)</span>'):esc(it.t);
+      h+='<div class="rm-it'+(on?' on':'')+'" onclick="toggleRm('+wi+','+ii+')"><span class="bx">✓</span><span class="lbl">'+lbl+(it.gate?'<span class="gate">GATE</span>':'')+'</span></div>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="rm-dead"><div class="dl">Sat 23 Aug — Launch-ready</div><div class="dd"><b>Done =</b> a good-attitude non-expert produces a client-ready, gov-defensible levy plan unaided — not merely “feature-complete.”</div></div>';
+  h+='<div class="rm-link">Full rescope, USP &amp; scope tiers → <a href="'+RM_PLAN+'" target="_blank" rel="noopener">the plan ↗</a></div>';
+  gridEl.innerHTML=h;
+  setTimeout(function(){var f=document.getElementById('rmFill');if(f)f.style.width=pct+'%';},120);
+}
 render();
 
 // progress = complete / (all non-parked)
@@ -260,7 +351,7 @@ render();
   document.getElementById('progPct').textContent=pct+'%';
   document.getElementById('progLab').textContent=done+' complete · '+live+' live · '+q+' queued (excl. parked)';
   setTimeout(()=>document.getElementById('progFill').style.width=pct+'%',150);
-  document.getElementById('stamp').textContent='Updated 2026-07-02 · calculator build 2026-06-28h · '+done+' shipped · '+live+' live · '+q+' queued · TARGET: world-class site live by Sept 2026';
+  document.getElementById('stamp').textContent='Updated 2026-07-02 · calculator build 2026-07-02g · '+done+' shipped · '+live+' live · '+q+' queued · ROADMAP: levy calculator launch-ready by 23 Aug 2026';
 })();
 
 // drifting network bg
