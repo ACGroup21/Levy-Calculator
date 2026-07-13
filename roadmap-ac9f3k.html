@@ -241,7 +241,7 @@ const PROJECTS=[
 const STAGES=[
   {key:'current',label:'Current',hint:'What\'s live right now — full context: what\'s done, what\'s left, what\'s next.',filter:'live',detail:true},
   {key:'roadmap',label:'Roadmap',hint:'Levy calculator delivery timeline to 23 Aug — tick items as they ship and the marker moves along.',roadmap:true},
-  {key:'queued',label:'Queued',hint:'On the to-do list — starts move up to Current.',filter:'queued'},
+  {key:'queued',label:'Queued',hint:'Website apps, client builds & backlog. Levy calculator work is now scheduled in the Roadmap tab → all of it by 23 Aug.',filter:'queued'},
   {key:'complete',label:'Complete',hint:'Shipped & live.',filter:'complete'},
 ];
 let activeStage='current';
@@ -251,7 +251,7 @@ function render(){
   const cur=STAGES.find(s=>s.key===activeStage);
   tabsEl.innerHTML='';
   STAGES.forEach(s=>{
-    const n=s.roadmap?(rmPct()+'%'):PROJECTS.filter(p=>p.stage===s.filter).length;
+    const n=s.roadmap?(rmPct()+'%'):PROJECTS.filter(p=>p.stage===s.filter&&!(s.filter==='queued'&&['levy','data','quality'].indexOf(p.cat)>=0)).length;
     const b=document.createElement('button');
     b.className='tab '+s.key+(s.key===activeStage?' on':'');
     b.innerHTML=s.label+' <span class="ct">'+n+'</span>';
@@ -262,7 +262,7 @@ function render(){
   if(cur.roadmap){gridEl.style.display='block';renderRoadmap();return;}
   if(cur.detail){gridEl.style.display='block';renderCurrent();return;}
   gridEl.style.display='grid';
-  let items=PROJECTS.filter(p=>p.stage===cur.filter).slice().sort((a,b)=>(a.cat==='parked')-(b.cat==='parked'));
+  let items=PROJECTS.filter(p=>p.stage===cur.filter&&!(cur.filter==='queued'&&['levy','data','quality'].indexOf(p.cat)>=0)).slice().sort((a,b)=>(a.cat==='parked')-(b.cat==='parked'));
   gridEl.innerHTML=''; let parkedShown=false;
   items.forEach(p=>{
     if(p.cat==='parked'&&!parkedShown){parkedShown=true;const d=document.createElement('div');d.className='divider';d.textContent='⏸ PARKED — deferred, backend / business-dependent';gridEl.appendChild(d);}
@@ -301,16 +301,16 @@ const RM_KEY='ac_roadmap_v1', RM_DEADLINE=new Date('2026-08-23T23:59:59'), RM_PL
 const ROADMAP=[
   {wk:'Week 1',dt:'to 18 Jul',ph:'Lock & prove',ttl:'Lock the plan, start the proof',items:[
     {t:'Source gov.uk worked examples',gate:1},{t:'Golden-case harness (start)'},{t:'Engine / UI separation (start)'},{t:'Design direction + tokens'},{t:'Business model locked (employer-paid)'}]},
-  {wk:'Week 2',dt:'to 25 Jul',ph:'Correctness',ttl:'Provably correct',items:[
-    {t:'Golden-case suite — to the penny'},{t:'Engine / UI split done'},{t:'Cost-per-learner ROI (slices 2–3)'}]},
-  {wk:'Week 3',dt:'to 1 Aug',ph:'Expertise',ttl:'The expert, encoded',items:[
-    {t:'Recommendation / best-moves + optimiser'},{t:'Guided answer-first mode (v1)'},{t:'Confidence + escalation flags'}]},
-  {wk:'Week 4',dt:'to 8 Aug',ph:'Design & complete',ttl:'Make it look undisputable',items:[
-    {t:'Full visual pass + report polish'},{t:'2026 change navigator'},{t:'Lifecycle quick-wins',soft:1}]},
-  {wk:'Week 5',dt:'to 15 Aug',ph:'Harden',ttl:'Public-sector-grade & solid',items:[
-    {t:'WCAG 2.2 AA'},{t:'Bundled fonts / offline'},{t:'Cross-browser QA'},{t:'Stress-test · lite version',soft:1}]},
+  {wk:'Week 2',dt:'to 25 Jul',ph:'Correctness & data',ttl:'Provably correct',items:[
+    {t:'Golden-case suite — to the penny'},{t:'Engine / UI split done'},{t:'Cost-per-learner ROI (slices 2–3)'},{t:'Strengthened matcher (synonyms / weighting / stemming)'},{t:'Expand to all ~401 fundable standards'}]},
+  {wk:'Week 3',dt:'to 1 Aug',ph:'Decision engine',ttl:'The expert, encoded',items:[
+    {t:'Recommendation / best-moves + optimiser'},{t:'Programme-stage read-out (utilisation → 3 bands)'},{t:'What-if comparison (defer / spread / unit / full)'},{t:'Compare / snapshot + safety (over time)'},{t:'Suggest standards from a JD'}]},
+  {wk:'Week 4',dt:'to 8 Aug',ph:'Guidance & completeness',ttl:'Novice-drivable, complete on funding',items:[
+    {t:'Guided answer-first mode (v1)'},{t:'Confidence + escalate-to-consultant flags'},{t:'Lifecycle completeness — waivers · £1k incentives · transfers-in · group levy'},{t:'Policy writer'},{t:'Optimise funding copilot'},{t:'Talent mapping (thin bridge)'}]},
+  {wk:'Week 5',dt:'to 15 Aug',ph:'Design & harden',ttl:'Undisputable to look at, solid under the hood',items:[
+    {t:'Full visual design pass + report polish'},{t:'2026 change navigator'},{t:'WCAG 2.2 AA'},{t:'Bundled fonts / true offline'},{t:'Stress-test / sensitivity (downside)'},{t:'RSS auto-refresh routine',soft:1},{t:'Mobile / responsive build',soft:1}]},
   {wk:'Week 6',dt:'to 22 Aug',ph:'Prove & ship',ttl:'The real acceptance gate',items:[
-    {t:'Non-expert acceptance test',gate:1},{t:'Close stuck-points'},{t:'Final QA + go-live verify'}]},
+    {t:'Non-expert acceptance test',gate:1},{t:'Close stuck-points'},{t:'Cross-browser + final QA'},{t:'Go-live verification'}]},
 ];
 let rmDone={}; try{rmDone=JSON.parse(localStorage.getItem(RM_KEY)||'{}');}catch(e){rmDone={};}
 function rmK(wi,ii){return wi+'-'+ii;}
@@ -331,11 +331,11 @@ function renderRoadmap(){
     '<div class="rm-deadchip">'+rmDays()+' days to 23 Aug</div></div>';
   // Anchor: the run to 23 Aug builds ON the levy app's verified-complete elements — pulled live from the tracker.
   var found=PROJECTS.filter(p=>p.stage==='complete'&&['levy','data','quality'].indexOf(p.cat)>=0);
-  var built=found.length, fchips=found.map(function(p){return '<span class="rm-fchip">'+esc(p.t)+'</span>';}).join('');
+  var built=found.length, fitems=found.map(function(p){return '<div class="rm-it on ver"><span class="bx">✓</span><span class="lbl">'+esc(p.t)+'</span></div>';}).join('');
   h+='<div class="rm-wk done"><div class="rm-when"><div class="wk" style="color:var(--teal)">Foundation</div><div class="dt">already live</div><span class="ph" style="color:var(--teal);border-color:rgba(45,212,178,.4)">Shipped</span></div><div>'+
     '<div class="rm-ttl">The levy engine is built &amp; live <span class="rm-vdate">✓ '+built+' elements shipped</span></div>'+
-    '<div class="rm-wp" style="margin-bottom:10px">Verified-complete on this tracker — the base the 23 Aug run extends, not replaces:</div>'+
-    '<div class="rm-fchips">'+fchips+'</div>'+
+    '<div class="rm-wp" style="margin-bottom:8px">Verified-complete on this tracker — the base the 23 Aug run extends, not replaces:</div>'+
+    fitems+
     '</div></div>';
   ROADMAP.forEach(function(w,wi){
     var done=rmWeekDone(wi),cur=(wi===curW);
