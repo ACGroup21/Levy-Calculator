@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02k</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1915,6 +1915,8 @@ function levyReportData(){
     subjectNames:subjectNames,subjectCount:subjectNames.length,maxLevel:maxLevel,util:util,stage:stage,yearUtil:yearUtil,
     otjCost:otjCost,otjHrsWk:otjHrsWk,otjFTE:otjFTE,trueCost:planCost+otjCost,payRate:payRate};
 }
+// The projection assembly is the engine's orchestration layer (gathers state → calls the pure sims). Exposed on the engine namespace; the golden suite runs it end-to-end over a controlled scenario.
+LevyEngine.projection=levyReportData;
 function levyRag(d){
   if(d.coInvest<1) return {label:'Comfortably Covered',col:'#2DD4B2'};
   if(d.coInvest < d.planCost*0.10) return {label:'Manageable Co-investment',col:'#E0A43B'};
@@ -3290,7 +3292,18 @@ document.addEventListener('keydown',e=>{
   var E=LevyEngine; // test the ACTUAL engine core, not re-implementations
   var mkB=RULEBOOK.boundaryMk-24, mkF=RULEBOOK.boundaryMk;             // a month before / on the Aug-2026 boundary
   var pad=function(a,n){var r=a.slice();while(r.length<n)r.push(0);return r;}; // pad an array with zeros to length n
-  // [group, case, engine result, gov.uk expected, source key]
+  // Full-assembly test: run the real levyReportData over a hand-computable scenario — 1 appr, £12k band, £1k/mo income, 12-mo horizon aligned to this month. Sets+restores globals; dates anchored to `today` so pmk lines up.
+  var assemblyD=function(){
+    var _p=programmes,_l=levyData,_y=projYears;
+    try{
+      var start=new Date(today.getFullYear(),today.getMonth(),15).toISOString().slice(0,10); // day 15 = timezone-safe (won't cross a month boundary)
+      var epa=new Date(today.getFullYear(),today.getMonth()+12,15).toISOString().slice(0,10);
+      programmes=[{name:'L3 Assembly test',cost:12000,count:1,start:start,epa:epa}];
+      levyData={monthlyAvg:1000,balance:0,byMonth:[]}; projYears=1;
+      return LevyEngine.projection();
+    } finally { programmes=_p; levyData=_l; projYears=_y; }
+  };
+  // [group, case, engine result (number or lazy fn), gov.uk/derived expected, source key]
   var CASES=[
     ['Levy calculation','Pay bill £5,000,000 → annual levy',E.levyFromPayBill(5000000),10000,'levy'],
     ['Levy calculation','Pay bill £3,600,000 → annual levy (HMRC Ex.2, M12)',E.levyFromPayBill(3600000),3000,'levy'],
@@ -3314,13 +3327,19 @@ document.addEventListener('keydown',e=>{
     ['Projection · co-investment sim','Bal £0 · income £600+£600 · £1,000 draw month 1 → £20 (5%)',E.simCoInvest([600,600],[1000,0],mkB,null,0).total,20,'fund'],
     ['Projection · co-investment sim','Bal £0 · £1,000 draw · £0 income · from Aug ’26 → 25%',E.simCoInvest([0],[1000],mkF,null,0).total,250,'fund'],
     ['Projection · FIFO expiry','£1,000 declared, undrawn, 30-mo horizon (24-mo rule) → expires',E.simulateLevyFIFO(pad([1000],30),pad([],30),mkB,30,[]).total,1000,'levy'],
-    ['Projection · FIFO expiry','£1,000 declared & fully drawn same month → nil expires',E.simulateLevyFIFO(pad([1000],30),pad([1000],30),mkB,30,[]).total,0,'levy']
+    ['Projection · FIFO expiry','£1,000 declared & fully drawn same month → nil expires',E.simulateLevyFIFO(pad([1000],30),pad([1000],30),mkB,30,[]).total,0,'levy'],
+    ['Projection · unit co-investment','£1,000 unit draw, empty pot → 5% unit co-invest',E.simCoInvest([0],[0],mkB,[1000],0).total,50,'fund'],
+    ['Projection · unit co-investment','£1,000 unit covered by £1,000 income → nil',E.simCoInvest([1000],[0],mkB,[1000],0).total,0,'fund'],
+    ['Projection · full assembly','1 appr £12k band · £1k/mo income · 12-mo → total plan cost',function(){return assemblyD().planCost;},12000,'fund'],
+    ['Projection · full assembly','… → co-investment (income covers the 80% draw)',function(){return assemblyD().coInvest;},0,'fund'],
+    ['Projection · full assembly','… → end balance (12 × £200 monthly surplus)',function(){return assemblyD().endBal;},2400,'fund']
   ];
   function fmt(v){var r=Math.round(v*100)/100;return '£'+r.toLocaleString('en-GB',{minimumFractionDigits:(r%1?2:0),maximumFractionDigits:2});}
   window.runGoldenCases=function(){
     var pass=0,rows='',grp='';
     CASES.forEach(function(c){
-      var got=c[2],exp=c[3],ok=Math.abs(got-exp)<0.005;if(ok)pass++;
+      var got; try{got=(typeof c[2]==='function')?c[2]():c[2];}catch(err){got=NaN;} // lazy cases compute at open (e.g. the assembly test sets+restores globals)
+      var exp=c[3],ok=Math.abs(got-exp)<0.005;if(ok)pass++;
       if(c[0]!==grp){grp=c[0];rows+='<tr><td colspan="4" style="padding:11px 8px 3px;color:#8fb8cc;font-weight:600;font-size:12px">'+grp+'</td></tr>';}
       rows+='<tr style="border-top:1px solid rgba(255,255,255,0.06)">'+
         '<td style="padding:6px 8px;font-size:12.5px">'+c[1]+' <a href="'+SRC[c[4]]+'" target="_blank" rel="noopener" style="color:#39A0D4;font-size:10px">gov.uk</a></td>'+
