@@ -759,7 +759,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-02i</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1174,6 +1174,22 @@ const RULEBOOK={
   ambitionMargin:{keepPace:0,aboveAverage:0.10,sectorLeading:0.20}, // added to the benchmark by ambition; target capped at 90%
   unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
 };
+// ===== LevyEngine — the pure, DOM-free calculation core (engine/UI separation, started 2026-07-12). Single source of truth for the funding maths; the UI routes through it and the golden-case suite tests it directly. =====
+const LevyEngine=(function(){
+  var R=RULEBOOK;
+  return {
+    levyFromPayBill:function(pb){return Math.max(0,(+pb||0)*R.levyRate-R.levyAllowance);},   // annual declared levy (0.5% − £15k)
+    payBillFromLevy:function(l){return ((+l||0)+R.levyAllowance)/R.levyRate;},                // reverse
+    topUp:function(levy){return (+levy||0)*R.topUpRate;},                                     // 10% government top-up
+    accountCredit:function(levy){return (+levy||0)*(1+R.topUpRate);},                         // levy + top-up into the account
+    coInvestShare:function(uncovered,fromBoundary){return (+uncovered||0)*(fromBoundary?R.coInvest.from:R.coInvest.before);}, // 5%→25%
+    bandTraining:function(band){return (+band||0)*R.draw.training;},                          // 80% over the practical period
+    bandEpa:function(band){return (+band||0)*R.draw.epa;},                                    // 20% at EPA
+    nonLevyEmployerShare:function(band){return (+band||0)*R.coInvest.before;},                // non-levy employer 5%
+    nonLevyGovShare:function(band){return (+band||0)*(1-R.coInvest.before);},                 // non-levy government 95%
+    niReliefPerYear:function(salary){return Math.max(0,R.ni.empRate*(Math.min(+salary||0,R.ni.aust)-R.ni.secThreshold));} // under-25 employer NIC relief
+  };
+})();
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
 let programmes=[];let projChart=null;let projYears=3;
 
@@ -1341,7 +1357,7 @@ function estimateLevyFromPayroll(){
   var gv=function(id){return parseFloat((document.getElementById(id).value||'').toString().replace(/[£,\s]/g,''))||0;};
   var pb=gv('est-paybill');
   if(pb<=0){setStatus('Enter your annual pay bill to estimate your levy.','warn');return;}
-  var annualLevy=Math.max(0, pb*RULEBOOK.levyRate - RULEBOOK.levyAllowance);
+  var annualLevy=LevyEngine.levyFromPayBill(pb); // route the UI through the pure engine (byte-identical)
   var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
   var openBal=gv('est-balance');
   var base=mKey(today), byMonth=[];
@@ -1362,7 +1378,7 @@ function estimateLevyFromContributions(){
   if(lv<=0){setStatus('Enter your declared levy to work back to your pay bill.','warn');return;}
   var annualLevy=(document.getElementById('rev-period').value==='year')?lv:lv*12;
   // reverse the levy formula: annualLevy = payBill×rate − allowance  →  payBill = (annualLevy + allowance) / rate
-  var pb=(annualLevy+RULEBOOK.levyAllowance)/RULEBOOK.levyRate;
+  var pb=LevyEngine.payBillFromLevy(annualLevy); // route the UI through the pure engine (byte-identical)
   var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
   var openBal=gv('rev-balance');
   var base=mKey(today), byMonth=[];
@@ -3269,28 +3285,26 @@ document.addEventListener('keydown',e=>{
     fund:'https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding',
     ni:'https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2025-to-2026'
   };
-  function levyAnnual(pb){return Math.max(0,pb*R.levyRate-R.levyAllowance);}      // == the engine's levy line
-  function pbFromLevy(l){return (l+R.levyAllowance)/R.levyRate;}                   // == the reverse estimator
-  function niRelief(s){return Math.max(0,R.ni.empRate*(Math.min(s,R.ni.aust)-R.ni.secThreshold));} // == NI relief
+  var E=LevyEngine; // test the ACTUAL engine core, not re-implementations
   // [group, case, engine result, gov.uk expected, source key]
   var CASES=[
-    ['Levy calculation','Pay bill £5,000,000 → annual levy',levyAnnual(5000000),10000,'levy'],
-    ['Levy calculation','Pay bill £3,600,000 → annual levy (HMRC Ex.2, M12)',levyAnnual(3600000),3000,'levy'],
-    ['Levy calculation','£300,000/mo regular → monthly levy (HMRC Ex.2)',levyAnnual(3600000)/12,250,'levy'],
-    ['Levy calculation','Pay bill £3,000,000 (threshold) → nil',levyAnnual(3000000),0,'levy'],
-    ['Levy calculation','Pay bill £2,000,000 (non-levy) → nil',levyAnnual(2000000),0,'levy'],
-    ['Reverse: levy → pay bill','Declared £10,000/yr → pay bill',pbFromLevy(10000),5000000,'levy'],
-    ['Reverse: levy → pay bill','Declared £3,000/yr → pay bill',pbFromLevy(3000),3600000,'levy'],
-    ['Government top-up (10%)','Levy £10,000 → account credit',10000+10000*R.topUpRate,11000,'levy'],
-    ['Government top-up (10%)','Levy £250/mo → with top-up',250+250*R.topUpRate,275,'levy'],
-    ['Co-investment (levy short)','Uncovered £1,000 before Aug 2026 (5%)',1000*R.coInvest.before,50,'fund'],
-    ['Co-investment (levy short)','Uncovered £1,000 from Aug 2026 (25%)',1000*R.coInvest.from,250,'fund'],
-    ['Funding-band drawdown','Band £9,000 → 80% training',9000*R.draw.training,7200,'fund'],
-    ['Funding-band drawdown','Band £9,000 → 20% EPA',9000*R.draw.epa,1800,'fund'],
-    ['Non-levy co-investment','Band £9,000, aged 22+ → employer 5%',9000*R.coInvest.before,450,'fund'],
-    ['Non-levy co-investment','Band £9,000, aged 22+ → government 95%',9000*(1-R.coInvest.before),8550,'fund'],
-    ['Employer NI relief (under-25)','Salary £22,000 → annual relief',niRelief(22000),2550,'ni'],
-    ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',niRelief(60000),6790.5,'ni']
+    ['Levy calculation','Pay bill £5,000,000 → annual levy',E.levyFromPayBill(5000000),10000,'levy'],
+    ['Levy calculation','Pay bill £3,600,000 → annual levy (HMRC Ex.2, M12)',E.levyFromPayBill(3600000),3000,'levy'],
+    ['Levy calculation','£300,000/mo regular → monthly levy (HMRC Ex.2)',E.levyFromPayBill(3600000)/12,250,'levy'],
+    ['Levy calculation','Pay bill £3,000,000 (threshold) → nil',E.levyFromPayBill(3000000),0,'levy'],
+    ['Levy calculation','Pay bill £2,000,000 (non-levy) → nil',E.levyFromPayBill(2000000),0,'levy'],
+    ['Reverse: levy → pay bill','Declared £10,000/yr → pay bill',E.payBillFromLevy(10000),5000000,'levy'],
+    ['Reverse: levy → pay bill','Declared £3,000/yr → pay bill',E.payBillFromLevy(3000),3600000,'levy'],
+    ['Government top-up (10%)','Levy £10,000 → account credit',E.accountCredit(10000),11000,'levy'],
+    ['Government top-up (10%)','Levy £250/mo → with top-up',E.accountCredit(250),275,'levy'],
+    ['Co-investment (levy short)','Uncovered £1,000 before Aug 2026 (5%)',E.coInvestShare(1000,false),50,'fund'],
+    ['Co-investment (levy short)','Uncovered £1,000 from Aug 2026 (25%)',E.coInvestShare(1000,true),250,'fund'],
+    ['Funding-band drawdown','Band £9,000 → 80% training',E.bandTraining(9000),7200,'fund'],
+    ['Funding-band drawdown','Band £9,000 → 20% EPA',E.bandEpa(9000),1800,'fund'],
+    ['Non-levy co-investment','Band £9,000, aged 22+ → employer 5%',E.nonLevyEmployerShare(9000),450,'fund'],
+    ['Non-levy co-investment','Band £9,000, aged 22+ → government 95%',E.nonLevyGovShare(9000),8550,'fund'],
+    ['Employer NI relief (under-25)','Salary £22,000 → annual relief',E.niReliefPerYear(22000),2550,'ni'],
+    ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',E.niReliefPerYear(60000),6790.5,'ni']
   ];
   function fmt(v){var r=Math.round(v*100)/100;return '£'+r.toLocaleString('en-GB',{minimumFractionDigits:(r%1?2:0),maximumFractionDigits:2});}
   window.runGoldenCases=function(){
@@ -3307,7 +3321,7 @@ document.addEventListener('keydown',e=>{
     var allPass=pass===CASES.length;
     return '<div style="font-weight:700;font-size:14px;margin-bottom:4px;color:'+(allPass?'#2DD4B2':'#ff6b81')+'">'+
       (allPass?'✓ ':'✗ ')+pass+' / '+CASES.length+' golden cases pass'+(allPass?' — reproduces gov.uk to the penny':' — DISCREPANCY, investigate')+'</div>'+
-      '<div style="font-size:11px;color:#5d7e93;margin-bottom:12px;line-height:1.5">Validates the governed RULEBOOK constants + documented formulas against published gov.uk worked examples. Deeper function-level tests follow the engine/UI split. Rules '+R.version+'.</div>'+
+      '<div style="font-size:11px;color:#5d7e93;margin-bottom:12px;line-height:1.5">Runs the actual <strong>LevyEngine</strong> core (the DOM-free calculation module the UI itself uses) against published gov.uk worked examples — function-level, to the penny. Rules '+R.version+'.</div>'+
       '<table style="width:100%;border-collapse:collapse"><thead><tr style="color:#5d7e93;font-size:10px;text-transform:uppercase;letter-spacing:.08em"><th style="text-align:left;padding:0 8px">Case</th><th style="text-align:right;padding:0 8px">Engine</th><th style="text-align:right;padding:0 8px">gov.uk</th><th style="padding:0 8px">Result</th></tr></thead><tbody>'+rows+'</tbody></table>';
   };
   document.addEventListener('keydown',function(e){
