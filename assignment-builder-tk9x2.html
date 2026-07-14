@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Assignment Builder — Build Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<style>
+  :root{
+    --bg:#070f1c; --bg2:#0c1726; --panel:rgba(255,255,255,0.025); --panelb:rgba(255,255,255,0.08);
+    --text:#e9f3fa; --text2:#8fb8cc; --text3:#5d7e93;
+    --teal:#2DD4B2; --gold:#E0A43B; --purple:#a78bfa; --blue:#39A0D4; --coral:#E8725D;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1200px 700px at 72% -12%,rgba(45,212,178,0.08),transparent),
+    radial-gradient(900px 600px at 10% 110%,rgba(224,164,59,0.05),transparent),var(--bg);
+    color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;
+    padding:34px 22px 70px;min-height:100vh}
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .wrap{max-width:1000px;margin:0 auto;position:relative;z-index:1}
+  .crumb{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.06em;margin-bottom:14px}
+  .crumb a{color:var(--text2);text-decoration:none} .crumb a:hover{color:var(--teal)}
+  h1{font-size:27px;font-weight:600;margin:0 0 5px;letter-spacing:-.01em}
+  .sub{color:var(--text2);font-size:14px;margin-bottom:22px;max-width:680px}
+  .sub b{color:var(--teal);font-weight:600}
+
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+  .stat{background:var(--bg2);border:1px solid var(--panelb);border-radius:12px;padding:11px 15px;min-width:104px}
+  .stat .n{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1.15}
+  .stat .l{font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.03em}
+  .stat.a .n{color:var(--blue)} .stat.b .n{color:var(--teal)} .stat.c .n{color:var(--gold)} .stat.d .n{color:var(--coral)}
+
+  .sect{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--text2);text-transform:uppercase;
+    display:flex;align-items:center;gap:11px;margin:30px 0 14px}
+  .sect::after{content:'';flex:1;height:1px;background:var(--panelb)}
+  .sect .n{color:var(--text3);font-size:10px}
+
+  /* decisions + spec cards */
+  .cards2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+  .dcard{background:var(--panel);border:1px solid var(--panelb);border-radius:13px;padding:14px 15px}
+  .dcard .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
+  .dcard .v{font-size:14px;font-weight:600;margin-bottom:6px;letter-spacing:-.005em}
+  .dcard .v .lock{color:var(--teal);font-size:12px}
+  .dcard .d{font-size:12px;color:var(--text3);line-height:1.5}
+
+  .spec{background:var(--panel);border:1px solid var(--panelb);border-radius:13px;padding:6px 16px}
+  .srow{display:flex;gap:13px;padding:12px 0;border-bottom:1px solid var(--panelb)}
+  .srow:last-child{border-bottom:none}
+  .srow .tag{flex:0 0 84px;font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.04em;padding-top:2px}
+  .srow .tag.a{color:var(--teal)} .srow .tag.b{color:var(--blue)}
+  .srow .body .t{font-size:13.5px;font-weight:600;margin-bottom:3px}
+  .srow .body .d{font-size:12px;color:var(--text3);line-height:1.5}
+
+  /* phase timeline */
+  .tl{position:relative;margin-left:8px;padding-left:26px}
+  .tl::before{content:'';position:absolute;left:5px;top:6px;bottom:24px;width:2px;
+    background:linear-gradient(180deg,var(--blue),var(--panelb) 60%)}
+  .ph{position:relative;margin-bottom:15px}
+  .ph::before{content:'';position:absolute;left:-26px;top:5px;width:12px;height:12px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--text3)}
+  .ph.now::before{border-color:var(--blue);background:var(--blue);box-shadow:0 0 10px var(--blue)}
+  .ph.now{}
+  .pcard{background:var(--panel);border:1px solid var(--panelb);border-radius:13px;padding:14px 16px;transition:border-color .16s}
+  .ph.now .pcard{border-color:rgba(57,160,212,0.35);background:rgba(57,160,212,0.04)}
+  .phead{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .phead .id{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--blue)}
+  .phead .nm{font-size:15px;font-weight:600;letter-spacing:-.005em;flex:1;min-width:120px}
+  .chip{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;border-radius:5px;padding:2px 7px;border:1px solid}
+  .chip.reuse{color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.08)}
+  .chip.new{color:var(--gold);border-color:rgba(224,164,59,0.4);background:rgba(224,164,59,0.08)}
+  .chip.crit{color:var(--coral);border-color:rgba(232,114,93,0.45);background:rgba(232,114,93,0.09)}
+  .chip.here{color:var(--blue);border-color:rgba(57,160,212,0.45);background:rgba(57,160,212,0.1)}
+  .pgoal{font-size:12.5px;color:var(--text2);margin:8px 0 9px;line-height:1.5}
+  .dels{list-style:none;padding:0;margin:0;display:grid;gap:5px}
+  .dels li{font-size:12px;color:var(--text3);padding-left:19px;position:relative;line-height:1.45}
+  .dels li::before{content:'○';position:absolute;left:0;top:0;color:var(--text3);font-size:11px}
+  .dels li.key::before{content:'◉';color:var(--blue)} .dels li.key{color:var(--text2)}
+
+  .rlist{display:grid;gap:9px}
+  .ritem{background:var(--panel);border:1px solid var(--panelb);border-radius:11px;padding:11px 14px;display:flex;gap:12px}
+  .ritem .ic{flex:0 0 auto;font-size:14px;line-height:1.4}
+  .ritem .t{font-size:13px;font-weight:600;margin-bottom:2px}
+  .ritem .d{font-size:12px;color:var(--text3);line-height:1.5}
+
+  .foot{margin-top:34px;background:var(--panel);border:1px solid var(--panelb);border-radius:12px;padding:15px 17px;font-size:12.5px;color:var(--text2)}
+  .foot b{color:var(--text);font-weight:600}
+  .stamp{margin-top:9px;font-family:var(--mono);font-size:11px;color:var(--text3)}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div class="wrap">
+  <div class="crumb"><a href="hub-t7r4x2.html">◂ Build Hub</a> &nbsp;/&nbsp; Internal &nbsp;/&nbsp; Assignment Builder</div>
+  <h1>Assignment Builder — Build Tracker 📝</h1>
+  <div class="sub">The assignment brief machine. Turns a provider's brief into an apprentice's route through it — a <b>step guide</b>, mapped to the <b>right KSBs</b>, with an integrity-safe <b>worked exemplar</b>. Internal-first: coordinator-grade assignment support. <b>Landing on the right KSBs is the tipping point between a pass and a distinction — so it's the whole product.</b></div>
+
+  <div class="stats">
+    <div class="stat a"><div class="n">Discovery</div><div class="l">STATUS · pre-build</div></div>
+    <div class="stat b"><div class="n">6</div><div class="l">PHASES · P0–P5</div></div>
+    <div class="stat c"><div class="n">0%</div><div class="l">DELIVERED</div></div>
+    <div class="stat d"><div class="n">Internal</div><div class="l">AC coordinators first</div></div>
+  </div>
+
+  <div class="sect"><span>Decisions locked</span><span class="n">2 / 2</span></div>
+  <div class="cards2">
+    <div class="dcard">
+      <div class="k">Integrity model <span class="lock">✔ locked</span></div>
+      <div class="v">Scaffold + same-brief worked exemplar</div>
+      <div class="d">Not a submission machine. Protected by the "Important Notice", KSB-tags-removed-before-submission, "Notes:" reflection spaces, and an illustrative scenario that's relatable but <b>not</b> the learner's real one — so copying is self-defeating.</div>
+    </div>
+    <div class="dcard">
+      <div class="k">Buyer / scope <span class="lock">✔ locked</span></div>
+      <div class="v">Internal-only — AC coordinators first</div>
+      <div class="d">Simplest first cut: no external data-sharing, lighter GDPR, fastest to value. Prove it in-house, then widen. P1 can run offline off the existing standards data.</div>
+    </div>
+  </div>
+
+  <div class="sect"><span>Output spec — the "Sarah Petrie" gold artifact</span></div>
+  <div class="spec">
+    <div class="srow"><div class="tag b">Front matter</div><div class="body"><div class="t">Important Notice to Learners</div><div class="d">Illustrative example / guidance tool only · "must not be copied or submitted as your own work" · what the apprentice must produce themselves · "copying = academic misconduct → disqualification" · How to Use + "developmental aid, not a template".</div></div></div>
+    <div class="srow"><div class="tag a">Part A</div><div class="body"><div class="t">Step guide (per section)</div><div class="d">Target words · Purpose · What to Write · <b>KSB Coverage</b> (real codes + text, grouped K/S/B) · To Achieve Pass ✔ · To Aim for Distinction ✔ — ending in a Final Checklist.</div></div></div>
+    <div class="srow"><div class="tag">Part B</div><div class="body"><div class="t">Annotated exemplar</div><div class="d">Full worked essay on the <b>same brief</b>, inline <code>[KSB tags]</code> per paragraph, a "Notes:" space each section, footer: "Remove KSB tags before final submission."</div></div></div>
+  </div>
+
+  <div class="sect"><span>Build phases</span><span class="n">to be scheduled</span></div>
+  <div class="tl">
+
+    <div class="ph now">
+      <div class="pcard">
+        <div class="phead"><span class="id">P0</span><span class="nm">Spec-lock</span><span class="chip here">you are here</span><span class="chip new">fast · no code</span></div>
+        <div class="pgoal">Freeze the 3-part template + integrity notice as canonical; settle the KSB source & coding scheme.</div>
+        <ul class="dels">
+          <li>Codify the Sarah Petrie format as the output contract</li>
+          <li>Lock the "Important Notice" wording</li>
+          <li class="key">Decide KSB codes: official IfATE (K/S/B) vs AC's thematic re-coding</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="pcard">
+        <div class="phead"><span class="id">P1</span><span class="nm">KSB mapping engine</span><span class="chip reuse">reuse · scraper + matcher</span></div>
+        <div class="pgoal"><b>The tipping point.</b> A brief's sections → the <b>right</b> real KSBs, with coverage + gaps. Trust hinge: mappings must be real, never invented.</div>
+        <ul class="dels">
+          <li class="key">Pull real KSBs per delivered standard — start L3 Customer Service Specialist</li>
+          <li>Map brief sections → KSBs (reuse the co-pilot's JD→KSB matcher)</li>
+          <li>Coverage / gap view across the brief</li>
+          <li class="key">Validate against the Sarah Petrie doc as a golden oracle</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="pcard">
+        <div class="phead"><span class="id">P2</span><span class="nm">Step-guide generator (Part A)</span><span class="chip new">new · LLM</span></div>
+        <div class="pgoal">Generate each section's guide — Target / Purpose / What to Write / KSB Coverage / Pass / Distinction — constrained to P1's real KSBs. Plus the final checklist.</div>
+        <ul class="dels">
+          <li>Per-section guide generation bound to mapped KSBs</li>
+          <li>Pass vs Distinction criteria per section</li>
+          <li>Final learner checklist</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="pcard">
+        <div class="phead"><span class="id">P3</span><span class="nm">Annotated exemplar generator (Part B)</span><span class="chip new">new · LLM</span><span class="chip crit">integrity-critical</span></div>
+        <div class="pgoal">Full worked exemplar on the same brief, with the guardrails baked in from line one.</div>
+        <ul class="dels">
+          <li class="key">Illustrative-scenario engine — relatable but not copyable</li>
+          <li>Inline [KSB tagging] per paragraph + "Notes:" spaces</li>
+          <li>Integrity front-matter + tag-removal footer</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="pcard">
+        <div class="phead"><span class="id">P4</span><span class="nm">Assembly + export + AC brand</span><span class="chip new">new</span></div>
+        <div class="pgoal">Combine into the branded document; export; wrap the coordinator workflow around it.</div>
+        <ul class="dels">
+          <li>Cover + Notice + Part A + Part B assembly</li>
+          <li>PDF / Word export</li>
+          <li>Workflow: paste brief → pick standard → generate → edit → export</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="ph">
+      <div class="pcard">
+        <div class="phead"><span class="id">P5</span><span class="nm">Portfolio KSB tracking → Landmark</span><span class="chip reuse">reuse · tracker</span></div>
+        <div class="pgoal">Track which KSBs a learner has evidenced across assignments; feed the Landmark tracker's coverage view.</div>
+        <ul class="dels">
+          <li>KSBs-evidenced ledger per learner</li>
+          <li>Link into the Landmark apprentice tracker</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sect"><span>Reuse from the levy calculator</span></div>
+  <div class="rlist">
+    <div class="ritem"><span class="ic">🧩</span><div><div class="t">KSB data model</div><div class="d"><code>ksbs:{knowledge, skills, behaviours}</code> per standard — already in the calc.</div></div></div>
+    <div class="ritem"><span class="ic">🛰️</span><div><div class="t">IfATE standards scraper</div><div class="d">Produces the KSB JSON the calc ingests. P1 extends this to cover AC's delivered standards.</div></div></div>
+    <div class="ritem"><span class="ic">🎯</span><div><div class="t">JD → KSB matcher (the co-pilot)</div><div class="d">The Assignment Builder is its sibling — same matcher, pointed at a brief instead of a JD.</div></div></div>
+  </div>
+
+  <div class="sect"><span>Dependencies &amp; risks</span></div>
+  <div class="rlist">
+    <div class="ritem"><span class="ic">⚠️</span><div><div class="t">KSB coverage is scraper-dependent</div><div class="d">Only standards that were scraped carry KSBs — ensure the delivered ones are in before mapping.</div></div></div>
+    <div class="ritem"><span class="ic">🔖</span><div><div class="t">Official codes vs AC re-coding</div><div class="d">The gold doc uses AC's scheme (Kn-CSEA1, Sk-SI1). Anchor to official IfATE codes for trust; treat AC's grouping as a presentation layer.</div></div></div>
+    <div class="ritem"><span class="ic">📋</span><div><div class="t">Copy risk on the exemplar</div><div class="d">Hold the tension: relatable enough to teach, distinct enough to be uncopyable.</div></div></div>
+    <div class="ritem"><span class="ic">🔐</span><div><div class="t">Architecture / data</div><div class="d">Needs an LLM (Claude API). Internal-first keeps hosting/GDPR light, but real learner scenarios are personal data — handle with care even in-house.</div></div></div>
+  </div>
+
+  <div class="foot">
+    <b>Where this sits:</b> Internal AC product, sibling to the tracker — an efficiency engine so a £200/day coordinator delivers the assignment support a £450/day tutor would. Discovery stage; P0 done in spirit (decisions + spec locked), scheduling P1 next.
+    <div class="stamp" id="stamp">Created 13 Jul 2026 · Assignment Builder</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var c=document.getElementById('bg'),x=c.getContext('2d');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var w,h,dpr,pts;
+  function size(){
+    dpr=Math.min(window.devicePixelRatio||1,2);
+    w=c.width=innerWidth*dpr; h=c.height=innerHeight*dpr;
+    c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px';
+    var n=Math.min(64,Math.round(innerWidth*innerHeight/24000)); pts=[];
+    for(var i=0;i<n;i++){pts.push({x:rand(0,w),y:rand(0,h),vx:rand(-0.11,0.11)*dpr,vy:rand(-0.11,0.11)*dpr,r:rand(0.6,1.8)*dpr,gold:Math.random()<0.13});}
+  }
+  function rand(a,b){return a+(b-a)*Math.random();}
+  function frame(){
+    x.clearRect(0,0,w,h); var link=140*dpr;
+    for(var i=0;i<pts.length;i++){var p=pts[i];
+      if(!reduce){p.x+=p.vx;p.y+=p.vy; if(p.x<0)p.x+=w; if(p.x>w)p.x-=w; if(p.y<0)p.y+=h; if(p.y>h)p.y-=h;}
+      for(var j=i+1;j<pts.length;j++){var q=pts[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<link){var a=(1-d/link)*0.13; x.strokeStyle='rgba(57,160,212,'+a+')'; x.lineWidth=dpr*0.6;
+          x.beginPath(); x.moveTo(p.x,p.y); x.lineTo(q.x,q.y); x.stroke();}}}
+    for(var k=0;k<pts.length;k++){var pt=pts[k]; x.beginPath(); x.arc(pt.x,pt.y,pt.r,0,6.2832);
+      x.fillStyle=pt.gold?'rgba(224,164,59,0.5)':'rgba(45,212,178,0.5)'; x.fill();}
+    if(!reduce) requestAnimationFrame(frame);
+  }
+  size(); frame();
+  var t; addEventListener('resize',function(){clearTimeout(t); t=setTimeout(function(){size(); if(reduce) frame();},160);});
+})();
+</script>
+</body>
+</html>
