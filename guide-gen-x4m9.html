@@ -80,12 +80,29 @@
   .foot{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:center}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14233a;border:1px solid var(--teal);color:var(--ink);font-size:12.5px;padding:9px 15px;border-radius:9px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
   .toast.on{opacity:1}
+  /* AI improve + settings */
+  .aibtn{margin-left:8px;font-family:var(--sans);font-size:11px;color:#bff3e6;background:rgba(45,212,178,.12);border:1px solid rgba(45,212,178,.4);border-radius:7px;padding:3px 9px;cursor:pointer;flex:0 0 auto;transition:border-color .15s}
+  .aibtn:hover{border-color:var(--teal)} .aibtn:disabled{opacity:.5;cursor:default}
+  .aibtn.busy{color:var(--gold);border-color:rgba(224,164,59,.5);background:rgba(224,164,59,.1)}
+  #improveall:disabled{opacity:.55;cursor:default}
+  .modal{position:fixed;inset:0;background:rgba(4,10,20,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+  .modal[hidden]{display:none}
+  .modal-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:20px 22px;max-width:470px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .modal-card .mh{font-size:16px;font-weight:700;margin-bottom:8px}
+  .modal-card .mp{font-size:12.5px;color:var(--ink2);line-height:1.55;margin:0 0 14px}
+  .modal-card .mp b{color:var(--ink)} .modal-card .mp a{color:var(--teal)}
+  .klabel{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:5px}
+  .keyin{width:100%;background:var(--field);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--mono);font-size:13px;padding:10px 12px}
+  .keyin:focus{outline:2px solid var(--teal);outline-offset:1px}
+  .mstatus{font-size:11.5px;margin:9px 2px 0;min-height:16px} .mstatus.ok{color:var(--ok)} .mstatus.err{color:var(--gap)}
+  .mbtns{display:flex;gap:9px;align-items:center;margin-top:16px}
+  .mnote{font-size:11px;color:var(--ink3);margin:13px 0 0;line-height:1.5}
 
   /* PRINT — clean white learner document */
   @media print{
     @page{margin:18mm}
     body{background:#fff;color:#111;padding:0;font-family:var(--serif)}
-    .crumb,.ttl,.lede,.controls,.foot,.sh .tgt .hint,.lbl .badge{display:none!important}
+    .crumb,.ttl,.lede,.controls,.foot,.aibtn,.modal,.lbl .badge{display:none!important}
     .doc{background:#fff;border:none;border-radius:0;padding:0}
     .notice{background:#fff;border:1px solid #999;border-left:3px solid #333;color:#111;break-inside:avoid}
     .notice h2,.notice b{color:#111} .notice p{color:#222}
@@ -112,6 +129,8 @@
   <div class="controls">
     <span class="src" id="src"></span>
     <span class="grow"></span>
+    <button id="settings-btn">⚙ Settings</button>
+    <button id="improveall" disabled>✨ Improve all with AI</button>
     <button id="regen" title="Re-draft Purpose / Pass / Distinction from the mapping (overwrites edits)">↻ Regenerate drafts</button>
     <button class="btn-p" id="print">🖨 Print / Save PDF</button>
   </div>
@@ -121,6 +140,23 @@
   <div class="foot">Arthur Curtis · Assignment Builder · Step 2 step-guide generator · v1</div>
 </div>
 <div class="toast" id="toast"></div>
+
+<div class="modal" id="settings" hidden>
+  <div class="modal-card">
+    <div class="mh">AI improvement — your Anthropic key</div>
+    <p class="mp">Paste your <b>Anthropic API key</b> to enable "✨ Improve". It's stored <b>only in this browser</b> and sent only to api.anthropic.com — never to Arthur Curtis or anyone else. Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
+    <label class="klabel" for="keyin">Anthropic API key</label>
+    <input type="password" id="keyin" class="keyin" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
+    <div class="mstatus" id="mstatus"></div>
+    <div class="mbtns">
+      <button id="keyclear">Remove key</button>
+      <span class="grow"></span>
+      <button id="keycancel">Close</button>
+      <button class="btn-p" id="keysave">Save key</button>
+    </div>
+    <p class="mnote">Model: Opus 4.8 · roughly 30p per full guide, billed to your key. The offline drafts work without a key.</p>
+  </div>
+</div>
 
 <script>
 /* ---------- input: from the Mapper (localStorage) or the baked ST0071 demo ---------- */
@@ -190,14 +226,15 @@ function render(){
     });
     if(!cov)cov='<div class="none">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
     var passHtml=codes.length?'<ul>'+codes.map(function(c){return '<li>'+esc(passLine(INPUT.ksb[c]||c))+'</li>';}).join('')+'</ul>':'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
-    h+='<div class="sec">'+
+    h+='<div class="sec" data-sec="'+i+'">'+
       '<div class="sh"><span class="num">'+(i+1)+'</span><span class="st">'+esc(sec.t)+'</span>'+
-        '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span></div>'+
-      '<div class="fld"><div class="lbl purpose">Purpose <span class="badge">draft — edit</span></div><div class="edit purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'+
+        '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span>'+
+        '<button class="aibtn" data-imp="'+i+'" title="Rewrite Purpose / Pass / Distinction with Opus 4.8">✨ Improve</button></div>'+
+      '<div class="fld"><div class="lbl purpose">Purpose <span class="badge">draft — edit</span></div><div class="edit purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'+
       '<div class="fld"><div class="lbl">What to write <span class="badge">from your Step 1 notes</span></div><div class="edit" contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'+
       '<div class="fld"><div class="lbl">KSB Coverage <span class="badge">verbatim from the standard</span></div><div class="ksbcov">'+cov+'</div></div>'+
-      '<div class="fld"><div class="lbl pass">To achieve a Pass <span class="badge">draft — edit</span></div><div class="edit" contenteditable="true">'+passHtml+'</div></div>'+
-      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" contenteditable="true"><ul>'+DIST.map(function(d){return '<li>'+d+'</li>';}).join('')+'</ul></div></div>'+
+      '<div class="fld"><div class="lbl pass">To achieve a Pass <span class="badge">draft — edit</span></div><div class="edit" data-f="pass" contenteditable="true">'+passHtml+'</div></div>'+
+      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" data-f="dist" contenteditable="true"><ul>'+DIST.map(function(d){return '<li>'+d+'</li>';}).join('')+'</ul></div></div>'+
     '</div>';
   });
   // checklist
@@ -213,7 +250,61 @@ function render(){
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1700);}
 $('regen').onclick=function(){if(confirm('Re-draft Purpose, Pass and Distinction from the mapping? This overwrites your edits to those fields.')){render();toast('Drafts regenerated');}};
 $('print').onclick=function(){window.print();};
+
+/* ---------- AI improvement (Browser BYO-key; direct to Anthropic) ---------- */
+const KEY='ab_anthropic_key';
+function getKey(){try{return localStorage.getItem(KEY)||'';}catch(e){return '';}}
+function hasKey(){return !!getKey();}
+function setMStatus(t,c){var s=$('mstatus');s.className='mstatus '+(c||'');s.textContent=t;}
+function updateAIState(){var on=hasKey();$('improveall').disabled=!on;$('improveall').title=on?'Improve every section with Opus 4.8':'Add your Anthropic key in Settings first';$('settings-btn').textContent=on?'⚙ Settings · key set':'⚙ Settings';}
+function openSettings(msg){$('keyin').value=getKey();setMStatus(msg||'',msg?'err':'');$('settings').hidden=false;$('keyin').focus();}
+$('settings-btn').onclick=function(){openSettings('');};
+$('keycancel').onclick=function(){$('settings').hidden=true;};
+$('settings').onclick=function(e){if(e.target===$('settings'))$('settings').hidden=true;};
+$('keysave').onclick=function(){var k=$('keyin').value.trim();if(!k){setMStatus('Paste a key first.','err');return;}try{localStorage.setItem(KEY,k);}catch(e){}setMStatus('Saved — stored in this browser only.','ok');updateAIState();setTimeout(function(){$('settings').hidden=true;},700);};
+$('keyclear').onclick=function(){try{localStorage.removeItem(KEY);}catch(e){}$('keyin').value='';setMStatus('Key removed.','ok');updateAIState();};
+
+const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','pass','distinction'],additionalProperties:false};
+const SYS="You are an expert end-point assessor and apprenticeship tutor. You write concise, encouraging, plain-English GUIDANCE that helps a Level 3 apprentice evidence their KSBs in a work-based project. RULES: (1) Guidance only — never write the apprentice's actual answer, example content, or a model paragraph; write how THEY should evidence each KSB using their OWN real workplace. (2) Ground every point strictly in the KSBs provided; never invent KSBs. (3) Pass = describe/explain level; Distinction = analyse, evaluate, justify, and weigh consequences / alternatives / long-term impact. (4) Keep it tight and immediately usable.";
+async function callClaude(system,user,schema){
+  var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-8',max_tokens:1500,system:system,messages:[{role:'user',content:user}],output_config:{format:{type:'json_schema',schema:schema}}})});
+  if(res.status===401)throw new Error('API key rejected — check it in Settings.');
+  if(res.status===429)throw new Error('Rate limited by Anthropic — wait a moment and retry.');
+  if(!res.ok){var m='';try{m=(await res.json()).error.message;}catch(e){}throw new Error('Anthropic error '+res.status+(m?': '+m:''));}
+  var data=await res.json();
+  if(data.stop_reason==='refusal')throw new Error('The model declined this request.');
+  var txt=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
+  return JSON.parse(txt);
+}
+function sectionPrompt(i){
+  var sec=INPUT.sections[i];var codes=sec.c||[];
+  var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section: a one-sentence Purpose; a Pass checklist with one short imperative per mapped KSB (describe/explain level); and a Distinction checklist of 2-4 higher-order moves (analyse / evaluate / justify). Return JSON only.';
+}
+function fillSection(i,out){
+  var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
+  var p=sec.querySelector('[data-f="purpose"]');if(p&&out.purpose)p.textContent=out.purpose;
+  var pa=sec.querySelector('[data-f="pass"]');if(pa&&Array.isArray(out.pass))pa.innerHTML='<ul>'+out.pass.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  var d=sec.querySelector('[data-f="dist"]');if(d&&Array.isArray(out.distinction))d.innerHTML='<ul>'+out.distinction.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+}
+async function improveSection(i,btn){
+  if(!hasKey()){openSettings('Add your Anthropic key to use AI improvement.');return false;}
+  if(btn){btn.classList.add('busy');btn.textContent='✨ Improving…';btn.disabled=true;}
+  try{var out=await callClaude(SYS,sectionPrompt(i),IMPROVE_SCHEMA);fillSection(i,out);return true;}
+  catch(e){toast(e.message||'AI request failed');return false;}
+  finally{if(btn){btn.classList.remove('busy');btn.textContent='✨ Improve';btn.disabled=false;}}
+}
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);}});
+$('improveall').onclick=async function(){
+  if(!hasKey()){openSettings('Add your Anthropic key to use AI improvement.');return;}
+  var btns=[].slice.call(document.querySelectorAll('[data-imp]'));var n=INPUT.sections.length;
+  this.disabled=true;
+  for(var i=0;i<n;i++){toast('Improving section '+(i+1)+' / '+n+'…');var ok=await improveSection(i,btns[i]);if(!ok)break;}
+  this.disabled=false;updateAIState();toast('Done — review and edit the AI drafts');
+};
+
 render();
+updateAIState();
 if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
 </script>
 </body>
