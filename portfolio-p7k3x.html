@@ -309,9 +309,10 @@ if(!state.learners.length){
 }
 renderAll();
 
-/* ---------- load the full standard library (fetched) ---------- */
-fetch('ksb-standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(lib){
-  var added=0;Object.keys(lib).forEach(function(c){if(!STANDARDS[c]){STANDARDS[c]=lib[c];added++;}});
+/* ---------- load the canonical AC standards library (single source for every app) ---------- */
+fetch('standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(res){
+  var lib=res.standards||res;var added=0;
+  Object.keys(lib).forEach(function(c){var s=lib[c];var hasK=s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));if(!STANDARDS[c]&&hasK){STANDARDS[c]=s;added++;}});
   if(added){renderAll();}
 }).catch(function(){});
 </script>
