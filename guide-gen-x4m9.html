@@ -63,6 +63,11 @@
   .edit{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink);line-height:1.55}
   .edit:focus{border-color:rgba(45,212,178,.45)}
   .edit ul{margin:2px 0;padding-left:20px} .edit li{margin:3px 0}
+  .crit{display:flex;gap:9px;margin:5px 0;align-items:baseline;line-height:1.5}
+  .cnum{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;padding:1px 6px;border-radius:5px;flex:0 0 auto}
+  .cnum.p{color:#bfe9d8;background:rgba(45,212,178,.14);border:1px solid rgba(45,212,178,.4)}
+  .cnum.d{color:#f0d29a;background:rgba(224,164,59,.14);border:1px solid rgba(224,164,59,.45)}
+  .ctext{flex:1}
   .edit.purpose{color:var(--ink2)}
 
   .ksbcov{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px}
@@ -144,6 +149,7 @@
     .ksbcov{background:#f6f6f4;border:1px solid #ccc}
     .kli{color:#222} .kgrp .gl{color:#333!important}
     .kgrp.K .kc,.kgrp.S .kc,.kgrp.B .kc{color:#111}
+    .crit{break-inside:avoid} .cnum.p{color:#0a6b3f!important;background:#eef7f1;border:1px solid #bcd} .cnum.d{color:#8a5a00!important;background:#fbf3e3;border:1px solid #e5cfa0}
     .checklist h3{color:#111}
     .partb-wrap{border-color:#333} .partb-wrap.empty,.pb-empty{display:none}
     .partb-head .pb-t{color:#111} .partb-head .pb-sub{color:#8a5a00}
@@ -225,26 +231,34 @@ try{var raw=localStorage.getItem('ab_guide_input');if(raw){var p=JSON.parse(raw)
 const GN={K:"Knowledge",S:"Skills",B:"Behaviours"};
 function grp(c){return c[0];}
 function clean(t){return (t||'').replace(/\.$/,'').trim();}
-function passLine(t){
-  t=clean(t);
-  if(/^understand/i.test(t))return t.replace(/^understand\s+/i,'Explain ');
-  if(/^know/i.test(t))return t.replace(/^know\s+/i,'Identify ');
-  return t.charAt(0).toUpperCase()+t.slice(1);
+function lc(s){return s?s.charAt(0).toLowerCase()+s.slice(1):s;}
+function stripLead(t){return clean(t).replace(/^(Understand(ing)?|Knowledge of|Know how to|Know that|Knows?|An? (understanding|awareness) of|Aware of|Able to|Ability to|Can|How to)\s+/i,'').trim();}
+// turn a KSB into an evidence INSTRUCTION (what the apprentice does), not a copy of the KSB text
+function passLine(c,t){
+  var type=(c||'K')[0];
+  var full=clean(t);
+  if(!full)return 'Evidence '+c+' with a specific example from your own work.';
+  var topic=lc(stripLead(full)).split(/;|—|–|\. /)[0].trim();
+  if(type==='S')return 'Show where you applied this in your work — '+topic+' — and what you produced.';
+  if(type==='B')return 'Give a real workplace example that shows this behaviour in practice: "'+full+'".';
+  return 'Explain '+topic+', and evidence your understanding with an example from your own workplace.';
 }
 function draftPurpose(codes,ksb){
   var themes=codes.slice(0,3).map(function(c){return clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].toLowerCase();}).filter(Boolean);
   return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
 }
 const DIST=[
- "Go beyond describing — <b>analyse</b> the impact, including what would happen if this were not addressed.",
- "<b>Evaluate</b> the options or alternatives you considered, and <b>justify</b> the choices you made.",
- "<b>Assess</b> the longer-term or strategic impact, drawing the KSBs above together."
+ "Analyse why this matters — not just what you did, but its impact, and what would have happened if you hadn't acted.",
+ "Evaluate the options or alternatives you weighed up, and justify the decision you made.",
+ "Assess the wider or longer-term impact, drawing the KSBs above together into one clear judgement."
 ];
 function whatToWrite(x){
   var parts=(x||'').split(';').map(function(s){return s.trim();}).filter(Boolean);
   return parts.length?"<ul>"+parts.map(function(p){return "<li>"+esc(p.charAt(0).toUpperCase()+p.slice(1))+"</li>";}).join('')+"</ul>":"<em>Describe what the learner should cover here.</em>";
 }
 function esc(s){return String(s).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
+// P1/P2… (pass) and D1/D2… (distinction) — numbered rows, not bullets
+function critHTML(items,kind){var L=kind==='p'?'P':'D';return items.map(function(x,i){return '<div class="crit"><span class="cnum '+kind+'">'+L+(i+1)+'</span><span class="ctext">'+esc(x)+'</span></div>';}).join('');}
 
 /* ---------- render ---------- */
 const $=function(id){return document.getElementById(id);};
@@ -271,7 +285,7 @@ function render(){
       cov+='<div class="kgrp '+g+'"><div class="gl">'+GN[g]+'</div>'+gc.map(function(c){return '<div class="kli"><span class="kc">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
     });
     if(!cov)cov='<div class="none">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
-    var passHtml=codes.length?'<ul>'+codes.map(function(c){return '<li>'+esc(passLine(INPUT.ksb[c]||c))+'</li>';}).join('')+'</ul>':'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
+    var passHtml=codes.length?critHTML(codes.map(function(c){return passLine(c,INPUT.ksb[c]||'');}),'p'):'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
     h+='<div class="sec" data-sec="'+i+'">'+
       '<div class="sh"><span class="num">'+(i+1)+'</span><span class="st">'+esc(sec.t)+'</span>'+
         '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span>'+
@@ -280,7 +294,7 @@ function render(){
       '<div class="fld"><div class="lbl">What to write <span class="badge">from your Step 1 notes</span></div><div class="edit" contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'+
       '<div class="fld"><div class="lbl">KSB Coverage <span class="badge">verbatim from the standard</span></div><div class="ksbcov">'+cov+'</div></div>'+
       '<div class="fld"><div class="lbl pass">To achieve a Pass <span class="badge">draft — edit</span></div><div class="edit" data-f="pass" contenteditable="true">'+passHtml+'</div></div>'+
-      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" data-f="dist" contenteditable="true"><ul>'+DIST.map(function(d){return '<li>'+d+'</li>';}).join('')+'</ul></div></div>'+
+      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" data-f="dist" contenteditable="true">'+critHTML(DIST,'d')+'</div></div>'+
     '</div>';
   });
   // checklist
@@ -321,6 +335,10 @@ var WORD_CSS=`body{font-family:Georgia,'Times New Roman',serif;color:#111;margin
 .lbl{font-family:Arial,sans-serif;font-size:8.5pt;letter-spacing:1px;text-transform:uppercase;color:#333;margin:8px 0 3px}
 .edit{font-size:10.5pt;margin:0 0 6px}
 .edit ul{margin:2px 0 6px 18px}
+.crit{margin:3px 0}
+.cnum{font-family:Consolas,monospace;font-size:9pt;font-weight:bold;padding:0 4px;margin-right:6px}
+.cnum.p{color:#0a6b3f;background:#eef7f1}
+.cnum.d{color:#8a5a00;background:#fbf3e3}
 .ksbcov{background:#f6f6f4;border:1px solid #ccc;padding:8px 12px}
 .kgrp{margin:4px 0}
 .kgrp .gl{font-family:Arial,sans-serif;font-size:8.5pt;text-transform:uppercase;color:#333}
@@ -401,8 +419,8 @@ function sectionPrompt(i){
 function fillSection(i,out){
   var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
   var p=sec.querySelector('[data-f="purpose"]');if(p&&out.purpose)p.textContent=out.purpose;
-  var pa=sec.querySelector('[data-f="pass"]');if(pa&&Array.isArray(out.pass))pa.innerHTML='<ul>'+out.pass.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
-  var d=sec.querySelector('[data-f="dist"]');if(d&&Array.isArray(out.distinction))d.innerHTML='<ul>'+out.distinction.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
+  var pa=sec.querySelector('[data-f="pass"]');if(pa&&Array.isArray(out.pass))pa.innerHTML=critHTML(out.pass,'p');
+  var d=sec.querySelector('[data-f="dist"]');if(d&&Array.isArray(out.distinction))d.innerHTML=critHTML(out.distinction,'d');
 }
 async function improveSection(i,btn){
   if(btn){btn.classList.add('busy');btn.disabled=true;}
