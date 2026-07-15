@@ -61,6 +61,16 @@
   .sec textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:8px;color:var(--ink2);
     font-family:var(--sans);font-size:12px;padding:8px 10px;resize:vertical;min-height:40px;line-height:1.45}
   .sec textarea::placeholder{color:var(--ink3)}
+  /* collapsible sections */
+  .sec .sh{cursor:pointer}
+  .chev{flex:0 0 auto;width:13px;color:var(--ink3);font-size:11px;transition:transform .15s;user-select:none}
+  .sec.collapsed .chev{transform:rotate(-90deg)}
+  .scount{flex:0 0 auto;font-family:var(--mono);font-size:10px;color:var(--teal);background:rgba(45,212,178,.1);border:1px solid rgba(45,212,178,.3);border-radius:20px;min-width:22px;text-align:center;padding:1px 6px}
+  .ssum{flex:1 1 auto;min-width:0;font-family:var(--mono);font-size:10.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:none}
+  .sec.collapsed .ssum{display:block}
+  .sec.collapsed .tin{flex:0 1 auto;max-width:46%}
+  .sec.collapsed .sbody{display:none}
+  .sec.collapsed .sh{margin-bottom:0}
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
   .chip{font-family:var(--mono);font-size:11px;border-radius:6px;padding:3px 6px 3px 8px;border:1px solid;display:inline-flex;align-items:center;gap:6px;cursor:default}
   .chip .x{cursor:pointer;opacity:.6;font-size:13px;line-height:1}.chip .x:hover{opacity:1}
@@ -131,8 +141,9 @@
     <select id="std"></select>
     <span class="avail" id="avail"></span>
     <span class="grow"></span>
+    <button id="collapse">Collapse all</button>
     <button id="add">+ Add section</button>
-    <button id="reset">Reset to ST0071 demo</button>
+    <button id="reset">Reset demo</button>
     <button class="btn-p" id="export">Export JSON</button>
   </div>
 
@@ -237,7 +248,7 @@ function ksbText(std,c){return STANDARDS[std][grp(c)][c];}
 
 /* ---------- state ---------- */
 let state={std:"ST0071",secs:[]};
-function loadDemo(code){var d=DEMOS[code||state.std]||[];state.secs=d.map((x,i)=>({id:i+1,t:x.t,x:x.x,c:[...(x.c||[])]}));}
+function loadDemo(code){var d=DEMOS[code||state.std]||[];state.secs=d.map((x,i)=>({id:i+1,t:x.t,x:x.x,c:[...(x.c||[])],open:true}));}
 loadDemo('ST0071');
 
 /* ---------- render ---------- */
@@ -253,19 +264,26 @@ function renderSections(){
  $('seccount').textContent=state.secs.length+" sections";
  var html=state.secs.map((s,i)=>{
   const chips=s.c.map(c=>`<span class="chip ${grp(c)}" title="${esc(ksbText(state.std,c))}">${c}<span class="x" data-rm="${i}|${c}">×</span></span>`).join('');
-  return `<div class="sec">
-    <div class="sh"><span class="num">${i+1}</span>
+  const codesum=s.c.length?esc(s.c.join(' · ')):'no KSBs yet';
+  return `<div class="sec ${s.open?'':'collapsed'}">
+    <div class="sh" data-toggle="${i}">
+      <span class="chev" aria-hidden="true">▾</span>
+      <span class="num">${i+1}</span>
       <input class="tin" value="${esc(s.t)}" data-t="${i}" aria-label="Section title">
+      <span class="ssum" title="${codesum}">${codesum}</span>
+      <span class="scount" title="${s.c.length} KSBs evidenced">${s.c.length}</span>
       <button class="del" data-del="${i}" title="Remove section">🗑</button></div>
-    <textarea data-x="${i}" placeholder="What the learner should write here — the more detail, the better the suggestions">${esc(s.x)}</textarea>
-    <div class="chips">${chips||'<span class="mini">no KSBs yet</span>'}</div>
-    <div class="sugwrap" id="sug${i}"></div>
-    <div class="rowbtns">
-      <button data-sug="${i}">✨ Suggest KSBs</button>
-      <button data-pick="${i}">+ Add manually</button>
-      <span class="mini">${s.c.length} evidenced here</span>
+    <div class="sbody">
+      <textarea data-x="${i}" placeholder="What the learner should write here — the more detail, the better the suggestions">${esc(s.x)}</textarea>
+      <div class="chips">${chips||'<span class="mini">no KSBs yet</span>'}</div>
+      <div class="sugwrap" id="sug${i}"></div>
+      <div class="rowbtns">
+        <button data-sug="${i}">✨ Suggest KSBs</button>
+        <button data-pick="${i}">+ Add manually</button>
+        <span class="mini">${s.c.length} evidenced here</span>
+      </div>
+      <div id="pick${i}"></div>
     </div>
-    <div id="pick${i}"></div>
   </div>`;
  }).join('');
  $('sections').innerHTML=html||'<div class="sec" style="color:var(--ink3);font-size:13px;text-align:center">No sections yet for this standard — click <b style="color:var(--ink2)">+ Add section</b> to start mapping a brief.</div>';
@@ -282,6 +300,7 @@ function bindSections(){
  document.querySelectorAll('[data-rm]').forEach(el=>el.onclick=e=>{const[i,c]=e.target.dataset.rm.split('|');state.secs[+i].c=state.secs[+i].c.filter(x=>x!==c);renderSections();});
  document.querySelectorAll('[data-sug]').forEach(el=>el.onclick=e=>{showSug(+e.target.dataset.sug);});
  document.querySelectorAll('[data-pick]').forEach(el=>el.onclick=e=>{showPick(+e.target.dataset.pick);});
+ document.querySelectorAll('[data-toggle]').forEach(el=>el.onclick=e=>{if(e.target.closest('input,button,textarea'))return;var i=+el.dataset.toggle;state.secs[i].open=!state.secs[i].open;el.closest('.sec').classList.toggle('collapsed',!state.secs[i].open);});
 }
 function showSug(i){
  const s=state.secs[i];const have=new Set(s.c);const props=suggest(state.std,s.t+" "+s.x,have);
@@ -326,7 +345,8 @@ function renderMatrix(){
 
 /* ---------- actions ---------- */
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800);}
-$('add').onclick=()=>{state.secs.push({id:state.secs.length+1,t:"New section",x:"",c:[]});renderSections();window.scrollTo(0,document.body.scrollHeight);};
+$('add').onclick=()=>{state.secs.push({id:state.secs.length+1,t:"New section",x:"",c:[],open:true});renderSections();window.scrollTo(0,document.body.scrollHeight);};
+$('collapse').onclick=()=>{var anyOpen=state.secs.some(s=>s.open);state.secs.forEach(s=>s.open=!anyOpen);$('collapse').textContent=anyOpen?'Expand all':'Collapse all';renderSections();};
 $('reset').onclick=()=>{loadDemo(state.std);renderSections();toast("Reset to demo sections");};
 $('std').onchange=e=>{state.std=e.target.value;loadDemo(state.std);fillStd();renderSections();toast("Switched to "+STANDARDS[state.std].name);};
 $('export').onclick=()=>{
