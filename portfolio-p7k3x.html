@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Portfolio KSB Tracker — Assignment Builder</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+<style>
+  :root{
+    --bg:#0a1220;--panel:#101c30;--panel2:#0c1626;--raise:#14233a;--field:#0d1829;
+    --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.045);
+    --ink:#e9f1f8;--ink2:#94aabe;--ink3:#647d92;
+    --teal:#2DD4B2;--blue:#7cc4e8;--purp:#c8a6f0;--gold:#e0a43b;--ok:#4ac48c;--gap:#e8725d;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(1100px 600px at 84% -10%,rgba(45,212,178,.06),transparent),radial-gradient(760px 500px at 4% 108%,rgba(200,166,240,.05),transparent),var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:26px 20px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto}
+  a{color:var(--teal)}
+  .crumb{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.05em;margin-bottom:12px}
+  .crumb a{color:var(--ink2);text-decoration:none}
+  .ttl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:23px;font-weight:700;letter-spacing:-.015em;margin:0}
+  .tagv{font-family:var(--mono);font-size:10.5px;color:var(--gold);border:1px solid rgba(224,164,59,.4);border-radius:5px;padding:2px 7px}
+  .lede{font-size:13.5px;color:var(--ink2);margin:7px 0 0;max-width:78ch}
+
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 20px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .toolbar label{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+  select,button,input[type=text],textarea{font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 11px}
+  select{cursor:pointer} button{cursor:pointer;transition:border-color .15s,background .15s} button:hover{border-color:var(--teal)}
+  button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .btn-p{background:rgba(45,212,178,.12);border-color:rgba(45,212,178,.4);color:#bff3e6}
+  .grow{flex:1} .avail{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .links{display:flex;gap:8px} .links a{font-family:var(--mono);font-size:11px;color:var(--ink2);text-decoration:none;border:1px solid var(--line);border-radius:7px;padding:5px 9px} .links a:hover{border-color:var(--teal);color:var(--teal)}
+
+  .cols{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+  .colh{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink2);display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+  .colh .c{font-family:var(--mono);color:var(--ink3);font-size:10px}
+  .colh::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  /* assignments */
+  .asg{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin-bottom:11px}
+  .asg .ah{display:flex;align-items:center;gap:10px}
+  .asg .an{flex:1;font-weight:600;font-size:14px;min-width:0}
+  .asg .ac{font-family:var(--mono);font-size:10.5px;color:var(--teal);background:rgba(45,212,178,.1);border:1px solid rgba(45,212,178,.3);border-radius:20px;padding:1px 8px}
+  .asg .del{color:var(--ink3);background:none;border:none;font-size:15px;padding:2px 6px;border-radius:6px} .asg .del:hover{color:var(--gap)}
+  .asg .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+  .chip{font-family:var(--mono);font-size:10.5px;border-radius:6px;padding:2px 6px;border:1px solid}
+  .chip.K{color:var(--teal);border-color:rgba(45,212,178,.4);background:rgba(45,212,178,.08)}
+  .chip.S{color:var(--blue);border-color:rgba(124,196,232,.4);background:rgba(124,196,232,.08)}
+  .chip.B{color:var(--purp);border-color:rgba(200,166,240,.4);background:rgba(200,166,240,.08)}
+  .empty{font-size:12.5px;color:var(--ink3);background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;line-height:1.55}
+
+  .addbox{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-top:6px}
+  .addbox .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
+  .addbox input[type=text]{flex:1;min-width:160px}
+  .addbox textarea{width:100%;min-height:52px;font-family:var(--mono);font-size:11px;color:var(--ink2);resize:vertical}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg button{border:none;border-radius:0;background:transparent;font-size:11.5px;padding:6px 11px} .seg button.on{background:rgba(45,212,178,.14);color:#bff3e6}
+  .picker{background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 11px;max-height:230px;overflow:auto;margin-top:8px}
+  .picker .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:7px 0 3px}
+  .picker label{display:flex;gap:8px;font-size:11.5px;color:var(--ink2);padding:2px 0;cursor:pointer}
+  .picker label .cc{font-family:var(--mono);color:var(--ink);flex:0 0 34px}
+  .mini{font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+
+  /* coverage panel */
+  .cov{position:sticky;top:16px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:17px}
+  .big{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .big .of{color:var(--ink3);font-size:20px}
+  .under{font-family:var(--mono);font-size:11.5px;color:var(--teal);margin-top:6px}
+  .bar{display:flex;height:14px;border-radius:5px;overflow:hidden;border:1px solid var(--line);margin:13px 0 6px}
+  .bar i{display:block}.bar .g{background:var(--ok)}.bar .r{background:rgba(232,114,93,.32)}
+  .clegend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+  .grpcov{display:flex;gap:8px;margin:15px 0 4px}
+  .gc{flex:1;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 10px;text-align:center}
+  .gc .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ink3);text-transform:uppercase}
+  .gc .v{font-family:var(--mono);font-size:15px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  .gc.K .v{color:var(--teal)}.gc.S .v{color:var(--blue)}.gc.B .v{color:var(--purp)}
+  .gaphd{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gap);margin:16px 0 8px;display:flex;gap:8px;align-items:center}
+  .gaphd::after{content:'';flex:1;height:1px;background:rgba(232,114,93,.25)}
+  .gaplist{display:flex;flex-wrap:wrap;gap:5px}
+  .gchip{font-family:var(--mono);font-size:10.5px;color:var(--gap);border:1px solid rgba(232,114,93,.35);background:rgba(232,114,93,.07);border-radius:5px;padding:2px 6px;cursor:help}
+  .allclear{font-size:12.5px;color:var(--ok);font-family:var(--mono)}
+  .note{font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.5;border-top:1px solid var(--line);padding-top:11px}
+  .note b{color:var(--ink2)}
+
+  /* matrix */
+  .mx{margin-top:26px}
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+  table{border-collapse:separate;border-spacing:0;font-size:11px}
+  th,td{padding:0}
+  .lH{position:sticky;left:0;background:var(--raise);z-index:3;text-align:left;padding:8px 12px;min-width:160px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--line)}
+  .cH{width:22px;font-family:var(--mono);font-size:9px;text-align:center;padding:7px 0;border-bottom:1px solid var(--line);background:var(--raise);position:sticky;top:0}
+  .cH.gK{color:var(--teal)}.cH.gS{color:var(--blue)}.cH.gB{color:var(--purp)}
+  .rl{position:sticky;left:0;background:var(--panel2);z-index:2;padding:5px 12px;font-size:11px;color:var(--ink2);border-bottom:1px solid var(--line2);white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+  tr.tot .rl{background:var(--raise);font-weight:700;color:var(--ink)}
+  .mc{width:22px;text-align:center;border-bottom:1px solid var(--line2)}
+  tr.tot .mc{border-top:1px solid var(--line)}
+  .d{display:inline-block;width:11px;height:11px;border-radius:3px;border:1px solid rgba(255,255,255,.06)}
+  .d.K{background:var(--teal);border-color:var(--teal)}.d.S{background:var(--blue);border-color:var(--blue)}.d.B{background:var(--purp);border-color:var(--purp)}
+  .d.gap{background:rgba(232,114,93,.25);border-color:var(--gap)}
+  .foot{margin-top:26px;font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:center}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14233a;border:1px solid var(--teal);color:var(--ink);font-size:12.5px;padding:9px 15px;border-radius:9px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="assignment-builder-tk9x2.html">◂ Assignment Builder</a> &nbsp;/&nbsp; Step 5 · Track KSBs across the learner</div>
+  <div class="ttl"><h1>Portfolio KSB Tracker 📚</h1><span class="tagv">Step 5 · v1</span></div>
+  <p class="lede">Roll up which KSBs a learner has evidenced <b>across all their assignments</b> — cumulative coverage of the standard, and the gaps still to plan for. Add each assignment's KSBs by importing a <a href="ksb-mapper-x7k2.html">Coverage Mapper</a> export, or tick them by hand.</p>
+
+  <div class="toolbar">
+    <label for="learner">Learner</label>
+    <select id="learner"></select>
+    <button id="addlearner">+ New learner</button>
+    <button id="dellearner" title="Remove this learner">🗑</button>
+    <span class="avail" id="avail"></span>
+    <span class="grow"></span>
+    <span class="links">
+      <a href="ksb-mapper-x7k2.html" target="_blank">Mapper ↗</a>
+      <a href="https://acgroup21.github.io/Levy-Calculator/landmark-demo-9f4k2m.html" target="_blank">Landmark tracker ↗</a>
+    </span>
+    <button id="export">Export coverage</button>
+  </div>
+
+  <div id="nolearner" class="empty" style="display:none">No learners yet. Click <b>+ New learner</b> to start a portfolio.</div>
+
+  <div class="cols" id="main">
+    <div>
+      <div class="colh"><span>Assignments</span><span class="c" id="asgcount"></span></div>
+      <div id="assignments"></div>
+      <div class="addbox">
+        <div class="row">
+          <input type="text" id="asgtitle" placeholder="Assignment title (e.g. Work-Based Project)">
+          <div class="seg"><button id="mode-manual" class="on">Tick KSBs</button><button id="mode-import">Import Mapper JSON</button></div>
+        </div>
+        <div id="pick-manual"></div>
+        <div id="pick-import" style="display:none"><textarea id="importjson" placeholder="Paste a Coverage Mapper export here (its evidenced KSBs are added)…"></textarea></div>
+        <div class="row" style="margin:9px 0 0"><button class="btn-p" id="addasg">+ Add assignment</button><span class="mini" id="pickcount"></span></div>
+      </div>
+    </div>
+    <div>
+      <div class="colh"><span>Portfolio coverage</span></div>
+      <div class="cov">
+        <div class="big" id="covbig">—</div>
+        <div class="under" id="covpct"></div>
+        <div class="bar"><i class="g" id="barok" style="flex:0"></i><i class="r" id="bargap" style="flex:1"></i></div>
+        <div class="clegend"><span id="legok">evidenced</span><span id="leggap">gaps</span></div>
+        <div class="grpcov">
+          <div class="gc K"><div class="l">Knowledge</div><div class="v" id="gcK">—</div></div>
+          <div class="gc S"><div class="l">Skills</div><div class="v" id="gcS">—</div></div>
+          <div class="gc B"><div class="l">Behaviours</div><div class="v" id="gcB">—</div></div>
+        </div>
+        <div class="gaphd">Not yet evidenced <span id="gapn"></span></div>
+        <div class="gaplist" id="gaplist"></div>
+        <div class="note">Coverage is the <b>union</b> of every assignment's KSBs. Gaps are what no assignment has evidenced yet — plan a workplace opportunity or assignment for each. Feeds the <b>Landmark tracker</b>'s KSB view.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mx" id="mxwrap" style="display:none">
+    <div class="colh"><span>KSB × assignment matrix</span><span class="c">where each KSB was evidenced</span></div>
+    <div class="scroll"><table id="matrix"><thead></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="foot">Arthur Curtis · Assignment Builder · Step 5 portfolio KSB tracker · v1</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- standards (inline ST0071 + ST0384; rest fetched) ---------- */
+const STANDARDS={
+ ST0071:{name:"Customer Service Specialist (L3)",
+  K:{K1:"Continuous improvement in a service environment; impact of change",K2:"Impact of your service on the wider organisation & value added",K3:"Business strategy re customers; recommend its future",K4:"Benefits of future-focused thinking in service decisions",K5:"A range of leadership styles, applied in service",K6:"Critically evaluate customer journeys, end-to-end",K7:"Why issues need referral or escalation to a specialist",K8:"Underpinning business processes behind good outcomes",K9:"Commercial factors & authority limits",K10:"Internal & external customers need different approaches",K11:"Analyse, use & present information for customer insight",K12:"What drives loyalty, retention & satisfaction",K13:"Different customer types & the role of emotions",K14:"How expectations differ by culture, age & social profile",K15:"Regulatory considerations, drivers & impacts",K16:"Your business environment, culture & place of service",K17:"Org structure & consequences if things go wrong",K18:"Find & use industry best practice"},
+  S:{S1:"Continuous-improvement, future-focused delivery & advice",S2:"Resolve complex issues via a wide range of approaches",S3:"Solutions meeting organisation & customer needs",S4:"Advanced questioning/listening; negotiate mutual outcomes",S5:"Manage challenging situations within your authority",S6:"Clear explanations, options & agreed next steps",S7:"Explore & interpret the customer experience",S8:"A cost-conscious mindset",S9:"Identify journey highs/lows that produce emotions",S10:"Written/verbal comms to simplify complex information",S11:"Proactively gather & critically analyse feedback",S12:"Analyse customer types to anticipate needs",S13:"Keep a positive relationship when you can't deliver",S14:"On escalations, account for history to set next steps",S15:"Analyse the end-to-end service experience",S16:"Make recommendations to enable improvement",S17:"Recommend & implement change re legislation/best practice"},
+  B:{B1:"Keep service & best-practice knowledge up to date",B2:"Set & act on personal service goals",B3:"Own actions to resolve customer issues",B4:"Proactivity & creativity in finding solutions",B5:"Make realistic promises & deliver on them",B6:"Work collaboratively with colleagues at all levels",B7:"Recognise colleagues as internal customers",B8:"Share knowledge to support colleague development",B9:"Positive, open-minded; tailor service to each customer",B10:"Adaptable & flexible to customer needs",B11:"Brand advocacy to build trust & satisfaction",B12:"Personal presentation reflects the brand"}},
+ ST0384:{name:"Team Leader (L3)",
+  K:{K1:"Performance management techniques",K2:"How to identify others' learning needs and solutions to address them",K3:"Processes and policies that support delivery of operational requirements",K4:"Project management tools and techniques",K5:"Relevant regulation, legislation and compliance affecting the role and organisation",K6:"Organisational strategy and objectives and how their role impacts them",K7:"How to manage resources to implement operational and team plans",K8:"Time management and prioritisation tools",K9:"Communication techniques including presentation, negotiation and influencing",K10:"Policy and procedure relating to people and organisational culture",K11:"Stakeholder management",K12:"Problem-solving and decision-making principles",K13:"Principles of change management and continuous improvement",K14:"IT and software used to support the business",K15:"External factors affecting the workplace, such as sustainability and net zero",K16:"The impact internal and external factors have on their role",K17:"Leadership and management approaches",K18:"The purpose of their role, including responsibility and accountability",K19:"The impact of cross-team working on delivering organisational objectives",K20:"How to collate, interpret and communicate data for different audiences",K21:"The wider social and economic environment the organisation operates in",K22:"Approaches to managing budgets and maximising efficient use of resources",K23:"Principles of equity, diversity and inclusion and their impact"},
+  S:{S1:"Use resources to implement operational and team plans",S2:"Organise, prioritise and allocate daily and weekly work activities",S3:"Collate and interpret data and information and create reports",S4:"Support the team's development through coaching and CPD",S5:"Use problem-solving techniques to provide solutions and influence decisions",S6:"Use digital tools for planning and project management, taking corrective action",S7:"Review work processes to improve performance and for continuous improvement",S8:"Use technology and software to produce documentation to communicate information",S9:"Manage performance by setting objectives, monitoring progress and giving feedback",S10:"Manage others through change by identifying challenges and resolving them",S11:"Interpret organisational strategy and communicate how it impacts others",S12:"Interpret and apply regulation and legislation and advise stakeholders",S13:"Communicate through different media so stakeholders understand what is required",S14:"Collaborate with stakeholders to ensure delivery of operational goals",S15:"Manage relationships with a diverse workforce and stakeholders",S16:"Negotiate with and challenge stakeholders to manage change and reduce conflict",S17:"Support delivery of equity, diversity and inclusion and monitor its impact",S18:"Identify future sector changes, such as technology, that may impact the organisation",S19:"Monitor technology use and its potential to reduce energy consumption"},
+  B:{B1:"Acts professionally, ethically and with integrity",B2:"Supports an inclusive culture, treating others fairly and with respect",B3:"Takes accountability and ownership of tasks and workload",B4:"Seeks learning opportunities and continuous professional development",B5:"Works flexibly and adapts to circumstances"}}
+};
+function grp(c){return c[0];}
+function allCodes(std){var d=STANDARDS[std];if(!d)return [];return [].concat(Object.keys(d.K||{}),Object.keys(d.S||{}),Object.keys(d.B||{}));}
+function ksbText(std,c){var d=STANDARDS[std];return (d&&d[grp(c)]&&d[grp(c)][c])||'';}
+
+/* ---------- state (localStorage) ---------- */
+var PKEY='ab_portfolio_v1';
+var state={learners:[],cur:null};
+function load(){try{var r=localStorage.getItem(PKEY);if(r){var p=JSON.parse(r);state.learners=p.learners||[];state.cur=p.cur||(state.learners[0]&&state.learners[0].id)||null;}}catch(e){}}
+function save(){try{localStorage.setItem(PKEY,JSON.stringify({learners:state.learners,cur:state.cur}));}catch(e){}}
+function curLearner(){return state.learners.filter(function(l){return l.id===state.cur;})[0]||null;}
+function uid(){return 'l'+(state.learners.length+1)+'_'+Object.keys(STANDARDS).length+'_'+(state._n=(state._n||0)+1);}
+load();
+
+/* ---------- add-mode ---------- */
+var addMode='manual';var pickSet=new Set();
+var $=function(id){return document.getElementById(id);};
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1900);}
+
+/* ---------- render ---------- */
+function fillLearners(){
+  var sel=$('learner');
+  sel.innerHTML=state.learners.map(function(l){return '<option value="'+l.id+'">'+esc(l.name)+' — '+esc((STANDARDS[l.std]&&STANDARDS[l.std].name)||l.std)+'</option>';}).join('');
+  if(state.cur)sel.value=state.cur;
+  var has=state.learners.length>0;
+  $('nolearner').style.display=has?'none':'block';
+  $('main').style.display=has?'grid':'none';
+  $('mxwrap').style.display=has&&curLearner()&&curLearner().assignments.length?'block':'none';
+  var l=curLearner();
+  $('avail').textContent=l?('· '+(STANDARDS[l.std]&&STANDARDS[l.std].name||l.std)+' · '+allCodes(l.std).length+' KSBs in standard'):'';
+}
+function renderManualPicker(){
+  var l=curLearner();if(!l){$('pick-manual').innerHTML='';return;}
+  var d=STANDARDS[l.std];if(!d){$('pick-manual').innerHTML='<div class="mini">This learner\'s standard isn\'t loaded — use Import instead.</div>';return;}
+  function g(k,lab){return '<div class="pg">'+lab+'</div>'+Object.keys(d[k]).map(function(c){return '<label><input type="checkbox" data-pk="'+c+'" '+(pickSet.has(c)?'checked':'')+'><span class="cc">'+c+'</span>'+esc(d[k][c])+'</label>';}).join('');}
+  $('pick-manual').innerHTML='<div class="picker">'+g('K','Knowledge')+g('S','Skills')+g('B','Behaviours')+'</div>';
+  $('pick-manual').querySelectorAll('[data-pk]').forEach(function(cb){cb.onchange=function(){if(cb.checked)pickSet.add(cb.dataset.pk);else pickSet.delete(cb.dataset.pk);$('pickcount').textContent=pickSet.size+' selected';};});
+  $('pickcount').textContent=pickSet.size?pickSet.size+' selected':'';
+}
+function renderAssignments(){
+  var l=curLearner();if(!l){$('assignments').innerHTML='';$('asgcount').textContent='';return;}
+  $('asgcount').textContent=l.assignments.length+' assignment'+(l.assignments.length===1?'':'s');
+  $('assignments').innerHTML=l.assignments.length?l.assignments.map(function(a,i){
+    var chips=(a.codes||[]).slice().sort(cmpCode).map(function(c){return '<span class="chip '+grp(c)+'" title="'+esc(ksbText(l.std,c))+'">'+c+'</span>';}).join('');
+    return '<div class="asg"><div class="ah"><span class="an">'+esc(a.title)+'</span><span class="ac">'+(a.codes||[]).length+' KSBs</span><button class="del" data-del="'+i+'" title="Remove">🗑</button></div><div class="chips">'+(chips||'<span class="mini">no KSBs</span>')+'</div></div>';
+  }).join(''):'<div class="empty">No assignments yet. Add one below — import a Mapper export or tick the KSBs it evidenced.</div>';
+  $('assignments').querySelectorAll('[data-del]').forEach(function(b){b.onclick=function(){l.assignments.splice(+b.dataset.del,1);save();renderAll();};});
+}
+function cmpCode(a,b){var o={K:0,S:1,B:2};if(o[a[0]]!==o[b[0]])return o[a[0]]-o[b[0]];return (+a.slice(1))-(+b.slice(1));}
+function evidenced(){var s=new Set();var l=curLearner();if(l)l.assignments.forEach(function(a){(a.codes||[]).forEach(function(c){s.add(c);});});return s;}
+function renderCoverage(){
+  var l=curLearner();if(!l)return;
+  var all=allCodes(l.std);var n=all.length;var ev=evidenced();var e=all.filter(function(c){return ev.has(c);}).length;
+  $('covbig').innerHTML=e+'<span class="of"> / '+n+'</span>';
+  $('covpct').textContent=(n?Math.round(e/n*100):0)+'% of the standard evidenced · '+(n-e)+' to go';
+  $('barok').style.flex=e;$('bargap').style.flex=(n-e);
+  $('legok').textContent=e+' evidenced';$('leggap').textContent=(n-e)+' gaps';
+  ['K','S','B'].forEach(function(g){var codes=Object.keys((STANDARDS[l.std]||{})[g]||{});var c=codes.filter(function(x){return ev.has(x);}).length;$('gc'+g).textContent=c+'/'+codes.length;});
+  var gaps=all.filter(function(c){return !ev.has(c);});
+  $('gapn').textContent=gaps.length?'· '+gaps.length:'';
+  $('gaplist').innerHTML=gaps.length?gaps.slice().sort(cmpCode).map(function(c){return '<span class="gchip" title="'+esc(ksbText(l.std,c))+'">'+c+'</span>';}).join(''):'<span class="allclear">✓ every KSB in the standard evidenced</span>';
+}
+function renderMatrix(){
+  var l=curLearner();if(!l||!l.assignments.length){$('mxwrap').style.display='none';return;}
+  $('mxwrap').style.display='block';
+  var all=allCodes(l.std);var ev=evidenced();
+  var head='<tr><th class="lH">Assignment</th>'+all.map(function(c){return '<th class="cH g'+grp(c)+'" title="'+esc(ksbText(l.std,c))+'">'+c.slice(1)+'</th>';}).join('')+'</tr>';
+  $('matrix').querySelector('thead').innerHTML=head;
+  var body=l.assignments.map(function(a){var set=new Set(a.codes||[]);return '<tr><td class="rl" title="'+esc(a.title)+'">'+esc(a.title)+'</td>'+all.map(function(c){return '<td class="mc">'+(set.has(c)?'<span class="d '+grp(c)+'"></span>':'<span class="d"></span>')+'</td>';}).join('')+'</tr>';}).join('');
+  body+='<tr class="tot"><td class="rl">Portfolio total</td>'+all.map(function(c){return '<td class="mc">'+(ev.has(c)?'<span class="d '+grp(c)+'"></span>':'<span class="d gap" title="gap"></span>')+'</td>';}).join('')+'</tr>';
+  $('matrix').querySelector('tbody').innerHTML=body;
+}
+function renderAll(){fillLearners();renderManualPicker();renderAssignments();renderCoverage();renderMatrix();}
+
+/* ---------- actions ---------- */
+$('addlearner').onclick=function(){
+  var name=prompt('Learner name:');if(!name)return;
+  var std=prompt('Standard code (e.g. ST0071 Customer Service, ST0384 Team Leader):','ST0071');
+  if(!std)return;std=std.trim().toUpperCase();
+  if(!STANDARDS[std]){toast('Standard '+std+' not loaded yet — try ST0071 / ST0384 or wait for the library.');return;}
+  var l={id:uid(),name:name.trim(),std:std,assignments:[]};state.learners.push(l);state.cur=l.id;pickSet=new Set();save();renderAll();toast('Learner added');
+};
+$('dellearner').onclick=function(){var l=curLearner();if(!l)return;if(!confirm('Remove '+l.name+' and their assignments?'))return;state.learners=state.learners.filter(function(x){return x.id!==l.id;});state.cur=(state.learners[0]&&state.learners[0].id)||null;pickSet=new Set();save();renderAll();};
+$('learner').onchange=function(){state.cur=this.value;pickSet=new Set();save();renderAll();};
+$('mode-manual').onclick=function(){addMode='manual';this.classList.add('on');$('mode-import').classList.remove('on');$('pick-manual').style.display='';$('pick-import').style.display='none';};
+$('mode-import').onclick=function(){addMode='import';this.classList.add('on');$('mode-manual').classList.remove('on');$('pick-manual').style.display='none';$('pick-import').style.display='';};
+$('addasg').onclick=function(){
+  var l=curLearner();if(!l){toast('Add a learner first');return;}
+  var title=($('asgtitle').value||'').trim()||('Assignment '+(l.assignments.length+1));
+  var codes=[];
+  if(addMode==='manual'){codes=Array.from(pickSet);}
+  else{
+    var raw=($('importjson').value||'').trim();if(!raw){toast('Paste a Mapper export first');return;}
+    try{var j=JSON.parse(raw);
+      var set=(j.coverage&&j.coverage.evidenced)||[];
+      if(!set.length&&Array.isArray(j.sections))j.sections.forEach(function(s){(s.ksbs||[]).forEach(function(c){set.push(c);});});
+      codes=Array.from(new Set(set));
+      if(j.standard&&j.standard!==l.std&&STANDARDS[j.standard])toast('Note: export is '+j.standard+', learner is '+l.std+' — codes still added.');
+    }catch(e){toast('That doesn\'t look like valid JSON');return;}
+  }
+  codes=codes.filter(function(c){return allCodes(l.std).indexOf(c)>=0;});
+  if(!codes.length){toast('No KSBs for this standard found');return;}
+  l.assignments.push({id:'a'+Date0(),title:title,codes:codes});
+  $('asgtitle').value='';$('importjson').value='';pickSet=new Set();save();renderAll();toast('Assignment added ('+codes.length+' KSBs)');
+};
+function Date0(){return (state._a=(state._a||0)+1);}
+$('export').onclick=function(){
+  var l=curLearner();if(!l){toast('Add a learner first');return;}
+  var all=allCodes(l.std);var ev=evidenced();
+  var out={learner:l.name,standard:l.std,standardName:(STANDARDS[l.std]||{}).name||l.std,
+    assignments:l.assignments.map(function(a){return {title:a.title,ksbs:a.codes};}),
+    evidenced:all.filter(function(c){return ev.has(c);}),gaps:all.filter(function(c){return !ev.has(c);}),
+    coveragePct:all.length?Math.round(all.filter(function(c){return ev.has(c);}).length/all.length*100):0};
+  var blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='portfolio-'+l.name.replace(/[^\w -]/g,'')+'-'+l.std+'.json';a.click();
+  toast('Coverage exported (for Landmark / records)');
+};
+
+/* seed a demo learner on first run so the tool isn't empty */
+if(!state.learners.length){
+  state.learners.push({id:'demo1',name:'Sample learner',std:'ST0071',assignments:[
+    {id:'a1',title:'Work-Based Project',codes:['K1','K3','K4','K16','K17','K2','K6','S6','S15','K10','K12','S7','B7','S1','S3','S5','S8','B3','K9','S16','S11','S12','S17','B1','B6','B11','B12','B2','B5']}
+  ]});state.cur='demo1';save();
+}
+renderAll();
+
+/* ---------- load the full standard library (fetched) ---------- */
+fetch('ksb-standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(lib){
+  var added=0;Object.keys(lib).forEach(function(c){if(!STANDARDS[c]){STANDARDS[c]=lib[c];added++;}});
+  if(added){renderAll();}
+}).catch(function(){});
+</script>
+</body>
+</html>
