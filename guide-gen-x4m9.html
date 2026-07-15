@@ -163,8 +163,7 @@
   <div class="controls">
     <span class="src" id="src"></span>
     <span class="grow"></span>
-    <button id="settings-btn">⚙ Settings</button>
-    <button id="improveall" disabled>✨ Improve all with AI</button>
+    <button id="improveall">✨ Improve all with Claude</button>
     <button id="regen" title="Re-draft Purpose / Pass / Distinction from the mapping (overwrites edits)">↻ Regenerate drafts</button>
     <button id="word">⬇ Word (.doc)</button>
     <button class="btn-p" id="print">🖨 Print / Save PDF</button>
@@ -176,20 +175,26 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<div class="modal" id="settings" hidden>
-  <div class="modal-card">
-    <div class="mh">AI improvement — your Anthropic key</div>
-    <p class="mp">Paste your <b>Anthropic API key</b> to enable "✨ Improve". It's stored <b>only in this browser</b> and sent only to api.anthropic.com — never to Arthur Curtis or anyone else. Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a>.</p>
-    <label class="klabel" for="keyin">Anthropic API key</label>
-    <input type="password" id="keyin" class="keyin" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-    <div class="mstatus" id="mstatus"></div>
-    <div class="mbtns">
-      <button id="keyclear">Remove key</button>
+<div class="modal" id="bridge" hidden>
+  <div class="modal-card" style="max-width:640px">
+    <div class="mh">Improve with Claude — no API key needed</div>
+    <p class="mp"><b>1.</b> Copy the prompt below.&nbsp; <b>2.</b> Paste it into the Claude you already use — <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai ↗</a> or the desktop app.&nbsp; <b>3.</b> Paste Claude's reply back here and press <b>Use reply</b>.</p>
+    <label class="klabel" for="bridge-prompt">Prompt — copy this</label>
+    <textarea id="bridge-prompt" class="keyin" readonly rows="7" style="height:148px;resize:vertical;line-height:1.45"></textarea>
+    <div class="mbtns" style="margin-top:9px">
+      <button class="btn-p" id="bridge-copy">📋 Copy prompt</button>
       <span class="grow"></span>
-      <button id="keycancel">Close</button>
-      <button class="btn-p" id="keysave">Save key</button>
+      <span class="mstatus ok" id="bridge-copied" style="margin:0"></span>
     </div>
-    <p class="mnote">Model: Opus 4.8 · roughly 30p per full guide, billed to your key. The offline drafts work without a key.</p>
+    <label class="klabel" for="bridge-result" style="margin-top:16px">Claude's reply — paste it here</label>
+    <textarea id="bridge-result" class="keyin" rows="6" placeholder="Paste Claude's whole reply, including the { … }" style="height:128px;resize:vertical;line-height:1.45"></textarea>
+    <div class="mstatus" id="bridge-status"></div>
+    <div class="mbtns">
+      <button id="bridge-cancel">Cancel</button>
+      <span class="grow"></span>
+      <button class="btn-p" id="bridge-use">✓ Use reply</button>
+    </div>
+    <p class="mnote">Uses your normal Claude — nothing is sent to Arthur Curtis or stored anywhere. The offline drafts work with no Claude at all.</p>
   </div>
 </div>
 
@@ -346,31 +351,48 @@ function exportWord(){
 }
 $('word').onclick=exportWord;
 
-/* ---------- AI improvement (Browser BYO-key; direct to Anthropic) ---------- */
-const KEY='ab_anthropic_key';
-function getKey(){try{return localStorage.getItem(KEY)||'';}catch(e){return '';}}
-function hasKey(){return !!getKey();}
-function setMStatus(t,c){var s=$('mstatus');s.className='mstatus '+(c||'');s.textContent=t;}
-function updateAIState(){var on=hasKey();$('improveall').disabled=!on;$('improveall').title=on?'Improve every section with Opus 4.8':'Add your Anthropic key in Settings first';$('settings-btn').textContent=on?'⚙ Settings · key set':'⚙ Settings';}
-function openSettings(msg){$('keyin').value=getKey();setMStatus(msg||'',msg?'err':'');$('settings').hidden=false;$('keyin').focus();}
-$('settings-btn').onclick=function(){openSettings('');};
-$('keycancel').onclick=function(){$('settings').hidden=true;};
-$('settings').onclick=function(e){if(e.target===$('settings'))$('settings').hidden=true;};
-$('keysave').onclick=function(){var k=$('keyin').value.trim();if(!k){setMStatus('Paste a key first.','err');return;}try{localStorage.setItem(KEY,k);}catch(e){}setMStatus('Saved — stored in this browser only.','ok');updateAIState();setTimeout(function(){$('settings').hidden=true;},700);};
-$('keyclear').onclick=function(){try{localStorage.removeItem(KEY);}catch(e){}$('keyin').value='';setMStatus('Key removed.','ok');updateAIState();};
-
+/* ---------- AI improvement (copy-paste bridge — uses the coordinator's own Claude, no API key) ---------- */
 const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','pass','distinction'],additionalProperties:false};
+const BATCH_SCHEMA={type:'object',properties:{sections:{type:'array',items:IMPROVE_SCHEMA}},required:['sections'],additionalProperties:false};
 const SYS="You are an expert end-point assessor and apprenticeship tutor. You write concise, encouraging, plain-English GUIDANCE that helps a Level 3 apprentice evidence their KSBs in a work-based project. RULES: (1) Guidance only — never write the apprentice's actual answer, example content, or a model paragraph; write how THEY should evidence each KSB using their OWN real workplace. (2) Ground every point strictly in the KSBs provided; never invent KSBs. (3) Pass = describe/explain level; Distinction = analyse, evaluate, justify, and weigh consequences / alternatives / long-term impact. (4) Keep it tight and immediately usable.";
-async function callClaude(system,user,schema,maxTokens){
-  var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-8',max_tokens:maxTokens||1500,system:system,messages:[{role:'user',content:user}],output_config:{format:{type:'json_schema',schema:schema}}})});
-  if(res.status===401)throw new Error('API key rejected — check it in Settings.');
-  if(res.status===429)throw new Error('Rate limited by Anthropic — wait a moment and retry.');
-  if(!res.ok){var m='';try{m=(await res.json()).error.message;}catch(e){}throw new Error('Anthropic error '+res.status+(m?': '+m:''));}
-  var data=await res.json();
-  if(data.stop_reason==='refusal')throw new Error('The model declined this request.');
-  var txt=(data.content||[]).filter(function(b){return b.type==='text';}).map(function(b){return b.text;}).join('');
-  return JSON.parse(txt);
+
+/* copy-paste bridge: build a prompt, user runs it in their own Claude, pastes the JSON back */
+var bridgeResolve=null,bridgeReject=null;
+function schemaExample(s){
+  if(!s||!s.type)return '"..."';
+  if(s.type==='string')return '"..."';
+  if(s.type==='number'||s.type==='integer')return '0';
+  if(s.type==='boolean')return 'true';
+  if(s.type==='array')return '['+schemaExample(s.items)+']';
+  if(s.type==='object'){var p=s.properties||{};return '{'+Object.keys(p).map(function(k){return JSON.stringify(k)+':'+schemaExample(p[k]);}).join(',')+'}';}
+  return '"..."';
 }
+function parseReply(t){
+  t=(t||'').trim();if(!t)throw new Error('Nothing pasted yet — paste Claude’s reply above.');
+  var m=t.match(/```(?:json)?\s*([\s\S]*?)```/i);if(m)t=m[1].trim();
+  var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<=a)throw new Error('No JSON found — paste Claude’s full reply, including the { … }.');
+  return JSON.parse(t.slice(a,b+1));
+}
+function setBStatus(t,c){var s=$('bridge-status');s.className='mstatus '+(c||'');s.textContent=t;}
+function closeBridge(){$('bridge').hidden=true;bridgeResolve=null;bridgeReject=null;}
+function callClaude(system,user,schema){
+  return new Promise(function(resolve,reject){
+    var prompt=system+'\n\n'+user+'\n\nReturn ONLY a JSON object in exactly this shape — no markdown fences, no commentary:\n'+schemaExample(schema);
+    $('bridge-prompt').value=prompt;$('bridge-result').value='';setBStatus('','');$('bridge-copied').textContent='';
+    $('bridge').hidden=false;$('bridge-copy').focus();
+    bridgeResolve=resolve;bridgeReject=reject;
+  });
+}
+$('bridge-copy').onclick=function(){
+  var ta=$('bridge-prompt');ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
+  var ok=false;try{ok=document.execCommand('copy');}catch(e){}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(function(){},function(){});}
+  $('bridge-copied').textContent='Copied ✓ — now paste it into Claude';
+  if(window.getSelection)window.getSelection().removeAllRanges();$('bridge-result').focus();
+};
+$('bridge-use').onclick=function(){try{var out=parseReply($('bridge-result').value);var r=bridgeResolve;closeBridge();if(r)r(out);}catch(e){setBStatus(e.message||'Could not read that reply.','err');}};
+$('bridge-cancel').onclick=function(){var j=bridgeReject;closeBridge();if(j)j(new Error('cancelled'));};
+$('bridge').onclick=function(e){if(e.target===$('bridge')){var j=bridgeReject;closeBridge();if(j)j(new Error('cancelled'));}};
 function sectionPrompt(i){
   var sec=INPUT.sections[i];var codes=sec.c||[];
   var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
@@ -383,19 +405,29 @@ function fillSection(i,out){
   var d=sec.querySelector('[data-f="dist"]');if(d&&Array.isArray(out.distinction))d.innerHTML='<ul>'+out.distinction.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul>';
 }
 async function improveSection(i,btn){
-  if(!hasKey()){openSettings('Add your Anthropic key to use AI improvement.');return false;}
-  if(btn){btn.classList.add('busy');btn.textContent='✨ Improving…';btn.disabled=true;}
+  if(btn){btn.classList.add('busy');btn.disabled=true;}
   try{var out=await callClaude(SYS,sectionPrompt(i),IMPROVE_SCHEMA);fillSection(i,out);return true;}
-  catch(e){toast(e.message||'AI request failed');return false;}
+  catch(e){if(e.message!=='cancelled')toast(e.message||'AI request failed');return false;}
   finally{if(btn){btn.classList.remove('busy');btn.textContent='✨ Improve';btn.disabled=false;}}
+}
+function allSectionsPrompt(){
+  var lines=INPUT.sections.map(function(sec,i){
+    var codes=sec.c||[];
+    var ksb=codes.map(function(c){return '  '+c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'  (none mapped)';
+    return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb;
+  }).join('\n\n');
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; a Pass checklist (one short imperative per mapped KSB, describe/explain level); and a Distinction checklist of 2-4 higher-order moves (analyse / evaluate / justify).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.';
 }
 document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);}});
 $('improveall').onclick=async function(){
-  if(!hasKey()){openSettings('Add your Anthropic key to use AI improvement.');return;}
-  var btns=[].slice.call(document.querySelectorAll('[data-imp]'));var n=INPUT.sections.length;
-  this.disabled=true;
-  for(var i=0;i<n;i++){toast('Improving section '+(i+1)+' / '+n+'…');var ok=await improveSection(i,btns[i]);if(!ok)break;}
-  this.disabled=false;updateAIState();toast('Done — review and edit the AI drafts');
+  var n=INPUT.sections.length;this.disabled=true;
+  try{
+    var out=await callClaude(SYS,allSectionsPrompt(),BATCH_SCHEMA);
+    var arr=(out&&out.sections)||[];
+    for(var i=0;i<n;i++){if(arr[i])fillSection(i,arr[i]);}
+    toast(arr.length?'Done — review and edit the AI drafts':'No sections returned — check the pasted reply');
+  }catch(e){if(e.message!=='cancelled')toast(e.message||'AI request failed');}
+  finally{this.disabled=false;}
 };
 
 /* ---------- Part B: annotated worked example (Step 3) ---------- */
@@ -404,7 +436,7 @@ function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span cl
 function renderPartB(){
   var body=$('partb-body');if(!body)return;
   var wrap=document.querySelector('.partb-wrap');if(wrap)wrap.classList.toggle('empty',!PARTB);
-  if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Needs your Anthropic key.</div>';return;}
+  if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Uses your own Claude — no API key needed.</div>';return;}
   var h='<div class="scenario"><b>Illustrative scenario</b> — not your workplace: '+esc(PARTB.scenario||'')+'</div>';
   INPUT.sections.forEach(function(sec,i){
     var s=PARTB.sections&&PARTB.sections[i];var ex=(s&&s.exemplar)||'';
@@ -421,15 +453,13 @@ function exemplarPrompt(){
   return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose, adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.';
 }
 async function generateExemplar(btn){
-  if(!hasKey()){openSettings('Add your Anthropic key to generate the worked example.');return;}
-  if(btn){btn.classList.add('busy');btn.textContent='✨ Writing… (~30–60s)';btn.disabled=true;}
-  try{var out=await callClaude(EXEMPLAR_SYS,exemplarPrompt(),EXEMPLAR_SCHEMA,8000);PARTB=out;renderPartB();toast('Worked example generated — review & edit');}
-  catch(e){toast(e.message||'Generation failed');}
+  if(btn){btn.classList.add('busy');btn.disabled=true;}
+  try{var out=await callClaude(EXEMPLAR_SYS,exemplarPrompt(),EXEMPLAR_SCHEMA);PARTB=out;renderPartB();toast('Worked example added — review & edit');}
+  catch(e){if(e.message!=='cancelled')toast(e.message||'Generation failed');}
   finally{if(btn){btn.classList.remove('busy');btn.disabled=false;btn.textContent=PARTB?'↻ Regenerate example':'✨ Generate worked example';}}
 }
 
 render();
-updateAIState();
 if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
 </script>
 </body>
