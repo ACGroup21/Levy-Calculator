@@ -366,14 +366,20 @@ $('guide').onclick=()=>{
 
 fillStd();renderSections();
 
-/* ---------- load the canonical AC standards library (single source for every app) ---------- */
+/* ---------- load the canonical AC standards library (single source; cached in localStorage for offline) ---------- */
 (function loadLibrary(){
+ var LIBCACHE='ab_standards_cache_v1';
+ function hasK(s){return s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));}
+ function merge(dict){var n=0;Object.keys(dict).forEach(function(c){if(!STANDARDS[c]&&hasK(dict[c])){STANDARDS[c]=dict[c];n++;}});if(n){var cur=state.std;fillStd();$('std').value=cur;}return n;}
+ // 1) instant paint from cache — works fully offline after the first online visit
+ try{var c=localStorage.getItem(LIBCACHE);if(c)merge(JSON.parse(c));}catch(e){}
+ // 2) refresh from network + re-cache
  fetch('standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(res){
-  var lib=res.standards||res;var added=0;
-  Object.keys(lib).forEach(function(c){var s=lib[c];var hasK=s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));if(!STANDARDS[c]&&hasK){STANDARDS[c]=s;added++;}});
-  var cur=state.std;fillStd();$('std').value=cur;
+  var lib=res.standards||res;var keep={};Object.keys(lib).forEach(function(c){if(hasK(lib[c]))keep[c]=lib[c];});
+  var added=merge(keep);
+  try{localStorage.setItem(LIBCACHE,JSON.stringify(keep));}catch(e){/* quota — skip caching, tool still fetches */}
   if(added)toast(Object.keys(STANDARDS).length+" standards available");
- }).catch(function(){/* offline — keep the 2 inline standards */});
+ }).catch(function(){/* offline — the cache (or 2 inline standards) already served */});
 })();
 </script>
 </body>

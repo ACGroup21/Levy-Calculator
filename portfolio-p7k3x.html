@@ -309,12 +309,18 @@ if(!state.learners.length){
 }
 renderAll();
 
-/* ---------- load the canonical AC standards library (single source for every app) ---------- */
-fetch('standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(res){
-  var lib=res.standards||res;var added=0;
-  Object.keys(lib).forEach(function(c){var s=lib[c];var hasK=s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));if(!STANDARDS[c]&&hasK){STANDARDS[c]=s;added++;}});
-  if(added){renderAll();}
-}).catch(function(){});
+/* ---------- load the canonical AC standards library (single source; cached in localStorage for offline) ---------- */
+(function loadLibrary(){
+  var LIBCACHE='ab_standards_cache_v1';
+  function hasK(s){return s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));}
+  function merge(dict){var n=0;Object.keys(dict).forEach(function(c){if(!STANDARDS[c]&&hasK(dict[c])){STANDARDS[c]=dict[c];n++;}});if(n)renderAll();return n;}
+  try{var c=localStorage.getItem(LIBCACHE);if(c)merge(JSON.parse(c));}catch(e){}
+  fetch('standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(res){
+    var lib=res.standards||res;var keep={};Object.keys(lib).forEach(function(c){if(hasK(lib[c]))keep[c]=lib[c];});
+    merge(keep);
+    try{localStorage.setItem(LIBCACHE,JSON.stringify(keep));}catch(e){}
+  }).catch(function(){});
+})();
 </script>
 </body>
 </html>
