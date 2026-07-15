@@ -61,6 +61,7 @@
   .ph::before{content:'';position:absolute;left:-26px;top:5px;width:12px;height:12px;border-radius:50%;
     background:var(--bg);border:2px solid var(--text3)}
   .ph.now::before{border-color:var(--blue);background:var(--blue);box-shadow:0 0 10px var(--blue)}
+  .ph.done::before{border-color:var(--teal);background:var(--teal);box-shadow:0 0 8px var(--teal)}
   .ph.now{}
   .pcard{background:var(--panel);border:1px solid var(--panelb);border-radius:13px;padding:14px 16px;transition:border-color .16s}
   .ph.now .pcard{border-color:rgba(57,160,212,0.35);background:rgba(57,160,212,0.04)}
@@ -72,6 +73,7 @@
   .chip.new{color:var(--gold);border-color:rgba(224,164,59,0.4);background:rgba(224,164,59,0.08)}
   .chip.crit{color:var(--coral);border-color:rgba(232,114,93,0.45);background:rgba(232,114,93,0.09)}
   .chip.here{color:var(--blue);border-color:rgba(57,160,212,0.45);background:rgba(57,160,212,0.1)}
+  .chip.done{color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.08)}
   .pgoal{font-size:12.5px;color:var(--text2);margin:8px 0 9px;line-height:1.5}
   .dels{list-style:none;padding:0;margin:0;display:grid;gap:5px}
   .dels li{font-size:12px;color:var(--text3);padding-left:19px;position:relative;line-height:1.45}
@@ -98,9 +100,9 @@
   <div class="sub">The assignment brief machine. Turns a provider's brief into an apprentice's route through it — a <b>step guide</b>, mapped to the <b>right KSBs</b>, with an integrity-safe <b>worked exemplar</b>. Internal-first: coordinator-grade assignment support. <b>Landing on the right KSBs is the tipping point between a pass and a distinction — so it's the whole product.</b></div>
 
   <div class="stats">
-    <div class="stat a"><div class="n">Discovery</div><div class="l">STATUS · pre-build</div></div>
-    <div class="stat b"><div class="n">6</div><div class="l">PHASES · P0–P5</div></div>
-    <div class="stat c"><div class="n">0%</div><div class="l">DELIVERED</div></div>
+    <div class="stat a"><div class="n">Building</div><div class="l">STATUS · step 1</div></div>
+    <div class="stat b"><div class="n">6</div><div class="l">STEPS · prep + 5</div></div>
+    <div class="stat c"><div class="n">Step 1</div><div class="l">KSB coverage engine</div></div>
     <div class="stat d"><div class="n">Internal</div><div class="l">AC coordinators first</div></div>
   </div>
 
@@ -125,38 +127,38 @@
     <div class="srow"><div class="tag">Part B</div><div class="body"><div class="t">Annotated exemplar</div><div class="d">Full worked essay on the <b>same brief</b>, inline <code>[KSB tags]</code> per paragraph, a "Notes:" space each section, footer: "Remove KSB tags before final submission."</div></div></div>
   </div>
 
-  <div class="sect"><span>Build phases</span><span class="n">to be scheduled</span></div>
+  <div class="sect"><span>Build steps</span><span class="n">step 1 in progress</span></div>
   <div class="tl">
+
+    <div class="ph done">
+      <div class="pcard">
+        <div class="phead"><span class="id">PREP</span><span class="nm">Groundwork — format &amp; decisions locked</span><span class="chip done">done</span></div>
+        <div class="pgoal">Froze the 3-part template + integrity notice as canonical; settled the KSB source &amp; coding scheme.</div>
+        <ul class="dels">
+          <li class="done">Codified the Sarah Petrie format as the output contract</li>
+          <li class="done">Locked the "Important Notice" wording</li>
+          <li class="done">KSB codes: anchor to official IfATE (K/S/B); AC scheme as a presentation layer</li>
+        </ul>
+      </div>
+    </div>
 
     <div class="ph now">
       <div class="pcard">
-        <div class="phead"><span class="id">P0</span><span class="nm">Spec-lock</span><span class="chip here">you are here</span><span class="chip new">fast · no code</span></div>
-        <div class="pgoal">Freeze the 3-part template + integrity notice as canonical; settle the KSB source & coding scheme.</div>
-        <ul class="dels">
-          <li>Codify the Sarah Petrie format as the output contract</li>
-          <li>Lock the "Important Notice" wording</li>
-          <li class="key">Decide KSB codes: official IfATE (K/S/B) vs AC's thematic re-coding</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="ph">
-      <div class="pcard">
-        <div class="phead"><span class="id">P1</span><span class="nm">KSB mapping engine</span><span class="chip reuse">reuse · scraper + matcher</span></div>
+        <div class="phead"><span class="id">1</span><span class="nm">Find the right KSBs</span><span class="chip here">building now</span><span class="chip reuse">reuse · scraper + matcher</span></div>
         <div class="pgoal"><b>The tipping point.</b> A brief's sections → the <b>right</b> real KSBs, with coverage + gaps. Trust hinge: mappings must be real, never invented.</div>
         <ul class="dels">
-          <li class="done">Pull real KSBs — L3 Customer Service Specialist: 47 KSBs (18K / 17S / 12B) pulled &amp; cited, 14 Jul</li>
-          <li>Map brief sections → KSBs (reuse the co-pilot's JD→KSB matcher)</li>
-          <li>Coverage / gap view across the brief</li>
-          <li class="done">Validated on ST0071 — 29/47 KSBs evidenced, 18 gaps surfaced (coverage audit built)</li>
+          <li class="done">Pull real KSBs — L3 Customer Service Specialist: 47 KSBs (18K / 17S / 12B) pulled &amp; cited</li>
+          <li class="done">Validated on ST0071 — 29/47 KSBs evidenced, 18 gaps surfaced (coverage audit)</li>
+          <li class="key"><a href="ksb-mapper-x7k2.html" style="color:var(--teal)">Build the reusable Coverage Mapper</a> — any brief + standard in → coverage &amp; gap out</li>
+          <li>Offline matcher suggests KSBs per section; coordinator confirms</li>
         </ul>
       </div>
     </div>
 
     <div class="ph">
       <div class="pcard">
-        <div class="phead"><span class="id">P2</span><span class="nm">Step-guide generator (Part A)</span><span class="chip new">new · LLM</span></div>
-        <div class="pgoal">Generate each section's guide — Target / Purpose / What to Write / KSB Coverage / Pass / Distinction — constrained to P1's real KSBs. Plus the final checklist.</div>
+        <div class="phead"><span class="id">2</span><span class="nm">Write the step-by-step guide</span><span class="chip new">new · LLM</span></div>
+        <div class="pgoal">Generate each section's guide — Target / Purpose / What to Write / KSB Coverage / Pass / Distinction — constrained to Step 1's real KSBs. Plus the final checklist.</div>
         <ul class="dels">
           <li>Per-section guide generation bound to mapped KSBs</li>
           <li>Pass vs Distinction criteria per section</li>
@@ -167,7 +169,7 @@
 
     <div class="ph">
       <div class="pcard">
-        <div class="phead"><span class="id">P3</span><span class="nm">Annotated exemplar generator (Part B)</span><span class="chip new">new · LLM</span><span class="chip crit">integrity-critical</span></div>
+        <div class="phead"><span class="id">3</span><span class="nm">Write the worked example</span><span class="chip new">new · LLM</span><span class="chip crit">integrity-critical</span></div>
         <div class="pgoal">Full worked exemplar on the same brief, with the guardrails baked in from line one.</div>
         <ul class="dels">
           <li class="key">Illustrative-scenario engine — relatable but not copyable</li>
@@ -179,10 +181,10 @@
 
     <div class="ph">
       <div class="pcard">
-        <div class="phead"><span class="id">P4</span><span class="nm">Assembly + export + AC brand</span><span class="chip new">new</span></div>
+        <div class="phead"><span class="id">4</span><span class="nm">Assemble &amp; export the pack</span><span class="chip new">new</span></div>
         <div class="pgoal">Combine into the branded document; export; wrap the coordinator workflow around it.</div>
         <ul class="dels">
-          <li>Cover + Notice + Part A + Part B assembly</li>
+          <li>Cover + Notice + guide + worked example assembly</li>
           <li>PDF / Word export</li>
           <li>Workflow: paste brief → pick standard → generate → edit → export</li>
         </ul>
@@ -191,7 +193,7 @@
 
     <div class="ph">
       <div class="pcard">
-        <div class="phead"><span class="id">P5</span><span class="nm">Portfolio KSB tracking → Landmark</span><span class="chip reuse">reuse · tracker</span></div>
+        <div class="phead"><span class="id">5</span><span class="nm">Track KSBs across the learner</span><span class="chip reuse">reuse · tracker</span></div>
         <div class="pgoal">Track which KSBs a learner has evidenced across assignments; feed the Landmark tracker's coverage view.</div>
         <ul class="dels">
           <li>KSBs-evidenced ledger per learner</li>
@@ -218,7 +220,7 @@
   </div>
 
   <div class="foot">
-    <b>Where this sits:</b> Internal AC product, sibling to the tracker — an efficiency engine so a £200/day coordinator delivers the assignment support a £450/day tutor would. Discovery stage; P0 done in spirit (decisions + spec locked), scheduling P1 next.
+    <b>Where this sits:</b> Internal AC product, sibling to the tracker — an efficiency engine so a £200/day coordinator delivers the assignment support a £450/day tutor would. Groundwork done (format + decisions locked); now building Step 1 — the KSB coverage engine.
     <div class="stamp" id="stamp">Created 13 Jul 2026 · Assignment Builder</div>
   </div>
 </div>

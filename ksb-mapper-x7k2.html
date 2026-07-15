@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>KSB Coverage Mapper — Assignment Builder</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+  :root{
+    --bg:#0a1220; --panel:#101c30; --panel2:#0c1626; --raise:#14233a; --field:#0d1829;
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.045);
+    --ink:#e9f1f8; --ink2:#94aabe; --ink3:#647d92;
+    --teal:#2DD4B2; --blue:#7cc4e8; --purp:#c8a6f0; --gold:#e0a43b; --gap:#e8725d; --ok:#4ac48c;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(1100px 600px at 84% -10%,rgba(45,212,178,.06),transparent),
+      radial-gradient(760px 500px at 4% 108%,rgba(232,114,93,.045),transparent),var(--bg);
+    color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;padding:26px 20px 80px}
+  .wrap{max-width:1180px;margin:0 auto}
+  a{color:var(--teal)}
+  .crumb{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.05em;margin-bottom:12px}
+  .crumb a{color:var(--ink2);text-decoration:none}
+  .ttl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:23px;font-weight:700;letter-spacing:-.015em;margin:0}
+  .tag-v{font-family:var(--mono);font-size:10.5px;color:var(--gold);border:1px solid rgba(224,164,59,.4);border-radius:5px;padding:2px 7px;letter-spacing:.03em}
+  .lede{font-size:13.5px;color:var(--ink2);margin:7px 0 0;max-width:76ch}
+
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 20px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .toolbar label{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+  select,button,input[type=text]{font-family:var(--sans);font-size:13px;color:var(--ink);
+    background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 11px}
+  select{cursor:pointer}
+  button{cursor:pointer;transition:border-color .15s,background .15s}
+  button:hover{border-color:var(--teal)}
+  button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .btn-p{background:rgba(45,212,178,.12);border-color:rgba(45,212,178,.4);color:#bff3e6}
+  .grow{flex:1}
+  .avail{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+
+  .cols{display:grid;grid-template-columns:1fr 400px;gap:18px;align-items:start}
+  @media(max-width:900px){.cols{grid-template-columns:1fr}}
+
+  .colh{font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink2);
+    display:flex;align-items:center;gap:10px;margin:2px 0 12px}
+  .colh .c{font-family:var(--mono);color:var(--ink3);font-size:10px}
+  .colh::after{content:'';flex:1;height:1px;background:var(--line)}
+
+  /* section cards */
+  .sec{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:13px 15px;margin-bottom:12px}
+  .sec .sh{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .sec .num{font-family:var(--mono);font-size:11px;color:var(--teal);font-weight:600;flex:0 0 auto}
+  .sec .tin{flex:1;font-weight:600;font-size:14px;background:transparent;border:1px solid transparent;border-radius:6px;padding:4px 7px;color:var(--ink);min-width:0}
+  .sec .tin:hover{border-color:var(--line2)} .sec .tin:focus{background:var(--field);border-color:var(--line)}
+  .sec .del{flex:0 0 auto;color:var(--ink3);background:none;border:none;font-size:15px;padding:2px 6px;border-radius:6px}
+  .sec .del:hover{color:var(--gap)}
+  .sec textarea{width:100%;background:var(--field);border:1px solid var(--line);border-radius:8px;color:var(--ink2);
+    font-family:var(--sans);font-size:12px;padding:8px 10px;resize:vertical;min-height:40px;line-height:1.45}
+  .sec textarea::placeholder{color:var(--ink3)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;align-items:center}
+  .chip{font-family:var(--mono);font-size:11px;border-radius:6px;padding:3px 6px 3px 8px;border:1px solid;display:inline-flex;align-items:center;gap:6px;cursor:default}
+  .chip .x{cursor:pointer;opacity:.6;font-size:13px;line-height:1}.chip .x:hover{opacity:1}
+  .chip.K{color:var(--teal);border-color:rgba(45,212,178,.4);background:rgba(45,212,178,.08)}
+  .chip.S{color:var(--blue);border-color:rgba(124,196,232,.4);background:rgba(124,196,232,.08)}
+  .chip.B{color:var(--purp);border-color:rgba(200,166,240,.4);background:rgba(200,166,240,.08)}
+  .chip.sug{border-style:dashed;cursor:pointer;opacity:.9}
+  .chip.sug::before{content:'+ ';opacity:.7}
+  .chip.sug:hover{opacity:1;background:rgba(224,164,59,.1)}
+  .sugwrap{margin-top:9px}
+  .sugh{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  .rowbtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .rowbtns button{font-size:11.5px;padding:5px 10px}
+  .mini{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-left:auto;align-self:center}
+  .picker{margin-top:8px;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 11px;max-height:190px;overflow:auto}
+  .picker .pg{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:7px 0 3px}
+  .picker label{display:flex;gap:8px;font-family:var(--sans);font-size:11.5px;color:var(--ink2);padding:2px 0;text-transform:none;letter-spacing:0;cursor:pointer}
+  .picker label .cc{font-family:var(--mono);color:var(--ink);flex:0 0 34px}
+
+  /* coverage panel */
+  .cov{position:sticky;top:16px;background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:17px 17px 15px}
+  .big{font-family:var(--mono);font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .big .of{color:var(--ink3);font-size:20px}
+  .under{font-family:var(--mono);font-size:11.5px;color:var(--teal);margin-top:6px}
+  .bar{display:flex;height:14px;border-radius:5px;overflow:hidden;border:1px solid var(--line);margin:13px 0 6px}
+  .bar i{display:block}.bar .g{background:var(--ok)}.bar .r{background:rgba(232,114,93,.32)}
+  .clegend{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+  .grpcov{display:flex;gap:8px;margin:15px 0 4px}
+  .gc{flex:1;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 10px;text-align:center}
+  .gc .l{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--ink3);text-transform:uppercase}
+  .gc .v{font-family:var(--mono);font-size:15px;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  .gc.K .v{color:var(--teal)}.gc.S .v{color:var(--blue)}.gc.B .v{color:var(--purp)}
+  .gaphd{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gap);margin:16px 0 8px;display:flex;gap:8px;align-items:center}
+  .gaphd::after{content:'';flex:1;height:1px;background:rgba(232,114,93,.25)}
+  .gaplist{display:flex;flex-wrap:wrap;gap:5px}
+  .gchip{font-family:var(--mono);font-size:10.5px;color:var(--gap);border:1px solid rgba(232,114,93,.35);background:rgba(232,114,93,.07);border-radius:5px;padding:2px 6px;cursor:help}
+  .allclear{font-size:12.5px;color:var(--ok);font-family:var(--mono)}
+  .note{font-size:11px;color:var(--ink3);margin-top:14px;line-height:1.5;border-top:1px solid var(--line);padding-top:11px}
+
+  /* matrix */
+  .mx{margin-top:26px}
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+  table{border-collapse:separate;border-spacing:0;font-size:11px}
+  th,td{padding:0}
+  .lH{position:sticky;left:0;background:var(--raise);z-index:3;text-align:left;padding:8px 12px;min-width:150px;
+    font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);border-bottom:1px solid var(--line)}
+  .cH{width:22px;font-family:var(--mono);font-size:9px;color:var(--ink2);text-align:center;padding:7px 0;border-bottom:1px solid var(--line);background:var(--raise);position:sticky;top:0}
+  .cH.gK{color:var(--teal)}.cH.gS{color:var(--blue)}.cH.gB{color:var(--purp)}
+  .rl{position:sticky;left:0;background:var(--panel2);z-index:2;padding:5px 12px;font-size:11px;color:var(--ink2);border-bottom:1px solid var(--line2);white-space:nowrap;max-width:190px;overflow:hidden;text-overflow:ellipsis}
+  .mc{width:22px;text-align:center;border-bottom:1px solid var(--line2)}
+  .d{display:inline-block;width:11px;height:11px;border-radius:3px;border:1px solid rgba(255,255,255,.06)}
+  .d.K{background:var(--teal);border-color:var(--teal)}.d.S{background:var(--blue);border-color:var(--blue)}.d.B{background:var(--purp);border-color:var(--purp)}
+  tr:hover .rl{background:#0f1a2b}
+  .foot{margin-top:26px;font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:center}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--raise);border:1px solid var(--teal);
+    color:var(--ink);font-size:12.5px;padding:9px 15px;border-radius:9px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+  .toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="assignment-builder-tk9x2.html">◂ Assignment Builder</a> &nbsp;/&nbsp; Step 1 · Find the right KSBs</div>
+  <div class="ttl"><h1>KSB Coverage Mapper 🎯</h1><span class="tag-v">P1 engine · v1 · offline</span></div>
+  <p class="lede">Break a brief into sections, let the offline matcher <strong>suggest</strong> which KSBs each one evidences, confirm them, and watch coverage &amp; gaps update live. Loaded with the real ST0071 standard and the "Sarah Petrie" exemplar's 11 sections so it opens on the validated case.</p>
+
+  <div class="toolbar">
+    <label for="std">Standard</label>
+    <select id="std"></select>
+    <span class="avail" id="avail"></span>
+    <span class="grow"></span>
+    <button id="add">+ Add section</button>
+    <button id="reset">Reset to ST0071 demo</button>
+    <button class="btn-p" id="export">Export JSON</button>
+  </div>
+
+  <div class="cols">
+    <div>
+      <div class="colh"><span>Brief sections</span><span class="c" id="seccount"></span></div>
+      <div id="sections"></div>
+    </div>
+    <div>
+      <div class="colh"><span>Coverage</span></div>
+      <div class="cov">
+        <div class="big" id="covbig">—</div>
+        <div class="under" id="covpct"></div>
+        <div class="bar"><i class="g" id="barok" style="flex:0"></i><i class="r" id="bargap" style="flex:1"></i></div>
+        <div class="clegend"><span id="legok">evidenced</span><span id="leggap">gaps</span></div>
+        <div class="grpcov">
+          <div class="gc K"><div class="l">Knowledge</div><div class="v" id="gcK">—</div></div>
+          <div class="gc S"><div class="l">Skills</div><div class="v" id="gcS">—</div></div>
+          <div class="gc B"><div class="l">Behaviours</div><div class="v" id="gcB">—</div></div>
+        </div>
+        <div class="gaphd">Not yet evidenced <span id="gapn"></span></div>
+        <div class="gaplist" id="gaplist"></div>
+        <div class="note">v1 uses an <b>offline term-overlap matcher</b> for suggestions — a starting point the coordinator confirms, not the final word. Distinguishing "absent" from "present-but-unclaimed", and richer semantic matching, come with the LLM pass (a later step).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mx">
+    <div class="colh"><span>Live coverage matrix</span><span class="c">sections × KSBs</span></div>
+    <div class="scroll"><table id="matrix"><thead></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="foot">Arthur Curtis · Assignment Builder · Step 1 KSB coverage engine · v1</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- standards data (real KSBs) ---------- */
+const STANDARDS={
+ ST0071:{name:"Customer Service Specialist (L3)",src:"Skills England ST0071 v1.3",
+  K:{K1:"Continuous improvement in a service environment; impact of change",K2:"Impact of your service on the wider organisation & value added",K3:"Business strategy re customers; recommend its future",K4:"Benefits of future-focused thinking in service decisions",K5:"A range of leadership styles, applied in service",K6:"Critically evaluate customer journeys, end-to-end",K7:"Why issues need referral or escalation to a specialist",K8:"Underpinning business processes behind good outcomes",K9:"Commercial factors & authority limits",K10:"Internal & external customers need different approaches",K11:"Analyse, use & present information for customer insight",K12:"What drives loyalty, retention & satisfaction",K13:"Different customer types & the role of emotions",K14:"How expectations differ by culture, age & social profile",K15:"Regulatory considerations, drivers & impacts",K16:"Your business environment, culture & place of service",K17:"Org structure & consequences if things go wrong",K18:"Find & use industry best practice"},
+  S:{S1:"Continuous-improvement, future-focused delivery & advice",S2:"Resolve complex issues via a wide range of approaches",S3:"Solutions meeting organisation & customer needs",S4:"Advanced questioning/listening; negotiate mutual outcomes",S5:"Manage challenging situations within your authority",S6:"Clear explanations, options & agreed next steps",S7:"Explore & interpret the customer experience",S8:"A cost-conscious mindset",S9:"Identify journey highs/lows that produce emotions",S10:"Written/verbal comms to simplify complex information",S11:"Proactively gather & critically analyse feedback",S12:"Analyse customer types to anticipate needs",S13:"Keep a positive relationship when you can't deliver",S14:"On escalations, account for history to set next steps",S15:"Analyse the end-to-end service experience",S16:"Make recommendations to enable improvement",S17:"Recommend & implement change re legislation/best practice"},
+  B:{B1:"Keep service & best-practice knowledge up to date",B2:"Set & act on personal service goals",B3:"Own actions to resolve customer issues",B4:"Proactivity & creativity in finding solutions",B5:"Make realistic promises & deliver on them",B6:"Work collaboratively with colleagues at all levels",B7:"Recognise colleagues as internal customers",B8:"Share knowledge to support colleague development",B9:"Positive, open-minded; tailor service to each customer",B10:"Adaptable & flexible to customer needs",B11:"Brand advocacy to build trust & satisfaction",B12:"Personal presentation reflects the brand"}}
+};
+
+/* ---------- demo sections for ST0071 (Sarah Petrie exemplar) ---------- */
+const DEMO=[
+ {t:"Introduction & Organisational Context",x:"job role and responsibilities; the building and client environment; how temperature and environment impact customer experience; environmental comfort links to business reputation and retention; how the organisation defines customer service standards",c:["K1","K3","K4","K16","K17"]},
+ {t:"The High-Level Challenge",x:"how the issue was first identified; the issue affected multiple clients; mismatch between BMS data and physical experience; business risks of reputation complaints and retention; why it required urgent intervention",c:["K2","K6","S6","S15"]},
+ {t:"Customer Journey & Emotional Impact",x:"reception interaction; client frustration and discomfort; internal versus external customers; impact on trust and loyalty; emotional highs and lows in the journey",c:["K6","K10","K12","S6","S7","B7"]},
+ {t:"Immediate Actions Taken",x:"initial system adjustments; physical inspection and validation; escalation and logging; customer communication; justification for the decisions taken",c:["S1","S3","S5","S6","S8","S15","B3"]},
+ {t:"Balancing Customer Needs & Organisational Constraints",x:"temporary heaters; risks of heaters affecting the system; budget considerations; authority boundaries; SLA awareness; cost and commercial factors",c:["K2","K9","S8"]},
+ {t:"Root Cause Analysis",x:"heater tripping; sensor fault; BMS reset patterns; system imbalance; digital versus physical validation; causes of service failure",c:["K2","K4","K17","S15","S16"]},
+ {t:"Monitoring & Continuous Improvement",x:"daily monitoring; logging requests; identifying recurring issues; adjusting time clocks; preventative measures; gathering feedback",c:["K1","S11","S12","S16","S17"]},
+ {t:"Cross-Department Collaboration",x:"working with engineers; working with building management; communicating with reception and security; sharing updates and lessons learned with colleagues",c:["B1","B6","B7","B11","B12"]},
+ {t:"Recommendations for Future Improvement",x:"morning BMS review process; escalation matrix; preventative maintenance; sensor audits; documentation procedures; business benefit; risk reduction; legislation and compliance",c:["K2","K3","S16","S17"]},
+ {t:"Reflection & Personal Development",x:"lessons learned; importance of physical verification; managing difficult conversations; confidence in escalation; future development goals",c:["K4","S5","B1","B2","B3","B5"]},
+ {t:"Measured Impact & Strategic Alignment",x:"reduction in repeat complaints; response confidence; preventative cost benefit; strategic alignment as a premium workspace; system resilience; integrated service model",c:["K1","B3"]}
+];
+
+/* ---------- offline matcher (TF-IDF-ish term overlap) ---------- */
+const STOP=new Set("the a an and or of to in on for with your you their our its it is are be as at by from that this these those how what who when where which not into within also may can will would should could per via than then them they we i".split(" "));
+function toks(s){return (String(s).toLowerCase().match(/[a-z]+/g)||[]).filter(w=>w.length>2&&!STOP.has(w)).map(w=>w.replace(/(ing|edly|ed|ations?|ates?|ally|ies|ment|ness|ised|ise|s)$/,''));}
+let IDF={},KTOK={};
+function buildIndex(std){
+ IDF={};KTOK={};const codes=allCodes(std);const N=codes.length;const df={};
+ codes.forEach(c=>{const t=toks(ksbText(std,c));KTOK[c]=new Set(t);new Set(t).forEach(w=>df[w]=(df[w]||0)+1);});
+ Object.keys(df).forEach(w=>IDF[w]=Math.log((N+1)/(df[w]+1))+1);
+}
+function suggest(std,text,exclude){
+ const st=toks(text);const stset=new Set(st);const scores=[];
+ allCodes(std).forEach(c=>{if(exclude.has(c))return;let s=0;KTOK[c].forEach(w=>{if(stset.has(w))s+=(IDF[w]||1);});if(s>0)scores.push([c,s]);});
+ scores.sort((a,b)=>b[1]-a[1]);
+ const max=scores.length?scores[0][1]:0;
+ return scores.filter(x=>x[1]>=Math.max(1.6,max*0.42)).slice(0,6).map(x=>x[0]);
+}
+
+/* ---------- helpers ---------- */
+function grp(c){return c[0];}
+function allCodes(std){const d=STANDARDS[std];return [...Object.keys(d.K),...Object.keys(d.S),...Object.keys(d.B)];}
+function ksbText(std,c){return STANDARDS[std][grp(c)][c];}
+
+/* ---------- state ---------- */
+let state={std:"ST0071",secs:[]};
+function loadDemo(){state.secs=DEMO.map((d,i)=>({id:i+1,t:d.t,x:d.x,c:[...d.c]}));}
+loadDemo();
+
+/* ---------- render ---------- */
+const $=id=>document.getElementById(id);
+function fillStd(){
+ $('std').innerHTML=Object.keys(STANDARDS).map(k=>`<option value="${k}">${STANDARDS[k].name}</option>`).join('');
+ $('std').value=state.std;
+ $('avail').textContent="· "+STANDARDS[state.std].src+" · 47 KSBs · (279 more standards available from the scraper)";
+}
+function renderSections(){
+ buildIndex(state.std);
+ $('seccount').textContent=state.secs.length+" sections";
+ $('sections').innerHTML=state.secs.map((s,i)=>{
+  const chips=s.c.map(c=>`<span class="chip ${grp(c)}" title="${esc(ksbText(state.std,c))}">${c}<span class="x" data-rm="${i}|${c}">×</span></span>`).join('');
+  return `<div class="sec">
+    <div class="sh"><span class="num">${i+1}</span>
+      <input class="tin" value="${esc(s.t)}" data-t="${i}" aria-label="Section title">
+      <button class="del" data-del="${i}" title="Remove section">🗑</button></div>
+    <textarea data-x="${i}" placeholder="What the learner should write here — the more detail, the better the suggestions">${esc(s.x)}</textarea>
+    <div class="chips">${chips||'<span class="mini">no KSBs yet</span>'}</div>
+    <div class="sugwrap" id="sug${i}"></div>
+    <div class="rowbtns">
+      <button data-sug="${i}">✨ Suggest KSBs</button>
+      <button data-pick="${i}">+ Add manually</button>
+      <span class="mini">${s.c.length} evidenced here</span>
+    </div>
+    <div id="pick${i}"></div>
+  </div>`;
+ }).join('');
+ bindSections();
+ renderCoverage();
+ renderMatrix();
+}
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+function bindSections(){
+ document.querySelectorAll('[data-t]').forEach(el=>el.onchange=e=>{state.secs[+e.target.dataset.t].t=e.target.value;});
+ document.querySelectorAll('[data-x]').forEach(el=>el.onchange=e=>{state.secs[+e.target.dataset.x].x=e.target.value;});
+ document.querySelectorAll('[data-del]').forEach(el=>el.onclick=e=>{state.secs.splice(+e.target.dataset.del,1);reindex();renderSections();});
+ document.querySelectorAll('[data-rm]').forEach(el=>el.onclick=e=>{const[i,c]=e.target.dataset.rm.split('|');state.secs[+i].c=state.secs[+i].c.filter(x=>x!==c);renderSections();});
+ document.querySelectorAll('[data-sug]').forEach(el=>el.onclick=e=>{showSug(+e.target.dataset.sug);});
+ document.querySelectorAll('[data-pick]').forEach(el=>el.onclick=e=>{showPick(+e.target.dataset.pick);});
+}
+function showSug(i){
+ const s=state.secs[i];const have=new Set(s.c);const props=suggest(state.std,s.t+" "+s.x,have);
+ const box=$('sug'+i);
+ if(!props.length){box.innerHTML='<div class="sugh">no new suggestions — add more detail above, or use “add manually”</div>';return;}
+ box.innerHTML='<div class="sugh">suggested — click to confirm</div><div class="chips">'+
+  props.map(c=>`<span class="chip ${grp(c)} sug" data-acc="${i}|${c}" title="${esc(ksbText(state.std,c))}">${c}</span>`).join('')+'</div>';
+ box.querySelectorAll('[data-acc]').forEach(el=>el.onclick=ev=>{const[ii,c]=ev.target.dataset.acc.split('|');if(!state.secs[+ii].c.includes(c))state.secs[+ii].c.push(c);renderSections();});
+}
+function showPick(i){
+ const s=state.secs[i];const have=new Set(s.c);const d=STANDARDS[state.std];
+ const grpHtml=g=>`<div class="pg">${({K:'Knowledge',S:'Skills',B:'Behaviours'})[g]}</div>`+
+  Object.keys(d[g]).map(c=>`<label><input type="checkbox" ${have.has(c)?'checked':''} data-pk="${i}|${c}"><span class="cc">${c}</span>${esc(d[g][c])}</label>`).join('');
+ const box=$('pick'+i);
+ box.innerHTML=`<div class="picker">${grpHtml('K')}${grpHtml('S')}${grpHtml('B')}</div>`;
+ box.querySelectorAll('[data-pk]').forEach(el=>el.onchange=ev=>{const[ii,c]=ev.target.dataset.pk.split('|');const sec=state.secs[+ii];if(ev.target.checked){if(!sec.c.includes(c))sec.c.push(c);}else{sec.c=sec.c.filter(x=>x!==c);}renderCoverage();renderMatrix();});
+}
+function reindex(){state.secs.forEach((s,i)=>s.id=i+1);}
+
+function covered(){const set=new Set();state.secs.forEach(s=>s.c.forEach(c=>set.add(c)));return set;}
+function renderCoverage(){
+ const cov=covered();const all=allCodes(state.std);const n=all.length;const e=[...cov].filter(c=>all.includes(c)).length;
+ $('covbig').innerHTML=e+'<span class="of"> / '+n+'</span>';
+ $('covpct').textContent=Math.round(e/n*100)+'% evidenced · '+(n-e)+' not landed';
+ $('barok').style.flex=e; $('bargap').style.flex=(n-e);
+ $('legok').textContent=e+' evidenced'; $('leggap').textContent=(n-e)+' gaps';
+ ['K','S','B'].forEach(g=>{const codes=Object.keys(STANDARDS[state.std][g]);const c=codes.filter(x=>cov.has(x)).length;$('gc'+g).textContent=c+'/'+codes.length;});
+ const gaps=all.filter(c=>!cov.has(c));
+ $('gapn').textContent=gaps.length?'· '+gaps.length:'';
+ $('gaplist').innerHTML=gaps.length?gaps.map(c=>`<span class="gchip" title="${esc(ksbText(state.std,c))}">${c}</span>`).join(''):'<span class="allclear">✓ every KSB evidenced</span>';
+}
+function renderMatrix(){
+ const all=allCodes(state.std);
+ let head='<tr><th class="lH">Section</th>'+all.map(c=>`<th class="cH g${grp(c)}" title="${esc(ksbText(state.std,c))}">${c.slice(1)}</th>`).join('')+'</tr>';
+ $('matrix').querySelector('thead').innerHTML=head;
+ let body=state.secs.map(s=>{
+  const set=new Set(s.c);
+  return `<tr><td class="rl" title="${esc(s.t)}">${esc(s.t)}</td>`+all.map(c=>`<td class="mc">${set.has(c)?`<span class="d ${grp(c)}"></span>`:'<span class="d"></span>'}</td>`).join('')+'</tr>';
+ }).join('');
+ $('matrix').querySelector('tbody').innerHTML=body;
+}
+
+/* ---------- actions ---------- */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800);}
+$('add').onclick=()=>{state.secs.push({id:state.secs.length+1,t:"New section",x:"",c:[]});renderSections();window.scrollTo(0,document.body.scrollHeight);};
+$('reset').onclick=()=>{loadDemo();renderSections();toast("Reset to the ST0071 demo");};
+$('std').onchange=e=>{state.std=e.target.value;state.secs.forEach(s=>s.c=[]);fillStd();renderSections();toast("Switched standard — sections cleared, re-map");};
+$('export').onclick=()=>{
+ const out={standard:state.std,standardName:STANDARDS[state.std].name,generated:"manual",coverage:{},sections:state.secs.map(s=>({title:s.t,ksbs:s.c}))};
+ const cov=covered();out.coverage={evidenced:[...cov],gaps:allCodes(state.std).filter(c=>!cov.has(c))};
+ const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="ksb-coverage-"+state.std+".json";a.click();
+ toast("Exported mapping JSON");
+};
+
+fillStd();renderSections();
+</script>
+</body>
+</html>
