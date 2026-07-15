@@ -175,7 +175,11 @@ const STANDARDS={
  ST0071:{name:"Customer Service Specialist (L3)",src:"Skills England ST0071 v1.3",
   K:{K1:"Continuous improvement in a service environment; impact of change",K2:"Impact of your service on the wider organisation & value added",K3:"Business strategy re customers; recommend its future",K4:"Benefits of future-focused thinking in service decisions",K5:"A range of leadership styles, applied in service",K6:"Critically evaluate customer journeys, end-to-end",K7:"Why issues need referral or escalation to a specialist",K8:"Underpinning business processes behind good outcomes",K9:"Commercial factors & authority limits",K10:"Internal & external customers need different approaches",K11:"Analyse, use & present information for customer insight",K12:"What drives loyalty, retention & satisfaction",K13:"Different customer types & the role of emotions",K14:"How expectations differ by culture, age & social profile",K15:"Regulatory considerations, drivers & impacts",K16:"Your business environment, culture & place of service",K17:"Org structure & consequences if things go wrong",K18:"Find & use industry best practice"},
   S:{S1:"Continuous-improvement, future-focused delivery & advice",S2:"Resolve complex issues via a wide range of approaches",S3:"Solutions meeting organisation & customer needs",S4:"Advanced questioning/listening; negotiate mutual outcomes",S5:"Manage challenging situations within your authority",S6:"Clear explanations, options & agreed next steps",S7:"Explore & interpret the customer experience",S8:"A cost-conscious mindset",S9:"Identify journey highs/lows that produce emotions",S10:"Written/verbal comms to simplify complex information",S11:"Proactively gather & critically analyse feedback",S12:"Analyse customer types to anticipate needs",S13:"Keep a positive relationship when you can't deliver",S14:"On escalations, account for history to set next steps",S15:"Analyse the end-to-end service experience",S16:"Make recommendations to enable improvement",S17:"Recommend & implement change re legislation/best practice"},
-  B:{B1:"Keep service & best-practice knowledge up to date",B2:"Set & act on personal service goals",B3:"Own actions to resolve customer issues",B4:"Proactivity & creativity in finding solutions",B5:"Make realistic promises & deliver on them",B6:"Work collaboratively with colleagues at all levels",B7:"Recognise colleagues as internal customers",B8:"Share knowledge to support colleague development",B9:"Positive, open-minded; tailor service to each customer",B10:"Adaptable & flexible to customer needs",B11:"Brand advocacy to build trust & satisfaction",B12:"Personal presentation reflects the brand"}}
+  B:{B1:"Keep service & best-practice knowledge up to date",B2:"Set & act on personal service goals",B3:"Own actions to resolve customer issues",B4:"Proactivity & creativity in finding solutions",B5:"Make realistic promises & deliver on them",B6:"Work collaboratively with colleagues at all levels",B7:"Recognise colleagues as internal customers",B8:"Share knowledge to support colleague development",B9:"Positive, open-minded; tailor service to each customer",B10:"Adaptable & flexible to customer needs",B11:"Brand advocacy to build trust & satisfaction",B12:"Personal presentation reflects the brand"}},
+ ST0384:{name:"Team Leader (L3)",src:"Skills England ST0384 v1.4",
+  K:{K1:"Performance management techniques",K2:"How to identify others' learning needs and solutions to address them",K3:"Processes and policies that support delivery of operational requirements",K4:"Project management tools and techniques",K5:"Relevant regulation, legislation and compliance affecting the role and organisation",K6:"Organisational strategy and objectives and how their role impacts them",K7:"How to manage resources to implement operational and team plans",K8:"Time management and prioritisation tools",K9:"Communication techniques including presentation, negotiation and influencing",K10:"Policy and procedure relating to people and organisational culture",K11:"Stakeholder management",K12:"Problem-solving and decision-making principles",K13:"Principles of change management and continuous improvement",K14:"IT and software used to support the business",K15:"External factors affecting the workplace, such as sustainability and net zero",K16:"The impact internal and external factors have on their role",K17:"Leadership and management approaches",K18:"The purpose of their role, including responsibility and accountability",K19:"The impact of cross-team working on delivering organisational objectives",K20:"How to collate, interpret and communicate data for different audiences",K21:"The wider social and economic environment the organisation operates in",K22:"Approaches to managing budgets and maximising efficient use of resources",K23:"Principles of equity, diversity and inclusion and their impact"},
+  S:{S1:"Use resources to implement operational and team plans",S2:"Organise, prioritise and allocate daily and weekly work activities",S3:"Collate and interpret data and information and create reports",S4:"Support the team's development through coaching and CPD",S5:"Use problem-solving techniques to provide solutions and influence decisions",S6:"Use digital tools for planning and project management, taking corrective action",S7:"Review work processes to improve performance and for continuous improvement",S8:"Use technology and software to produce documentation to communicate information",S9:"Manage performance by setting objectives, monitoring progress and giving feedback",S10:"Manage others through change by identifying challenges and resolving them",S11:"Interpret organisational strategy and communicate how it impacts others",S12:"Interpret and apply regulation and legislation and advise stakeholders",S13:"Communicate through different media so stakeholders understand what is required",S14:"Collaborate with stakeholders to ensure delivery of operational goals",S15:"Manage relationships with a diverse workforce and stakeholders",S16:"Negotiate with and challenge stakeholders to manage change and reduce conflict",S17:"Support delivery of equity, diversity and inclusion and monitor its impact",S18:"Identify future sector changes, such as technology, that may impact the organisation",S19:"Monitor technology use and its potential to reduce energy consumption"},
+  B:{B1:"Acts professionally, ethically and with integrity",B2:"Supports an inclusive culture, treating others fairly and with respect",B3:"Takes accountability and ownership of tasks and workload",B4:"Seeks learning opportunities and continuous professional development",B5:"Works flexibly and adapts to circumstances"}}
 };
 
 /* ---------- demo sections for ST0071 (Sarah Petrie exemplar) ---------- */
@@ -193,18 +197,34 @@ const DEMO=[
  {t:"Measured Impact & Strategic Alignment",x:"reduction in repeat complaints; response confidence; preventative cost benefit; strategic alignment as a premium workspace; system resilience; integrated service model",c:["K1","B3"]}
 ];
 
+/* ---------- demo sections for ST0384 (generic Team Leader work-based project — no oracle; map with the matcher) ---------- */
+const DEMO_TL=[
+ {t:"Organisational context & the operational challenge",x:"the organisation's strategy and objectives; my role, responsibility and accountability; the operational problem or improvement opportunity; why it mattered to the team and business; external factors affecting the workplace",c:[]},
+ {t:"Leadership approach & leading the team",x:"leadership and management styles I applied; motivating and directing the team; setting direction and communicating the vision; building an inclusive team culture",c:[]},
+ {t:"Planning, resourcing & project management",x:"project management tools and techniques; planning the work; allocating and managing resources; prioritising and organising daily and weekly activities; monitoring progress against the plan",c:[]},
+ {t:"Managing performance & developing people",x:"setting objectives and monitoring individual and team performance; giving feedback and guidance; identifying learning needs; coaching and continuous professional development",c:[]},
+ {t:"Stakeholder management & collaboration",x:"identifying and managing stakeholders; collaborating across teams; communicating through meetings, emails, reports and presentations; negotiating and managing conflict",c:[]},
+ {t:"Managing change & problem-solving",x:"leading the team through change; identifying challenges and resolving them; problem-solving and decision-making; interpreting and applying regulation and legislation",c:[]},
+ {t:"Data, budget & decision-making",x:"collating and interpreting data and creating reports; using information to inform decisions; managing the budget and resources efficiently; using IT and software to support the business",c:[]},
+ {t:"Results, evaluation & continuous improvement",x:"reviewing work processes; identifying opportunities to improve performance; continuous improvement; evaluating outcomes; sustainability and reducing energy consumption",c:[]},
+ {t:"Reflection & personal development",x:"acting professionally, ethically and with integrity; taking accountability and ownership; seeking learning and CPD; working flexibly and adapting; equity, diversity and inclusion",c:[]}
+];
+const DEMOS={ST0071:DEMO,ST0384:DEMO_TL};
+
 /* ---------- offline matcher (TF-IDF-ish term overlap) ---------- */
 const STOP=new Set("the a an and or of to in on for with your you their our its it is are be as at by from that this these those how what who when where which not into within also may can will would should could per via than then them they we i".split(" "));
 function toks(s){return (String(s).toLowerCase().match(/[a-z]+/g)||[]).filter(w=>w.length>2&&!STOP.has(w)).map(w=>w.replace(/(ing|edly|ed|ations?|ates?|ally|ies|ment|ness|ised|ise|s)$/,''));}
-let IDF={},KTOK={};
+let INDEX={};
 function buildIndex(std){
- IDF={};KTOK={};const codes=allCodes(std);const N=codes.length;const df={};
- codes.forEach(c=>{const t=toks(ksbText(std,c));KTOK[c]=new Set(t);new Set(t).forEach(w=>df[w]=(df[w]||0)+1);});
- Object.keys(df).forEach(w=>IDF[w]=Math.log((N+1)/(df[w]+1))+1);
+ if(INDEX[std])return INDEX[std];
+ const idf={},ktok={};const codes=allCodes(std);const N=codes.length;const df={};
+ codes.forEach(c=>{const t=toks(ksbText(std,c));ktok[c]=new Set(t);new Set(t).forEach(w=>df[w]=(df[w]||0)+1);});
+ Object.keys(df).forEach(w=>idf[w]=Math.log((N+1)/(df[w]+1))+1);
+ INDEX[std]={idf,ktok};return INDEX[std];
 }
 function suggest(std,text,exclude){
- const st=toks(text);const stset=new Set(st);const scores=[];
- allCodes(std).forEach(c=>{if(exclude.has(c))return;let s=0;KTOK[c].forEach(w=>{if(stset.has(w))s+=(IDF[w]||1);});if(s>0)scores.push([c,s]);});
+ const ix=buildIndex(std);const stset=new Set(toks(text));const scores=[];
+ allCodes(std).forEach(c=>{if(exclude.has(c))return;let s=0;ix.ktok[c].forEach(w=>{if(stset.has(w))s+=(ix.idf[w]||1);});if(s>0)scores.push([c,s]);});
  scores.sort((a,b)=>b[1]-a[1]);
  const max=scores.length?scores[0][1]:0;
  return scores.filter(x=>x[1]>=Math.max(1.6,max*0.42)).slice(0,6).map(x=>x[0]);
@@ -217,20 +237,21 @@ function ksbText(std,c){return STANDARDS[std][grp(c)][c];}
 
 /* ---------- state ---------- */
 let state={std:"ST0071",secs:[]};
-function loadDemo(){state.secs=DEMO.map((d,i)=>({id:i+1,t:d.t,x:d.x,c:[...d.c]}));}
-loadDemo();
+function loadDemo(code){var d=DEMOS[code||state.std]||[];state.secs=d.map((x,i)=>({id:i+1,t:x.t,x:x.x,c:[...(x.c||[])]}));}
+loadDemo('ST0071');
 
 /* ---------- render ---------- */
 const $=id=>document.getElementById(id);
 function fillStd(){
- $('std').innerHTML=Object.keys(STANDARDS).map(k=>`<option value="${k}">${STANDARDS[k].name}</option>`).join('');
+ var keys=Object.keys(STANDARDS).sort((a,b)=>STANDARDS[a].name.localeCompare(STANDARDS[b].name));
+ $('std').innerHTML=keys.map(k=>`<option value="${k}">${esc(STANDARDS[k].name)}${STANDARDS[k].level?' (L'+STANDARDS[k].level+')':''} · ${k}</option>`).join('');
  $('std').value=state.std;
- $('avail').textContent="· "+STANDARDS[state.std].src+" · 47 KSBs · (279 more standards available from the scraper)";
+ $('avail').textContent="· "+STANDARDS[state.std].src+" · "+allCodes(state.std).length+" KSBs · "+Object.keys(STANDARDS).length+" standards loaded";
 }
 function renderSections(){
  buildIndex(state.std);
  $('seccount').textContent=state.secs.length+" sections";
- $('sections').innerHTML=state.secs.map((s,i)=>{
+ var html=state.secs.map((s,i)=>{
   const chips=s.c.map(c=>`<span class="chip ${grp(c)}" title="${esc(ksbText(state.std,c))}">${c}<span class="x" data-rm="${i}|${c}">×</span></span>`).join('');
   return `<div class="sec">
     <div class="sh"><span class="num">${i+1}</span>
@@ -247,6 +268,7 @@ function renderSections(){
     <div id="pick${i}"></div>
   </div>`;
  }).join('');
+ $('sections').innerHTML=html||'<div class="sec" style="color:var(--ink3);font-size:13px;text-align:center">No sections yet for this standard — click <b style="color:var(--ink2)">+ Add section</b> to start mapping a brief.</div>';
  bindSections();
  renderCoverage();
  renderMatrix();
@@ -305,8 +327,8 @@ function renderMatrix(){
 /* ---------- actions ---------- */
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800);}
 $('add').onclick=()=>{state.secs.push({id:state.secs.length+1,t:"New section",x:"",c:[]});renderSections();window.scrollTo(0,document.body.scrollHeight);};
-$('reset').onclick=()=>{loadDemo();renderSections();toast("Reset to the ST0071 demo");};
-$('std').onchange=e=>{state.std=e.target.value;state.secs.forEach(s=>s.c=[]);fillStd();renderSections();toast("Switched standard — sections cleared, re-map");};
+$('reset').onclick=()=>{loadDemo(state.std);renderSections();toast("Reset to demo sections");};
+$('std').onchange=e=>{state.std=e.target.value;loadDemo(state.std);fillStd();renderSections();toast("Switched to "+STANDARDS[state.std].name);};
 $('export').onclick=()=>{
  const out={standard:state.std,standardName:STANDARDS[state.std].name,generated:"manual",coverage:{},sections:state.secs.map(s=>({title:s.t,ksbs:s.c}))};
  const cov=covered();out.coverage={evidenced:[...cov],gaps:allCodes(state.std).filter(c=>!cov.has(c))};
@@ -316,6 +338,15 @@ $('export').onclick=()=>{
 };
 
 fillStd();renderSections();
+
+/* ---------- load the full standard library (fetched; the 2 inline standards are the offline fallback) ---------- */
+(function loadLibrary(){
+ fetch('ksb-standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(lib){
+  var added=0;Object.keys(lib).forEach(function(c){if(!STANDARDS[c]){STANDARDS[c]=lib[c];added++;}});
+  var cur=state.std;fillStd();$('std').value=cur;
+  if(added)toast(Object.keys(STANDARDS).length+" standards available");
+ }).catch(function(){/* offline or file missing — keep the 2 inline standards */});
+})();
 </script>
 </body>
 </html>
