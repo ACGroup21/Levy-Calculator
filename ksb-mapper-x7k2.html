@@ -144,7 +144,8 @@
     <button id="collapse">Collapse all</button>
     <button id="add">+ Add section</button>
     <button id="reset">Reset demo</button>
-    <button class="btn-p" id="export">Export JSON</button>
+    <button id="export">Export JSON</button>
+    <button class="btn-p" id="guide">Generate step guide →</button>
   </div>
 
   <div class="cols">
@@ -355,6 +356,12 @@ $('export').onclick=()=>{
  const blob=new Blob([JSON.stringify(out,null,2)],{type:"application/json"});
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download="ksb-coverage-"+state.std+".json";a.click();
  toast("Exported mapping JSON");
+};
+$('guide').onclick=()=>{
+ var d=STANDARDS[state.std];
+ var payload={std:state.std,standardName:d.name,ksb:Object.assign({},d.K,d.S,d.B),sections:state.secs.map(function(s){return {t:s.t,x:s.x,c:s.c};})};
+ localStorage.setItem('ab_guide_input',JSON.stringify(payload));
+ window.open('guide-gen-x4m9.html','_blank');
 };
 
 fillStd();renderSections();

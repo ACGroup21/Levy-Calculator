@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Step-Guide Generator — Assignment Builder</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<style>
+  :root{
+    --bg:#0a1220;--panel:#101c30;--panel2:#0c1626;--field:#0d1829;
+    --line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.05);
+    --ink:#e9f1f8;--ink2:#94aabe;--ink3:#647d92;
+    --teal:#2DD4B2;--blue:#7cc4e8;--purp:#c8a6f0;--gold:#e0a43b;--ok:#4ac48c;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+    --serif:Georgia,'Times New Roman',serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;padding:26px 20px 80px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto}
+  a{color:var(--teal)}
+  .crumb{font-family:var(--mono);font-size:11px;color:var(--ink3);letter-spacing:.05em;margin-bottom:12px}
+  .crumb a{color:var(--ink2);text-decoration:none}
+  .ttl{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  h1{font-size:22px;font-weight:700;letter-spacing:-.015em;margin:0}
+  .tagv{font-family:var(--mono);font-size:10.5px;color:var(--gold);border:1px solid rgba(224,164,59,.4);border-radius:5px;padding:2px 7px}
+  .lede{font-size:13px;color:var(--ink2);margin:7px 0 0;max-width:74ch}
+  .lede b{color:var(--ink)}
+  .controls{position:sticky;top:0;z-index:10;display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:16px 0 20px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:11px 13px}
+  .src{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .src b{color:var(--teal)}
+  .grow{flex:1}
+  button{cursor:pointer;font-family:var(--sans);font-size:13px;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:8px;padding:8px 12px;transition:border-color .15s}
+  button:hover{border-color:var(--teal)}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .btn-p{background:rgba(45,212,178,.12);border-color:rgba(45,212,178,.4);color:#bff3e6}
+
+  /* document */
+  .doc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 4px}
+  .notice{background:rgba(232,114,93,.06);border:1px solid rgba(232,114,93,.22);border-left:3px solid #e8725d;border-radius:10px;padding:15px 18px;margin:10px 12px 18px}
+  .notice h2{font-size:14px;margin:0 0 8px;color:#f4a593}
+  .notice p{font-size:12.5px;color:var(--ink2);margin:6px 0}
+  .notice b{color:var(--ink)}
+
+  .doch{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:4px 18px 14px;border-bottom:1px solid var(--line);margin-bottom:6px}
+  .doch .dt{font-size:17px;font-weight:700}
+  .doch .dm{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+
+  .sec{padding:16px 18px;border-bottom:1px solid var(--line2)}
+  .sec:last-child{border-bottom:none}
+  .sh{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .sh .num{font-family:var(--mono);font-size:13px;color:var(--teal);font-weight:600}
+  .sh .st{font-size:16px;font-weight:600;letter-spacing:-.005em}
+  .sh .tgt{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .sh .tgt b[contenteditable]{color:var(--gold);outline:none;border-bottom:1px dashed rgba(224,164,59,.4);padding:0 3px}
+  .fld{margin:11px 0}
+  .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;display:flex;align-items:center;gap:8px}
+  .lbl.pass{color:var(--ok)} .lbl.dist{color:var(--gold)} .lbl.purpose{color:var(--blue)}
+  .lbl .badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;color:var(--ink3);border:1px solid var(--line);border-radius:4px;padding:1px 5px;text-transform:none}
+  [contenteditable]{outline:none}
+  .edit{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--ink);line-height:1.55}
+  .edit:focus{border-color:rgba(45,212,178,.45)}
+  .edit ul{margin:2px 0;padding-left:20px} .edit li{margin:3px 0}
+  .edit.purpose{color:var(--ink2)}
+
+  .ksbcov{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+  .kgrp{margin:5px 0}
+  .kgrp .gl{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+  .kgrp.K .gl{color:var(--teal)} .kgrp.S .gl{color:var(--blue)} .kgrp.B .gl{color:var(--purp)}
+  .kli{display:flex;gap:9px;font-size:12px;color:var(--ink2);padding:2px 0}
+  .kli .kc{font-family:var(--mono);font-size:11px;flex:0 0 34px}
+  .kgrp.K .kc{color:var(--teal)} .kgrp.S .kc{color:var(--blue)} .kgrp.B .kc{color:var(--purp)}
+  .none{font-size:12px;color:var(--gold)}
+
+  .checklist{padding:16px 18px}
+  .checklist h3{font-size:14px;margin:0 0 9px}
+  .checklist .edit{}
+  .foot{margin-top:22px;font-family:var(--mono);font-size:11px;color:var(--ink3);text-align:center}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#14233a;border:1px solid var(--teal);color:var(--ink);font-size:12.5px;padding:9px 15px;border-radius:9px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:30}
+  .toast.on{opacity:1}
+
+  /* PRINT — clean white learner document */
+  @media print{
+    @page{margin:18mm}
+    body{background:#fff;color:#111;padding:0;font-family:var(--serif)}
+    .crumb,.ttl,.lede,.controls,.foot,.sh .tgt .hint,.lbl .badge{display:none!important}
+    .doc{background:#fff;border:none;border-radius:0;padding:0}
+    .notice{background:#fff;border:1px solid #999;border-left:3px solid #333;color:#111;break-inside:avoid}
+    .notice h2,.notice b{color:#111} .notice p{color:#222}
+    .doch{border-color:#333} .doch .dt{color:#111} .doch .dm{color:#444}
+    .sec{border-color:#ccc;break-inside:avoid;padding:12px 0}
+    .sh .num,.sh .st{color:#111} .sh .tgt{color:#444}
+    .sh .tgt b[contenteditable]{color:#111;border:none}
+    .lbl{color:#333!important} .lbl.pass{color:#0a6b3f!important} .lbl.dist{color:#8a5a00!important} .lbl.purpose{color:#134a6b!important}
+    .edit{background:#fff;border:none;padding:0 0 0 2px;color:#111}
+    .edit.purpose{color:#222}
+    .ksbcov{background:#f6f6f4;border:1px solid #ccc}
+    .kli{color:#222} .kgrp .gl{color:#333!important}
+    .kgrp.K .kc,.kgrp.S .kc,.kgrp.B .kc{color:#111}
+    .checklist h3{color:#111}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="ksb-mapper-x7k2.html">◂ Coverage Mapper</a> &nbsp;/&nbsp; Step 2 · Write the step-by-step guide</div>
+  <div class="ttl"><h1>Step-Guide Generator 📝</h1><span class="tagv">Step 2 · v1 · offline</span></div>
+  <p class="lede">Turns the Step 1 mapping into a <b>Part A step guide</b> — per section: word target, purpose, what to write, the real KSB coverage, and Pass / Distinction criteria. Everything is a <b>draft you edit</b>; the KSB coverage is taken verbatim from the standard. Print to a clean learner document.</p>
+
+  <div class="controls">
+    <span class="src" id="src"></span>
+    <span class="grow"></span>
+    <button id="regen" title="Re-draft Purpose / Pass / Distinction from the mapping (overwrites edits)">↻ Regenerate drafts</button>
+    <button class="btn-p" id="print">🖨 Print / Save PDF</button>
+  </div>
+
+  <div class="doc" id="doc"></div>
+
+  <div class="foot">Arthur Curtis · Assignment Builder · Step 2 step-guide generator · v1</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- input: from the Mapper (localStorage) or the baked ST0071 demo ---------- */
+const DEMO_INPUT={
+ std:"ST0071",standardName:"Customer Service Specialist (L3)",
+ ksb:{K1:"Understand what continuous improvement means in a service environment and how your recommendations for change impact your organisation",K2:"Understand the impact your service provision has on the wider organisation and the value it adds",K3:"Understand your organisation's current business strategy in relation to customers and make recommendations for its future",K4:"Understand the principles and benefits of being able to think about the future when taking action or making service related decisions",K6:"Understand and critically evaluate the possible journeys of your customers, including the end-to-end experience",K9:"Understand commercial factors and authority limits for delivering the required customer experience",K10:"Know your internal and external customers and how their behaviour may require different approaches from you",K12:"Understand what drives loyalty, retention and satisfaction and how they impact on your organisation",K16:"Understand your business environment and culture and the position of customer service within it",K17:"Understand your organisation structure and what role each department plays in delivering customer service and the consequences should things go wrong",S1:"Demonstrate a continuous improvement and future focussed approach to customer service delivery including decision making and recommendations",S3:"Find solutions that meet your organisation's needs as well as the customer requirements",S5:"Manage challenging and complicated situations within your level of authority and make recommendations to enable change",S6:"Use clear explanations, provide options and solutions to influence and help customers make choices and agree next steps",S7:"Explore and interpret the customer experience to inform and influence achieving a positive result for customer satisfaction",S8:"Demonstrate a cost conscious mind-set when meeting customer and business needs",S11:"Proactively gather customer feedback, critically analyse and evaluate its meaning, implication and facts and act upon it",S12:"Analyse your customer types to identify or anticipate their potential needs and expectations",S15:"Analyse the end to end service experience, seeking input from others where required, supporting development of solutions",S16:"Make recommendations based on your findings to enable improvement",S17:"Make recommendations and implement changes in line with new and relevant legislation, regulations and industry best practice",B1:"Proactively keep your service, industry and best practice knowledge and skills up-to-date",B2:"Consider personal goals related to service and take action towards achieving them",B3:"Personally commit to and take ownership for actions to resolve customer issues to the satisfaction of the customer and your organisation",B5:"Make realistic promises and deliver on them",B6:"Work effectively and collaboratively with colleagues at all levels to achieve results",B7:"Recognise colleagues as internal customers",B11:"Demonstrate brand advocacy, values and belief when dealing with customer requests to build trust and credibility",B12:"Ensure your personal presentation, in all forms of communication, reflects positively on your organisation's brand"},
+ sections:[
+  {t:"Introduction & Organisational Context",x:"job role and responsibilities; the building and client environment; how temperature and environment impact customer experience; environmental comfort links to business reputation and retention; how the organisation defines customer service standards",c:["K1","K3","K4","K16","K17"]},
+  {t:"The High-Level Challenge",x:"how the issue was first identified; the issue affected multiple clients; mismatch between system data and physical experience; business risks of reputation, complaints and retention; why it required urgent intervention",c:["K2","K6","S6","S15"]},
+  {t:"Customer Journey & Emotional Impact",x:"reception interaction; client frustration and discomfort; internal versus external customers; impact on trust and loyalty; emotional highs and lows in the journey",c:["K6","K10","K12","S6","S7","B7"]},
+  {t:"Immediate Actions Taken",x:"initial adjustments; physical inspection and validation; escalation and logging; customer communication; justification for the decisions taken",c:["S1","S3","S5","S6","S8","S15","B3"]},
+  {t:"Balancing Customer Needs & Organisational Constraints",x:"temporary measures; risks to the wider system; budget considerations; authority boundaries; cost and commercial factors",c:["K9","S8"]},
+  {t:"Root Cause Analysis",x:"component fault; sensor fault; reset patterns; system imbalance; digital versus physical validation; causes of service failure",c:["K2","K4","K17","S15","S16"]},
+  {t:"Monitoring & Continuous Improvement",x:"daily monitoring; logging requests; identifying recurring issues; preventative measures; gathering feedback",c:["K1","S11","S12","S16","S17"]},
+  {t:"Cross-Department Collaboration",x:"working with engineers and management; communicating with reception and security; sharing updates and lessons learned",c:["B1","B6","B7","B11","B12"]},
+  {t:"Recommendations for Future Improvement",x:"review process; escalation matrix; preventative maintenance; documentation; business benefit; risk reduction; legislation and compliance",c:["K2","K3","S16","S17"]},
+  {t:"Reflection & Personal Development",x:"lessons learned; the importance of verification; managing difficult conversations; confidence in escalation; future development goals",c:["K4","S5","B1","B2","B3","B5"]},
+  {t:"Measured Impact & Strategic Alignment",x:"reduction in repeat issues; response confidence; preventative cost benefit; strategic alignment; system resilience",c:["K1","B3"]}
+ ]
+};
+let INPUT=DEMO_INPUT;
+try{var raw=localStorage.getItem('ab_guide_input');if(raw){var p=JSON.parse(raw);if(p&&p.sections&&p.ksb)INPUT=p;}}catch(e){}
+
+/* ---------- heuristic draft generators (offline; coordinator refines; LLM polish later) ---------- */
+const GN={K:"Knowledge",S:"Skills",B:"Behaviours"};
+function grp(c){return c[0];}
+function clean(t){return (t||'').replace(/\.$/,'').trim();}
+function passLine(t){
+  t=clean(t);
+  if(/^understand/i.test(t))return t.replace(/^understand\s+/i,'Explain ');
+  if(/^know/i.test(t))return t.replace(/^know\s+/i,'Identify ');
+  return t.charAt(0).toUpperCase()+t.slice(1);
+}
+function draftPurpose(codes,ksb){
+  var themes=codes.slice(0,3).map(function(c){return clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].toLowerCase();}).filter(Boolean);
+  return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
+}
+const DIST=[
+ "Go beyond describing — <b>analyse</b> the impact, including what would happen if this were not addressed.",
+ "<b>Evaluate</b> the options or alternatives you considered, and <b>justify</b> the choices you made.",
+ "<b>Assess</b> the longer-term or strategic impact, drawing the KSBs above together."
+];
+function whatToWrite(x){
+  var parts=(x||'').split(';').map(function(s){return s.trim();}).filter(Boolean);
+  return parts.length?"<ul>"+parts.map(function(p){return "<li>"+esc(p.charAt(0).toUpperCase()+p.slice(1))+"</li>";}).join('')+"</ul>":"<em>Describe what the learner should cover here.</em>";
+}
+function esc(s){return String(s).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
+
+/* ---------- render ---------- */
+const $=function(id){return document.getElementById(id);};
+function targetFor(sec){return 200+Math.min(200,(sec.c.length||0)*30);} // 200–400 by KSB load
+function render(){
+  $('src').innerHTML="Standard: <b>"+esc(INPUT.standardName||INPUT.std)+"</b> · "+INPUT.sections.length+" sections";
+  var h='';
+  // front matter
+  h+='<div class="notice"><h2>Important Notice to Learners</h2>'+
+    '<p>This is an <b>illustrative guidance document</b> to help you understand how to structure your work-based project and evidence your KSBs. It is a developmental aid — <b>it must not be copied or submitted as your own work.</b></p>'+
+    '<p>You must produce <b>original content drawn from your own workplace</b>, with your own actions, decisions and reflection. Copying this material would constitute academic misconduct and may result in disqualification.</p></div>';
+  h+='<div class="doch"><span class="dt">Work-Based Project — Step Guide</span><span class="dm">'+esc(INPUT.standardName||INPUT.std)+'</span></div>';
+  INPUT.sections.forEach(function(sec,i){
+    var codes=(sec.c||[]);
+    // KSB coverage grouped
+    var cov='';['K','S','B'].forEach(function(g){
+      var gc=codes.filter(function(c){return grp(c)===g;});
+      if(!gc.length)return;
+      cov+='<div class="kgrp '+g+'"><div class="gl">'+GN[g]+'</div>'+gc.map(function(c){return '<div class="kli"><span class="kc">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
+    });
+    if(!cov)cov='<div class="none">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
+    var passHtml=codes.length?'<ul>'+codes.map(function(c){return '<li>'+esc(passLine(INPUT.ksb[c]||c))+'</li>';}).join('')+'</ul>':'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
+    h+='<div class="sec">'+
+      '<div class="sh"><span class="num">'+(i+1)+'</span><span class="st">'+esc(sec.t)+'</span>'+
+        '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span></div>'+
+      '<div class="fld"><div class="lbl purpose">Purpose <span class="badge">draft — edit</span></div><div class="edit purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'+
+      '<div class="fld"><div class="lbl">What to write <span class="badge">from your Step 1 notes</span></div><div class="edit" contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'+
+      '<div class="fld"><div class="lbl">KSB Coverage <span class="badge">verbatim from the standard</span></div><div class="ksbcov">'+cov+'</div></div>'+
+      '<div class="fld"><div class="lbl pass">To achieve a Pass <span class="badge">draft — edit</span></div><div class="edit" contenteditable="true">'+passHtml+'</div></div>'+
+      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" contenteditable="true"><ul>'+DIST.map(function(d){return '<li>'+d+'</li>';}).join('')+'</ul></div></div>'+
+    '</div>';
+  });
+  // checklist
+  h+='<div class="checklist"><h3>Final checklist for the learner</h3><div class="edit" contenteditable="true"><ul>'+
+    '<li>Word count within the target range for each section</li>'+
+    '<li>Every section links clearly to business impact</li>'+
+    '<li>Data and evidence referenced from your own workplace</li>'+
+    '<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'+
+    '<li>Reflection shows honest personal growth</li>'+
+    '<li>All content is your own original work</li></ul></div></div>';
+  $('doc').innerHTML=h;
+}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1700);}
+$('regen').onclick=function(){if(confirm('Re-draft Purpose, Pass and Distinction from the mapping? This overwrites your edits to those fields.')){render();toast('Drafts regenerated');}};
+$('print').onclick=function(){window.print();};
+render();
+if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
+</script>
+</body>
+</html>
