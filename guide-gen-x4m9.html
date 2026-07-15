@@ -97,6 +97,20 @@
   .mstatus{font-size:11.5px;margin:9px 2px 0;min-height:16px} .mstatus.ok{color:var(--ok)} .mstatus.err{color:var(--gap)}
   .mbtns{display:flex;gap:9px;align-items:center;margin-top:16px}
   .mnote{font-size:11px;color:var(--ink3);margin:13px 0 0;line-height:1.5}
+  /* Part B — annotated exemplar */
+  .partb-wrap{border-top:2px solid var(--line);margin-top:8px;padding:16px 18px}
+  .partb-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .partb-head .pb-t{font-size:15px;font-weight:700;flex:1;min-width:200px}
+  .partb-head .pb-sub{font-family:var(--mono);font-size:9.5px;color:var(--gap);letter-spacing:.05em;margin-left:8px;text-transform:uppercase}
+  .pb-empty{font-size:12.5px;color:var(--ink3);line-height:1.6;background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:14px 16px}
+  .pb-empty b{color:var(--ink2)}
+  .scenario{font-size:12.5px;color:var(--ink2);background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--teal);border-radius:9px;padding:11px 14px;margin:4px 0 16px}
+  .scenario b{color:var(--teal)}
+  .exsec{margin:0 0 16px} .exsec h4{font-size:14px;margin:0 0 7px}
+  .exsec p{font-size:13px;color:var(--ink);line-height:1.62;margin:0 0 9px}
+  .ktag{font-family:var(--mono);font-size:10px;color:var(--teal);background:rgba(45,212,178,.1);border:1px solid rgba(45,212,178,.3);border-radius:4px;padding:0 4px;white-space:nowrap}
+  .notes{font-size:12px;color:var(--ink3);border-top:1px dashed var(--line);padding-top:6px;margin-top:4px}
+  .exfoot{font-size:12px;color:var(--gap);font-style:italic;margin-top:12px}
 
   /* PRINT — clean white learner document */
   @media print{
@@ -117,6 +131,12 @@
     .kli{color:#222} .kgrp .gl{color:#333!important}
     .kgrp.K .kc,.kgrp.S .kc,.kgrp.B .kc{color:#111}
     .checklist h3{color:#111}
+    .partb-wrap{border-color:#333} .partb-wrap.empty,.pb-empty{display:none}
+    .partb-head .pb-t{color:#111} .partb-head .pb-sub{color:#8a5a00}
+    .scenario{background:#f6f6f4;border-color:#ccc;color:#222} .scenario b{color:#111}
+    .exsec h4{color:#111} .exsec p{color:#111}
+    .ktag{color:#0a6b3f;background:#eef7f1;border-color:#bcd}
+    .notes{color:#444;border-color:#bbb} .exfoot{color:#333}
   }
 </style>
 </head>
@@ -214,7 +234,8 @@ function render(){
   // front matter
   h+='<div class="notice"><h2>Important Notice to Learners</h2>'+
     '<p>This is an <b>illustrative guidance document</b> to help you understand how to structure your work-based project and evidence your KSBs. It is a developmental aid — <b>it must not be copied or submitted as your own work.</b></p>'+
-    '<p>You must produce <b>original content drawn from your own workplace</b>, with your own actions, decisions and reflection. Copying this material would constitute academic misconduct and may result in disqualification.</p></div>';
+    '<p>You must produce <b>original content drawn from your own workplace</b>, with your own actions, decisions and reflection. Copying this material would constitute academic misconduct and may result in disqualification.</p>'+
+    '<p>The worked example (Part B) below uses an <b>illustrative scenario that is not your workplace</b> — it only shows what “good” looks like. Its <code>[KSB tags]</code> are for your tutor and <b>must be removed before submission.</b></p></div>';
   h+='<div class="doch"><span class="dt">Work-Based Project — Step Guide</span><span class="dm">'+esc(INPUT.standardName||INPUT.std)+'</span></div>';
   INPUT.sections.forEach(function(sec,i){
     var codes=(sec.c||[]);
@@ -245,7 +266,9 @@ function render(){
     '<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'+
     '<li>Reflection shows honest personal growth</li>'+
     '<li>All content is your own original work</li></ul></div></div>';
+  h+='<div class="partb-wrap'+(PARTB?'':' empty')+'"><div class="partb-head"><span class="pb-t">Part B — Annotated worked example <span class="pb-sub">illustrative · not for submission</span></span><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
   $('doc').innerHTML=h;
+  renderPartB();
 }
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1700);}
 $('regen').onclick=function(){if(confirm('Re-draft Purpose, Pass and Distinction from the mapping? This overwrites your edits to those fields.')){render();toast('Drafts regenerated');}};
@@ -266,8 +289,8 @@ $('keyclear').onclick=function(){try{localStorage.removeItem(KEY);}catch(e){}$('
 
 const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','pass','distinction'],additionalProperties:false};
 const SYS="You are an expert end-point assessor and apprenticeship tutor. You write concise, encouraging, plain-English GUIDANCE that helps a Level 3 apprentice evidence their KSBs in a work-based project. RULES: (1) Guidance only — never write the apprentice's actual answer, example content, or a model paragraph; write how THEY should evidence each KSB using their OWN real workplace. (2) Ground every point strictly in the KSBs provided; never invent KSBs. (3) Pass = describe/explain level; Distinction = analyse, evaluate, justify, and weigh consequences / alternatives / long-term impact. (4) Keep it tight and immediately usable.";
-async function callClaude(system,user,schema){
-  var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-8',max_tokens:1500,system:system,messages:[{role:'user',content:user}],output_config:{format:{type:'json_schema',schema:schema}}})});
+async function callClaude(system,user,schema,maxTokens){
+  var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-opus-4-8',max_tokens:maxTokens||1500,system:system,messages:[{role:'user',content:user}],output_config:{format:{type:'json_schema',schema:schema}}})});
   if(res.status===401)throw new Error('API key rejected — check it in Settings.');
   if(res.status===429)throw new Error('Rate limited by Anthropic — wait a moment and retry.');
   if(!res.ok){var m='';try{m=(await res.json()).error.message;}catch(e){}throw new Error('Anthropic error '+res.status+(m?': '+m:''));}
@@ -294,7 +317,7 @@ async function improveSection(i,btn){
   catch(e){toast(e.message||'AI request failed');return false;}
   finally{if(btn){btn.classList.remove('busy');btn.textContent='✨ Improve';btn.disabled=false;}}
 }
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);}});
+document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);}});
 $('improveall').onclick=async function(){
   if(!hasKey()){openSettings('Add your Anthropic key to use AI improvement.');return;}
   var btns=[].slice.call(document.querySelectorAll('[data-imp]'));var n=INPUT.sections.length;
@@ -302,6 +325,36 @@ $('improveall').onclick=async function(){
   for(var i=0;i<n;i++){toast('Improving section '+(i+1)+' / '+n+'…');var ok=await improveSection(i,btns[i]);if(!ok)break;}
   this.disabled=false;updateAIState();toast('Done — review and edit the AI drafts');
 };
+
+/* ---------- Part B: annotated worked example (Step 3) ---------- */
+var PARTB=null;
+function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span class="ktag">[$1]</span>');}
+function renderPartB(){
+  var body=$('partb-body');if(!body)return;
+  var wrap=document.querySelector('.partb-wrap');if(wrap)wrap.classList.toggle('empty',!PARTB);
+  if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Needs your Anthropic key.</div>';return;}
+  var h='<div class="scenario"><b>Illustrative scenario</b> — not your workplace: '+esc(PARTB.scenario||'')+'</div>';
+  INPUT.sections.forEach(function(sec,i){
+    var s=PARTB.sections&&PARTB.sections[i];var ex=(s&&s.exemplar)||'';
+    var paras=ex.split(/\n\n+/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p contenteditable="true">'+highlightTags(p)+'</p>';}).join('');
+    h+='<div class="exsec"><h4>'+(i+1)+'. '+esc(sec.t)+'</h4>'+(paras||'<p>—</p>')+'<div class="notes">Notes: <span contenteditable="true"></span></div></div>';
+  });
+  h+='<div class="exfoot">(End of annotated draft — remove the [KSB tags] before final submission.)</div>';
+  body.innerHTML=h;
+}
+const EXEMPLAR_SYS="You are writing an ILLUSTRATIVE worked example for an apprenticeship step guide — a teaching aid, NOT the apprentice’s submission. INTEGRITY RULES (critical): (1) Invent ONE plausible but generic illustrative workplace scenario for this standard; it must NOT be tailored to any specific real apprentice — the apprentice writes their OWN version from their OWN workplace, and this only shows what good looks like. (2) Write section by section following the given structure; each section’s prose must evidence its mapped KSBs at distinction level (analyse / evaluate / justify, not just describe). (3) Immediately after the sentence(s) that evidence a KSB, add an inline tag in square brackets with the code(s), e.g. [K1, S15] — these are for the tutor and are removed before submission. (4) Keep it realistic but plainly an EXAMPLE; do not invent real companies, named people, or confidential data. Write in the first person as the illustrative apprentice.";
+const EXEMPLAR_SCHEMA={type:'object',properties:{scenario:{type:'string'},sections:{type:'array',items:{type:'object',properties:{title:{type:'string'},exemplar:{type:'string'}},required:['title','exemplar'],additionalProperties:false}}},required:['scenario','sections'],additionalProperties:false};
+function exemplarPrompt(){
+  var lines=INPUT.sections.map(function(sec,i){var codes=(sec.c||[]).map(function(c){return c+' ('+clean(INPUT.ksb[c]||'')+')';}).join('; ');return (i+1)+'. '+sec.t+' — cover: '+(sec.x||'')+' — KSBs: '+(codes||'none');}).join('\n');
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose, adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.';
+}
+async function generateExemplar(btn){
+  if(!hasKey()){openSettings('Add your Anthropic key to generate the worked example.');return;}
+  if(btn){btn.classList.add('busy');btn.textContent='✨ Writing… (~30–60s)';btn.disabled=true;}
+  try{var out=await callClaude(EXEMPLAR_SYS,exemplarPrompt(),EXEMPLAR_SCHEMA,8000);PARTB=out;renderPartB();toast('Worked example generated — review & edit');}
+  catch(e){toast(e.message||'Generation failed');}
+  finally{if(btn){btn.classList.remove('busy');btn.disabled=false;btn.textContent=PARTB?'↻ Regenerate example':'✨ Generate worked example';}}
+}
 
 render();
 updateAIState();
