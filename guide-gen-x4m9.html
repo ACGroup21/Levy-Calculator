@@ -231,26 +231,26 @@ try{var raw=localStorage.getItem('ab_guide_input');if(raw){var p=JSON.parse(raw)
 const GN={K:"Knowledge",S:"Skills",B:"Behaviours"};
 function grp(c){return c[0];}
 function clean(t){return (t||'').replace(/\.$/,'').trim();}
-function lc(s){return s?s.charAt(0).toLowerCase()+s.slice(1):s;}
-function stripLead(t){return clean(t).replace(/^(Understand(ing)?|Knowledge of|Know how to|Know that|Knows?|An? (understanding|awareness) of|Aware of|Able to|Ability to|Can|How to)\s+/i,'').trim();}
-// turn a KSB into an evidence INSTRUCTION (what the apprentice does), not a copy of the KSB text
-function passLine(c,t){
-  var type=(c||'K')[0];
-  var full=clean(t);
-  if(!full)return 'Evidence '+c+' with a specific example from your own work.';
-  var topic=lc(stripLead(full)).split(/;|—|–|\. /)[0].trim();
-  if(type==='S')return 'Show where you applied this in your work — '+topic+' — and what you produced.';
-  if(type==='B')return 'Give a real workplace example that shows this behaviour in practice: "'+full+'".';
-  return 'Explain '+topic+', and evidence your understanding with an example from your own workplace.';
+// PRACTICAL, workplace-grounded evidence prompts — what the apprentice DOES at work.
+// NOT a rework of the KSB text (that's already shown verbatim in the coverage box above — restating it is duplication).
+function passList(codes){
+  var has={K:false,S:false,B:false};
+  codes.forEach(function(c){if(c&&has[c[0]]!==undefined)has[c[0]]=true;});
+  var out=['Set the real workplace scene for this section — where it happened, who was involved, and why it mattered to the business.'];
+  if(has.K)out.push('For each knowledge area above, give a concrete example from your own job — what you actually did with it, not just what you know.');
+  if(has.S)out.push('Show the real work you produced — the actual email, plan, record, call or action — that proves each skill in practice.');
+  if(has.B)out.push('Describe how you conducted yourself: a real moment that shows the behaviours above, and how you handled it.');
+  out.push('Close the loop — the effect your work had on the customer, colleagues, cost or results.');
+  return out;
 }
 function draftPurpose(codes,ksb){
   var themes=codes.slice(0,3).map(function(c){return clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].toLowerCase();}).filter(Boolean);
   return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
 }
 const DIST=[
- "Analyse why this matters — not just what you did, but its impact, and what would have happened if you hadn't acted.",
- "Evaluate the options or alternatives you weighed up, and justify the decision you made.",
- "Assess the wider or longer-term impact, drawing the KSBs above together into one clear judgement."
+ "Analyse WHY you took your approach — weigh the alternatives you considered and justify the decision you made.",
+ "Evidence the impact with something concrete — numbers, customer feedback, or a measurable before-vs-after result.",
+ "Reflect on the longer-term effect on the business, and what you would do differently next time."
 ];
 function whatToWrite(x){
   var parts=(x||'').split(';').map(function(s){return s.trim();}).filter(Boolean);
@@ -285,7 +285,7 @@ function render(){
       cov+='<div class="kgrp '+g+'"><div class="gl">'+GN[g]+'</div>'+gc.map(function(c){return '<div class="kli"><span class="kc">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
     });
     if(!cov)cov='<div class="none">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
-    var passHtml=codes.length?critHTML(codes.map(function(c){return passLine(c,INPUT.ksb[c]||'');}),'p'):'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
+    var passHtml=codes.length?critHTML(passList(codes),'p'):'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
     h+='<div class="sec" data-sec="'+i+'">'+
       '<div class="sh"><span class="num">'+(i+1)+'</span><span class="st">'+esc(sec.t)+'</span>'+
         '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span>'+
@@ -372,7 +372,7 @@ $('word').onclick=exportWord;
 /* ---------- AI improvement (copy-paste bridge — uses the coordinator's own Claude, no API key) ---------- */
 const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','pass','distinction'],additionalProperties:false};
 const BATCH_SCHEMA={type:'object',properties:{sections:{type:'array',items:IMPROVE_SCHEMA}},required:['sections'],additionalProperties:false};
-const SYS="You are an expert end-point assessor and apprenticeship tutor. You write concise, encouraging, plain-English GUIDANCE that helps a Level 3 apprentice evidence their KSBs in a work-based project. RULES: (1) Guidance only — never write the apprentice's actual answer, example content, or a model paragraph; write how THEY should evidence each KSB using their OWN real workplace. (2) Ground every point strictly in the KSBs provided; never invent KSBs. (3) Pass = describe/explain level; Distinction = analyse, evaluate, justify, and weigh consequences / alternatives / long-term impact. (4) Keep it tight and immediately usable.";
+const SYS="You are an expert end-point assessor and apprenticeship tutor. You write concise, encouraging, plain-English GUIDANCE that helps a Level 3 apprentice evidence their KSBs in a work-based project. RULES: (1) Guidance only — never write the apprentice's actual answer or a model paragraph; write how THEY evidence it from their OWN real workplace. (2) Be PRACTICAL and workplace-grounded — tell them what real situation to describe, what actions to show they took, and what actual work/evidence to include (the email, plan, record, call, meeting, result). (3) Do NOT restate or paraphrase the KSB text — the learner is already shown the KSBs verbatim; repeating them is useless duplication. Every Pass point must add practical 'how to evidence this at work' value and cover the mapped KSBs collectively, NOT one-line-per-KSB. (4) Pass = show it genuinely happened at work (situation -> what you did -> what you produced -> effect); Distinction = analyse and justify your approach, weigh alternatives, quantify the impact, and reflect. (5) Keep it tight and immediately usable.";
 
 /* copy-paste bridge: build a prompt, user runs it in their own Claude, pastes the JSON back */
 var bridgeResolve=null,bridgeReject=null;
@@ -414,7 +414,7 @@ $('bridge').onclick=function(e){if(e.target===$('bridge')){var j=bridgeReject;cl
 function sectionPrompt(i){
   var sec=INPUT.sections[i];var codes=sec.c||[];
   var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section: a one-sentence Purpose; a Pass checklist with one short imperative per mapped KSB (describe/explain level); and a Distinction checklist of 2-4 higher-order moves (analyse / evaluate / justify). Return JSON only.';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points telling the apprentice what real situation to describe, what to show they did, and the actual evidence to include (do NOT restate the KSBs — they already see them); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect). Return JSON only.';
 }
 function fillSection(i,out){
   var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
@@ -434,7 +434,7 @@ function allSectionsPrompt(){
     var ksb=codes.map(function(c){return '  '+c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'  (none mapped)';
     return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb;
   }).join('\n\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; a Pass checklist (one short imperative per mapped KSB, describe/explain level); and a Distinction checklist of 2-4 higher-order moves (analyse / evaluate / justify).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points (what real situation to describe, what they did, and the actual evidence to include — do NOT restate the KSBs); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.';
 }
 document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);}});
 $('improveall').onclick=async function(){
