@@ -158,6 +158,110 @@
     .ktag{color:#0a6b3f;background:#eef7f1;border-color:#bcd}
     .notes{color:#444;border-color:#bbb} .exfoot{color:#333}
   }
+  /* ===== REDESIGNED DOCUMENT — white paper, AC tech theme (Inter + JetBrains Mono, teal on navy). Scoped to .doc so it overrides the legacy rules above. ===== */
+  .doc{
+    --ink:#0e1a27;--ink2:#3a4a5b;--mut:#657687;--fnt:#8b9aa9;--line:#e6ecf2;--panel:#f5f8fb;
+    --n1:#0b1e3a;--n2:#050c18;--cyan:#4bd6ec;
+    --tk:#0b8f76;--tbg:#e5f7f2;--tln:#bfe9de;--pk:#6438c9;--pbg:#efeafe;--pln:#dcd0fb;--gk:#a2711a;--gbg:#fbf1db;--gln:#ecd7a6;
+    --isans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;--pad:34px;
+    background:#fff;color:var(--ink);font-family:var(--isans);border:1px solid var(--line);border-radius:14px;overflow:hidden;padding:0;box-shadow:0 18px 50px rgba(0,0,0,.32)}
+  .doc .eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;display:flex;align-items:center;gap:7px}
+  .doc .eyebrow::before{content:"";width:6px;height:6px;border-radius:1px;background:currentColor;flex:0 0 auto;transform:rotate(45deg);opacity:.9}
+  .doc .hero{position:relative;background:radial-gradient(120% 150% at 90% -20%,#16375f 0%,var(--n1) 44%,var(--n2) 100%);color:#fff;padding:28px var(--pad) 30px;overflow:hidden}
+  .doc .hero-motif{position:absolute;inset:0;pointer-events:none}
+  .doc .hero-row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:2}
+  .doc .brand img{height:30px;width:auto;display:block}
+  .doc .tool-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:#bfeef7;border:1px solid rgba(75,214,236,.4);border-radius:5px;padding:5px 11px;background:rgba(75,214,236,.07);display:flex;align-items:center;gap:7px}
+  .doc .tool-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+  .doc .hero h1{position:relative;z-index:2;font-size:27px;line-height:1.1;font-weight:800;letter-spacing:-.022em;margin:22px 0 0;max-width:20ch;color:#fff}
+  .doc .hero .sub{position:relative;z-index:2;font-size:13px;font-weight:500;color:var(--cyan);margin-top:9px}
+  .doc .summary{position:relative;z-index:3;margin:-22px var(--pad) 0;background:#fff;border:1px solid var(--line);border-radius:11px;box-shadow:0 12px 30px rgba(11,30,58,.12);display:flex;align-items:stretch;overflow:hidden}
+  .doc .sb{padding:14px 18px;display:flex;flex-direction:column;gap:6px;justify-content:flex-start;align-items:flex-start;border-right:1px solid var(--line)}
+  .doc .sb:last-child{border-right:none}
+  .doc .sb .k{min-height:12px;white-space:nowrap;color:var(--mut);margin:0}
+  .doc .lvl3{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.03em;background:#38BDF8;color:#04121e;border-radius:99px;padding:2px 9px;display:inline-block;line-height:1.35}
+  .doc .sb.std{flex:2.4;gap:4px}
+  .doc .sb.num{flex:1}
+  .doc .sb.num .v{line-height:1}
+  .doc .sb .std-v{display:flex;align-items:center;gap:9px;margin-top:1px}
+  .doc .sb .std-v .nm{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.15}
+  .doc .sb .std-v .ic{color:var(--tk);flex:0 0 auto}
+  .doc .sb .v{font-size:20px;font-weight:800;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .doc .sb.note{flex:2;border-right:none}
+  .doc .sb.note .n{font-size:12px;color:var(--ink2);line-height:1.45}
+  .doc .sb.note .n b{color:var(--tk);font-weight:700}
+  .doc .docbody{padding:8px var(--pad) 0}
+  .doc .notice{display:flex;gap:13px;background:var(--gbg);border:1px solid var(--gln);border-left:3px solid #d9962a;border-radius:9px;padding:14px 16px;margin:22px 0 4px}
+  .doc .notice .ic{color:var(--gk);flex:0 0 auto;margin-top:1px}
+  .doc .notice h2{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;margin:0 0 6px;color:var(--gk)}
+  .doc .notice p{font-size:12.5px;line-height:1.55;color:#5f4a26;margin:0 0 6px}
+  .doc .notice p:last-child{margin-bottom:0}
+  .doc .notice b{color:#4a3a1a}
+  .doc .notice code{font-family:var(--mono);font-size:11px;background:#f3e4c2;padding:0 5px;border-radius:3px;color:#6f4a06}
+  .doc .sec{border:1px solid var(--line);border-radius:12px;padding:0 20px 20px;margin:16px 0;background:#fff}
+  .doc .sec-h{display:flex;align-items:center;gap:12px;padding:15px 0 4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .doc .snum{flex:0 0 auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:13px;color:#052e26;background:var(--teal);box-shadow:0 0 0 1px rgba(11,143,118,.25),0 4px 10px rgba(45,212,178,.3)}
+  .doc .sec-h .t{font-size:16px;font-weight:700;letter-spacing:-.01em;flex:1}
+  .doc .target{font-family:var(--mono);font-size:9.5px;color:var(--tk);background:var(--tbg);border:1px solid var(--tln);border-radius:5px;padding:3px 9px;white-space:nowrap;box-shadow:0 0 10px rgba(45,212,178,.22);animation:wcGlow 2.8s ease-in-out infinite}
+  .doc .target .wc{font-weight:700;font-variant-numeric:tabular-nums;color:var(--tk)}
+  @keyframes wcGlow{0%,100%{box-shadow:0 0 7px rgba(45,212,178,.16)}50%{box-shadow:0 0 16px rgba(45,212,178,.44)}}
+  @media (prefers-reduced-motion:reduce){.doc .target{animation:none}}
+  .doc .blk{margin-top:15px}
+  .doc .lab{margin-bottom:8px;color:var(--mut)}
+  .doc .lab.purpose{color:#2f74a8}.doc .lab.pass{color:var(--tk)}.doc .lab.dist{color:var(--gk)}
+  .doc .lab .tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.02em;text-transform:none;color:var(--fnt);border:1px solid var(--line);border-radius:3px;padding:1px 6px;margin-left:2px}
+  .doc .read{font-size:13.5px;line-height:1.6;color:var(--ink2)}
+  .doc .read.purpose{color:var(--ink)}
+  .doc [contenteditable]{outline:none}
+  .doc [contenteditable]:focus{outline:1px dashed var(--tln);outline-offset:3px;border-radius:4px}
+  .doc .blk ul{font-size:13px;line-height:1.5;color:var(--ink2);margin:0;padding-left:18px}
+  .doc .blk li{margin:4px 0}.doc .blk li::marker{color:var(--teal)}
+  .doc .cov-box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+  .doc .cgrp .ch{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:7px;font-weight:600}
+  .doc .cgrp.K .ch{color:var(--tk)}.doc .cgrp.S .ch{color:var(--pk)}.doc .cgrp.B .ch{color:var(--gk)}
+  .doc .krow{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:baseline;padding:3px 0}
+  .doc .kc{font-family:var(--mono);font-size:11px;font-weight:600}
+  .doc .cgrp.K .kc{color:var(--tk)}.doc .cgrp.S .kc{color:var(--pk)}.doc .cgrp.B .kc{color:var(--gk)}
+  .doc .kt{font-size:12.5px;line-height:1.45;color:var(--ink2)}
+  .doc .crit{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start;margin:8px 0}
+  .doc .cnum{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.02em;padding:2px 0;border-radius:5px;text-align:center}
+  .doc .cnum.p{color:var(--tk);background:var(--tbg);border:1px solid var(--tln)}
+  .doc .cnum.d{color:var(--gk);background:var(--gbg);border:1px solid var(--gln)}
+  .doc .ctext{font-size:13px;line-height:1.5;color:var(--ink)}
+  .doc .partb{margin:26px calc(-1 * var(--pad)) 0;padding:0 var(--pad);background:linear-gradient(180deg,#f4fafc,#fff);border-top:1px solid var(--line)}
+  .doc .pb-h{display:flex;align-items:center;gap:11px;padding:22px 0 2px;flex-wrap:wrap}
+  .doc .pb-rib{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:#eafcff;background:linear-gradient(150deg,#16375f,var(--n1));padding:6px 11px;border-radius:6px}
+  .doc .pb-h .pt{font-size:17px;font-weight:700;letter-spacing:-.01em}
+  .doc .pb-h .ps{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gk);background:var(--gbg);border:1px solid var(--gln);border-radius:5px;padding:3px 9px}
+  .doc .pb-empty{font-size:12.5px;color:var(--mut);line-height:1.6;background:var(--panel);border:1px dashed var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+  .doc .pb-empty b{color:var(--ink2)}
+  .doc .scenario{display:flex;gap:11px;background:var(--gbg);border:1px solid var(--gln);border-radius:9px;padding:12px 15px;margin:14px 0 20px}
+  .doc .scenario .ic{color:var(--gk);flex:0 0 auto;margin-top:1px}
+  .doc .scenario .s-lab{font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--gk);font-weight:600;display:block;margin-bottom:3px}
+  .doc .scenario .s-txt{font-size:13px;line-height:1.55;color:#5f4a26}
+  .doc .exsec{margin:0 0 22px}
+  .doc .exsec h4{font-size:14px;font-weight:700;margin:0 0 9px;display:flex;align-items:center;gap:9px;letter-spacing:-.01em}
+  .doc .exsec h4 .n{font-family:var(--mono);font-size:11px;color:#052e26;background:var(--teal);border-radius:5px;padding:2px 8px;font-weight:700}
+  .doc .exsec p{font-size:13.5px;line-height:1.72;color:var(--ink);margin:0 0 10px}
+  .doc .kk{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--tk);background:var(--tbg);border:1px solid var(--tln);border-radius:4px;padding:0 5px;white-space:nowrap}
+  .doc .notes{font-size:12px;color:var(--mut);border-top:1px dashed #cdd8e2;padding-top:8px;margin-top:6px;font-family:var(--mono);letter-spacing:.02em}
+  .doc .exfoot{font-size:12px;color:var(--gk);margin:2px 0 10px;font-family:var(--mono);letter-spacing:.01em}
+  .doc .foot{background:linear-gradient(150deg,var(--n1),var(--n2));color:#8ea6bd;padding:15px var(--pad);display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.02em;margin-top:24px;flex-wrap:wrap}
+  .doc .foot img{height:16px;width:auto;opacity:.92}
+  .doc .aibtn{margin-left:8px;font-family:var(--isans);font-size:11px;color:var(--tk);background:var(--tbg);border:1px solid var(--tln);border-radius:7px;padding:4px 10px;cursor:pointer;flex:0 0 auto;transition:border-color .15s}
+  .doc .aibtn:hover{border-color:var(--teal)} .doc .aibtn:disabled{opacity:.5;cursor:default}
+  .doc .aibtn.busy{color:var(--gk);border-color:var(--gln);background:var(--gbg)}
+  @media (max-width:560px){ .doc{--pad:20px} .doc .summary{flex-wrap:wrap} .doc .sb{flex:1 1 50%!important;border-bottom:1px solid var(--line)} .doc .sb.std{flex:1 1 100%!important} }
+  /* print overrides for the redesigned doc */
+  @media print{
+    body{background:#fff!important;color:#111!important;padding:0!important;font-family:'Inter',Arial,sans-serif!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{max-width:none}
+    .crumb,.ttl,.lede,.controls,.toast,.modal,.doc .aibtn{display:none!important}
+    .doc{border:none!important;border-radius:0!important;box-shadow:none!important}
+    .doc .summary{box-shadow:none}
+    .doc .target{animation:none!important;box-shadow:none}
+    .doc .sec,.doc .exsec,.doc .crit,.doc .krow{break-inside:avoid}
+  }
 </style>
 </head>
 <body>
@@ -176,8 +280,6 @@
   </div>
 
   <div class="doc" id="doc"></div>
-
-  <div class="foot">Arthur Curtis · Assignment Builder · Step 2 step-guide generator · v1</div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -263,52 +365,74 @@ function critHTML(items,kind){var L=kind==='p'?'P':'D';return items.map(function
 /* ---------- render ---------- */
 const $=function(id){return document.getElementById(id);};
 function targetFor(sec){return 200+Math.min(200,(sec.c.length||0)*30);} // 200–400 by KSB load
+var CIC={
+ K:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5V20"/></svg>',
+ S:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 6.5a3.5 3.5 0 0 0-4.8 4.5l-5.4 5.4 2.3 2.3 5.4-5.4a3.5 3.5 0 0 0 4.5-4.8l-2 2-1.7-1.7z"/></svg>',
+ B:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0"/><path d="M16 6a3 3 0 0 1 0 6M20 19a5 5 0 0 0-4-4.9"/></svg>'};
+var HERO_MOTIF='<svg class="hero-motif" viewBox="0 0 900 220" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><g fill="none" stroke="#4bd6ec" stroke-opacity=".13"><circle cx="812" cy="55" r="52"/><circle cx="812" cy="55" r="90"/><circle cx="812" cy="55" r="132"/><circle cx="812" cy="55" r="180"/></g><g fill="#4bd6ec" fill-opacity=".15"><circle cx="648" cy="140" r="2"/><circle cx="670" cy="140" r="2"/><circle cx="692" cy="140" r="2"/><circle cx="648" cy="162" r="2"/><circle cx="670" cy="162" r="2"/><circle cx="692" cy="162" r="2"/><circle cx="648" cy="184" r="2"/><circle cx="670" cy="184" r="2"/><circle cx="692" cy="184" r="2"/></g></svg>';
+function animateWC(){
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  Array.prototype.forEach.call(document.querySelectorAll('.wc'),function(el){
+    var t=parseInt(el.getAttribute('data-n'),10)||0;
+    if(reduce){el.textContent=t;return;}
+    var start=null;function step(ts){if(start===null)start=ts;var p=Math.min((ts-start)/1000,1);el.textContent=Math.round((1-Math.pow(1-p,3))*t);if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);
+  });
+}
 function render(){
-  $('src').innerHTML="Standard: <b>"+esc(INPUT.standardName||INPUT.std)+"</b> · "+INPUT.sections.length+" sections";
+  var full=esc(INPUT.standardName||INPUT.std);
+  var lm=/\(L\s?(\d)\)/i.exec(INPUT.standardName||'')||/\bL\s?(\d)\b/i.exec(INPUT.standardName||'');
+  var level=lm?lm[1]:(INPUT.level||3);
+  var shortName=esc((INPUT.standardName||INPUT.std||'').replace(/\s*\(L\s?\d\)\s*$/i,''));
+  var totalK=Object.keys(INPUT.ksb||{}).length;
+  $('src').innerHTML="Standard: <b>"+full+"</b> · "+INPUT.sections.length+" sections";
   var h='';
-  // AC-branded letterhead
-  h+='<div class="lh-band"><div class="lh-top"><div class="lh-brand"><img class="lh-logo" src="'+AC_LOGO_WHITE+'" alt="Arthur Curtis Education"></div><span class="lh-tool">Assignment Builder</span></div>'+
-    '<div class="lh-title">Work-Based Project — Learner Guide</div>'+
-    '<div class="lh-sub">'+esc(INPUT.standardName||INPUT.std)+' &middot; step guide &amp; annotated worked example</div></div>';
-  // front matter
-  h+='<div class="notice"><h2>Important Notice to Learners</h2>'+
-    '<p>This is an <b>illustrative guidance document</b> to help you understand how to structure your work-based project and evidence your KSBs. It is a developmental aid — <b>it must not be copied or submitted as your own work.</b></p>'+
-    '<p>You must produce <b>original content drawn from your own workplace</b>, with your own actions, decisions and reflection. Copying this material would constitute academic misconduct and may result in disqualification.</p>'+
-    '<p>The worked example (Part B) below uses an <b>illustrative scenario that is not your workplace</b> — it only shows what “good” looks like. Its <code>[KSB tags]</code> are for your tutor and <b>must be removed before submission.</b></p></div>';
-  h+='<div class="doch"><span class="dt">Work-Based Project — Step Guide</span><span class="dm">'+esc(INPUT.standardName||INPUT.std)+'</span></div>';
+  h+='<div class="hero">'+HERO_MOTIF
+    +'<div class="hero-row"><div class="brand"><img src="'+AC_LOGO_WHITE+'" alt="Arthur Curtis Education" style="height:30px;display:block"></div>'
+    +'<span class="tool-tag"><span class="dot"></span>'+shortName+'</span></div>'
+    +'<h1>Assignment Guide</h1><div class="sub">Level '+level+' · Step guide &amp; annotated worked example</div></div>';
+  h+='<div class="summary">'
+    +'<div class="sb std"><span class="k eyebrow">Standard</span><span class="std-v"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="nm">'+shortName+'</span></span><span class="lvl3">Level '+level+'</span></div>'
+    +'<div class="sb num"><span class="k eyebrow">Sections</span><span class="v">'+INPUT.sections.length+'</span></div>'
+    +'<div class="sb num"><span class="k eyebrow">KSBs</span><span class="v">'+totalK+'</span></div>'
+    +'<div class="sb note"><span class="k eyebrow">Integrity</span><span class="n"><b>Guidance only</b></span></div></div>';
+  h+='<div class="docbody">';
+  h+='<div class="notice"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9.3 12l1.9 1.9 3.6-3.9"/></svg><div>'
+    +'<h2>Important notice to learners</h2>'
+    +'<p>This is an <b>illustrative guidance document</b> to help you structure your assignment and evidence your KSBs. It <b>must not be copied or submitted as your own work</b> — you produce original content from your own workplace, with your own actions, decisions and reflection.</p>'
+    +'<p>The worked example (Part B) uses an <b>illustrative scenario that is not your workplace</b>. Its <code>[KSB tags]</code> are for your tutor and <b>must be removed before submission.</b></p></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var codes=(sec.c||[]);
-    // KSB coverage grouped
     var cov='';['K','S','B'].forEach(function(g){
       var gc=codes.filter(function(c){return grp(c)===g;});
       if(!gc.length)return;
-      cov+='<div class="kgrp '+g+'"><div class="gl">'+GN[g]+'</div>'+gc.map(function(c){return '<div class="kli"><span class="kc">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
+      cov+='<div class="cgrp '+g+'"><div class="ch">'+CIC[g]+GN[g]+'</div>'+gc.map(function(c){return '<div class="krow"><span class="kc">'+c+'</span><span class="kt">'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
     });
-    if(!cov)cov='<div class="none">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
+    if(!cov)cov='<div class="pb-empty">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
     var passHtml=codes.length?critHTML(passList(codes),'p'):'<em>Map KSBs in Step 1 to generate pass criteria.</em>';
-    h+='<div class="sec" data-sec="'+i+'">'+
-      '<div class="sh"><span class="num">'+(i+1)+'</span><span class="st">'+esc(sec.t)+'</span>'+
-        '<span class="tgt">Target: <b contenteditable="true">'+targetFor(sec)+'</b> words</span>'+
-        '<button class="aibtn" data-imp="'+i+'" title="Rewrite Purpose / Pass / Distinction with Opus 4.8">✨ Improve</button></div>'+
-      '<div class="fld"><div class="lbl purpose">Purpose <span class="badge">draft — edit</span></div><div class="edit purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'+
-      '<div class="fld"><div class="lbl">What to write <span class="badge">from your Step 1 notes</span></div><div class="edit" contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'+
-      '<div class="fld"><div class="lbl">KSB Coverage <span class="badge">verbatim from the standard</span></div><div class="ksbcov">'+cov+'</div></div>'+
-      '<div class="fld"><div class="lbl pass">To achieve a Pass <span class="badge">draft — edit</span></div><div class="edit" data-f="pass" contenteditable="true">'+passHtml+'</div></div>'+
-      '<div class="fld"><div class="lbl dist">To aim for Distinction <span class="badge">draft — edit</span></div><div class="edit" data-f="dist" contenteditable="true">'+critHTML(DIST,'d')+'</div></div>'+
-    '</div>';
+    h+='<div class="sec" data-sec="'+i+'">'
+      +'<div class="sec-h"><span class="snum">'+(i+1)+'</span><span class="t">'+esc(sec.t)+'</span>'
+      +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words</span>'
+      +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button></div>'
+      +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
+      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">from your Step 1 notes</span></div><div contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'
+      +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
+      +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass</div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
+      +'<div class="blk"><div class="lab dist eyebrow">To aim for Distinction</div><div data-f="dist" contenteditable="true">'+critHTML(DIST,'d')+'</div></div>'
+      +'</div>';
   });
-  // checklist
-  h+='<div class="checklist"><h3>Final checklist for the learner</h3><div class="edit" contenteditable="true"><ul>'+
-    '<li>Word count within the target range for each section</li>'+
-    '<li>Every section links clearly to business impact</li>'+
-    '<li>Data and evidence referenced from your own workplace</li>'+
-    '<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'+
-    '<li>Reflection shows honest personal growth</li>'+
-    '<li>All content is your own original work</li></ul></div></div>';
-  h+='<div class="partb-wrap'+(PARTB?'':' empty')+'"><div class="partb-head"><span class="pb-t">Part B — Annotated worked example <span class="pb-sub">illustrative · not for submission</span></span><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
-  h+='<div class="lh-foot"><img class="lh-flogo" src="'+AC_LOGO_WHITE+'" alt=""><span class="lh-fmeta">Arthur Curtis Education &middot; Assignment Builder &middot; a learning aid — never submittable work</span></div>';
+  h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:0 4px 10px rgba(139,92,246,.3)">✓</span><span class="t">Final checklist for the learner</span></div><div class="blk"><ul>'
+    +'<li>Word count within the target range for each section</li>'
+    +'<li>Every section links clearly to business impact</li>'
+    +'<li>Data and evidence referenced from your own workplace</li>'
+    +'<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'
+    +'<li>Reflection shows honest personal growth</li>'
+    +'<li>All content is your own original work</li></ul></div></div>';
+  h+='<div class="partb'+(PARTB?'':' empty')+'"><div class="pb-h"><span class="pb-rib">Part B</span><span class="pt">Annotated worked example</span><span class="ps">illustrative · not for submission</span><span style="flex:1"></span><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
+  h+='</div>';
+  h+='<div class="foot"><img src="'+AC_LOGO_WHITE+'" alt="" style="height:16px"><span>Arthur Curtis Education · Assignment Guide · guidance only, never submittable work</span></div>';
   $('doc').innerHTML=h;
   renderPartB();
+  animateWC();
 }
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1700);}
 $('regen').onclick=function(){if(confirm('Re-draft Purpose, Pass and Distinction from the mapping? This overwrites your edits to those fields.')){render();toast('Drafts regenerated');}};
@@ -360,7 +484,7 @@ var WORD_CSS=`body{font-family:Georgia,'Times New Roman',serif;color:#111;margin
 function exportWord(){
   var clone=document.getElementById('doc').cloneNode(true);
   clone.querySelectorAll('.aibtn').forEach(function(b){b.remove();});
-  var e=clone.querySelector('.partb-wrap.empty'); if(e)e.remove();
+  var e=clone.querySelector('.partb.empty'); if(e)e.remove();
   var name=(INPUT.standardName||INPUT.std||'standard').replace(/[^\w \-]/g,'').trim();
   var html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Assignment pack — '+name+'</title><style>'+WORD_CSS+'</style></head><body>'+clone.innerHTML+'</body></html>';
   var blob=new Blob(['﻿'+html],{type:'application/msword'});
@@ -450,18 +574,18 @@ $('improveall').onclick=async function(){
 
 /* ---------- Part B: annotated worked example (Step 3) ---------- */
 var PARTB=null;
-function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span class="ktag">[$1]</span>');}
+function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span class="kk">[$1]</span>');}
 function renderPartB(){
   var body=$('partb-body');if(!body)return;
-  var wrap=document.querySelector('.partb-wrap');if(wrap)wrap.classList.toggle('empty',!PARTB);
+  var wrap=document.querySelector('.partb');if(wrap)wrap.classList.toggle('empty',!PARTB);
   if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Uses your own Claude — no API key needed.</div>';return;}
-  var h='<div class="scenario"><b>Illustrative scenario</b> — not your workplace: '+esc(PARTB.scenario||'')+'</div>';
+  var h='<div class="scenario"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><div><span class="s-lab">Illustrative scenario — not your workplace</span><span class="s-txt">'+esc(PARTB.scenario||'')+'</span></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var s=PARTB.sections&&PARTB.sections[i];var ex=(s&&s.exemplar)||'';
     var paras=ex.split(/\n\n+/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p contenteditable="true">'+highlightTags(p)+'</p>';}).join('');
-    h+='<div class="exsec"><h4>'+(i+1)+'. '+esc(sec.t)+'</h4>'+(paras||'<p>—</p>')+'<div class="notes">Notes: <span contenteditable="true"></span></div></div>';
+    h+='<div class="exsec"><h4><span class="n">'+(i+1)+'</span> '+esc(sec.t)+'</h4>'+(paras||'<p>—</p>')+'<div class="notes">Notes: <span contenteditable="true"></span></div></div>';
   });
-  h+='<div class="exfoot">(End of annotated draft — remove the [KSB tags] before final submission.)</div>';
+  h+='<div class="exfoot">End of annotated draft — remove the [KSB tags] before final submission.</div>';
   body.innerHTML=h;
 }
 const EXEMPLAR_SYS="You are writing an ILLUSTRATIVE worked example for an apprenticeship step guide — a teaching aid, NOT the apprentice’s submission. INTEGRITY RULES (critical): (1) Invent ONE plausible but generic illustrative workplace scenario for this standard; it must NOT be tailored to any specific real apprentice — the apprentice writes their OWN version from their OWN workplace, and this only shows what good looks like. (2) Write section by section following the given structure; each section’s prose must evidence its mapped KSBs at distinction level (analyse / evaluate / justify, not just describe). (3) Immediately after the sentence(s) that evidence a KSB, add an inline tag in square brackets with the code(s), e.g. [K1, S15] — these are for the tutor and are removed before submission. (4) Keep it realistic but plainly an EXAMPLE; do not invent real companies, named people, or confidential data. Write in the first person as the illustrative apprentice.";
