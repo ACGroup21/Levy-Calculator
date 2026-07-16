@@ -464,11 +464,12 @@ function exampleSeed(txt){
 }
 function ksbAction(txt){
   var t=clean(txt||'').replace(/\s*\([^)]*\)\s*/g,' ').replace(/,?\s*(?:such as|e\.?g\.?|including|for example|for instance)\s+[^.;]+/i,'').replace(/\s{2,}/g,' ').trim();
-  return t?t.charAt(0).toLowerCase()+t.slice(1):'';
+  if(!t)return '';
+  return /^[A-Z]{2,}\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1); // keep acronyms (IT), lowercase normal words
 }
 function passList(codes,ksb,task){
   ksb=ksb||{};codes=(codes||[]).slice(0,6);
-  var LEAD={K:'Show you understand ',S:'Show the real work where you ',B:'Give a real moment where you '};
+  var LEAD={K:'Show you understand ',S:'Show the real work where you ',B:'Give a real moment that shows the behaviour — '};
   var out=['Set the scene — the real situation at work where this happened: who was involved and why it mattered to the business.'];
   codes.forEach(function(c){
     var d=clean(ksb[c]||'');if(!d)return;
