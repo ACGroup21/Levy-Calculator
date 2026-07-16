@@ -345,6 +345,13 @@
   .doc .sem-prog{font-family:var(--mono);font-size:10px;color:#2f74a8;margin-left:auto}
   .doc .sem-badge{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 7px;margin-left:auto}
   .doc .sem-badge.on{color:var(--tk);background:var(--tbg);border-color:var(--tln)}
+  .doc .chk-overall{font-size:13px;line-height:1.55;color:var(--ink);background:var(--panel);border-left:3px solid var(--teal);border-radius:0 8px 8px 0;padding:10px 13px;margin-top:13px}
+  .doc .chk-row{display:grid;grid-template-columns:auto auto 1fr;gap:9px;align-items:baseline;margin:8px 0;font-size:12.5px;line-height:1.5}
+  .doc .v-tag{font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+  .doc .v-tag.v-ok{color:var(--tk);background:var(--tbg);border:1px solid var(--tln)}
+  .doc .v-tag.v-mid{color:var(--gk);background:var(--gbg);border:1px solid var(--gln)}
+  .doc .v-tag.v-no{color:#c0553f;background:#fdeee9;border:1px solid #f0cabb}
+  .doc .v-cmt{color:var(--ink2)}
 </style>
 </head>
 <body>
@@ -726,75 +733,99 @@ var ASSIGN=null;
 function loadAssignment(){
   var inp=document.createElement('input');inp.type='file';inp.accept='.pdf,.docx,.txt,.md,text/*,application/pdf';
   inp.onchange=function(){var f=inp.files[0];if(!f)return;toast('Reading '+f.name+'…');
-    parseFile(f).then(function(t){if(!t||!t.trim()){toast('No text found in that file.');return;}ASSIGN={name:f.name,text:t};SEMRES=null;renderPartB();if(SEM_ON)runSemantic();toast('Assignment loaded & checked against the brief');}).catch(function(e){toast(e.message||'Could not read that file.');});};
+    parseFile(f).then(function(t){if(!t||!t.trim()){toast('No text found in that file.');return;}ASSIGN={name:f.name,text:t};SEMRES=null;AIREVIEW=null;AI_ON=false;renderPartB();runSemantic();toast('Assignment loaded & reviewing…');}).catch(function(e){toast(e.message||'Could not read that file.');});};
   inp.click();
 }
-function clearAssignment(){ASSIGN=null;SEMRES=null;renderPartB();toast('Assignment removed');}
+function clearAssignment(){ASSIGN=null;SEMRES=null;AIREVIEW=null;AI_ON=false;renderPartB();toast('Assignment removed');}
 function suggestFor(c,mode){
   var type=(c||'K')[0],full=clean(INPUT.ksb[c]||''),topic=full?(full.charAt(0).toLowerCase()+full.slice(1)).split(/;|—|–|\. /)[0].trim():String(c),verb=mode==='add'?'Add':'Strengthen';
   if(type==='S')return verb+' evidence of '+topic+' — show a specific example of the work you produced and what it achieved.';
   if(type==='B')return verb+' evidence of this behaviour — describe a real moment that shows: “'+full+'”.';
   return verb+' evidence of '+topic+' — explain it and give a concrete example from your own workplace.';
 }
-/* optional in-browser SEMANTIC matcher — transformers.js embeddings, opt-in, one-time ~25MB, then offline */
-var SEM_ON=false, SEMRES=null, _embedder=null, _semProg='';
+/* in-browser SEMANTIC matcher — runs by DEFAULT (free, offline after first load) + optional AI "deeper read" */
+var SEMRES=null, _embedder=null, _semProg='', AI_ON=false, AIREVIEW=null;
 async function getEmbedder(){
   if(_embedder)return _embedder;
   var mod=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
   mod.env.allowLocalModels=false;
   _embedder=await mod.pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2',{progress_callback:function(p){
-    if(p&&p.status==='progress'&&typeof p.progress==='number'){_semProg='downloading matcher — '+Math.round(p.progress)+'%';var el=document.querySelector('.sem-prog');if(el)el.textContent=_semProg;}
+    if(p&&p.status==='progress'&&typeof p.progress==='number'){_semProg='loading review model — '+Math.round(p.progress)+'%';var el=document.querySelector('.sem-prog');if(el)el.textContent=_semProg;}
   }});
   return _embedder;
 }
 function cosine(a,b){var s=0,n=Math.min(a.length,b.length);for(var i=0;i<n;i++)s+=a[i]*b[i];return s;}
+function reqSet(){
+  var brief=(typeof getBrief==='function'?getBrief():'').trim();
+  var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
+  return {required:required,reqLabel:brief.length>=25?'the brief requires':'mapped in the guide'};
+}
 async function runSemantic(){
   if(!ASSIGN)return;
-  _semProg='loading the semantic matcher…';renderPartB();
+  _semProg='reviewing…';renderPartB();
   try{
     var emb=await getEmbedder();
-    var brief=(typeof getBrief==='function'?getBrief():'').trim();
-    var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
+    var required=reqSet().required;
     var ksbTexts=required.map(function(c){return clean(INPUT.ksb[c]||'');});
     var chunks=(ASSIGN.text||'').replace(/\n+/g,' ').split(/(?<=[.!?])\s+/).map(function(s){return s.trim();}).filter(function(s){return s.length>25;}).slice(0,150);
     if(!chunks.length)chunks=[(ASSIGN.text||'').slice(0,1500)];
-    _semProg='analysing…';var pe=document.querySelector('.sem-prog');if(pe)pe.textContent=_semProg;
     var kv=(await emb(ksbTexts,{pooling:'mean',normalize:true})).tolist();
     var cv=(await emb(chunks,{pooling:'mean',normalize:true})).tolist();
     var sim={};required.forEach(function(c,i){var mx=0;for(var j=0;j<cv.length;j++){var s=cosine(kv[i],cv[j]);if(s>mx)mx=s;}sim[c]=mx;});
-    SEMRES={key:required.join(','),sim:sim};_semProg='';renderPartB();toast('Semantic check ready');
-  }catch(e){
-    _semProg='';SEM_ON=false;SEMRES=null;renderPartB();
-    toast('Couldn’t load the smart matcher — staying on keyword.');
-  }
+    SEMRES={key:required.join(','),sim:sim};_semProg='';renderPartB();
+  }catch(e){_semProg='';SEMRES=null;renderPartB();toast('Smart review unavailable — using keyword (offline first run?).');}
 }
 function tierKSBs(){
-  var brief=(typeof getBrief==='function'?getBrief():'').trim();
-  var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
-  var reqLabel=brief.length>=25?'the brief requires':'mapped in the guide';
-  var met=[],weak=[],missing=[],semUsed=false;
-  if(SEM_ON&&SEMRES&&SEMRES.key===required.join(',')){
-    semUsed=true;
-    required.forEach(function(c){var s=SEMRES.sim[c]||0;if(s>=0.45)met.push(c);else if(s>=0.32)weak.push(c);else missing.push(c);});
+  var R=reqSet(),required=R.required,met=[],weak=[],missing=[],semUsed=false;
+  if(SEMRES&&SEMRES.key===required.join(',')){
+    semUsed=true;required.forEach(function(c){var s=SEMRES.sim[c]||0;if(s>=0.45)met.push(c);else if(s>=0.32)weak.push(c);else missing.push(c);});
   }else{
     var atoks=jdTokens(ASSIGN.text||'');
     required.forEach(function(c){var m=jdMatch(INPUT.ksb[c]||'',atoks);if(m.covered)met.push(c);else if(m.hits>=1||m.ratio>=0.1)weak.push(c);else missing.push(c);});
   }
-  return {required:required,reqLabel:reqLabel,met:met,weak:weak,missing:missing,semUsed:semUsed};
+  return {required:required,reqLabel:R.reqLabel,met:met,weak:weak,missing:missing,semUsed:semUsed};
 }
-document.addEventListener('change',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('type')==='checkbox'&&t.hasAttribute('data-semtoggle')){SEM_ON=t.checked;if(SEM_ON){runSemantic();}else{SEMRES=null;renderPartB();}}});
+/* deeper read — Claude via the copy-paste bridge (AC proxy can automate later) */
+var REVIEW_SYS="You are an experienced apprenticeship end-point assessor giving developmental feedback — NOT a formal grade. Review the finished assignment against the required KSBs. For EACH required KSB return: verdict = one of 'evidenced' | 'partial' | 'missing', and a one-sentence, specific reason grounded in what the assignment does or doesn't show; for partial/missing say what to add. Be fair but rigorous.";
+var REVIEW_SCHEMA={type:'object',properties:{overall:{type:'string'},ksbs:{type:'array',items:{type:'object',properties:{code:{type:'string'},verdict:{type:'string'},comment:{type:'string'}},required:['code','verdict','comment'],additionalProperties:false}}},required:['overall','ksbs'],additionalProperties:false};
+function reviewPrompt(){
+  var req=reqSet().required, ksbLines=req.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n');
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nRequired KSBs:\n'+ksbLines+'\n\nFinished assignment:\n"""\n'+(ASSIGN.text||'').slice(0,12000)+'\n"""\n\nReturn JSON: "overall" (2-3 sentence summary) and "ksbs" (one item per required KSB above: code, verdict, comment).';
+}
+async function runAIReview(){
+  if(!ASSIGN)return;
+  try{var out=await callClaude(REVIEW_SYS,reviewPrompt(),REVIEW_SCHEMA);var m={};(out.ksbs||[]).forEach(function(k){m[String(k.code||'').trim()]={verdict:String(k.verdict||'').toLowerCase(),comment:k.comment||''};});AIREVIEW={overall:out.overall||'',map:m};renderPartB();toast('AI review added');}
+  catch(e){AI_ON=false;renderPartB();if(e.message!=='cancelled')toast(e.message||'Review failed');}
+}
+document.addEventListener('change',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('type')==='checkbox'&&t.hasAttribute('data-aitoggle')){AI_ON=t.checked;if(AI_ON){if(AIREVIEW){renderPartB();}else{runAIReview();}}else{renderPartB();}}});
 function checkHTML(){
   var text=ASSIGN.text||'';
+  if(AI_ON&&AIREVIEW){
+    var req=reqSet().required,ord={evidenced:2,partial:1,missing:0};
+    var rows=req.map(function(c){var r=AIREVIEW.map[c]||{verdict:'missing',comment:'Not addressed.'};return {c:c,v:r.verdict,cmt:r.comment};});
+    rows.sort(function(a,b){return (ord[a.v]||0)-(ord[b.v]||0);});
+    var ev=rows.filter(function(r){return r.v==='evidenced';}).length;
+    var pct=req.length?Math.round(ev/req.length*100):0,col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
+    var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
+    h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">AI review — <b>'+ev+' of '+req.length+'</b> KSBs clearly evidenced</span></div>';
+    h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
+    h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-aitoggle checked> Deeper read (AI)</label><span class="sem-badge on">✓ AI review</span></div>';
+    if(AIREVIEW.overall)h+='<div class="chk-overall">'+esc(AIREVIEW.overall)+'</div>';
+    h+='<div class="chk-sec">'+rows.map(function(r){var vc=r.v==='evidenced'?'v-ok':(r.v==='partial'?'v-mid':'v-no');return '<div class="chk-row"><span class="kk">'+r.c+'</span><span class="v-tag '+vc+'">'+esc(r.v||'?')+'</span><span class="v-cmt">'+esc(r.cmt)+'</span></div>';}).join('')+'</div>';
+    h+='<div class="chk-note">AI review (Claude) — developmental feedback; the coordinator makes the final judgement.</div></div>';
+    h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
+    return h;
+  }
   var T=tierKSBs(),required=T.required,met=T.met,weak=T.weak,missing=T.missing,reqLabel=T.reqLabel;
   var pct=required.length?Math.round(met.length/required.length*100):0,col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
   var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
   h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment clearly evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(weak.length?' · <b>'+weak.length+'</b> partly':'')+(missing.length?' · <b>'+missing.length+'</b> missing':'')+'</span></div>';
   h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
-  h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-semtoggle'+(SEM_ON?' checked':'')+'> Smarter (semantic) matching <span class="sem-hint">one-time ~25 MB, then offline</span></label>'+(_semProg?'<span class="sem-prog">'+esc(_semProg)+'</span>':(T.semUsed?'<span class="sem-badge on">✓ semantic</span>':'<span class="sem-badge">keyword</span>'))+'</div>';
+  h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-aitoggle'+(AI_ON?' checked':'')+'> Deeper read (AI) <span class="sem-hint">uses your Claude</span></label>'+(_semProg?'<span class="sem-prog">'+esc(_semProg)+'</span>':'<span class="sem-badge'+(T.semUsed?' on':'')+'">'+(T.semUsed?'✓ semantic':'keyword')+'</span>')+'</div>';
   if(missing.length)h+='<div class="chk-sec"><div class="chk-t">Missing — add ('+missing.length+')</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'add'))+'</span></div>';}).join('')+'</div>';
   if(weak.length)h+='<div class="chk-sec"><div class="chk-t weak">Partly evidenced — strengthen ('+weak.length+')</div>'+weak.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'strengthen'))+'</span></div>';}).join('')+'</div>';
   h+='<div class="chk-sec"><div class="chk-t ok">Clearly evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
-  h+='<div class="chk-note">'+(T.semUsed?'Semantic match — in-browser AI embeddings, fully offline.':'Indicative keyword match, fully offline.')+' A coordinator should confirm borderline KSBs.</div></div>';
+  h+='<div class="chk-note">'+(T.semUsed?'Semantic review — in-browser AI embeddings, free &amp; offline.':'Keyword match (semantic model loading…).')+' Tick “Deeper read” for a Claude-written review.</div></div>';
   h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
   return h;
 }
