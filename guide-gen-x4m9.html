@@ -468,7 +468,7 @@ function passList(codes){
   return out;
 }
 function draftPurpose(codes,ksb){
-  var themes=codes.slice(0,3).map(function(c){return clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].toLowerCase();}).filter(Boolean);
+  var themes=codes.slice(0,3).map(function(c){var t=clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].trim();return /^[A-Z]{2,}\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1);}).filter(Boolean);
   return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
 }
 const DIST=[
@@ -583,7 +583,7 @@ function render(){
       +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words</span>'
       +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
-      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">from your Step 1 notes</span></div><div contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'
+      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'the task, from your brief':'from your Step 1 notes')+'</span></div><div contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
       +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass</div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
       +'<div class="blk"><div class="lab dist eyebrow">To aim for Distinction</div><div data-f="dist" contenteditable="true">'+critHTML(DIST,'d')+'</div></div>'
