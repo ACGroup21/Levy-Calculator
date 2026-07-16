@@ -289,6 +289,28 @@
   .doc .sec.collapsed .blk{display:none}
   .doc .sec.collapsed .sec-h{border-bottom:none;margin-bottom:0}
   @media print{.doc .sec.collapsed .blk{display:block!important}.doc .sec-caret{display:none!important}.doc .sec-h{cursor:auto}}
+  /* JD-matcher-style coverage readout under the brief/JD boxes */
+  .cov-slot:empty{display:none}
+  .cov-read{margin-top:10px;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
+  .cov-top{display:flex;align-items:baseline;gap:9px}
+  .cov-pct{font-family:var(--mono);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+  .cov-lbl{font-size:11px;color:var(--ink2);line-height:1.4}
+  .cov-bar{height:5px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin:8px 0}
+  .cov-bar span{display:block;height:100%;border-radius:3px}
+  .cov-minis{display:flex;gap:12px;flex-wrap:wrap;align-items:baseline}
+  .cov-mini{font-family:var(--mono);font-size:10px;color:var(--ink3)}
+  .cov-mini b{font-variant-numeric:tabular-nums}
+  .cov-mini.K b{color:var(--teal)} .cov-mini.S b{color:var(--purp)} .cov-mini.B b{color:var(--gold)}
+  .cov-hint{font-size:9.5px;color:var(--ink3);opacity:.85;margin-left:auto}
+  .cov-gaps{margin-top:9px}
+  .cov-gaps summary{font-size:10.5px;color:var(--ink3);cursor:pointer}
+  .cov-gaplist{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .cov-gaptag{font-family:var(--mono);font-size:10px;color:var(--gold);border:1px solid rgba(224,164,59,.35);border-radius:4px;padding:1px 6px}
+  .cov-allgood{font-size:11px;color:var(--teal);margin-top:8px}
+  /* covered-by-brief highlight on the guide's KSB rows */
+  .doc .krow.covered{background:var(--tbg);border-radius:6px}
+  .doc .krow.covered .kc{color:var(--tk)}
+  @media print{.doc .krow.covered{background:#eef7f1}}
 </style>
 </head>
 <body>
@@ -315,11 +337,13 @@
           <label class="ctx-lab" for="briefTA">Assignment brief</label>
           <div class="drop" id="briefDrop" tabindex="0" role="button">⬇ Drop the brief — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="briefTA" placeholder="Paste the assignment brief here…"></textarea>
+          <div class="cov-slot" id="briefCov"></div>
         </div>
         <div class="ctx-col">
           <label class="ctx-lab" for="jdTA">Job description <span class="opt">· optional</span></label>
           <div class="drop" id="jdDrop" tabindex="0" role="button">⬇ Drop the JD — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="jdTA" placeholder="Paste the real job description here…"></textarea>
+          <div class="cov-slot" id="jdCov"></div>
         </div>
       </div>
       <p class="ctx-note">Anything here is woven into the ✨ Improve / Generate prompts so the guidance and worked example fit this brief and role. Stored only in this browser. PDF and Word (.docx) files are read automatically; for old .doc, save as .docx or paste.</p>
@@ -483,6 +507,7 @@ function render(){
   $('doc').innerHTML=h;
   renderPartB();
   animateWC();
+  if(typeof updateCoverage==='function')updateCoverage();
 }
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on');},1700);}
 $('regen').onclick=function(){if(confirm('Re-draft Purpose, Pass and Distinction from the mapping? This overwrites your edits to those fields.')){render();toast('Drafts regenerated');}};
@@ -651,6 +676,42 @@ async function generateExemplar(btn){
   finally{if(btn){btn.classList.remove('busy');btn.disabled=false;btn.textContent=PARTB?'↻ Regenerate example':'✨ Generate worked example';}}
 }
 
+/* ---------- JD-Matcher engine: match brief/JD text against the standard's KSBs, client-side & instant (ported from the levy calc) ---------- */
+var JD_STOP=new Set(['this','that','with','from','have','will','your','their','they','able','must','should','which','when','where','what','then','than','into','also','such','been','were','being','some','more','most','other','over','under','within','across','using','used','role','work','team','etc','and','for','the','our','you']);
+function jdStem(w){return w.replace(/(ings?|ed|ies|es|s)$/,'');}
+function jdTokens(t){return new Set(String(t||'').toLowerCase().split(/[^a-z]+/).filter(function(w){return w.length>3&&!JD_STOP.has(w);}).map(jdStem));}
+function jdMatch(stmt,tokens){
+  var words=Array.from(new Set(String(stmt||'').toLowerCase().split(/[^a-z]+/).filter(function(w){return w.length>3&&!JD_STOP.has(w);}).map(jdStem)));
+  var hits=words.filter(function(w){return tokens.has(w);});
+  var ratio=words.length?hits.length/words.length:0;
+  return {covered:hits.length>=2||ratio>=0.25};
+}
+function analyseCoverage(text){
+  var tokens=jdTokens(text),G={K:{label:'Knowledge',total:0,cov:0},S:{label:'Skills',total:0,cov:0},B:{label:'Behaviours',total:0,cov:0}},covered=new Set(),gaps=[];
+  Object.keys(INPUT.ksb||{}).forEach(function(code){var g=code[0];if(!G[g])return;G[g].total++;if(jdMatch(INPUT.ksb[code],tokens).covered){G[g].cov++;covered.add(code);}else{gaps.push(code);}});
+  var total=G.K.total+G.S.total+G.B.total,cov=G.K.cov+G.S.cov+G.B.cov;
+  return {total:total,cov:cov,pct:total?Math.round(cov/total*100):0,G:G,covered:covered,gaps:gaps};
+}
+function renderCoverage(slotId,text,kind){
+  var el=$(slotId);if(!el)return;
+  if(!text||text.trim().length<25){el.innerHTML='';return;}
+  var a=analyseCoverage(text);if(!a.total){el.innerHTML='';return;}
+  var col=a.pct>=60?'#2DD4B2':a.pct>=40?'#e0a43b':'#e8725d';
+  var minis=['K','S','B'].map(function(g){var x=a.G[g];return x.total?'<span class="cov-mini '+g+'"><b>'+x.cov+'/'+x.total+'</b> '+x.label+'</span>':'';}).join('');
+  var gapsHtml=a.gaps.length?'<details class="cov-gaps"><summary>'+a.gaps.length+' KSBs not yet evidenced — plan workplace exposure to bridge</summary><div class="cov-gaplist">'+a.gaps.map(function(c){return '<span class="cov-gaptag">'+c+'</span>';}).join('')+'</div></details>':'<div class="cov-allgood">✓ Every mapped KSB is touched by this '+kind+'.</div>';
+  var hint=kind==='brief'?'<span class="cov-hint">covered KSBs are highlighted in the guide ↓</span>':'';
+  el.innerHTML='<div class="cov-read"><div class="cov-top"><span class="cov-pct" style="color:'+col+'">'+a.pct+'%</span><span class="cov-lbl">'+a.cov+' of '+a.total+' KSBs evidenced by this '+kind+(a.gaps.length?' · '+a.gaps.length+' to bridge':'')+'</span></div><div class="cov-bar"><span style="width:'+a.pct+'%;background:'+col+'"></span></div><div class="cov-minis">'+minis+hint+'</div>'+gapsHtml+'</div>';
+}
+function markGuideCoverage(covered){
+  Array.prototype.forEach.call(document.querySelectorAll('.doc .krow'),function(row){var kc=row.querySelector('.kc');if(!kc)return;row.classList.toggle('covered',covered.has(kc.textContent.trim()));});
+}
+function updateCoverage(){
+  var b=(typeof getBrief==='function'?getBrief():''),j=(typeof getJD==='function'?getJD():'');
+  renderCoverage('briefCov',b,'brief');
+  renderCoverage('jdCov',j,'JD');
+  markGuideCoverage(b.trim().length>=25?analyseCoverage(b).covered:new Set());
+}
+
 /* ---------- brief + JD context (fed into the AI prompts) + collapsibles ---------- */
 var BRIEF_KEY='ab_brief',JD_KEY='ab_jd';
 function getBrief(){try{return localStorage.getItem(BRIEF_KEY)||'';}catch(e){return '';}}
@@ -710,7 +771,7 @@ async function readDocx(file){
 function readFileInto(file,ta,key,drop){
   var name=(file.name||'').toLowerCase();
   drop.classList.remove('filled');drop.textContent='⏳ Reading '+(file.name||'file')+'…';
-  function done(t){if(!t||!t.trim()){toast('No text found in that file — try pasting instead.');markDrop(drop,ta.value);return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();toast('Loaded '+file.name);}
+  function done(t){if(!t||!t.trim()){toast('No text found in that file — try pasting instead.');markDrop(drop,ta.value);return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();updateCoverage();toast('Loaded '+file.name);}
   function fail(e){toast((e&&e.message)||'Could not read that file — paste the text instead.');markDrop(drop,ta.value);}
   if(name.endsWith('.pdf')||file.type==='application/pdf'){readPdf(file).then(done).catch(fail);return;}
   if(name.endsWith('.docx')){readDocx(file).then(done).catch(fail);return;}
@@ -730,8 +791,8 @@ function wireDrop(drop,ta,key){if(!drop)return;drop.setAttribute('data-empty',dr
   bTA.value=getBrief();jTA.value=getJD();
   if(getBrief().trim()||getJD().trim()){panel.classList.add('open');body.hidden=false;}
   toggle.onclick=function(){var open=panel.classList.toggle('open');body.hidden=!open;};
-  bTA.addEventListener('input',function(){setCtxV(BRIEF_KEY,bTA.value);markDrop(bD,bTA.value);ctxStatus();});
-  jTA.addEventListener('input',function(){setCtxV(JD_KEY,jTA.value);markDrop(jD,jTA.value);ctxStatus();});
+  bTA.addEventListener('input',function(){setCtxV(BRIEF_KEY,bTA.value);markDrop(bD,bTA.value);ctxStatus();updateCoverage();});
+  jTA.addEventListener('input',function(){setCtxV(JD_KEY,jTA.value);markDrop(jD,jTA.value);ctxStatus();updateCoverage();});
   wireDrop(bD,bTA,BRIEF_KEY);wireDrop(jD,jTA,JD_KEY);markDrop(bD,bTA.value);markDrop(jD,jTA.value);ctxStatus();
 })();
 document.addEventListener('click',function(e){
