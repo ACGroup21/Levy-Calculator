@@ -262,6 +262,33 @@
     .doc .target{animation:none!important;box-shadow:none}
     .doc .sec,.doc .exsec,.doc .crit,.doc .krow{break-inside:avoid}
   }
+  /* ===== brief/JD context panel (chrome) + collapsible doc sections ===== */
+  .ctxpanel{margin:0 0 18px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .ctx-toggle{width:100%;text-align:left;background:transparent;border:none;color:var(--ink2);font-family:var(--mono);font-size:11px;letter-spacing:.04em;padding:12px 14px;display:flex;align-items:center;gap:9px;cursor:pointer}
+  .ctx-toggle:hover{color:var(--ink)}
+  .ctx-toggle .caret{transition:transform .18s;color:var(--teal);font-size:10px}
+  .ctxpanel.open .ctx-toggle .caret{transform:rotate(90deg)}
+  .ctx-status{margin-left:auto;font-size:10px;color:var(--ink3);text-transform:none;letter-spacing:0}
+  .ctx-status.on{color:var(--teal)}
+  .ctx-body[hidden]{display:none}
+  .ctx-body{padding:2px 14px 15px}
+  .ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){.ctx-grid{grid-template-columns:1fr}}
+  .ctx-lab{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:6px}
+  .ctx-lab .opt{opacity:.65;text-transform:none;letter-spacing:0}
+  .drop{border:1.5px dashed var(--line);border-radius:9px;padding:14px 12px;text-align:center;font-size:11.5px;color:var(--ink3);cursor:pointer;transition:all .15s;background:var(--field)}
+  .drop:hover,.drop.drag{border-color:var(--teal);color:var(--teal);background:rgba(45,212,178,.06)}
+  .drop.filled{border-style:solid;border-color:rgba(45,212,178,.4);color:#bff3e6}
+  .drop:focus-visible{outline:2px solid var(--teal);outline-offset:1px}
+  .ctx-ta{width:100%;margin-top:8px;min-height:82px;resize:vertical;background:var(--field);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--sans);font-size:12.5px;line-height:1.5;padding:9px 11px}
+  .ctx-ta:focus{outline:2px solid var(--teal);outline-offset:1px}
+  .ctx-note{font-size:11px;color:var(--ink3);line-height:1.5;margin:12px 0 0}
+  .doc .sec-h{cursor:pointer}
+  .doc .sec-caret{color:var(--mut);transition:transform .18s;flex:0 0 auto;font-size:10px;margin-left:2px}
+  .doc .sec.collapsed .sec-caret{transform:rotate(-90deg)}
+  .doc .sec.collapsed .blk{display:none}
+  .doc .sec.collapsed .sec-h{border-bottom:none;margin-bottom:0}
+  @media print{.doc .sec.collapsed .blk{display:block!important}.doc .sec-caret{display:none!important}.doc .sec-h{cursor:auto}}
 </style>
 </head>
 <body>
@@ -275,8 +302,28 @@
     <span class="grow"></span>
     <button id="improveall">✨ Improve all with Claude</button>
     <button id="regen" title="Re-draft Purpose / Pass / Distinction from the mapping (overwrites edits)">↻ Regenerate drafts</button>
+    <button id="collapseAll" title="Collapse or expand all sections">⊟ Collapse all</button>
     <button id="word">⬇ Word (.doc)</button>
     <button class="btn-p" id="print">🖨 Print / Save PDF</button>
+  </div>
+
+  <div class="ctxpanel" id="ctxpanel">
+    <button class="ctx-toggle" id="ctxToggle" type="button"><span class="caret">▸</span> Add brief &amp; JD for sharper AI <span class="ctx-status" id="ctxStatus">optional</span></button>
+    <div class="ctx-body" id="ctxBody" hidden>
+      <div class="ctx-grid">
+        <div class="ctx-col">
+          <label class="ctx-lab" for="briefTA">Assignment brief</label>
+          <div class="drop" id="briefDrop" tabindex="0" role="button">⬇ Drop a .txt / .md file, or paste below</div>
+          <textarea class="ctx-ta" id="briefTA" placeholder="Paste the assignment brief here…"></textarea>
+        </div>
+        <div class="ctx-col">
+          <label class="ctx-lab" for="jdTA">Job description <span class="opt">· optional</span></label>
+          <div class="drop" id="jdDrop" tabindex="0" role="button">⬇ Drop the JD file, or paste below</div>
+          <textarea class="ctx-ta" id="jdTA" placeholder="Paste the real job description here…"></textarea>
+        </div>
+      </div>
+      <p class="ctx-note">Anything here is woven into the ✨ Improve / Generate prompts so the guidance and worked example fit this brief and role. Stored only in this browser. For PDF / Word, open the file and paste its text.</p>
+    </div>
   </div>
 
   <div class="doc" id="doc"></div>
@@ -415,7 +462,7 @@ function render(){
     h+='<div class="sec" data-sec="'+i+'">'
       +'<div class="sec-h"><span class="snum">'+(i+1)+'</span><span class="t">'+esc(sec.t)+'</span>'
       +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words</span>'
-      +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button></div>'
+      +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
       +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">from your Step 1 notes</span></div><div contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
@@ -423,7 +470,7 @@ function render(){
       +'<div class="blk"><div class="lab dist eyebrow">To aim for Distinction</div><div data-f="dist" contenteditable="true">'+critHTML(DIST,'d')+'</div></div>'
       +'</div>';
   });
-  h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:0 4px 10px rgba(139,92,246,.3)">✓</span><span class="t">Final checklist for the learner</span></div><div class="blk"><ul>'
+  h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:0 4px 10px rgba(139,92,246,.3)">✓</span><span class="t">Final checklist for the learner</span><span class="sec-caret" title="Collapse / expand">▾</span></div><div class="blk"><ul>'
     +'<li>Word count within the target range for each section</li>'
     +'<li>Every section links clearly to business impact</li>'
     +'<li>Data and evidence referenced from your own workplace</li>'
@@ -541,7 +588,7 @@ $('bridge').onclick=function(e){if(e.target===$('bridge')){var j=bridgeReject;cl
 function sectionPrompt(i){
   var sec=INPUT.sections[i];var codes=sec.c||[];
   var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points telling the apprentice what real situation to describe, what to show they did, and the actual evidence to include (do NOT restate the KSBs — they already see them); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect). Return JSON only.';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points telling the apprentice what real situation to describe, what to show they did, and the actual evidence to include (do NOT restate the KSBs — they already see them); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect). Return JSON only.'+ctx();
 }
 function fillSection(i,out){
   var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
@@ -561,7 +608,7 @@ function allSectionsPrompt(){
     var ksb=codes.map(function(c){return '  '+c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'  (none mapped)';
     return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb;
   }).join('\n\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points (what real situation to describe, what they did, and the actual evidence to include — do NOT restate the KSBs); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points (what real situation to describe, what they did, and the actual evidence to include — do NOT restate the KSBs); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.'+ctx();
 }
 document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);}});
 $('improveall').onclick=async function(){
@@ -595,7 +642,7 @@ const EXEMPLAR_SYS="You are writing an ILLUSTRATIVE worked example for an appren
 const EXEMPLAR_SCHEMA={type:'object',properties:{scenario:{type:'string'},sections:{type:'array',items:{type:'object',properties:{title:{type:'string'},exemplar:{type:'string'}},required:['title','exemplar'],additionalProperties:false}}},required:['scenario','sections'],additionalProperties:false};
 function exemplarPrompt(){
   var lines=INPUT.sections.map(function(sec,i){var codes=(sec.c||[]).map(function(c){return c+' ('+clean(INPUT.ksb[c]||'')+')';}).join('; ');return (i+1)+'. '+sec.t+' — cover: '+(sec.x||'')+' — KSBs: '+(codes||'none');}).join('\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose, adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose, adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.'+ctx();
 }
 async function generateExemplar(btn){
   if(btn){btn.classList.add('busy');btn.disabled=true;}
@@ -603,6 +650,44 @@ async function generateExemplar(btn){
   catch(e){if(e.message!=='cancelled')toast(e.message||'Generation failed');}
   finally{if(btn){btn.classList.remove('busy');btn.disabled=false;btn.textContent=PARTB?'↻ Regenerate example':'✨ Generate worked example';}}
 }
+
+/* ---------- brief + JD context (fed into the AI prompts) + collapsibles ---------- */
+var BRIEF_KEY='ab_brief',JD_KEY='ab_jd';
+function getBrief(){try{return localStorage.getItem(BRIEF_KEY)||'';}catch(e){return '';}}
+function getJD(){try{return localStorage.getItem(JD_KEY)||'';}catch(e){return '';}}
+function setCtxV(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function ctx(){
+  var b=getBrief().trim().slice(0,8000),j=getJD().trim().slice(0,8000),s='';
+  if(b)s+='\n\n--- ASSIGNMENT BRIEF (tailor ALL guidance to THIS brief) ---\n'+b;
+  if(j)s+='\n\n--- JOB DESCRIPTION (the apprentice\'s real role — make any examples fit it) ---\n'+j;
+  return s;
+}
+function ctxStatus(){var el=$('ctxStatus');if(!el)return;var p=[];if(getBrief().trim())p.push('brief');if(getJD().trim())p.push('JD');if(p.length){el.textContent='✓ '+p.join(' + ')+' added';el.classList.add('on');}else{el.textContent='optional';el.classList.remove('on');}}
+function markDrop(drop,val){if(!drop)return;var t=(val||'').trim();if(t){drop.classList.add('filled');drop.textContent='✓ '+t.split(/\s+/).length+' words loaded — click to replace';}else{drop.classList.remove('filled');drop.textContent=drop.getAttribute('data-empty')||'Drop a file, or paste below';}}
+function readFileInto(file,ta,key,drop){var r=new FileReader();r.onload=function(){var t=String(r.result||'');if(/[\x00-\x08\x0E-\x1F]/.test(t.slice(0,2000))){toast('That looks like a PDF/Word file — open it and paste the text instead.');return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();toast('Loaded '+file.name);};r.readAsText(file);}
+function wireDrop(drop,ta,key){if(!drop)return;drop.setAttribute('data-empty',drop.textContent);
+  drop.addEventListener('click',function(){var inp=document.createElement('input');inp.type='file';inp.accept='.txt,.md,.markdown,.csv,.text,text/*';inp.onchange=function(){if(inp.files[0])readFileInto(inp.files[0],ta,key,drop);};inp.click();});
+  drop.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();drop.click();}});
+  drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('drag');});
+  drop.addEventListener('dragleave',function(){drop.classList.remove('drag');});
+  drop.addEventListener('drop',function(e){e.preventDefault();drop.classList.remove('drag');var f=e.dataTransfer&&e.dataTransfer.files[0];if(f)readFileInto(f,ta,key,drop);});
+}
+(function ctxInit(){
+  var panel=document.querySelector('.ctxpanel'),toggle=$('ctxToggle'),body=$('ctxBody'),bTA=$('briefTA'),jTA=$('jdTA'),bD=$('briefDrop'),jD=$('jdDrop');
+  if(!panel||!bTA)return;
+  bTA.value=getBrief();jTA.value=getJD();
+  if(getBrief().trim()||getJD().trim()){panel.classList.add('open');body.hidden=false;}
+  toggle.onclick=function(){var open=panel.classList.toggle('open');body.hidden=!open;};
+  bTA.addEventListener('input',function(){setCtxV(BRIEF_KEY,bTA.value);markDrop(bD,bTA.value);ctxStatus();});
+  jTA.addEventListener('input',function(){setCtxV(JD_KEY,jTA.value);markDrop(jD,jTA.value);ctxStatus();});
+  wireDrop(bD,bTA,BRIEF_KEY);wireDrop(jD,jTA,JD_KEY);markDrop(bD,bTA.value);markDrop(jD,jTA.value);ctxStatus();
+})();
+document.addEventListener('click',function(e){
+  if(!e.target.closest||e.target.closest('.aibtn'))return;
+  var hh=e.target.closest('.sec-h');
+  if(hh&&hh.closest('.doc')&&hh.parentNode)hh.parentNode.classList.toggle('collapsed');
+});
+(function(){var ca=$('collapseAll');if(!ca)return;ca.onclick=function(){var secs=document.querySelectorAll('.doc .sec');var anyOpen=false;Array.prototype.forEach.call(secs,function(s){if(!s.classList.contains('collapsed'))anyOpen=true;});Array.prototype.forEach.call(secs,function(s){s.classList.toggle('collapsed',anyOpen);});ca.textContent=anyOpen?'⊞ Expand all':'⊟ Collapse all';};})();
 
 render();
 if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
