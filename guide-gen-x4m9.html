@@ -330,6 +330,7 @@
   .doc .chk-sec{margin-top:13px}
   .doc .chk-t{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gk);font-weight:600;margin-bottom:8px}
   .doc .chk-t.ok{color:var(--tk)}
+  .doc .chk-t.weak{color:#2f74a8}
   .doc .chk-miss{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:baseline;font-size:12.5px;line-height:1.5;color:var(--ink2);margin:6px 0}
   .doc .chk-met{display:flex;flex-wrap:wrap;gap:5px}
   .doc .chk-none{font-size:12px;color:var(--muted)}
@@ -722,24 +723,27 @@ function loadAssignment(){
   inp.click();
 }
 function clearAssignment(){ASSIGN=null;renderPartB();toast('Assignment removed');}
+function suggestFor(c,mode){
+  var type=(c||'K')[0],full=clean(INPUT.ksb[c]||''),topic=full?(full.charAt(0).toLowerCase()+full.slice(1)).split(/;|—|–|\. /)[0].trim():String(c),verb=mode==='add'?'Add':'Strengthen';
+  if(type==='S')return verb+' evidence of '+topic+' — show a specific example of the work you produced and what it achieved.';
+  if(type==='B')return verb+' evidence of this behaviour — describe a real moment that shows: “'+full+'”.';
+  return verb+' evidence of '+topic+' — explain it and give a concrete example from your own workplace.';
+}
 function checkHTML(){
-  var text=ASSIGN.text||'';
-  var ev=analyseCoverage(text).covered;
+  var text=ASSIGN.text||'',atoks=jdTokens(text);
   var brief=(typeof getBrief==='function'?getBrief():'').trim();
-  var reqSet,reqLabel;
-  if(brief.length>=25){reqSet=analyseCoverage(brief).covered;reqLabel='the brief requires';}
-  else{reqSet=new Set(Object.keys(INPUT.ksb||{}));reqLabel='mapped in the guide';}
-  var required=Array.from(reqSet),met=required.filter(function(c){return ev.has(c);}),missing=required.filter(function(c){return !ev.has(c);});
-  var pct=required.length?Math.round(met.length/required.length*100):0;
-  var col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
+  var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
+  var reqLabel=brief.length>=25?'the brief requires':'mapped in the guide';
+  var met=[],weak=[],missing=[];
+  required.forEach(function(c){var m=jdMatch(INPUT.ksb[c]||'',atoks);if(m.covered)met.push(c);else if(m.hits>=1||m.ratio>=0.1)weak.push(c);else missing.push(c);});
+  var pct=required.length?Math.round(met.length/required.length*100):0,col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
   var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
-  h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(missing.length?' — <b>'+missing.length+'</b> still to address':' — all covered ✓')+'</span></div>';
+  h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment clearly evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(weak.length?' · <b>'+weak.length+'</b> partly':'')+(missing.length?' · <b>'+missing.length+'</b> missing':'')+'</span></div>';
   h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
-  if(missing.length){
-    h+='<div class="chk-sec"><div class="chk-t">Not yet evidenced — suggestions</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+' — add a specific workplace example that clearly evidences this.</span></div>';}).join('')+'</div>';
-  }
-  h+='<div class="chk-sec"><div class="chk-t ok">Evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
-  h+='<div class="chk-note">Indicative keyword match — a coordinator should confirm borderline KSBs.</div></div>';
+  if(missing.length)h+='<div class="chk-sec"><div class="chk-t">Missing — add ('+missing.length+')</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'add'))+'</span></div>';}).join('')+'</div>';
+  if(weak.length)h+='<div class="chk-sec"><div class="chk-t weak">Partly evidenced — strengthen ('+weak.length+')</div>'+weak.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'strengthen'))+'</span></div>';}).join('')+'</div>';
+  h+='<div class="chk-sec"><div class="chk-t ok">Clearly evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
+  h+='<div class="chk-note">Indicative keyword match, fully offline — a coordinator should confirm borderline KSBs. (✨ AI can give a deeper read if you have Claude.)</div></div>';
   h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
   return h;
 }
@@ -781,7 +785,7 @@ function jdMatch(stmt,tokens){
   var words=Array.from(new Set(String(stmt||'').toLowerCase().split(/[^a-z]+/).filter(function(w){return w.length>3&&!JD_STOP.has(w);}).map(jdStem)));
   var hits=words.filter(function(w){return tokens.has(w);});
   var ratio=words.length?hits.length/words.length:0;
-  return {covered:hits.length>=2||ratio>=0.25};
+  return {covered:hits.length>=2||ratio>=0.25,hits:hits.length,ratio:ratio};
 }
 function analyseCoverage(text){
   var tokens=jdTokens(text),G={K:{label:'Knowledge',total:0,cov:0},S:{label:'Skills',total:0,cov:0},B:{label:'Behaviours',total:0,cov:0}},covered=new Set(),gaps=[];
