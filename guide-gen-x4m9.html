@@ -317,6 +317,26 @@
   .doc .krow.covered{background:var(--tbg);border-radius:6px}
   .doc .krow.covered .kc{color:var(--tk)}
   @media print{.doc .krow.covered{background:#eef7f1}}
+  /* assignment checker panel (in Part B) */
+  .doc .chk{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin:14px 0 16px;position:relative}
+  .doc .chk-clear{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9.5px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:5px;padding:2px 8px;cursor:pointer}
+  .doc .chk-clear:hover{color:#c0553f;border-color:#e6b7ab}
+  .doc .chk-h{display:flex;align-items:baseline;gap:11px;padding-right:60px}
+  .doc .chk-pct{font-family:var(--mono);font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .doc .chk-lbl{font-size:12.5px;color:var(--ink2);line-height:1.45}
+  .doc .chk-lbl b{color:var(--ink)}
+  .doc .chk-bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:10px 0 2px}
+  .doc .chk-bar span{display:block;height:100%;border-radius:3px}
+  .doc .chk-sec{margin-top:13px}
+  .doc .chk-t{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--gk);font-weight:600;margin-bottom:8px}
+  .doc .chk-t.ok{color:var(--tk)}
+  .doc .chk-miss{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:baseline;font-size:12.5px;line-height:1.5;color:var(--ink2);margin:6px 0}
+  .doc .chk-met{display:flex;flex-wrap:wrap;gap:5px}
+  .doc .chk-none{font-size:12px;color:var(--muted)}
+  .doc .chk-note{font-size:10.5px;color:var(--muted);margin-top:12px;font-style:italic}
+  .doc .chk-doc{margin-top:16px;border-top:1px dashed var(--line);padding-top:13px}
+  .doc .chk-doc-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
+  .doc .chk-doc p{font-size:13px;line-height:1.62;color:var(--ink);margin:0 0 9px}
 </style>
 </head>
 <body>
@@ -507,7 +527,7 @@ function render(){
     +'<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'
     +'<li>Reflection shows honest personal growth</li>'
     +'<li>All content is your own original work</li></ul></div></div>';
-  h+='<div class="partb'+(PARTB?'':' empty')+'"><div class="pb-h"><span class="pb-rib">Part B</span><span class="pt">Annotated worked example</span><span class="ps">illustrative · not for submission</span><span style="flex:1"></span><button class="aibtn" data-dummy="1" title="Fill Part B with an offline placeholder example — no AI needed">⚡ Dummy (offline)</button><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
+  h+='<div class="partb'+(PARTB?'':' empty')+'"><div class="pb-h"><span class="pb-rib">Part B</span><span class="pt">Annotated worked example</span><span class="ps">illustrative · not for submission</span><span style="flex:1"></span><button class="aibtn" data-loadassign="1" title="Load a finished assignment and check it against the brief">📥 Load assignment</button><button class="aibtn" data-dummy="1" title="Fill Part B with an offline placeholder example — no AI needed">⚡ Dummy (offline)</button><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
   h+='</div>';
   h+='<div class="foot"><img src="'+AC_LOGO_WHITE+'" alt="" style="height:16px"><span>Arthur Curtis Education · Assignment Guide · guidance only, never submittable work</span></div>';
   $('doc').innerHTML=h;
@@ -653,7 +673,7 @@ function allSectionsPrompt(){
   }).join('\n\n');
   return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points (what real situation to describe, what they did, and the actual evidence to include — do NOT restate the KSBs); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.'+ctx();
 }
-document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);return;}var dm=e.target.closest('[data-dummy]');if(dm){PARTB=dummyExemplar();renderPartB();toast('Offline dummy example inserted — edit it, or replace with ✨ Generate');}});
+document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);return;}var la=e.target.closest('[data-loadassign]');if(la){loadAssignment();return;}var ca=e.target.closest('[data-clearassign]');if(ca){clearAssignment();return;}var dm=e.target.closest('[data-dummy]');if(dm){PARTB=dummyExemplar();renderPartB();toast('Offline dummy example inserted — edit it, or replace with ✨ Generate');}});
 $('improveall').onclick=async function(){
   var n=INPUT.sections.length;this.disabled=true;
   try{
@@ -686,9 +706,50 @@ function dummyExemplar(){
   });
   return {scenario:scenario,sections:sections};
 }
+/* ---------- ASSIGNMENT CHECKER: load a finished assignment into Part B, match its KSBs vs the brief, suggest ---------- */
+function parseFile(file){
+  var name=(file.name||'').toLowerCase();
+  if(name.endsWith('.pdf')||file.type==='application/pdf')return readPdf(file);
+  if(name.endsWith('.docx'))return readDocx(file);
+  if(name.endsWith('.doc'))return Promise.reject(new Error('Old .doc isn’t supported — save as .docx or PDF.'));
+  return new Promise(function(res,rej){var r=new FileReader();r.onerror=function(){rej(new Error('Could not read the file.'));};r.onload=function(){var t=String(r.result||'');if(/[\x00-\x08\x0E-\x1F]/.test(t.slice(0,2000))){rej(new Error('Unrecognised file — try a PDF, .docx or text file.'));return;}res(t);};r.readAsText(file);});
+}
+var ASSIGN=null;
+function loadAssignment(){
+  var inp=document.createElement('input');inp.type='file';inp.accept='.pdf,.docx,.txt,.md,text/*,application/pdf';
+  inp.onchange=function(){var f=inp.files[0];if(!f)return;toast('Reading '+f.name+'…');
+    parseFile(f).then(function(t){if(!t||!t.trim()){toast('No text found in that file.');return;}ASSIGN={name:f.name,text:t};renderPartB();toast('Assignment loaded & checked against the brief');}).catch(function(e){toast(e.message||'Could not read that file.');});};
+  inp.click();
+}
+function clearAssignment(){ASSIGN=null;renderPartB();toast('Assignment removed');}
+function checkHTML(){
+  var text=ASSIGN.text||'';
+  var ev=analyseCoverage(text).covered;
+  var brief=(typeof getBrief==='function'?getBrief():'').trim();
+  var reqSet,reqLabel;
+  if(brief.length>=25){reqSet=analyseCoverage(brief).covered;reqLabel='the brief requires';}
+  else{reqSet=new Set(Object.keys(INPUT.ksb||{}));reqLabel='mapped in the guide';}
+  var required=Array.from(reqSet),met=required.filter(function(c){return ev.has(c);}),missing=required.filter(function(c){return !ev.has(c);});
+  var pct=required.length?Math.round(met.length/required.length*100):0;
+  var col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
+  var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
+  h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(missing.length?' — <b>'+missing.length+'</b> still to address':' — all covered ✓')+'</span></div>';
+  h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
+  if(missing.length){
+    h+='<div class="chk-sec"><div class="chk-t">Not yet evidenced — suggestions</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(clean(INPUT.ksb[c]||''))+' — add a specific workplace example that clearly evidences this.</span></div>';}).join('')+'</div>';
+  }
+  h+='<div class="chk-sec"><div class="chk-t ok">Evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
+  h+='<div class="chk-note">Indicative keyword match — a coordinator should confirm borderline KSBs.</div></div>';
+  h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
+  return h;
+}
 function renderPartB(){
   var body=$('partb-body');if(!body)return;
-  var wrap=document.querySelector('.partb');if(wrap)wrap.classList.toggle('empty',!PARTB);
+  var wrap=document.querySelector('.partb');
+  var pt=document.querySelector('.pb-h .pt'),ps=document.querySelector('.pb-h .ps');
+  if(ASSIGN){ if(wrap)wrap.classList.remove('empty'); if(pt)pt.textContent='Assignment check'; if(ps)ps.style.display='none'; body.innerHTML=checkHTML(); return; }
+  if(pt)pt.textContent='Annotated worked example'; if(ps)ps.style.display='';
+  if(wrap)wrap.classList.toggle('empty',!PARTB);
   if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Uses your own Claude — no API key needed.</div>';return;}
   var h='<div class="scenario"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><div><span class="s-lab">Illustrative scenario — not your workplace</span><span class="s-txt">'+esc(PARTB.scenario||'')+'</span></div></div>';
   INPUT.sections.forEach(function(sec,i){
