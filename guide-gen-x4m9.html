@@ -352,6 +352,19 @@
   .doc .v-tag.v-mid{color:var(--gk);background:var(--gbg);border:1px solid var(--gln)}
   .doc .v-tag.v-no{color:#c0553f;background:#fdeee9;border:1px solid #f0cabb}
   .doc .v-cmt{color:var(--ink2)}
+  /* empty-start standard picker */
+  .doc .empty-pick{padding:20px var(--pad) 30px;max-width:580px}
+  .doc .ep-lab{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);margin-bottom:8px}
+  .doc .ep-search{width:100%;background:#fff;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--isans);font-size:14px;padding:11px 13px}
+  .doc .ep-search:focus{outline:2px solid var(--teal);outline-offset:1px}
+  .doc .ep-list{margin-top:10px;max-height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+  .doc .ep-item{display:flex;align-items:baseline;justify-content:space-between;gap:12px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer;font-family:var(--isans);width:100%}
+  .doc .ep-item:hover{border-color:var(--teal);background:var(--tbg)}
+  .doc .ep-name{font-size:13px;font-weight:600;color:var(--ink)}
+  .doc .ep-lvl{font-family:var(--mono);font-size:10px;color:var(--mut);white-space:nowrap}
+  .doc .ep-none{font-size:12.5px;color:var(--mut);padding:10px 2px}
+  .doc .ep-note{font-size:11.5px;color:var(--ink2);line-height:1.55;margin-top:14px}
+  .doc .ep-note a{color:var(--tk)}
 </style>
 </head>
 <body>
@@ -438,7 +451,7 @@ const DEMO_INPUT={
   {t:"Measured Impact & Strategic Alignment",x:"reduction in repeat issues; response confidence; preventative cost benefit; strategic alignment; system resilience",c:["K1","B3"]}
  ]
 };
-let INPUT=DEMO_INPUT;
+let INPUT=null;
 try{var raw=localStorage.getItem('ab_guide_input');if(raw){var p=JSON.parse(raw);if(p&&p.sections&&p.ksb)INPUT=p;}}catch(e){}
 
 /* ---------- heuristic draft generators (offline; coordinator refines; LLM polish later) ---------- */
@@ -493,7 +506,47 @@ function animateWC(){
     setTimeout(function(){if(!done){done=true;el.textContent=t;}},1400);
   });
 }
+var STDLIB=null;
+function stdHasKsb(s){return s&&((s.K&&Object.keys(s.K).length)||(s.S&&Object.keys(s.S).length)||(s.B&&Object.keys(s.B).length));}
+function emptyHTML(){
+  return '<div class="hero">'+HERO_MOTIF
+    +'<div class="hero-row"><div class="brand"><img src="'+AC_LOGO_WHITE+'" alt="Arthur Curtis Education" style="height:30px;display:block"></div><span class="tool-tag"><span class="dot"></span>Assignment Guide</span></div>'
+    +'<h1>Assignment Guide</h1><div class="sub">Load a standard to begin</div></div>'
+    +'<div class="docbody"><div class="empty-pick">'
+    +'<div class="ep-lab">Apprenticeship standard</div>'
+    +'<input id="stdSearch" class="ep-search" placeholder="Search standards by name or code…" autocomplete="off">'
+    +'<div id="stdList" class="ep-list"><div class="ep-none">Loading the standards library…</div></div>'
+    +'<p class="ep-note">Pick a standard to load its KSBs — then add a brief and load a finished assignment to check it. For a full step-by-step guide, start in the <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>.</p>'
+    +'</div></div>';
+}
+function loadStdLib(){
+  if(STDLIB)return Promise.resolve(STDLIB);
+  return fetch('standards.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();}).then(function(res){STDLIB=res.standards||res;return STDLIB;});
+}
+function wireStdPicker(){
+  var search=$('stdSearch'),list=$('stdList');if(!search||!list)return;
+  loadStdLib().then(function(lib){
+    var codes=Object.keys(lib).filter(function(c){return stdHasKsb(lib[c]);});
+    function draw(q){
+      q=(q||'').toLowerCase().trim();
+      var items=codes.filter(function(c){var s=lib[c];return !q||(s.name||'').toLowerCase().indexOf(q)>=0||c.toLowerCase().indexOf(q)>=0;}).sort(function(a,b){return (lib[a].name||a).localeCompare(lib[b].name||b);}).slice(0,60);
+      list.innerHTML=items.length?items.map(function(c){var s=lib[c];return '<button class="ep-item" data-std="'+c+'" type="button"><span class="ep-name">'+esc(s.name||c)+'</span><span class="ep-lvl">L'+(s.level||'?')+' · '+c+'</span></button>';}).join(''):'<div class="ep-none">No standards match “'+esc(q)+'”.</div>';
+    }
+    draw('');
+    search.addEventListener('input',function(){draw(search.value);});
+    list.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-std]');if(b)pickStandard(lib,b.getAttribute('data-std'));});
+    search.focus();
+  }).catch(function(){list.innerHTML='<div class="ep-none">Couldn’t load the standards library — check the connection.</div>';});
+}
+function pickStandard(lib,code){
+  var s=lib[code];if(!s)return;
+  var ksb={};['K','S','B'].forEach(function(g){if(s[g])Object.keys(s[g]).forEach(function(cd){ksb[cd]=s[g][cd];});});
+  INPUT={std:code,standardName:(s.name||code),level:s.level||'',ksb:ksb,sections:[]};
+  render();if(typeof updateCoverage==='function')updateCoverage();
+  toast((s.name||code)+' loaded — add a brief and an assignment to check');
+}
 function render(){
+  if(!INPUT){$('src').textContent='';$('doc').innerHTML=emptyHTML();wireStdPicker();return;}
   var full=esc(INPUT.standardName||INPUT.std);
   var lm=/\(L\s?(\d)\)/i.exec(INPUT.standardName||'')||/\bL\s?(\d)\b/i.exec(INPUT.standardName||'');
   var level=lm?lm[1]:(INPUT.level||3);
@@ -515,6 +568,7 @@ function render(){
     +'<h2>Important notice to learners</h2>'
     +'<p>This is an <b>illustrative guidance document</b> to help you structure your assignment and evidence your KSBs. It <b>must not be copied or submitted as your own work</b> — you produce original content from your own workplace, with your own actions, decisions and reflection.</p>'
     +'<p>The worked example (Part B) uses an <b>illustrative scenario that is not your workplace</b>. Its <code>[KSB tags]</code> are for your tutor and <b>must be removed before submission.</b></p></div></div>';
+  if(!INPUT.sections.length)h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:none">i</span><span class="t">No project sections yet</span></div><div class="blk"><div class="read">This standard was loaded directly, so there is no mapped project structure. For a full step-by-step guide, map the project\'s sections in the <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>. To <b>check a finished assignment</b>, add its brief above, then load the assignment in Part B below.</div></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var codes=(sec.c||[]);
     var cov='';['K','S','B'].forEach(function(g){
@@ -870,6 +924,7 @@ function jdMatch(stmt,tokens){
   return {covered:hits.length>=2||ratio>=0.25,hits:hits.length,ratio:ratio};
 }
 function analyseCoverage(text){
+  if(!INPUT||!INPUT.ksb)return {total:0,cov:0,pct:0,G:{K:{label:'Knowledge',total:0,cov:0},S:{label:'Skills',total:0,cov:0},B:{label:'Behaviours',total:0,cov:0}},covered:new Set(),gaps:[]};
   var tokens=jdTokens(text),G={K:{label:'Knowledge',total:0,cov:0},S:{label:'Skills',total:0,cov:0},B:{label:'Behaviours',total:0,cov:0}},covered=new Set(),gaps=[];
   Object.keys(INPUT.ksb||{}).forEach(function(code){var g=code[0];if(!G[g])return;G[g].total++;if(jdMatch(INPUT.ksb[code],tokens).covered){G[g].cov++;covered.add(code);}else{gaps.push(code);}});
   var total=G.K.total+G.S.total+G.B.total,cov=G.K.cov+G.S.cov+G.B.cov;
@@ -889,6 +944,7 @@ function markGuideCoverage(covered){
   Array.prototype.forEach.call(document.querySelectorAll('.doc .krow'),function(row){var kc=row.querySelector('.kc');if(!kc)return;row.classList.toggle('covered',covered.has(kc.textContent.trim()));});
 }
 function updateCoverage(){
+  if(!INPUT){renderCoverage('briefCov','','brief');renderCoverage('jdCov','','JD');return;}
   var b=(typeof getBrief==='function'?getBrief():''),j=(typeof getJD==='function'?getJD():'');
   renderCoverage('briefCov',b,'brief');
   renderCoverage('jdCov',j,'JD');
@@ -994,7 +1050,6 @@ function clearCtx(which){
 (function(){var bc=$('briefClear'),jc=$('jdClear');if(bc)bc.onclick=function(){clearCtx('brief');};if(jc)jc.onclick=function(){clearCtx('jd');};})();
 
 render();
-if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
 </script>
 </body>
 </html>
