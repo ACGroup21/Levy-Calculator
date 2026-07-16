@@ -320,10 +320,12 @@
   .ctx-clear{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink3);background:transparent;border:1px solid var(--line);border-radius:5px;padding:2px 7px;cursor:pointer}
   .ctx-clear:hover{color:#f4a593;border-color:rgba(232,114,93,.5)}
   .ctx-clear[hidden]{display:none}
-  /* covered-by-brief highlight on the guide's KSB rows */
-  .doc .krow.covered{background:var(--tbg);border-radius:6px}
-  .doc .krow.covered .kc{color:var(--tk)}
-  @media print{.doc .krow.covered{background:#eef7f1}}
+  /* covered-by-brief highlight on the guide's KSB rows — tinted to match each category's heading */
+  .doc .krow.covered{border-radius:6px}
+  .doc .cgrp.K .krow.covered{background:var(--tbg)}
+  .doc .cgrp.S .krow.covered{background:var(--pbg)}
+  .doc .cgrp.B .krow.covered{background:var(--gbg)}
+  @media print{.doc .cgrp.K .krow.covered{background:#eef7f1}.doc .cgrp.S .krow.covered{background:#f1ecfb}.doc .cgrp.B .krow.covered{background:#fbf3e3}}
   /* assignment checker panel (in Part B) */
   .doc .chk{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:14px 16px;margin:14px 0 16px;position:relative}
   .doc .chk-clear{position:absolute;top:12px;right:12px;font-family:var(--mono);font-size:9.5px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:5px;padding:2px 8px;cursor:pointer}
@@ -691,7 +693,7 @@ svg,.hero-motif,.sec-caret,.aibtn,.pb-empty,.cov-slot,.tool-tag .dot{display:non
 .krow{margin:2px 0;font-size:10pt}
 .kc{font-family:Consolas,monospace;font-weight:bold;margin-right:8px}
 .cgrp.K .kc{color:#0b8f76} .cgrp.S .kc{color:#6438c9} .cgrp.B .kc{color:#a2711a}
-.krow.covered{background:#eef7f1}
+.cgrp.K .krow.covered{background:#eef7f1} .cgrp.S .krow.covered{background:#f1ecfb} .cgrp.B .krow.covered{background:#fbf3e3}
 .crit{margin:4px 0;font-size:10.5pt}
 .cnum{font-family:Consolas,monospace;font-size:9pt;font-weight:bold;padding:1px 5px;margin-right:8px}
 .cnum.p{color:#0b6b57;background:#e5f7f2} .cnum.d{color:#8a5a00;background:#fbf3e3}
