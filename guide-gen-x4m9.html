@@ -671,7 +671,7 @@ function dummyExemplar(){
     var paras=['In this part of my project I focused on '+String(sec.t||'this area').toLowerCase()+' — setting out the real workplace context, who was involved, and why it mattered to the business.'];
     var ks=codes.map(function(c){
       var t=clean(INPUT.ksb[c]||'');
-      var topic=t?lc(t).split(/;|—|–|\. /)[0].trim():String(c);
+      var topic=t?(t.charAt(0).toLowerCase()+t.slice(1)).split(/;|—|–|\. /)[0].trim():String(c);
       return 'I showed how I applied '+topic+', giving a concrete example from my own work and the effect it had on the customer, colleagues or results. ['+c+']';
     });
     if(ks.length)paras.push(ks.join(' '));
