@@ -338,6 +338,13 @@
   .doc .chk-doc{margin-top:16px;border-top:1px dashed var(--line);padding-top:13px}
   .doc .chk-doc-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
   .doc .chk-doc p{font-size:13px;line-height:1.62;color:var(--ink);margin:0 0 9px}
+  .doc .chk-mode{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:11px;border-top:1px solid var(--line)}
+  .doc .sem-toggle{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink2);cursor:pointer}
+  .doc .sem-toggle input{accent-color:var(--teal);cursor:pointer}
+  .doc .sem-hint{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.02em}
+  .doc .sem-prog{font-family:var(--mono);font-size:10px;color:#2f74a8;margin-left:auto}
+  .doc .sem-badge{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:2px 7px;margin-left:auto}
+  .doc .sem-badge.on{color:var(--tk);background:var(--tbg);border-color:var(--tln)}
 </style>
 </head>
 <body>
@@ -719,31 +726,75 @@ var ASSIGN=null;
 function loadAssignment(){
   var inp=document.createElement('input');inp.type='file';inp.accept='.pdf,.docx,.txt,.md,text/*,application/pdf';
   inp.onchange=function(){var f=inp.files[0];if(!f)return;toast('Reading '+f.name+'…');
-    parseFile(f).then(function(t){if(!t||!t.trim()){toast('No text found in that file.');return;}ASSIGN={name:f.name,text:t};renderPartB();toast('Assignment loaded & checked against the brief');}).catch(function(e){toast(e.message||'Could not read that file.');});};
+    parseFile(f).then(function(t){if(!t||!t.trim()){toast('No text found in that file.');return;}ASSIGN={name:f.name,text:t};SEMRES=null;renderPartB();if(SEM_ON)runSemantic();toast('Assignment loaded & checked against the brief');}).catch(function(e){toast(e.message||'Could not read that file.');});};
   inp.click();
 }
-function clearAssignment(){ASSIGN=null;renderPartB();toast('Assignment removed');}
+function clearAssignment(){ASSIGN=null;SEMRES=null;renderPartB();toast('Assignment removed');}
 function suggestFor(c,mode){
   var type=(c||'K')[0],full=clean(INPUT.ksb[c]||''),topic=full?(full.charAt(0).toLowerCase()+full.slice(1)).split(/;|—|–|\. /)[0].trim():String(c),verb=mode==='add'?'Add':'Strengthen';
   if(type==='S')return verb+' evidence of '+topic+' — show a specific example of the work you produced and what it achieved.';
   if(type==='B')return verb+' evidence of this behaviour — describe a real moment that shows: “'+full+'”.';
   return verb+' evidence of '+topic+' — explain it and give a concrete example from your own workplace.';
 }
-function checkHTML(){
-  var text=ASSIGN.text||'',atoks=jdTokens(text);
+/* optional in-browser SEMANTIC matcher — transformers.js embeddings, opt-in, one-time ~25MB, then offline */
+var SEM_ON=false, SEMRES=null, _embedder=null, _semProg='';
+async function getEmbedder(){
+  if(_embedder)return _embedder;
+  var mod=await import('https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2');
+  mod.env.allowLocalModels=false;
+  _embedder=await mod.pipeline('feature-extraction','Xenova/all-MiniLM-L6-v2',{progress_callback:function(p){
+    if(p&&p.status==='progress'&&typeof p.progress==='number'){_semProg='downloading matcher — '+Math.round(p.progress)+'%';var el=document.querySelector('.sem-prog');if(el)el.textContent=_semProg;}
+  }});
+  return _embedder;
+}
+function cosine(a,b){var s=0,n=Math.min(a.length,b.length);for(var i=0;i<n;i++)s+=a[i]*b[i];return s;}
+async function runSemantic(){
+  if(!ASSIGN)return;
+  _semProg='loading the semantic matcher…';renderPartB();
+  try{
+    var emb=await getEmbedder();
+    var brief=(typeof getBrief==='function'?getBrief():'').trim();
+    var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
+    var ksbTexts=required.map(function(c){return clean(INPUT.ksb[c]||'');});
+    var chunks=(ASSIGN.text||'').replace(/\n+/g,' ').split(/(?<=[.!?])\s+/).map(function(s){return s.trim();}).filter(function(s){return s.length>25;}).slice(0,150);
+    if(!chunks.length)chunks=[(ASSIGN.text||'').slice(0,1500)];
+    _semProg='analysing…';var pe=document.querySelector('.sem-prog');if(pe)pe.textContent=_semProg;
+    var kv=(await emb(ksbTexts,{pooling:'mean',normalize:true})).tolist();
+    var cv=(await emb(chunks,{pooling:'mean',normalize:true})).tolist();
+    var sim={};required.forEach(function(c,i){var mx=0;for(var j=0;j<cv.length;j++){var s=cosine(kv[i],cv[j]);if(s>mx)mx=s;}sim[c]=mx;});
+    SEMRES={key:required.join(','),sim:sim};_semProg='';renderPartB();toast('Semantic check ready');
+  }catch(e){
+    _semProg='';SEM_ON=false;SEMRES=null;renderPartB();
+    toast('Couldn’t load the smart matcher — staying on keyword.');
+  }
+}
+function tierKSBs(){
   var brief=(typeof getBrief==='function'?getBrief():'').trim();
   var required=brief.length>=25?Array.from(analyseCoverage(brief).covered):Object.keys(INPUT.ksb||{});
   var reqLabel=brief.length>=25?'the brief requires':'mapped in the guide';
-  var met=[],weak=[],missing=[];
-  required.forEach(function(c){var m=jdMatch(INPUT.ksb[c]||'',atoks);if(m.covered)met.push(c);else if(m.hits>=1||m.ratio>=0.1)weak.push(c);else missing.push(c);});
+  var met=[],weak=[],missing=[],semUsed=false;
+  if(SEM_ON&&SEMRES&&SEMRES.key===required.join(',')){
+    semUsed=true;
+    required.forEach(function(c){var s=SEMRES.sim[c]||0;if(s>=0.45)met.push(c);else if(s>=0.32)weak.push(c);else missing.push(c);});
+  }else{
+    var atoks=jdTokens(ASSIGN.text||'');
+    required.forEach(function(c){var m=jdMatch(INPUT.ksb[c]||'',atoks);if(m.covered)met.push(c);else if(m.hits>=1||m.ratio>=0.1)weak.push(c);else missing.push(c);});
+  }
+  return {required:required,reqLabel:reqLabel,met:met,weak:weak,missing:missing,semUsed:semUsed};
+}
+document.addEventListener('change',function(e){var t=e.target;if(t&&t.getAttribute&&t.getAttribute('type')==='checkbox'&&t.hasAttribute('data-semtoggle')){SEM_ON=t.checked;if(SEM_ON){runSemantic();}else{SEMRES=null;renderPartB();}}});
+function checkHTML(){
+  var text=ASSIGN.text||'';
+  var T=tierKSBs(),required=T.required,met=T.met,weak=T.weak,missing=T.missing,reqLabel=T.reqLabel;
   var pct=required.length?Math.round(met.length/required.length*100):0,col=pct>=80?'#2DD4B2':pct>=50?'#e0a43b':'#e8725d';
   var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
   h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment clearly evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(weak.length?' · <b>'+weak.length+'</b> partly':'')+(missing.length?' · <b>'+missing.length+'</b> missing':'')+'</span></div>';
   h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
+  h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-semtoggle'+(SEM_ON?' checked':'')+'> Smarter (semantic) matching <span class="sem-hint">one-time ~25 MB, then offline</span></label>'+(_semProg?'<span class="sem-prog">'+esc(_semProg)+'</span>':(T.semUsed?'<span class="sem-badge on">✓ semantic</span>':'<span class="sem-badge">keyword</span>'))+'</div>';
   if(missing.length)h+='<div class="chk-sec"><div class="chk-t">Missing — add ('+missing.length+')</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'add'))+'</span></div>';}).join('')+'</div>';
   if(weak.length)h+='<div class="chk-sec"><div class="chk-t weak">Partly evidenced — strengthen ('+weak.length+')</div>'+weak.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'strengthen'))+'</span></div>';}).join('')+'</div>';
   h+='<div class="chk-sec"><div class="chk-t ok">Clearly evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
-  h+='<div class="chk-note">Indicative keyword match, fully offline — a coordinator should confirm borderline KSBs. (✨ AI can give a deeper read if you have Claude.)</div></div>';
+  h+='<div class="chk-note">'+(T.semUsed?'Semantic match — in-browser AI embeddings, fully offline.':'Indicative keyword match, fully offline.')+' A coordinator should confirm borderline KSBs.</div></div>';
   h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
   return h;
 }
