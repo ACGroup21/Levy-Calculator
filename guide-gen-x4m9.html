@@ -313,16 +313,16 @@
       <div class="ctx-grid">
         <div class="ctx-col">
           <label class="ctx-lab" for="briefTA">Assignment brief</label>
-          <div class="drop" id="briefDrop" tabindex="0" role="button">⬇ Drop a .txt / .md file, or paste below</div>
+          <div class="drop" id="briefDrop" tabindex="0" role="button">⬇ Drop the brief — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="briefTA" placeholder="Paste the assignment brief here…"></textarea>
         </div>
         <div class="ctx-col">
           <label class="ctx-lab" for="jdTA">Job description <span class="opt">· optional</span></label>
-          <div class="drop" id="jdDrop" tabindex="0" role="button">⬇ Drop the JD file, or paste below</div>
+          <div class="drop" id="jdDrop" tabindex="0" role="button">⬇ Drop the JD — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="jdTA" placeholder="Paste the real job description here…"></textarea>
         </div>
       </div>
-      <p class="ctx-note">Anything here is woven into the ✨ Improve / Generate prompts so the guidance and worked example fit this brief and role. Stored only in this browser. For PDF / Word, open the file and paste its text.</p>
+      <p class="ctx-note">Anything here is woven into the ✨ Improve / Generate prompts so the guidance and worked example fit this brief and role. Stored only in this browser. PDF and Word (.docx) files are read automatically; for old .doc, save as .docx or paste.</p>
     </div>
   </div>
 
@@ -664,9 +664,61 @@ function ctx(){
 }
 function ctxStatus(){var el=$('ctxStatus');if(!el)return;var p=[];if(getBrief().trim())p.push('brief');if(getJD().trim())p.push('JD');if(p.length){el.textContent='✓ '+p.join(' + ')+' added';el.classList.add('on');}else{el.textContent='optional';el.classList.remove('on');}}
 function markDrop(drop,val){if(!drop)return;var t=(val||'').trim();if(t){drop.classList.add('filled');drop.textContent='✓ '+t.split(/\s+/).length+' words loaded — click to replace';}else{drop.classList.remove('filled');drop.textContent=drop.getAttribute('data-empty')||'Drop a file, or paste below';}}
-function readFileInto(file,ta,key,drop){var r=new FileReader();r.onload=function(){var t=String(r.result||'');if(/[\x00-\x08\x0E-\x1F]/.test(t.slice(0,2000))){toast('That looks like a PDF/Word file — open it and paste the text instead.');return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();toast('Loaded '+file.name);};r.readAsText(file);}
+var _pdfjs=null;
+function loadPdfJs(){
+  if(_pdfjs)return Promise.resolve(_pdfjs);
+  return new Promise(function(res,rej){
+    var s=document.createElement('script');s.src='pdf.min.js';
+    s.onload=function(){try{var lib=window.pdfjsLib;lib.GlobalWorkerOptions.workerSrc='pdf.worker.min.js';_pdfjs=lib;res(lib);}catch(e){rej(new Error('Could not start the PDF reader.'));}};
+    s.onerror=function(){rej(new Error('Could not load the PDF reader (offline?).'));};
+    document.head.appendChild(s);
+  });
+}
+async function readPdf(file){
+  var lib=await loadPdfJs();
+  var buf=await file.arrayBuffer();
+  var pdf=await lib.getDocument({data:new Uint8Array(buf)}).promise;
+  var out=[];
+  for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p);var tc=await page.getTextContent();out.push(tc.items.map(function(it){return it.str;}).join(' '));}
+  return out.join('\n\n').replace(/[ \t]{2,}/g,' ').trim();
+}
+function xmlDecode(s){return s.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;|&apos;/g,"'");}
+async function readDocx(file){
+  var buf=await file.arrayBuffer();var u8=new Uint8Array(buf);var dv=new DataView(buf);var dec=new TextDecoder();
+  var eocd=-1,lim=Math.max(0,u8.length-22-65536);
+  for(var p=u8.length-22;p>=lim;p--){if(u8[p]===0x50&&u8[p+1]===0x4B&&u8[p+2]===0x05&&u8[p+3]===0x06){eocd=p;break;}}
+  if(eocd<0)throw new Error('That is not a valid .docx file');
+  var cdCount=dv.getUint16(eocd+10,true),cdOff=dv.getUint32(eocd+16,true),off=cdOff,found=null;
+  for(var n=0;n<cdCount;n++){
+    if(!(u8[off]===0x50&&u8[off+1]===0x4B&&u8[off+2]===0x01&&u8[off+3]===0x02))break;
+    var method=dv.getUint16(off+10,true),compSize=dv.getUint32(off+20,true),nameLen=dv.getUint16(off+28,true),extraLen=dv.getUint16(off+30,true),commentLen=dv.getUint16(off+32,true),localOff=dv.getUint32(off+42,true);
+    var nm=dec.decode(u8.subarray(off+46,off+46+nameLen));
+    if(nm==='word/document.xml'){found={method:method,compSize:compSize,localOff:localOff};break;}
+    off+=46+nameLen+extraLen+commentLen;
+  }
+  if(!found)throw new Error('Could not read that .docx');
+  var lh=found.localOff;
+  if(!(u8[lh]===0x50&&u8[lh+1]===0x4B&&u8[lh+2]===0x03&&u8[lh+3]===0x04))throw new Error('Could not read that .docx');
+  var dataStart=lh+30+dv.getUint16(lh+26,true)+dv.getUint16(lh+28,true);
+  var comp=u8.subarray(dataStart,dataStart+found.compSize),xmlU8;
+  if(found.method===0){xmlU8=comp;}
+  else{var st=new Response(comp).body.pipeThrough(new DecompressionStream('deflate-raw'));xmlU8=new Uint8Array(await new Response(st).arrayBuffer());}
+  var xml=new TextDecoder().decode(xmlU8);
+  xml=xml.replace(/<w:tab[^>]*\/>/g,'\t').replace(/<w:br[^>]*\/>/g,'\n').replace(/<\/w:p>/g,'\n').replace(/<[^>]+>/g,'');
+  return xmlDecode(xml).replace(/\n{3,}/g,'\n\n').trim();
+}
+function readFileInto(file,ta,key,drop){
+  var name=(file.name||'').toLowerCase();
+  drop.classList.remove('filled');drop.textContent='⏳ Reading '+(file.name||'file')+'…';
+  function done(t){if(!t||!t.trim()){toast('No text found in that file — try pasting instead.');markDrop(drop,ta.value);return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();toast('Loaded '+file.name);}
+  function fail(e){toast((e&&e.message)||'Could not read that file — paste the text instead.');markDrop(drop,ta.value);}
+  if(name.endsWith('.pdf')||file.type==='application/pdf'){readPdf(file).then(done).catch(fail);return;}
+  if(name.endsWith('.docx')){readDocx(file).then(done).catch(fail);return;}
+  if(name.endsWith('.doc')){toast('Old .doc isn\'t supported — save as .docx or PDF, or paste the text.');markDrop(drop,ta.value);return;}
+  var r=new FileReader();r.onerror=function(){fail();};r.onload=function(){var t=String(r.result||'');if(/[\x00-\x08\x0E-\x1F]/.test(t.slice(0,2000))){toast('Unrecognised file — paste the text instead.');markDrop(drop,ta.value);return;}done(t);};r.readAsText(file);
+}
 function wireDrop(drop,ta,key){if(!drop)return;drop.setAttribute('data-empty',drop.textContent);
-  drop.addEventListener('click',function(){var inp=document.createElement('input');inp.type='file';inp.accept='.txt,.md,.markdown,.csv,.text,text/*';inp.onchange=function(){if(inp.files[0])readFileInto(inp.files[0],ta,key,drop);};inp.click();});
+  drop.addEventListener('click',function(){var inp=document.createElement('input');inp.type='file';inp.accept='.pdf,.docx,.txt,.md,.markdown,.csv,text/*,application/pdf';inp.onchange=function(){if(inp.files[0])readFileInto(inp.files[0],ta,key,drop);};inp.click();});
   drop.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();drop.click();}});
   drop.addEventListener('dragover',function(e){e.preventDefault();drop.classList.add('drag');});
   drop.addEventListener('dragleave',function(){drop.classList.remove('drag');});
