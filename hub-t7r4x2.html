@@ -68,6 +68,19 @@
   .chip.st-build{color:var(--gold);border-color:rgba(224,164,59,0.4);background:rgba(224,164,59,0.08)}
   .chip.st-discovery{color:var(--blue);border-color:rgba(57,160,212,0.4);background:rgba(57,160,212,0.08)}
 
+  .road{margin-top:2px}
+  .rstage{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text2);text-transform:uppercase;margin:18px 0 8px}
+  .rstage::after{content:'';flex:1;height:1px;background:var(--panelb)}
+  .ritem{display:flex;align-items:center;gap:10px;padding:5px 2px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(255,255,255,0.03)}
+  .rdot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+  .rdot.live{background:var(--teal);box-shadow:0 0 6px var(--teal)}
+  .rdot.build{background:var(--gold);box-shadow:0 0 6px var(--gold)}
+  .rdot.discovery{background:var(--blue);box-shadow:0 0 6px var(--blue)}
+  .rdot.idea{background:var(--text3);opacity:.55}
+  .rtag{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--text3);border:1px solid var(--panelb);border-radius:5px;padding:2px 7px;margin-left:auto;white-space:nowrap}
+  .rtag.q{color:var(--purple);border-color:rgba(167,139,250,0.32)}
+  .rtag.new{color:var(--teal);border-color:rgba(45,212,178,0.28)}
+
   .foot{margin-top:36px;background:var(--panel);border:1px solid var(--panelb);border-radius:12px;
     padding:15px 17px;font-size:12.5px;color:var(--text2)}
   .foot .legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:9px}
@@ -87,6 +100,7 @@
     <div class="stat b"><div class="n">5</div><div class="l">Builds (products)</div></div>
     <div class="stat t"><div class="n">4</div><div class="l">Trackers (boards)</div></div>
     <div class="stat v"><div class="n">7</div><div class="l">Live &amp; reachable</div></div>
+    <div class="stat"><div class="n" style="color:var(--blue)">25+</div><div class="l">Roadmap ideas</div></div>
   </div>
 
   <!-- INTERNAL -->
@@ -169,15 +183,74 @@
 
   </div>
 
+  <!-- ROADMAP -->
+  <div class="lane">
+    <span class="lh"><span class="dot" style="background:var(--blue);box-shadow:0 0 8px var(--blue)"></span>Roadmap — end-to-end education consulting</span>
+    <span class="ct">7 stages &middot; ~35 elements</span>
+    <span class="line"></span>
+  </div>
+  <div class="road">
+    <div class="rstage">1 · Plan &amp; decide</div>
+    <div class="ritem"><span class="rdot live"></span>Levy Affordability Calculator<span class="rtag">flagship · live</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Levy Forecast / Simulator<span class="rtag q">↪ Levy tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Skills-Gap Diagnostic<span class="rtag q">↪ Levy tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Apprenticeship ROI Calculator<span class="rtag q">↪ Levy tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Workforce Planner (peaks &amp; troughs)<span class="rtag q">↪ Levy tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Levy Allocation Planner<span class="rtag q">↪ Levy tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Funding-Status Checker<span class="rtag new">new app</span></div>
+
+    <div class="rstage">2 · Choose the right fit</div>
+    <div class="ritem"><span class="rdot live"></span>JD Matcher<span class="rtag">↪ Levy calc · live</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Duties-Level Matcher<span class="rtag q">↪ Flagship</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Provider Scorecard<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Standard Explorer<span class="rtag new">new app</span></div>
+
+    <div class="rstage">3 · Set up &amp; onboard</div>
+    <div class="ritem"><span class="rdot idea"></span>Onboarding Readiness Checklist<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Cohort Builder<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Off-the-Job Hours Planner<span class="rtag new">new app</span></div>
+
+    <div class="rstage">4 · Deliver &amp; track</div>
+    <div class="ritem"><span class="rdot live"></span>KSB Coverage Mapper<span class="rtag">↪ Assignment Builder · live</span></div>
+    <div class="ritem"><span class="rdot live"></span>Assignment Guide<span class="rtag">↪ Assignment Builder · live</span></div>
+    <div class="ritem"><span class="rdot live"></span>Portfolio KSB Tracker<span class="rtag">↪ Assignment Builder · live</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Cohort Progress Dashboard<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Evidence Bank<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Mentor / Coach Portal<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot build"></span>Landmark — Apprentice Tracker<span class="rtag">client · in build</span></div>
+    <div class="ritem"><span class="rdot discovery"></span>National Debtline — Conversation Tracker<span class="rtag">client · discovery</span></div>
+
+    <div class="rstage">5 · Assess &amp; EPA readiness</div>
+    <div class="ritem"><span class="rdot live"></span>Assignment Checker<span class="rtag">↪ Assignment Builder · live</span></div>
+    <div class="ritem"><span class="rdot idea"></span>EPA Readiness / Gateway Gate<span class="rtag q">↪ Assignment Builder</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Mock EPA Simulator<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Project Decomposer<span class="rtag q">↪ Assignment Builder</span></div>
+
+    <div class="rstage">6 · Report &amp; prove value</div>
+    <div class="ritem"><span class="rdot idea"></span>Report Builder<span class="rtag new">new app · parked</span></div>
+    <div class="ritem"><span class="rdot idea"></span>ROI / Impact Report<span class="rtag q">↪ Report Builder</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Compliance / Audit Pack<span class="rtag q">↪ Report Builder</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Employer QBR Dashboard<span class="rtag q">↪ Report Builder</span></div>
+
+    <div class="rstage">7 · AC's own engine</div>
+    <div class="ritem"><span class="rdot live"></span>Build Hub<span class="rtag">this page · live</span></div>
+    <div class="ritem"><span class="rdot build"></span>Marketing Machine<span class="rtag">↪ Marketing tracker</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Proposal / Quote Builder<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Client Intake / Scoping<span class="rtag new">new app</span></div>
+    <div class="ritem"><span class="rdot idea"></span>Gov-Change Watcher<span class="rtag new">new app</span></div>
+  </div>
+
   <div class="foot">
     <div class="legend">
       <span class="lg"><span class="d" style="background:var(--teal)"></span> Live — deployed &amp; working</span>
       <span class="lg"><span class="d" style="background:var(--gold)"></span> In build — live but evolving</span>
       <span class="lg"><span class="d" style="background:var(--blue)"></span> Discovery — pre-build</span>
+      <span class="lg"><span class="d" style="background:var(--text3);opacity:.55"></span> Idea — roadmap backlog</span>
     </div>
+    <b style="color:var(--purple)">↪ tag</b> = a queued element of an existing project · <b style="color:var(--teal)">new app</b> = standalone build.
     <b>Lanes:</b> Internal = AC's own products · External = paid client builds.
     <b>Builds</b> = things you ship · <b>Trackers</b> = the boards that monitor them.
-    <div class="stamp" id="stamp">Updated 13 Jul 2026</div>
+    <div class="stamp" id="stamp">Updated 16 Jul 2026</div>
   </div>
 </div>
 
