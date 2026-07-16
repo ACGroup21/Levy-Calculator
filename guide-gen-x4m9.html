@@ -307,6 +307,12 @@
   .cov-gaplist{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
   .cov-gaptag{font-family:var(--mono);font-size:10px;color:var(--gold);border:1px solid rgba(224,164,59,.35);border-radius:4px;padding:1px 6px}
   .cov-allgood{font-size:11px;color:var(--teal);margin-top:8px}
+  .cov-outside{font-size:10.5px;color:var(--ink3);line-height:1.45;margin-top:8px}
+  .ctx-labrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+  .ctx-labrow .ctx-lab{margin-bottom:0}
+  .ctx-clear{font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink3);background:transparent;border:1px solid var(--line);border-radius:5px;padding:2px 7px;cursor:pointer}
+  .ctx-clear:hover{color:#f4a593;border-color:rgba(232,114,93,.5)}
+  .ctx-clear[hidden]{display:none}
   /* covered-by-brief highlight on the guide's KSB rows */
   .doc .krow.covered{background:var(--tbg);border-radius:6px}
   .doc .krow.covered .kc{color:var(--tk)}
@@ -334,13 +340,13 @@
     <div class="ctx-body" id="ctxBody" hidden>
       <div class="ctx-grid">
         <div class="ctx-col">
-          <label class="ctx-lab" for="briefTA">Assignment brief</label>
+          <div class="ctx-labrow"><label class="ctx-lab" for="briefTA">Assignment brief</label><button class="ctx-clear" id="briefClear" type="button" hidden>✕ clear</button></div>
           <div class="drop" id="briefDrop" tabindex="0" role="button">⬇ Drop the brief — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="briefTA" placeholder="Paste the assignment brief here…"></textarea>
           <div class="cov-slot" id="briefCov"></div>
         </div>
         <div class="ctx-col">
-          <label class="ctx-lab" for="jdTA">Job description <span class="opt">· optional</span></label>
+          <div class="ctx-labrow"><label class="ctx-lab" for="jdTA">Job description <span class="opt">· optional</span></label><button class="ctx-clear" id="jdClear" type="button" hidden>✕ clear</button></div>
           <div class="drop" id="jdDrop" tabindex="0" role="button">⬇ Drop the JD — PDF, Word or text — or paste below</div>
           <textarea class="ctx-ta" id="jdTA" placeholder="Paste the real job description here…"></textarea>
           <div class="cov-slot" id="jdCov"></div>
@@ -726,11 +732,11 @@ function renderCoverage(slotId,text,kind){
   var el=$(slotId);if(!el)return;
   if(!text||text.trim().length<25){el.innerHTML='';return;}
   var a=analyseCoverage(text);if(!a.total){el.innerHTML='';return;}
-  var col=a.pct>=60?'#2DD4B2':a.pct>=40?'#e0a43b':'#e8725d';
-  var minis=['K','S','B'].map(function(g){var x=a.G[g];return x.total?'<span class="cov-mini '+g+'"><b>'+x.cov+'/'+x.total+'</b> '+x.label+'</span>':'';}).join('');
-  var gapsHtml=a.gaps.length?'<details class="cov-gaps"><summary>'+a.gaps.length+' KSBs not yet evidenced — plan workplace exposure to bridge</summary><div class="cov-gaplist">'+a.gaps.map(function(c){return '<span class="cov-gaptag">'+c+'</span>';}).join('')+'</div></details>':'<div class="cov-allgood">✓ Every mapped KSB is touched by this '+kind+'.</div>';
-  var hint=kind==='brief'?'<span class="cov-hint">covered KSBs are highlighted in the guide ↓</span>':'';
-  el.innerHTML='<div class="cov-read"><div class="cov-top"><span class="cov-pct" style="color:'+col+'">'+a.pct+'%</span><span class="cov-lbl">'+a.cov+' of '+a.total+' KSBs evidenced by this '+kind+(a.gaps.length?' · '+a.gaps.length+' to bridge':'')+'</span></div><div class="cov-bar"><span style="width:'+a.pct+'%;background:'+col+'"></span></div><div class="cov-minis">'+minis+hint+'</div>'+gapsHtml+'</div>';
+  var other=a.total-a.cov, verb=kind==='brief'?'targets':'relates to';
+  var minis=['K','S','B'].map(function(g){var x=a.G[g];return x.total?'<span class="cov-mini '+g+'"><b>'+x.cov+'</b> '+x.label+'</span>':'';}).join('');
+  var hint=kind==='brief'?'<span class="cov-hint">highlighted in the guide ↓</span>':'';
+  var note=other?'<div class="cov-outside">The other '+other+' mapped KSB'+(other!==1?'s':'')+' sit outside this '+kind+'’s focus'+(kind==='brief'?' — they’d be evidenced by other assignments, not this one.':'.')+'</div>':'<div class="cov-allgood">✓ This '+kind+' '+verb+' every KSB mapped in the guide.</div>';
+  el.innerHTML='<div class="cov-read"><div class="cov-top"><span class="cov-pct" style="color:#2DD4B2">'+a.cov+'</span><span class="cov-lbl">KSB'+(a.cov!==1?'s':'')+' this '+kind+' '+verb+' · out of '+a.total+' mapped</span></div><div class="cov-minis">'+minis+hint+'</div>'+note+'</div>';
 }
 function markGuideCoverage(covered){
   Array.prototype.forEach.call(document.querySelectorAll('.doc .krow'),function(row){var kc=row.querySelector('.kc');if(!kc)return;row.classList.toggle('covered',covered.has(kc.textContent.trim()));});
@@ -753,7 +759,7 @@ function ctx(){
   if(j)s+='\n\n--- JOB DESCRIPTION (the apprentice\'s real role — make any examples fit it) ---\n'+j;
   return s;
 }
-function ctxStatus(){var el=$('ctxStatus');if(!el)return;var p=[];if(getBrief().trim())p.push('brief');if(getJD().trim())p.push('JD');if(p.length){el.textContent='✓ '+p.join(' + ')+' added';el.classList.add('on');}else{el.textContent='optional';el.classList.remove('on');}}
+function ctxStatus(){var hasB=getBrief().trim(),hasJ=getJD().trim();var bc=$('briefClear'),jc=$('jdClear');if(bc)bc.hidden=!hasB;if(jc)jc.hidden=!hasJ;var el=$('ctxStatus');if(!el)return;var p=[];if(hasB)p.push('brief');if(hasJ)p.push('JD');if(p.length){el.textContent='✓ '+p.join(' + ')+' added';el.classList.add('on');}else{el.textContent='optional';el.classList.remove('on');}}
 function markDrop(drop,val){if(!drop)return;var t=(val||'').trim();if(t){drop.classList.add('filled');drop.textContent='✓ '+t.split(/\s+/).length+' words loaded — click to replace';}else{drop.classList.remove('filled');drop.textContent=drop.getAttribute('data-empty')||'Drop a file, or paste below';}}
 var _pdfjs=null;
 function loadPdfJs(){
@@ -831,6 +837,14 @@ document.addEventListener('click',function(e){
   if(hh&&hh.closest('.doc')&&hh.parentNode)hh.parentNode.classList.toggle('collapsed');
 });
 (function(){var ca=$('collapseAll');if(!ca)return;ca.onclick=function(){var secs=document.querySelectorAll('.doc .sec');var anyOpen=false;Array.prototype.forEach.call(secs,function(s){if(!s.classList.contains('collapsed'))anyOpen=true;});Array.prototype.forEach.call(secs,function(s){s.classList.toggle('collapsed',anyOpen);});ca.textContent=anyOpen?'⊞ Expand all':'⊟ Collapse all';};})();
+
+function clearCtx(which){
+  var isB=which==='brief',key=isB?BRIEF_KEY:JD_KEY,ta=isB?$('briefTA'):$('jdTA'),drop=isB?$('briefDrop'):$('jdDrop');
+  if(ta)ta.value='';try{localStorage.removeItem(key);}catch(e){}
+  markDrop(drop,'');ctxStatus();updateCoverage();
+  toast((isB?'Brief':'JD')+' cleared');
+}
+(function(){var bc=$('briefClear'),jc=$('jdClear');if(bc)bc.onclick=function(){clearCtx('brief');};if(jc)jc.onclick=function(){clearCtx('jd');};})();
 
 render();
 if(INPUT===DEMO_INPUT)setTimeout(function(){toast('Showing the ST0071 demo — open from the Mapper to use your own mapping');},400);
