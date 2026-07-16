@@ -228,6 +228,13 @@
   .doc .cnum.p{color:var(--tk);background:var(--tbg);border:1px solid var(--tln)}
   .doc .cnum.d{color:var(--gk);background:var(--gbg);border:1px solid var(--gln)}
   .doc .ctext{font-size:13px;line-height:1.5;color:var(--ink)}
+  .doc .ex-toggle{font-family:var(--mono);font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--tk);background:var(--tbg);border:1px solid var(--tln);border-radius:5px;padding:1px 7px;margin-left:7px;cursor:pointer;white-space:nowrap;vertical-align:middle}
+  .doc .ex-toggle:hover{background:#d5f1e9}
+  .doc .crit-ex{margin-top:8px;font-size:12px;line-height:1.6;color:var(--ink2);background:var(--panel);border-left:2px solid var(--tk);border-radius:0 8px 8px 0;padding:9px 12px}
+  .doc .crit .cnum.d + .ctext .crit-ex{border-left-color:var(--gk)}
+  .doc .crit .cnum.d + .ctext .ex-toggle{color:var(--gk);background:var(--gbg);border-color:var(--gln)}
+  .doc .exsec h4 .ex-wc{font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.02em;color:var(--mut);margin-left:auto;padding-left:12px;white-space:nowrap}
+  .doc .exsec h4 .ex-wc.ok{color:var(--tk)}
   .doc .partb{margin:26px calc(-1 * var(--pad)) 0;padding:0 var(--pad);background:linear-gradient(180deg,#f4fafc,#fff);border-top:1px solid var(--line)}
   .doc .pb-h{display:flex;align-items:center;gap:11px;padding:22px 0 2px;flex-wrap:wrap}
   .doc .pb-rib{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;color:#eafcff;background:linear-gradient(150deg,#16375f,var(--n1));padding:6px 11px;border-radius:6px}
@@ -288,7 +295,7 @@
   .doc .sec.collapsed .sec-caret{transform:rotate(-90deg)}
   .doc .sec.collapsed .blk{display:none}
   .doc .sec.collapsed .sec-h{border-bottom:none;margin-bottom:0}
-  @media print{.doc .sec.collapsed .blk{display:block!important}.doc .sec-caret{display:none!important}.doc .sec-h{cursor:auto}}
+  @media print{.doc .sec.collapsed .blk{display:block!important}.doc .sec-caret,.doc .ex-toggle{display:none!important}.doc .sec-h{cursor:auto}}
   /* JD-matcher-style coverage readout under the brief/JD boxes */
   .cov-slot:empty{display:none}
   .cov-read{margin-top:10px;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:11px 12px}
@@ -467,6 +474,14 @@ function ksbAction(txt){
   if(!t)return '';
   return /^[A-Z]{2,}\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1); // keep acronyms (IT), lowercase normal words
 }
+// an illustrative "how this could read" snippet for a Pass point — a teaching aid, clearly not the learner's own work
+function passExample(g,act,seed){
+  var lead=g==='K'?'In my role I need to understand ':g==='B'?'A moment that showed this behaviour — ':'In my role I ';
+  var tail=g==='K'?'. I show this by explaining how it applied to a real task I handled, and the difference that understanding made to my decision.'
+    :g==='B'?'. I describe what I actually said or did in the moment, why, and how it landed with the people involved.'
+    :'. I set it up, involved the people affected, checked it was working, and it made a measurable difference — time saved, fewer errors, or better feedback.';
+  return 'In reality it might read: “'+lead+act+(seed?', for example '+seed:'')+tail+'” — swap in your own real workplace example.';
+}
 function passList(codes,ksb,task){
   ksb=ksb||{};codes=(codes||[]).slice(0,6);
   var LEAD={K:'Show you understand ',S:'Show the real work where you ',B:'Give a real moment that shows the behaviour — '};
@@ -477,7 +492,7 @@ function passList(codes,ksb,task){
     var seed=exampleSeed(d)||exampleSeed(task||'');
     var line=(LEAD[c[0]]||'Give an example where you ')+act;
     if(seed)line+=' — e.g. '+seed;
-    out.push(line.replace(/\s{2,}/g,' ').replace(/[.;,]+$/,'')+' ('+c+').');
+    out.push({t:line.replace(/\s{2,}/g,' ').replace(/[.;,]+$/,'')+' ('+c+').',ex:passExample(c[0],act,seed)});
   });
   out.push('Close the loop — the result: what changed for the customer, colleagues, cost or the business.');
   return out;
@@ -489,9 +504,12 @@ function draftPurpose(codes,ksb){
 function distList(codes,ksb,task){
   var seed=exampleSeed(task||'');
   return [
-    'Analyse WHY you took your approach — weigh the alternatives you considered and justify the decision.',
-    'Quantify the impact'+(seed?' (e.g. on '+seed+')':'')+' — a real number, a before-vs-after, or genuine feedback, not just "it went well".',
-    'Reflect on the longer-term effect on the business and what you would refine next time.'
+    {t:'Analyse WHY you took your approach — weigh the alternatives you considered and justify the decision.',
+     ex:'In reality it might read: “I chose this approach over the alternative because it best fitted the business goal; the trade-off was a slower setup, but on balance it was the right call because it reduced risk and was easier for the team to sustain.” — put your own real decision and reasoning here.'},
+    {t:'Quantify the impact'+(seed?' (e.g. on '+seed+')':'')+' — a real number, a before-vs-after, or genuine feedback, not just "it went well".',
+     ex:'In reality it might read: “Before, this took about four hours a week and produced several errors a month; after my change it took under an hour with near-zero errors — roughly a 75% time saving.” — use your own real figures.'},
+    {t:'Reflect on the longer-term effect on the business and what you would refine next time.',
+     ex:'In reality it might read: “The lasting effect was that the team adopted the new method as standard, so the benefit kept compounding; next time I would involve finance earlier to speed up sign-off.” — put your own honest reflection here.'}
   ];
 }
 function whatToWrite(x){
@@ -502,7 +520,16 @@ function whatToWrite(x){
 }
 function esc(s){return String(s).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
 // P1/P2… (pass) and D1/D2… (distinction) — numbered rows, not bullets
-function critHTML(items,kind){var L=kind==='p'?'P':'D';return items.map(function(x,i){return '<div class="crit"><span class="cnum '+kind+'">'+L+(i+1)+'</span><span class="ctext">'+esc(x)+'</span></div>';}).join('');}
+function critHTML(items,kind){
+  var L=kind==='p'?'P':'D';
+  return items.map(function(x,i){
+    var text=(typeof x==='string')?x:((x&&x.t)||'');
+    var ex=(x&&typeof x==='object')?(x.ex||''):'';
+    var toggle=ex?' <button class="ex-toggle" type="button" contenteditable="false" title="See an illustrative example of how to write this">example ▾</button>':'';
+    var rev=ex?'<div class="crit-ex" contenteditable="false" hidden>'+esc(ex)+'</div>':'';
+    return '<div class="crit'+(ex?' has-ex':'')+'"><span class="cnum '+kind+'">'+L+(i+1)+'</span><span class="ctext">'+esc(text)+toggle+rev+'</span></div>';
+  }).join('');
+}
 
 /* ---------- render ---------- */
 const $=function(id){return document.getElementById(id);};
@@ -686,7 +713,7 @@ svg,.hero-motif,.sec-caret,.aibtn,.pb-empty,.cov-slot,.tool-tag .dot{display:non
 .foot img{height:16px;vertical-align:middle;margin-right:8px}`;
 function exportWord(){
   var clone=document.getElementById('doc').cloneNode(true);
-  clone.querySelectorAll('.aibtn, svg, .sec-caret').forEach(function(b){b.remove();});
+  clone.querySelectorAll('.aibtn, svg, .sec-caret, .ex-toggle, .crit-ex').forEach(function(b){b.remove();});
   clone.querySelectorAll('.sec.collapsed').forEach(function(s){s.classList.remove('collapsed');});
   var e=clone.querySelector('.partb.empty'); if(e)e.remove();
   var name=(INPUT.standardName||INPUT.std||'standard').replace(/[^\w \-]/g,'').trim();
@@ -782,17 +809,31 @@ function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span cl
 /* offline dummy worked example — templated placeholder, no AI/external input */
 function dummyExemplar(){
   var role=(INPUT.standardName||INPUT.std||'this standard').replace(/\s*\(L\s?\d\)\s*$/i,'');
-  var scenario='Placeholder scenario (offline dummy) — an illustrative '+role+' at a mid-sized organisation works through a recurring operational problem end-to-end to evidence the standard. Replace with a real illustrative example, or use ✨ Generate worked example for AI-written prose.';
+  var scenario='Placeholder scenario (offline dummy) — an illustrative '+role+' at a mid-sized organisation works a recurring operational problem end-to-end. The prose is padded to roughly the target length so you can see the scale of a full answer; replace it with real content or use ✨ Generate worked example for AI-written prose.';
+  var FILL=[
+    'I began by clarifying exactly what the business needed and who would be affected, so the work stayed focused on a real outcome rather than activity for its own sake.',
+    'I checked the relevant policies and standards first, so that what I did would stand up to scrutiny and stay consistent with how the organisation expects things to be done.',
+    'I talked the approach through with my manager and the colleagues involved, gathered their input, and adjusted the plan where their feedback made it stronger.',
+    'I kept a simple record as I went — dates, decisions and the reasons behind them — so the trail of what I did and why stays clear and auditable.',
+    'Where I hit an obstacle I set out the options I considered, the trade-offs of each, and the reason I chose the route I did.',
+    'I sense-checked the result against the original aim, corrected what was not quite right, and confirmed the change held up in day-to-day use.',
+    'I measured the difference as far as I reasonably could — time taken, errors, or feedback from the people affected — rather than assuming it had worked.',
+    'I made sure the people who rely on this were informed and comfortable with the change, and that nothing important had been missed.'
+  ];
   var sections=INPUT.sections.map(function(sec){
-    var codes=sec.c||[];
-    var paras=['In this part of my project I focused on '+String(sec.t||'this area').toLowerCase()+' — setting out the real workplace context, who was involved, and why it mattered to the business.'];
-    var ks=codes.map(function(c){
-      var t=clean(INPUT.ksb[c]||'');
-      var topic=t?(t.charAt(0).toLowerCase()+t.slice(1)).split(/;|—|–|\. /)[0].trim():String(c);
-      return 'I showed how I applied '+topic+', giving a concrete example from my own work and the effect it had on the customer, colleagues or results. ['+c+']';
+    var codes=sec.c||[];var target=targetFor(sec);
+    var paras=['In this part of my project I focused on the task set out above. I describe the real workplace context — the team involved, the business pressure behind it, and why getting this right mattered to our customers and colleagues.'];
+    codes.forEach(function(c){
+      var t=clean(INPUT.ksb[c]||'');var g=c[0];var act=ksbAction(t)||String(c);var seed=exampleSeed(t)||exampleSeed(sec.x||'');
+      var lead=g==='K'?'To evidence '+c+' I explain my understanding of ':g==='B'?'To evidence '+c+' I describe a real moment that showed ':'To evidence '+c+' I show how I ';
+      paras.push(lead+act+(seed?', for example '+seed:'')+'. I set out the actual situation, exactly what I did and the judgement calls I made, who I worked with, and the measurable effect it had on the customer, colleagues or results. ['+c+']');
     });
-    if(ks.length)paras.push(ks.join(' '));
-    paras.push('I then analysed why I took this approach, weighed the alternatives I considered, and reflected on the impact and what I would do differently next time.');
+    paras.push('Standing back, I analysed why I took this approach over the alternatives, weighed the trade-offs and justified the decision against the business goal. I quantified the impact where I could rather than simply asserting it went well.');
+    paras.push('Finally I reflected on what I learned, the longer-term effect on the team and the organisation, and what I would refine next time.');
+    var wc=function(arr){return arr.join(' ').split(/\s+/).filter(Boolean).length;};
+    var fi=0,pad=[];
+    while(wc(paras.concat([pad.join(' ')]))<target-30&&fi<240){pad.push(FILL[fi%FILL.length]);fi++;if(pad.length>=4){paras.splice(paras.length-2,0,pad.join(' '));pad=[];}}
+    if(pad.length)paras.splice(paras.length-2,0,pad.join(' '));
     return {title:sec.t,exemplar:paras.join('\n\n')};
   });
   return {scenario:scenario,sections:sections};
@@ -918,8 +959,9 @@ function renderPartB(){
   var h='<div class="scenario"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><div><span class="s-lab">Illustrative scenario — not your workplace</span><span class="s-txt">'+esc(PARTB.scenario||'')+'</span></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var s=PARTB.sections&&PARTB.sections[i];var ex=(s&&s.exemplar)||'';
+    var wc=ex.replace(/\[[^\]]*\]/g,' ').split(/\s+/).filter(Boolean).length,tgt=targetFor(sec);
     var paras=ex.split(/\n\n+/).map(function(p){return p.trim();}).filter(Boolean).map(function(p){return '<p contenteditable="true">'+highlightTags(p)+'</p>';}).join('');
-    h+='<div class="exsec"><h4><span class="n">'+(i+1)+'</span> '+esc(sec.t)+'</h4>'+(paras||'<p>—</p>')+'<div class="notes">Notes: <span contenteditable="true"></span></div></div>';
+    h+='<div class="exsec"><h4><span class="n">'+(i+1)+'</span> '+esc(sec.t)+'<span class="ex-wc'+(wc>=tgt*0.9?' ok':'')+'">'+wc.toLocaleString()+' / ~'+tgt.toLocaleString()+' words</span></h4>'+(paras||'<p>—</p>')+'<div class="notes">Notes: <span contenteditable="true"></span></div></div>';
   });
   h+='<div class="exfoot">End of annotated draft — remove the [KSB tags] before final submission.</div>';
   body.innerHTML=h;
@@ -1109,7 +1151,10 @@ function wireDrop(drop,ta,key){if(!drop)return;drop.setAttribute('data-empty',dr
   wireDrop(bD,bTA,BRIEF_KEY);wireDrop(jD,jTA,JD_KEY);markDrop(bD,bTA.value);markDrop(jD,jTA.value);ctxStatus();
 })();
 document.addEventListener('click',function(e){
-  if(!e.target.closest||e.target.closest('.aibtn'))return;
+  if(!e.target.closest)return;
+  var xt=e.target.closest('.ex-toggle');
+  if(xt){e.preventDefault();e.stopPropagation();var rev=xt.parentNode&&xt.parentNode.querySelector('.crit-ex');if(rev){rev.hidden=!rev.hidden;xt.textContent=rev.hidden?'example ▾':'hide ▴';}return;}
+  if(e.target.closest('.aibtn'))return;
   var hh=e.target.closest('.sec-h');
   if(hh&&hh.closest('.doc')&&hh.parentNode)hh.parentNode.classList.toggle('collapsed');
 });
