@@ -501,7 +501,7 @@ function render(){
     +'<li>Each mapped KSB is genuinely evidenced (not just mentioned)</li>'
     +'<li>Reflection shows honest personal growth</li>'
     +'<li>All content is your own original work</li></ul></div></div>';
-  h+='<div class="partb'+(PARTB?'':' empty')+'"><div class="pb-h"><span class="pb-rib">Part B</span><span class="pt">Annotated worked example</span><span class="ps">illustrative · not for submission</span><span style="flex:1"></span><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
+  h+='<div class="partb'+(PARTB?'':' empty')+'"><div class="pb-h"><span class="pb-rib">Part B</span><span class="pt">Annotated worked example</span><span class="ps">illustrative · not for submission</span><span style="flex:1"></span><button class="aibtn" data-dummy="1" title="Fill Part B with an offline placeholder example — no AI needed">⚡ Dummy (offline)</button><button class="aibtn" data-genex="1">'+(PARTB?'↻ Regenerate example':'✨ Generate worked example')+'</button></div><div id="partb-body"></div></div>';
   h+='</div>';
   h+='<div class="foot"><img src="'+AC_LOGO_WHITE+'" alt="" style="height:16px"><span>Arthur Curtis Education · Assignment Guide · guidance only, never submittable work</span></div>';
   $('doc').innerHTML=h;
@@ -647,7 +647,7 @@ function allSectionsPrompt(){
   }).join('\n\n');
   return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = 3-5 PRACTICAL, workplace-grounded points (what real situation to describe, what they did, and the actual evidence to include — do NOT restate the KSBs); "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect).\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.'+ctx();
 }
-document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);}});
+document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);return;}var dm=e.target.closest('[data-dummy]');if(dm){PARTB=dummyExemplar();renderPartB();toast('Offline dummy example inserted — edit it, or replace with ✨ Generate');}});
 $('improveall').onclick=async function(){
   var n=INPUT.sections.length;this.disabled=true;
   try{
@@ -662,6 +662,24 @@ $('improveall').onclick=async function(){
 /* ---------- Part B: annotated worked example (Step 3) ---------- */
 var PARTB=null;
 function highlightTags(p){return esc(p).replace(/\[([^\]\n]{1,40})\]/g,'<span class="kk">[$1]</span>');}
+/* offline dummy worked example — templated placeholder, no AI/external input */
+function dummyExemplar(){
+  var role=(INPUT.standardName||INPUT.std||'this standard').replace(/\s*\(L\s?\d\)\s*$/i,'');
+  var scenario='Placeholder scenario (offline dummy) — an illustrative '+role+' at a mid-sized organisation works through a recurring operational problem end-to-end to evidence the standard. Replace with a real illustrative example, or use ✨ Generate worked example for AI-written prose.';
+  var sections=INPUT.sections.map(function(sec){
+    var codes=sec.c||[];
+    var paras=['In this part of my project I focused on '+String(sec.t||'this area').toLowerCase()+' — setting out the real workplace context, who was involved, and why it mattered to the business.'];
+    var ks=codes.map(function(c){
+      var t=clean(INPUT.ksb[c]||'');
+      var topic=t?lc(t).split(/;|—|–|\. /)[0].trim():String(c);
+      return 'I showed how I applied '+topic+', giving a concrete example from my own work and the effect it had on the customer, colleagues or results. ['+c+']';
+    });
+    if(ks.length)paras.push(ks.join(' '));
+    paras.push('I then analysed why I took this approach, weighed the alternatives I considered, and reflected on the impact and what I would do differently next time.');
+    return {title:sec.t,exemplar:paras.join('\n\n')};
+  });
+  return {scenario:scenario,sections:sections};
+}
 function renderPartB(){
   var body=$('partb-body');if(!body)return;
   var wrap=document.querySelector('.partb');if(wrap)wrap.classList.toggle('empty',!PARTB);
