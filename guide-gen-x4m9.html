@@ -374,8 +374,11 @@ function animateWC(){
   var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
   Array.prototype.forEach.call(document.querySelectorAll('.wc'),function(el){
     var t=parseInt(el.getAttribute('data-n'),10)||0;
-    if(reduce){el.textContent=t;return;}
-    var start=null;function step(ts){if(start===null)start=ts;var p=Math.min((ts-start)/1000,1);el.textContent=Math.round((1-Math.pow(1-p,3))*t);if(p<1)requestAnimationFrame(step);}requestAnimationFrame(step);
+    if(reduce||document.hidden){el.textContent=t;return;}
+    var start=null,done=false;
+    function step(ts){if(done)return;if(start===null)start=ts;var p=Math.min((ts-start)/1000,1);el.textContent=Math.round((1-Math.pow(1-p,3))*t);if(p<1)requestAnimationFrame(step);else done=true;}
+    requestAnimationFrame(step);
+    setTimeout(function(){if(!done){done=true;el.textContent=t;}},1400);
   });
 }
 function render(){
