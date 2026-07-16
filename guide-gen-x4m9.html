@@ -487,11 +487,9 @@ function draftPurpose(codes,ksb){
   return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
 }
 function distList(codes,ksb,task){
-  ksb=ksb||{};codes=codes||[];
-  var subj='';for(var i=0;i<codes.length;i++){var a=ksbAction(ksb[codes[i]]||'');if(a){subj=a.split(/\s+/).slice(0,7).join(' ').replace(/[,;].*$/,'');break;}}
   var seed=exampleSeed(task||'');
   return [
-    'Analyse WHY you took your approach'+(subj?' to '+subj:'')+' — weigh the alternatives you considered and justify the decision.',
+    'Analyse WHY you took your approach — weigh the alternatives you considered and justify the decision.',
     'Quantify the impact'+(seed?' (e.g. on '+seed+')':'')+' — a real number, a before-vs-after, or genuine feedback, not just "it went well".',
     'Reflect on the longer-term effect on the business and what you would refine next time.'
   ];
