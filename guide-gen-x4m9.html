@@ -486,7 +486,7 @@ function critHTML(items,kind){var L=kind==='p'?'P':'D';return items.map(function
 
 /* ---------- render ---------- */
 const $=function(id){return document.getElementById(id);};
-function targetFor(sec){return 200+Math.min(200,(sec.c.length||0)*30);} // 200–400 by KSB load
+function targetFor(sec){return sec.target||(200+Math.min(200,(sec.c.length||0)*30));} // brief total if given, else 200–400 by KSB load
 var CIC={
  K:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5V20"/></svg>',
  S:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 6.5a3.5 3.5 0 0 0-4.8 4.5l-5.4 5.4 2.3 2.3 5.4-5.4a3.5 3.5 0 0 0 4.5-4.8l-2 2-1.7-1.7z"/></svg>',
@@ -552,6 +552,7 @@ function render(){
   var level=lm?lm[1]:(INPUT.level||3);
   var shortName=esc((INPUT.standardName||INPUT.std||'').replace(/\s*\(L\s?\d\)\s*$/i,''));
   var totalK=Object.keys(INPUT.ksb||{}).length;
+  var totalWords=INPUT.sections.reduce(function(a,s){return a+targetFor(s);},0);
   $('src').innerHTML="Standard: <b>"+full+"</b> · "+INPUT.sections.length+" sections";
   var h='';
   h+='<div class="hero">'+HERO_MOTIF
@@ -562,6 +563,7 @@ function render(){
     +'<div class="sb std"><span class="k eyebrow">Standard</span><span class="std-v"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span class="nm">'+shortName+'</span></span><span class="lvl3">Level '+level+'</span></div>'
     +'<div class="sb num"><span class="k eyebrow">Sections</span><span class="v">'+INPUT.sections.length+'</span></div>'
     +'<div class="sb num"><span class="k eyebrow">KSBs</span><span class="v">'+totalK+'</span></div>'
+    +(INPUT.sections.length?'<div class="sb num"><span class="k eyebrow">Words</span><span class="v">~'+totalWords+'</span></div>':'')
     +'<div class="sb note"><span class="k eyebrow">Integrity</span><span class="n"><b>Guidance only</b></span></div></div>';
   h+='<div class="docbody">';
   h+='<div class="notice"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9.3 12l1.9 1.9 3.6-3.9"/></svg><div>'
@@ -993,6 +995,15 @@ function parseBriefToSections(brief,ksb){
   }else{
     var all=briefCodes(brief,ksb);
     if(all.length)secs.push({t:(lines[0]||'Assignment brief').slice(0,70),x:brief.slice(0,700).trim(),c:all});
+  }
+  // honour the brief's suggested word count — split it across sections, weighted by KSB load
+  var totM=brief.match(/word\s*count[^\d]{0,24}(\d{3,5})/i)||brief.match(/\b(\d{3,5})\s*words?\b/i);
+  var total=totM?parseInt(totM[1],10):0;
+  if(total&&secs.length){
+    var wts=secs.map(function(s){return Math.max(1,(s.c||[]).length);});
+    var sum=wts.reduce(function(a,b){return a+b;},0),alloc=0;
+    secs.forEach(function(s,i){var t=Math.max(150,Math.round(total*wts[i]/sum/50)*50);s.target=t;alloc+=t;});
+    var last=secs[secs.length-1];last.target=Math.max(150,last.target+(total-alloc)); // absorb rounding so parts sum to the brief total
   }
   return secs;
 }
