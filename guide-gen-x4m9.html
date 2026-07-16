@@ -540,8 +540,10 @@ function pickStandard(lib,code){
   var s=lib[code];if(!s)return;
   var ksb={};['K','S','B'].forEach(function(g){if(s[g])Object.keys(s[g]).forEach(function(cd){ksb[cd]=s[g][cd];});});
   INPUT={std:code,standardName:(s.name||code),level:s.level||'',ksb:ksb,sections:[]};
+  var _b=getBrief().trim();
+  if(_b){INPUT.sections=parseBriefToSections(_b,ksb);INPUT.briefGen=true;}
   render();if(typeof updateCoverage==='function')updateCoverage();
-  toast((s.name||code)+' loaded — add a brief and an assignment to check');
+  toast(INPUT.sections.length?((s.name||code)+' · guide built from your brief — '+INPUT.sections.length+' section'+(INPUT.sections.length>1?'s':'')):((s.name||code)+' loaded — drop the brief to build the guide'));
 }
 function render(){
   if(!INPUT){$('src').textContent='';$('doc').innerHTML=emptyHTML();wireStdPicker();return;}
@@ -566,7 +568,7 @@ function render(){
     +'<h2>Important notice to learners</h2>'
     +'<p>This is an <b>illustrative guidance document</b> to help you structure your assignment and evidence your KSBs. It <b>must not be copied or submitted as your own work</b> — you produce original content from your own workplace, with your own actions, decisions and reflection.</p>'
     +'<p>The worked example (Part B) uses an <b>illustrative scenario that is not your workplace</b>. Its <code>[KSB tags]</code> are for your tutor and <b>must be removed before submission.</b></p></div></div>';
-  if(!INPUT.sections.length)h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:none">i</span><span class="t">No project sections yet</span></div><div class="blk"><div class="read">This standard was loaded directly, so there is no mapped project structure. For a full step-by-step guide, map the project\'s sections in the <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>. To <b>check a finished assignment</b>, add its brief above, then load the assignment in Part B below.</div></div></div>';
+  if(!INPUT.sections.length)h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:none">i</span><span class="t">Drop the brief and the guide builds itself</span></div><div class="blk"><div class="read"><b>Add the assignment brief above</b> (drop the file or paste it) — the guide auto-generates a section for each task in the brief, mapped to the exact KSBs it cites, with Pass and Distinction prompts. Then <b>load the finished assignment</b> in Part B to check it. For a hand-mapped structure instead, use the <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>.</div></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var codes=(sec.c||[]);
     var cov='';['K','S','B'].forEach(function(g){
@@ -962,6 +964,47 @@ function ctx(){
   if(j)s+='\n\n--- JOB DESCRIPTION (the apprentice\'s real role — make any examples fit it) ---\n'+j;
   return s;
 }
+// --- Auto-build the guide FROM the brief: split its tasks, read the KSB codes each cites ---
+function briefCodes(txt,ksb){
+  var out=[],seen={},re=/\b([KSB])\s?(\d{1,3})\b/g,m;
+  while((m=re.exec(txt))){var c=m[1].toUpperCase()+m[2];if(ksb[c]&&!seen[c]){seen[c]=1;out.push(c);}}
+  return out;
+}
+function parseBriefToSections(brief,ksb){
+  ksb=ksb||{};
+  var lines=brief.replace(/\r/g,'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
+  var markRe=/^(?:task\s*)?((?:[PMD]\d+(?:\.\d+)?)|(?:T\d+))[\).:]?\s+(.+)/i; // pass/merit/distinction/task criteria — NOT K/S/B codes
+  var numRe=/^(\d+)[\).:]\s+(.+)/;
+  var idxs=[],useNum=false;
+  lines.forEach(function(l,i){if(markRe.test(l))idxs.push(i);});
+  if(!idxs.length){lines.forEach(function(l,i){if(numRe.test(l))idxs.push(i);});useNum=true;}
+  var secs=[];
+  if(idxs.length){
+    for(var k=0;k<idxs.length;k++){
+      var start=idxs[k],end=(k+1<idxs.length?idxs[k+1]:lines.length);
+      var block=lines.slice(start,end).join(' ');
+      var mm=(useNum?numRe:markRe).exec(lines[start]);
+      var code=(mm[1]||'').toUpperCase();
+      var rest=(mm[2]||'').replace(/\s*\([KSB\d,;\s]*\)\s*/g,' ').replace(/\s{2,}/g,' ').trim();
+      var codes=briefCodes(block,ksb);
+      var words=rest.split(/\s+/);
+      secs.push({t:code+' · '+words.slice(0,9).join(' ')+(words.length>9?'…':''),x:rest,c:codes});
+    }
+  }else{
+    var all=briefCodes(brief,ksb);
+    if(all.length)secs.push({t:(lines[0]||'Assignment brief').slice(0,70),x:brief.slice(0,700).trim(),c:all});
+  }
+  return secs;
+}
+function syncGuideFromBrief(force){
+  if(!INPUT)return;
+  if(!force&&!INPUT.briefGen&&INPUT.sections.length)return; // don't clobber hand-built sections
+  var brief=getBrief().trim();
+  INPUT.sections=brief?parseBriefToSections(brief,INPUT.ksb||{}):[];
+  INPUT.briefGen=true;
+  render();
+  if(typeof updateCoverage==='function')updateCoverage();
+}
 function ctxStatus(){var hasB=getBrief().trim(),hasJ=getJD().trim();var bc=$('briefClear'),jc=$('jdClear');if(bc)bc.hidden=!hasB;if(jc)jc.hidden=!hasJ;var el=$('ctxStatus');if(!el)return;var p=[];if(hasB)p.push('brief');if(hasJ)p.push('JD');if(p.length){el.textContent='✓ '+p.join(' + ')+' added';el.classList.add('on');}else{el.textContent='optional';el.classList.remove('on');}}
 function markDrop(drop,val){if(!drop)return;var t=(val||'').trim();if(t){drop.classList.add('filled');drop.textContent='✓ '+t.split(/\s+/).length+' words loaded — click to replace';}else{drop.classList.remove('filled');drop.textContent=drop.getAttribute('data-empty')||'Drop a file, or paste below';}}
 var _pdfjs=null;
@@ -1010,7 +1053,7 @@ async function readDocx(file){
 function readFileInto(file,ta,key,drop){
   var name=(file.name||'').toLowerCase();
   drop.classList.remove('filled');drop.textContent='⏳ Reading '+(file.name||'file')+'…';
-  function done(t){if(!t||!t.trim()){toast('No text found in that file — try pasting instead.');markDrop(drop,ta.value);return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();updateCoverage();toast('Loaded '+file.name);}
+  function done(t){if(!t||!t.trim()){toast('No text found in that file — try pasting instead.');markDrop(drop,ta.value);return;}ta.value=t;setCtxV(key,t);markDrop(drop,t);ctxStatus();updateCoverage();if(key===BRIEF_KEY)syncGuideFromBrief(true);toast('Loaded '+file.name);}
   function fail(e){toast((e&&e.message)||'Could not read that file — paste the text instead.');markDrop(drop,ta.value);}
   if(name.endsWith('.pdf')||file.type==='application/pdf'){readPdf(file).then(done).catch(fail);return;}
   if(name.endsWith('.docx')){readDocx(file).then(done).catch(fail);return;}
@@ -1030,7 +1073,7 @@ function wireDrop(drop,ta,key){if(!drop)return;drop.setAttribute('data-empty',dr
   bTA.value=getBrief();jTA.value=getJD();
   if(getBrief().trim()||getJD().trim()){panel.classList.add('open');body.hidden=false;}
   toggle.onclick=function(){var open=panel.classList.toggle('open');body.hidden=!open;};
-  bTA.addEventListener('input',function(){setCtxV(BRIEF_KEY,bTA.value);markDrop(bD,bTA.value);ctxStatus();updateCoverage();});
+  bTA.addEventListener('input',function(){setCtxV(BRIEF_KEY,bTA.value);markDrop(bD,bTA.value);ctxStatus();updateCoverage();clearTimeout(window.__briefT);window.__briefT=setTimeout(function(){syncGuideFromBrief(true);},700);});
   jTA.addEventListener('input',function(){setCtxV(JD_KEY,jTA.value);markDrop(jD,jTA.value);ctxStatus();updateCoverage();});
   wireDrop(bD,bTA,BRIEF_KEY);wireDrop(jD,jTA,JD_KEY);markDrop(bD,bTA.value);markDrop(jD,jTA.value);ctxStatus();
 })();
@@ -1045,6 +1088,7 @@ function clearCtx(which){
   var isB=which==='brief',key=isB?BRIEF_KEY:JD_KEY,ta=isB?$('briefTA'):$('jdTA'),drop=isB?$('briefDrop'):$('jdDrop');
   if(ta)ta.value='';try{localStorage.removeItem(key);}catch(e){}
   markDrop(drop,'');ctxStatus();updateCoverage();
+  if(isB)syncGuideFromBrief(true);
   toast((isB?'Brief':'JD')+' cleared');
 }
 (function(){var bc=$('briefClear'),jc=$('jdClear');if(bc)bc.onclick=function(){clearCtx('brief');};if(jc)jc.onclick=function(){clearCtx('jd');};})();
