@@ -514,12 +514,16 @@ function distList(codes,ksb,task){
      ex:'In reality it might read: “The lasting effect was that the team adopted the new method as standard, so the benefit kept compounding; next time I would involve finance earlier to speed up sign-off.” — put your own honest reflection here.'}
   ];
 }
+function learnerVoice(s){
+  s=(s||'').replace(/^they\s+/i,'').replace(/^(describes|explains|identifies|demonstrates|analyses|evaluates|shows|monitors|uses|considers|applies|reviews)\b/i,function(m){var map={describes:'Describe',explains:'Explain',identifies:'Identify',demonstrates:'Demonstrate',analyses:'Analyse',evaluates:'Evaluate',shows:'Show',monitors:'Monitor',uses:'Use',considers:'Consider',applies:'Apply',reviews:'Review'};return map[m.toLowerCase()]||m;});
+  s=s.replace(/\btheir\b/gi,'your').replace(/\bthem\b/gi,'you').replace(/\bthey\b/gi,'you');
+  return s?s.charAt(0).toUpperCase()+s.slice(1):s;
+}
 function whatToWrite(x,codes,ksb){
   x=(x||'').trim();ksb=ksb||{};codes=codes||[];
-  function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
   var b=[];
-  x.split(/;|(?:,\s+)?\band how\b|(?:,\s+)?\band then\b|(?:,\s+)?\bidentifying\b/i).map(function(s){return s.replace(/^[,\s]+|[,\s]+$/g,'').trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(cap(s));});
-  if(b.length<2)x.split(/,\s+and\s+/i).map(function(s){return s.trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(cap(s));});
+  x.split(/;|(?:,\s+)?\band how\b|(?:,\s+)?\band then\b|(?:,\s+)?\bidentifying\b/i).map(function(s){return s.replace(/^[,\s]+|[,\s]+$/g,'').trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(learnerVoice(s));});
+  if(b.length<2)x.split(/,\s+and\s+/i).map(function(s){return s.trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(learnerVoice(s));});
   var seeds=[];codes.forEach(function(c){var s=exampleSeed(clean(ksb[c]||''));if(s&&seeds.indexOf(s)<0)seeds.push(s);});
   var ts=exampleSeed(x);if(ts&&seeds.indexOf(ts)<0)seeds.push(ts);
   if(seeds.length)b.push('The specific tools, methods or examples you used — e.g. '+seeds.slice(0,3).join('; '));
