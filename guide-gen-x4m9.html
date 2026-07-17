@@ -514,11 +514,20 @@ function distList(codes,ksb,task){
      ex:'In reality it might read: “The lasting effect was that the team adopted the new method as standard, so the benefit kept compounding; next time I would involve finance earlier to speed up sign-off.” — put your own honest reflection here.'}
   ];
 }
-function whatToWrite(x){
-  x=(x||'').trim();
-  var parts=x.split(/;|(?:,\s+)?\band how\b|(?:,\s+)?\band then\b|(?:,\s+)?\bidentifying\b/i).map(function(s){return s.replace(/^[,\s]+|[,\s]+$/g,'').trim();}).filter(function(s){return s.length>3;});
-  if(parts.length<2)parts=x.split(/,\s+and\s+/i).map(function(s){return s.trim();}).filter(function(s){return s.length>3;});
-  return parts.length?"<ul>"+parts.map(function(p){return "<li>"+esc(p.charAt(0).toUpperCase()+p.slice(1))+"</li>";}).join('')+"</ul>":"<em>Describe what the learner should cover here.</em>";
+function whatToWrite(x,codes,ksb){
+  x=(x||'').trim();ksb=ksb||{};codes=codes||[];
+  function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+  var b=[];
+  x.split(/;|(?:,\s+)?\band how\b|(?:,\s+)?\band then\b|(?:,\s+)?\bidentifying\b/i).map(function(s){return s.replace(/^[,\s]+|[,\s]+$/g,'').trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(cap(s));});
+  if(b.length<2)x.split(/,\s+and\s+/i).map(function(s){return s.trim();}).filter(function(s){return s.length>3;}).forEach(function(s){b.push(cap(s));});
+  var seeds=[];codes.forEach(function(c){var s=exampleSeed(clean(ksb[c]||''));if(s&&seeds.indexOf(s)<0)seeds.push(s);});
+  var ts=exampleSeed(x);if(ts&&seeds.indexOf(ts)<0)seeds.push(ts);
+  if(seeds.length)b.push('The specific tools, methods or examples you used — e.g. '+seeds.slice(0,3).join('; '));
+  b.push('Your role and the real workplace context — who was involved and why it mattered to the business');
+  b.push('The actual work you produced as evidence (a document, plan, record, message or action)');
+  b.push('The measurable result or impact, and a short honest reflection');
+  var seen={},out=[];b.forEach(function(t){var k=t.toLowerCase().replace(/[^a-z]/g,'').slice(0,32);if(k&&!seen[k]){seen[k]=1;out.push(t);}});
+  return out.length?'<ul>'+out.map(function(p){return '<li>'+esc(p)+'</li>';}).join('')+'</ul>':'<em>Describe what the learner should cover here.</em>';
 }
 function esc(s){return String(s).replace(/[&<>]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[m];});}
 // P1/P2… (pass) and D1/D2… (distinction) — numbered rows, not bullets
@@ -631,10 +640,10 @@ function render(){
     var passHtml=codes.length?critHTML(passList(codes,INPUT.ksb,sec.x),'p'):'<em>No KSBs on this task yet — its brief didn\'t cite codes in this standard.</em>';
     h+='<div class="sec" data-sec="'+i+'">'
       +'<div class="sec-h"><span class="snum">'+(i+1)+'</span><span class="t">'+esc(sec.t)+'</span>'
-      +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words</span>'
+      +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words<span class="wc-range"> · '+(Math.round(targetFor(sec)*0.9/10)*10).toLocaleString()+'–'+(Math.round(targetFor(sec)*1.1/10)*10).toLocaleString()+' range</span></span>'
       +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
-      +'<div class="blk"><div class="lab write eyebrow">Objectives <span class="tag">'+(INPUT.briefGen?'what the task asks, from your brief':'from your Step 1 notes')+'</span></div><div contenteditable="true">'+whatToWrite(sec.x)+'</div></div>'
+      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'from the brief + KSBs':'from your Step 1 notes')+'</span></div><div data-f="wtw" contenteditable="true">'+whatToWrite(sec.x,codes,INPUT.ksb)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
       +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass <span class="tag">examples to evidence</span></div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
       +'<div class="blk"><div class="lab dist eyebrow">To aim for Distinction</div><div data-f="dist" contenteditable="true">'+critHTML(distList(codes,INPUT.ksb,sec.x),'d')+'</div></div>'
@@ -727,9 +736,9 @@ function exportWord(){
 $('word').onclick=exportWord;
 
 /* ---------- AI improvement (copy-paste bridge — uses the coordinator's own Claude, no API key) ---------- */
-const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','pass','distinction'],additionalProperties:false};
+const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},whatToWrite:{type:'array',items:{type:'string'}},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','whatToWrite','pass','distinction'],additionalProperties:false};
 const BATCH_SCHEMA={type:'object',properties:{sections:{type:'array',items:IMPROVE_SCHEMA}},required:['sections'],additionalProperties:false};
-const SYS="You are an expert end-point assessor and apprenticeship tutor. Read the task the way the apprentice will: note the word count, then the OBJECTIVES (what it actually asks them to do), then the KSBs it maps to — then write concise, plain-English GUIDANCE. RULES: (1) Guidance only — never write the apprentice's actual answer or a model paragraph; write how THEY evidence it from their OWN real workplace. (2) For Pass, SUGGEST SPECIFIC, CONCRETE EXAMPLES tied to what THIS task is actually about — name the real tools, documents, situations or actions the brief and KSBs point to (e.g. 'the spreadsheet or presentation you produced to communicate information', 'how you cut paper use or switched equipment off'). Give one clear, task-specific example per objective/KSB. Do NOT write generic scaffolding sentences that could apply to any assignment, and do NOT just restate the KSB wording (they see the KSBs verbatim already). (3) Distinction = analyse & justify the approach, weigh alternatives, quantify the impact, reflect — anchored to THIS task's subject. (4) Keep it tight and immediately usable.";
+const SYS="You are an expert apprenticeship tutor and end-point assessor writing a LEARNER GUIDANCE resource — a coordinator-grade roadmap through a work-based assignment, like a detailed tutor would hand a learner. For each section produce FOUR parts. (1) purpose: one sentence on what this section must demonstrate. (2) whatToWrite: a RICH list of 4-6 CONCRETE content points telling the learner exactly what to write about in THIS section — the real topics, situations, tools, decisions and evidence the task and its KSBs call for (this is the heart of the guide; make it specific and substantial, like a coordinator mapping the section out — NOT a restatement of the KSB wording, which the learner already sees). (3) pass: 2-3 tight assessment-style points a Pass must show. (4) distinction: 2-3 higher-order points (analyse and justify the approach, weigh alternatives, quantify the impact, reflect). RULES: Guidance only — never write the learner's actual answer or a model paragraph; everything is framed as what THEY do from their OWN real workplace. Be specific to what this task is actually about — name the real tools, documents, situations or actions (for example: the spreadsheet or presentation produced, how paper use was cut). Never generic filler that fits any assignment. Keep every point tight and immediately usable.";
 
 /* copy-paste bridge: build a prompt, user runs it in their own Claude, pastes the JSON back */
 var bridgeResolve=null,bridgeReject=null;
@@ -771,11 +780,12 @@ $('bridge').onclick=function(e){if(e.target===$('bridge')){var j=bridgeReject;cl
 function sectionPrompt(i){
   var sec=INPUT.sections[i];var codes=sec.c||[];
   var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: a one-sentence Purpose; "pass" = one SPECIFIC, concrete example per objective/KSB, grounded in what THIS task is about (name the real tools, documents, situations or actions the brief/KSBs point to) — suggest what the apprentice could describe from their own workplace; do NOT write generic sentences that fit any assignment and do NOT restate the KSB wording; "distinction" = 2-4 higher-order moves (analyse & justify the approach, weigh alternatives, quantify impact, reflect) anchored to this task. Return JSON only.'+ctx();
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about here — the real topics, situations, tools, decisions and evidence this task and its KSBs call for (specific and substantial, a coordinator mapping the section out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show; "distinction" = 2-3 higher-order points (analyse & justify, weigh alternatives, quantify impact, reflect). Everything is guidance the learner applies to their OWN workplace — never write their answer. Return JSON only.'+ctx();
 }
 function fillSection(i,out){
   var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
   var p=sec.querySelector('[data-f="purpose"]');if(p&&out.purpose)p.textContent=out.purpose;
+  var w=sec.querySelector('[data-f="wtw"]');if(w&&Array.isArray(out.whatToWrite)&&out.whatToWrite.length)w.innerHTML='<ul>'+out.whatToWrite.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>';
   var pa=sec.querySelector('[data-f="pass"]');if(pa&&Array.isArray(out.pass))pa.innerHTML=critHTML(out.pass,'p');
   var d=sec.querySelector('[data-f="dist"]');if(d&&Array.isArray(out.distinction))d.innerHTML=critHTML(out.distinction,'d');
 }
@@ -791,7 +801,7 @@ function allSectionsPrompt(){
     var ksb=codes.map(function(c){return '  '+c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'  (none mapped)';
     return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb;
   }).join('\n\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: a one-sentence Purpose; "pass" = one SPECIFIC, concrete example per objective/KSB, grounded in what that section covers (name the real tools, documents, situations or actions the brief/KSBs point to) — suggest what the apprentice could describe from their own workplace, NOT generic sentences that fit any assignment, and do NOT restate the KSB wording; "distinction" = 2-4 higher-order moves (analyse & justify, weigh alternatives, quantify impact, reflect) anchored to that task.\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, pass[], distinction[]}.'+ctx();
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about in that section — the real topics, situations, tools, decisions and evidence that section and its KSBs call for (specific and substantial, a coordinator mapping it out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show; "distinction" = 2-3 higher-order points (analyse & justify, weigh alternatives, quantify impact, reflect). Everything is guidance the learner applies to their OWN workplace — never write their answer.\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, whatToWrite[], pass[], distinction[]}.'+ctx();
 }
 document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);return;}var la=e.target.closest('[data-loadassign]');if(la){loadAssignment();return;}var ca=e.target.closest('[data-clearassign]');if(ca){clearAssignment();return;}var dm=e.target.closest('[data-dummy]');if(dm){PARTB=dummyExemplar();renderPartB();toast('Offline dummy example inserted — edit it, or replace with ✨ Generate');}});
 $('improveall').onclick=async function(){
