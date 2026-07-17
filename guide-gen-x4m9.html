@@ -382,7 +382,7 @@
   <div class="controls">
     <span class="src" id="src"></span>
     <span class="grow"></span>
-    <button id="improveall">✨ Improve all with Claude</button>
+    <button id="improveall">✨ Improve all with AI</button>
     <button id="regen" title="Re-draft Purpose / Pass / Distinction from the mapping (overwrites edits)">↻ Regenerate drafts</button>
     <button id="collapseAll" title="Collapse or expand all sections">⊟ Collapse all</button>
     <button id="word">⬇ Word (.doc)</button>
@@ -416,8 +416,8 @@
 
 <div class="modal" id="bridge" hidden>
   <div class="modal-card" style="max-width:640px">
-    <div class="mh">Improve with Claude — no API key needed</div>
-    <p class="mp"><b>1.</b> Copy the prompt below.&nbsp; <b>2.</b> Paste it into the Claude you already use — <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai ↗</a> or the desktop app.&nbsp; <b>3.</b> Paste Claude's reply back here and press <b>Use reply</b>.</p>
+    <div class="mh">Improve with AI — no API key needed</div>
+    <p class="mp"><b>1.</b> Copy the prompt below.&nbsp; <b>2.</b> Paste it into any AI assistant you use — Claude, ChatGPT, Copilot or Gemini.&nbsp; <b>3.</b> Paste its reply back here and press <b>Use reply</b>.</p>
     <label class="klabel" for="bridge-prompt">Prompt — copy this</label>
     <textarea id="bridge-prompt" class="keyin" readonly rows="7" style="height:148px;resize:vertical;line-height:1.45"></textarea>
     <div class="mbtns" style="margin-top:9px">
@@ -425,15 +425,15 @@
       <span class="grow"></span>
       <span class="mstatus ok" id="bridge-copied" style="margin:0"></span>
     </div>
-    <label class="klabel" for="bridge-result" style="margin-top:16px">Claude's reply — paste it here</label>
-    <textarea id="bridge-result" class="keyin" rows="6" placeholder="Paste Claude's whole reply, including the { … }" style="height:128px;resize:vertical;line-height:1.45"></textarea>
+    <label class="klabel" for="bridge-result" style="margin-top:16px">The AI's reply — paste it here</label>
+    <textarea id="bridge-result" class="keyin" rows="6" placeholder="Paste the AI's whole reply, including the { … }" style="height:128px;resize:vertical;line-height:1.45"></textarea>
     <div class="mstatus" id="bridge-status"></div>
     <div class="mbtns">
       <button id="bridge-cancel">Cancel</button>
       <span class="grow"></span>
       <button class="btn-p" id="bridge-use">✓ Use reply</button>
     </div>
-    <p class="mnote">Uses your normal Claude — nothing is sent to Arthur Curtis or stored anywhere. The offline drafts work with no Claude at all.</p>
+    <p class="mnote">Uses your own AI assistant — nothing is sent to Arthur Curtis or stored anywhere. The offline drafts work with no AI at all.</p>
   </div>
 </div>
 
@@ -645,7 +645,7 @@ function render(){
     h+='<div class="sec" data-sec="'+i+'">'
       +'<div class="sec-h"><span class="snum">'+(i+1)+'</span><span class="t">'+esc(sec.t)+'</span>'
       +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words<span class="wc-range"> · '+(Math.round(targetFor(sec)*0.9/10)*10).toLocaleString()+'–'+(Math.round(targetFor(sec)*1.1/10)*10).toLocaleString()+' range</span></span>'
-      +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with Claude">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
+      +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with AI">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
       +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'from the brief + KSBs':'from your Step 1 notes')+'</span></div><div data-f="wtw" contenteditable="true">'+whatToWrite(sec.x,codes,INPUT.ksb)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
@@ -756,9 +756,9 @@ function schemaExample(s){
   return '"..."';
 }
 function parseReply(t){
-  t=(t||'').trim();if(!t)throw new Error('Nothing pasted yet — paste Claude’s reply above.');
+  t=(t||'').trim();if(!t)throw new Error('Nothing pasted yet — paste the AI’s reply above.');
   var m=t.match(/```(?:json)?\s*([\s\S]*?)```/i);if(m)t=m[1].trim();
-  var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<=a)throw new Error('No JSON found — paste Claude’s full reply, including the { … }.');
+  var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<=a)throw new Error('No JSON found — paste the AI’s full reply, including the { … }.');
   return JSON.parse(t.slice(a,b+1));
 }
 function setBStatus(t,c){var s=$('bridge-status');s.className='mstatus '+(c||'');s.textContent=t;}
@@ -775,7 +775,7 @@ $('bridge-copy').onclick=function(){
   var ta=$('bridge-prompt');ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);
   var ok=false;try{ok=document.execCommand('copy');}catch(e){}
   if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(ta.value).then(function(){},function(){});}
-  $('bridge-copied').textContent='Copied ✓ — now paste it into Claude';
+  $('bridge-copied').textContent='Copied ✓ — now paste it into your AI assistant';
   if(window.getSelection)window.getSelection().removeAllRanges();$('bridge-result').focus();
 };
 $('bridge-use').onclick=function(){try{var out=parseReply($('bridge-result').value);var r=bridgeResolve;closeBridge();if(r)r(out);}catch(e){setBStatus(e.message||'Could not read that reply.','err');}};
@@ -947,7 +947,7 @@ function checkHTML(){
     h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-aitoggle checked> Deeper read (AI)</label><span class="sem-badge on">✓ AI review</span></div>';
     if(AIREVIEW.overall)h+='<div class="chk-overall">'+esc(AIREVIEW.overall)+'</div>';
     h+='<div class="chk-sec">'+rows.map(function(r){var vc=r.v==='evidenced'?'v-ok':(r.v==='partial'?'v-mid':'v-no');return '<div class="chk-row"><span class="kk">'+r.c+'</span><span class="v-tag '+vc+'">'+esc(r.v||'?')+'</span><span class="v-cmt">'+esc(r.cmt)+'</span></div>';}).join('')+'</div>';
-    h+='<div class="chk-note">AI review (Claude) — developmental feedback; the coordinator makes the final judgement.</div></div>';
+    h+='<div class="chk-note">AI review — developmental feedback; the coordinator makes the final judgement.</div></div>';
     h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
     return h;
   }
@@ -956,11 +956,11 @@ function checkHTML(){
   var h='<div class="chk"><button class="chk-clear" data-clearassign="1" type="button">✕ clear</button>';
   h+='<div class="chk-h"><span class="chk-pct" style="color:'+col+'">'+pct+'%</span><span class="chk-lbl">this assignment clearly evidences <b>'+met.length+' of '+required.length+'</b> KSBs '+reqLabel+(weak.length?' · <b>'+weak.length+'</b> partly':'')+(missing.length?' · <b>'+missing.length+'</b> missing':'')+'</span></div>';
   h+='<div class="chk-bar"><span style="width:'+pct+'%;background:'+col+'"></span></div>';
-  h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-aitoggle'+(AI_ON?' checked':'')+'> Deeper read (AI) <span class="sem-hint">uses your Claude</span></label>'+(_semProg?'<span class="sem-prog">'+esc(_semProg)+'</span>':'<span class="sem-badge'+(T.semUsed?' on':'')+'">'+(T.semUsed?'✓ semantic':'keyword')+'</span>')+'</div>';
+  h+='<div class="chk-mode"><label class="sem-toggle"><input type="checkbox" data-aitoggle'+(AI_ON?' checked':'')+'> Deeper read (AI) <span class="sem-hint">uses your AI assistant</span></label>'+(_semProg?'<span class="sem-prog">'+esc(_semProg)+'</span>':'<span class="sem-badge'+(T.semUsed?' on':'')+'">'+(T.semUsed?'✓ semantic':'keyword')+'</span>')+'</div>';
   if(missing.length)h+='<div class="chk-sec"><div class="chk-t">Missing — add ('+missing.length+')</div>'+missing.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'add'))+'</span></div>';}).join('')+'</div>';
   if(weak.length)h+='<div class="chk-sec"><div class="chk-t weak">Partly evidenced — strengthen ('+weak.length+')</div>'+weak.map(function(c){return '<div class="chk-miss"><span class="kk">'+c+'</span><span>'+esc(suggestFor(c,'strengthen'))+'</span></div>';}).join('')+'</div>';
   h+='<div class="chk-sec"><div class="chk-t ok">Clearly evidenced ('+met.length+')</div><div class="chk-met">'+(met.length?met.map(function(c){return '<span class="kk">'+c+'</span>';}).join(''):'<span class="chk-none">none matched yet</span>')+'</div></div>';
-  h+='<div class="chk-note">'+(T.semUsed?'Semantic review — in-browser AI embeddings, free &amp; offline.':'Keyword match (semantic model loading…).')+' Tick “Deeper read” for a Claude-written review.</div></div>';
+  h+='<div class="chk-note">'+(T.semUsed?'Semantic review — in-browser AI embeddings, free &amp; offline.':'Keyword match (semantic model loading…).')+' Tick “Deeper read” for an AI-written review.</div></div>';
   h+='<div class="chk-doc"><div class="chk-doc-h">📄 Loaded assignment — '+esc(ASSIGN.name||'')+'</div>'+text.split(/\n\n+/).map(function(p){return p.trim()?'<p>'+esc(p.trim())+'</p>':'';}).join('')+'</div>';
   return h;
 }
@@ -971,7 +971,7 @@ function renderPartB(){
   if(ASSIGN){ if(wrap)wrap.classList.remove('empty'); if(pt)pt.textContent='Assignment check'; if(ps)ps.style.display='none'; body.innerHTML=checkHTML(); return; }
   if(pt)pt.textContent='Annotated worked example'; if(ps)ps.style.display='';
   if(wrap)wrap.classList.toggle('empty',!PARTB);
-  if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Uses your own Claude — no API key needed.</div>';return;}
+  if(!PARTB){body.innerHTML='<div class="pb-empty">Writes a full worked example on an <b>illustrative</b> scenario (deliberately not a real learner’s), with inline [KSB tags] the learner removes before submitting. It shows what “good” looks like — it is never the apprentice’s own submission. Uses your own AI assistant — no API key needed.</div>';return;}
   var h='<div class="scenario"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg><div><span class="s-lab">Illustrative scenario — not your workplace</span><span class="s-txt">'+esc(PARTB.scenario||'')+'</span></div></div>';
   INPUT.sections.forEach(function(sec,i){
     var s=PARTB.sections&&PARTB.sections[i];var ex=(s&&s.exemplar)||'';
