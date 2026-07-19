@@ -1328,9 +1328,10 @@ function parseESFA(text){
   // Fuzzy column match: exact first, then substring contains
   const col=n=>{let i=hdr.findIndex(h=>h===n);if(i<0)i=hdr.findIndex(h=>h.includes(n));return i;};
   const iP=col('payroll month'),iL=col('levy declared'),iT=col('10% top up'),iF=col('paid from levy'),iD=col('transaction date');
+  const iU=col('unique learner number'),iN=col('learner'),iCn=col('course name'),iCl=col('course level'),iTt=col('transaction type');
   if(iL<0){setStatus('Could not match "Levy declared" column. Found columns: '+hdr.filter(Boolean).join(', '),'warn');return;}
   const rows=lines.slice(1).filter(l=>l.trim()).map(l=>l.split(sep).map(c=>c.trim().replace(/^"|"$/g,'')));
-  const mm={};let tI=0,tO=0;
+  const mm={};let tI=0,tO=0;const learners={};
   const numFail=raw=>{const s=(raw||'').toString().replace(/[£,\s]/g,'');return s!==''&&isNaN(parseFloat(s));};
   const issues={badCells:0,badExamples:[],unknownMonth:0};
   rows.forEach(r=>{
@@ -1342,8 +1343,16 @@ function parseESFA(text){
     else{mk='Unknown';issues.unknownMonth++;}
     if(!mm[mk])mm[mk]={levy:0,topup:0,paid:0};
     mm[mk].levy+=lv;mm[mk].topup+=tp;mm[mk].paid+=pd;tI+=lv+tp;tO+=pd;
+    // collect per-learner apprenticeship rows so we can reconstruct in-flight programmes
+    var uln=iU>=0?(r[iU]||'').trim():'';
+    if(uln&&iCn>=0&&(r[iCn]||'').trim()){
+      var L=learners[uln]||(learners[uln]={name:(iN>=0?(r[iN]||''):'').trim(),course:(r[iCn]||'').trim(),level:iCl>=0?(r[iCl]||'').trim():'',pays:[],types:{}});
+      var tt=iTt>=0?(r[iTt]||'').trim():'';L.types[tt]=1;
+      if(pd!==0)L.pays.push({date:iD>=0?(r[iD]||'').trim():'',type:tt,amt:Math.abs(pd)});
+    }
   });
   buildLevyData(mm,tI,tO,rows.length,issues);
+  importExistingLearners(learners);
 }
 
 function buildLevyData(mm,tI,tO,rc,issues){
@@ -1358,6 +1367,49 @@ function buildLevyData(mm,tI,tO,rc,issues){
   levyData={monthlyAvg:avg,balance:Math.max(0,tI-tO),byMonth};
   setStatus((rc?`[OK] Parsed ${byMonth.length} payroll months across ${rc} rows. `:'')+`Average monthly income: ${fmt(avg)}`,'ok');
   renderSummary();renderMonthTable();renderDataQuality(validateLevyData(byMonth,issues));saveState();
+}
+
+// ── Reconstruct in-flight apprenticeships from the transaction ledger so the forecast includes commitments already running.
+function ddmyToIso(s){var m=/(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(s||'');return m?m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2):'';}
+function addMonthsIso(base,n){var d=new Date(base);if(isNaN(d))d=new Date(today);d.setMonth(d.getMonth()+n);return d.toISOString().slice(0,10);}
+function matchStandardByCourse(course,level){
+  var cn=(course||'').toLowerCase().replace(/\s+/g,' ').trim(),lv=parseInt(level)||0,best=null,loose=null;
+  for(var i=0;i<STANDARDS.length;i++){var s=STANDARDS[i];if(!s.name||s.name==='Other / custom')continue;
+    var sn=s.name.toLowerCase().replace(/^l\s?\d+\s+/,'').replace(/\s+/g,' ').trim();
+    if(sn===cn&&(!lv||!s.level||s.level===lv)){best=s;break;}
+    if(!loose&&(sn.indexOf(cn)>=0||cn.indexOf(sn)>=0)&&(!lv||!s.level||s.level===lv))loose=s;
+  }
+  return best||loose;
+}
+function importExistingLearners(learners){
+  var ulns=Object.keys(learners||{});if(!ulns.length)return;
+  programmes=programmes.filter(function(p){return !p.imported;}); // refresh any prior import
+  var added=0,done=0;
+  ulns.forEach(function(uln){
+    var L=learners[uln];
+    var monthly=L.pays.filter(function(p){return p.type==='Monthly Payment';});
+    if(L.types['Completion Payment']||!monthly.length){done++;return;} // finished, or no ongoing draw
+    // modal monthly draw (ignores catch-up doubles / one-off balance & completion payments)
+    var freq={},draw=0,fmax=0;monthly.forEach(function(p){var k=Math.round(p.amt);freq[k]=(freq[k]||0)+1;});
+    Object.keys(freq).forEach(function(k){if(freq[k]>fmax){fmax=freq[k];draw=+k;}});
+    if(draw<=0)return;
+    var std=matchStandardByCourse(L.course,L.level),band=std?std.band:0;
+    // choose (cost, duration) so the engine reproduces the learner's real monthly draw
+    var practical=band>0?Math.min(48,Math.max(6,Math.round(band*RULEBOOK.draw.training/draw))):(std&&std.dur?std.dur:18);
+    var cost=band>0?band:Math.round(draw*practical/RULEBOOK.draw.training);
+    var months={};L.pays.forEach(function(p){var iso=ddmyToIso(p.date);if(iso)months[iso.slice(0,7)]=1;});
+    var elapsed=Math.min(practical-1,Math.max(1,Object.keys(months).length)); // lower-bound on how far in they are
+    var start=addMonthsIso(new Date(today),-elapsed),epa=addMonthsIso(new Date(start),practical);
+    if(new Date(epa)<=new Date(today))epa=addMonthsIso(new Date(today),Math.max(3,practical-elapsed));
+    programmes.push({name:std?std.name:(L.course||'Apprenticeship'),cost:cost,count:1,start:start,epa:epa,imported:true});
+    added++;
+  });
+  if(added){
+    renderProgrammes();renderProjection();saveState();
+    document.getElementById('levySummary').classList.remove('hidden');
+    document.getElementById('progTable').classList.remove('hidden');
+    setStatus('[OK] Imported '+added+' in-flight learner'+(added>1?'s':'')+' from your transactions as existing programmes'+(done?' ('+done+' completed, skipped)':'')+'. Prices use the funding band; start/end dates are estimated from payment history — review & adjust each for an exact forecast.','ok');
+  }
 }
 
 // ── #10d: estimate the levy from pay bill when there's no ESFA export (new/first-time payers)
@@ -1649,7 +1701,8 @@ function renderProgrammes(){
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
-    return`<tr><td class="td-name">${p.name}${hasKSB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
+    return`<tr><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
 }
 
