@@ -13,21 +13,21 @@
   --wash:255,255,255; /* overlay base — flips to dark in light mode so rgba(var(--wash),x) works in both */
   --glass:rgba(var(--wash),0.04);--border:rgba(45,212,178,0.18);--border2:rgba(45,212,178,0.4);
   --text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;
-  --amber:#f5a623;--red:#ff4c6a;--purple:#a78bfa;
+  --amber:#f5a623;--red:#ff4c6a;--purple:#a78bfa;--money:var(--teal);
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
 }
-:root[data-theme="light"]{
-  --bg:#f1f4f9;                 /* soft light-grey page so white cards pop */
-  --wash:30,41,59;
-  --glass:#ffffff;             /* solid white surfaces */
-  --border:#e2e8f0;--border2:#0b8f76;
-  --text:#131d29;--text2:#46566a;--text3:#7a889a;
-  --teal:#0b8f76;--navy:#46607a;--purple:#6d43c9;--amber:#a86a12;--red:#d61f45;
+:root[data-theme="light"]{                       /* Scheme A — Cobalt & Slate + terracotta */
+  --bg:#f4f7fc;                 /* clean cool page so white cards pop */
+  --wash:15,27,46;              /* ink-slate overlays */
+  --glass:#ffffff;
+  --border:#e4eaf3;--border2:#2563eb;
+  --text:#0f1b2e;--text2:#4a5a70;--text3:#8fa0b7;
+  --teal:#2563eb;--navy:#5a7290;--purple:#5b6b9e;--amber:#c2603c;--red:#d61f45;--money:#c2603c;
 }
 :root[data-theme="light"] .aurora{display:none}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
-:root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#2DD4B2}
+:root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#3b82f6}
 /* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
 .lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
@@ -789,7 +789,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20i</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1723,13 +1723,13 @@ function renderProgrammes(){
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--teal)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--teal)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
@@ -3471,13 +3471,16 @@ document.addEventListener('keydown',e=>{
       x:Math.random()*w,y:Math.random()*h,
       vx:(Math.random()-.5)*0.18*DPR,vy:(Math.random()-.5)*0.18*DPR,
       r:(Math.random()*1.6+0.7)*DPR,
-      hoff:Math.random()*360,phase:Math.random()*6.283,speed:0.012+Math.random()*0.023
+      hj:(Math.random()-.5),accent:Math.random()<0.12,phase:Math.random()*6.283,speed:0.012+Math.random()*0.023
     }));
   }
   const LINK=130*DPR;
   function frame(){
     ctx.clearRect(0,0,w,h);
-    t+=0.4; // drives the hue cycle — the "changing colours"
+    t+=0.4;
+    const _lt=document.documentElement.getAttribute('data-theme')==='light';
+    const _B=_lt?220:168,_S=_lt?15:22,_ACC=_lt?18:190;
+    const HUE=n=>Math.round((((n.accent?_ACC:_B)+n.hj*_S+Math.sin(t*0.01+n.phase)*_S*0.6)%360+360)%360);
     for(const n of nodes){
       n.x+=n.vx;n.y+=n.vy;
       if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;
@@ -3487,8 +3490,8 @@ document.addEventListener('keydown',e=>{
       for(let j=i+1;j<nodes.length;j++){
         const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
         if(d<LINK){
-          const o=(1-d/LINK)*0.18, hh=((t+a.hoff)%360).toFixed(0);
-          ctx.strokeStyle='hsla('+hh+',70%,55%,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
+          const o=(1-d/LINK)*0.16, hh=HUE(a);
+          ctx.strokeStyle='hsla('+hh+',66%,'+(_lt?50:55)+'%,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
           ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
         }
       }
@@ -3496,9 +3499,9 @@ document.addEventListener('keydown',e=>{
     // nodes — pulsing glow, cycling hue
     for(const n of nodes){
       n.phase+=n.speed;
-      const gl=0.5+0.5*Math.sin(n.phase), hh=((t+n.hoff)%360).toFixed(0);
+      const gl=0.5+0.5*Math.sin(n.phase), hh=HUE(n);
       ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);
-      ctx.fillStyle='hsla('+hh+',75%,55%,'+(0.3+0.45*gl).toFixed(3)+')';ctx.fill();
+      ctx.fillStyle='hsla('+hh+',72%,'+(_lt?50:55)+'%,'+(0.3+0.45*gl).toFixed(3)+')';ctx.fill();
       ctx.beginPath();ctx.arc(n.x,n.y,n.r*2.8,0,7);
       ctx.fillStyle='hsla('+hh+',75%,65%,'+(0.05*gl).toFixed(3)+')';ctx.fill();
     }
