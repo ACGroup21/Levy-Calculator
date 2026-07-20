@@ -28,6 +28,9 @@
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
 :root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#3b82f6}
+/* Scheme A — warm accents: terracotta on EPA chips + the Add-programme CTA in light mode */
+:root[data-theme="light"] .badge-epa,:root[data-theme="light"] .epa-chip{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;border-color:rgba(194,96,60,0.32)!important}
+:root[data-theme="light"] .btn-add{background:rgba(194,96,60,0.09);color:#c2603c;border-color:rgba(194,96,60,0.34)}
 /* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
 .lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
@@ -789,7 +792,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20j</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1130,9 +1133,9 @@ function renderLearnerCost(){
   var training=band*RULEBOOK.draw.training, epaAmt=band*RULEBOOK.draw.epa;
   var otjCost=Math.round(otj*weeks*rate), fullCost=band+otjCost;
   var rows=lcCell('Funding band <span style="color:#2DD4B2">levy-funded</span>',fmt(band),T+'% '+fmt(training)+' over '+dur+'mo + '+E+'% '+fmt(epaAmt)+' at EPA','#2DD4B2')+
-    lcCell('Off-the-job time <span style="color:#E0A43B">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),'#E0A43B')+
+    lcCell('Off-the-job time <span style="color:var(--amber)">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),'var(--amber)')+
     lcCell('Full cost of ownership',noRate?fmt(band)+'+':'&asymp;'+fmt(fullCost),'band + off-the-job time','#fff')+
-    lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it','#a78bfa');
+    lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it','var(--amber)');
   // How many of THIS standard could the levy fund? (uses the standard's real band — no fabrication)
   var capHtml='', M=(typeof projYears==='number'?projYears:3)*12;
   var levyAvail=levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0;
