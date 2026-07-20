@@ -789,7 +789,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20h</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -3461,7 +3461,7 @@ document.addEventListener('keydown',e=>{
 // ── Constellation network background ──
 (function(){
   const cv=document.getElementById('constellation');if(!cv)return;
-  const ctx=cv.getContext('2d');let w,h,nodes,raf,running=true;
+  const ctx=cv.getContext('2d');let w,h,nodes,raf,running=true,t=0;
   const DPR=Math.min(window.devicePixelRatio||1,2);
   function resize(){
     w=cv.width=innerWidth*DPR;h=cv.height=innerHeight*DPR;
@@ -3470,31 +3470,37 @@ document.addEventListener('keydown',e=>{
     nodes=Array.from({length:target},()=>({
       x:Math.random()*w,y:Math.random()*h,
       vx:(Math.random()-.5)*0.18*DPR,vy:(Math.random()-.5)*0.18*DPR,
-      r:(Math.random()*1.6+0.7)*DPR
+      r:(Math.random()*1.6+0.7)*DPR,
+      hoff:Math.random()*360,phase:Math.random()*6.283,speed:0.012+Math.random()*0.023
     }));
   }
   const LINK=130*DPR;
   function frame(){
     ctx.clearRect(0,0,w,h);
+    t+=0.4; // drives the hue cycle — the "changing colours"
     for(const n of nodes){
       n.x+=n.vx;n.y+=n.vy;
       if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;
     }
-    // links
+    // links — hue shifts over time
     for(let i=0;i<nodes.length;i++){
       for(let j=i+1;j<nodes.length;j++){
         const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
         if(d<LINK){
-          const o=(1-d/LINK)*0.16;
-          ctx.strokeStyle='rgba(45,212,178,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
+          const o=(1-d/LINK)*0.18, hh=((t+a.hoff)%360).toFixed(0);
+          ctx.strokeStyle='hsla('+hh+',70%,55%,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
           ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
         }
       }
     }
-    // nodes
+    // nodes — pulsing glow, cycling hue
     for(const n of nodes){
+      n.phase+=n.speed;
+      const gl=0.5+0.5*Math.sin(n.phase), hh=((t+n.hoff)%360).toFixed(0);
       ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);
-      ctx.fillStyle='rgba(120,210,196,0.55)';ctx.fill();
+      ctx.fillStyle='hsla('+hh+',75%,55%,'+(0.3+0.45*gl).toFixed(3)+')';ctx.fill();
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r*2.8,0,7);
+      ctx.fillStyle='hsla('+hh+',75%,65%,'+(0.05*gl).toFixed(3)+')';ctx.fill();
     }
     if(running)raf=requestAnimationFrame(frame);
   }
