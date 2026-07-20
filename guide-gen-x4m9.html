@@ -478,21 +478,28 @@ function ksbAction(txt){
 }
 // an illustrative "how this could read" snippet for a Pass point — a teaching aid, clearly not the learner's own work
 function passExample(g,act,seed){
-  var lead=g==='K'?'In my role I need to understand ':g==='B'?'A moment that showed this behaviour — ':'In my role I ';
+  var ger=/^[a-z]+ing\b/i.test(act||''); // KSB starts with a gerund (e.g. "Identifying…")
+  var lead=g==='K'?'In my role I need to understand ':g==='B'?'A moment that showed this behaviour — ':(ger?'In my role I am ':'In my role I ');
   var tail=g==='K'?'. I show this by explaining how it applied to a real task I handled, and the difference that understanding made to my decision.'
     :g==='B'?'. I describe what I actually said or did in the moment, why, and how it landed with the people involved.'
     :'. I set it up, involved the people affected, checked it was working, and it made a measurable difference — time saved, fewer errors, or better feedback.';
   return 'In reality it might read: “'+lead+act+(seed?', for example '+seed:'')+tail+'” — swap in your own real workplace example.';
 }
-function passList(codes,ksb,task){
-  ksb=ksb||{};codes=(codes||[]).slice(0,6);
+function passList(codes,ksb,task,crit){
+  ksb=ksb||{};codes=(codes||[]).slice(0,6);crit=crit||[];
   var LEAD={K:'Show you understand ',S:'Show the real work where you ',B:'Give a real moment that shows the behaviour — '};
-  var out=['Set the scene — the real situation at work where this happened: who was involved and why it mattered to the business.'];
+  var out=[];
+  // the brief's OWN Pass criteria come first — these are what the assessor actually marks
+  crit.forEach(function(cr){var t=clean(cr);if(t)out.push({t:'The brief asks, for a Pass: '+learnerVoice(t)+'.',ex:null});});
+  out.push('Set the scene — the real situation at work where this happened: who was involved and why it mattered to the business.');
   codes.forEach(function(c){
     var d=clean(ksb[c]||'');if(!d)return;
     var act=ksbAction(d);if(!act)return;
+    if(c[0]==='K')act=act.replace(/^understand(ing)?\s+/i,'').replace(/^know(ledge)?\s+(of\s+)?/i,''); // LEAD already says "Show you understand"
     var seed=exampleSeed(d)||exampleSeed(task||'');
-    var line=(LEAD[c[0]]||'Give an example where you ')+act;
+    var lead=LEAD[c[0]]||'Give an example where you ';
+    if(c[0]==='S'&&/^[a-z]+ing\b/i.test(act))lead='Show the real work where you are '; // gerund KSB ("Identifying…") reads as "you are identifying…"
+    var line=lead+act;
     if(seed)line+=' — e.g. '+seed;
     out.push({t:line.replace(/\s{2,}/g,' ').replace(/[.;,]+$/,'')+' ('+c+').',ex:passExample(c[0],act,seed)});
   });
@@ -503,9 +510,9 @@ function draftPurpose(codes,ksb){
   var themes=codes.slice(0,3).map(function(c){var t=clean(ksb[c]||'').replace(/^(Understand|Know)( what| how| the)?\s+/i,'').split(/[,;]| and | including /i)[0].trim();return /^[A-Z]{2,}\b/.test(t)?t:t.charAt(0).toLowerCase()+t.slice(1);}).filter(Boolean);
   return "Set out this part of your project and evidence the mapped KSBs in your own workplace context"+(themes.length?" — in particular "+themes.join('; ')+".":".");
 }
-function distList(codes,ksb,task){
+function distList(codes,ksb,task,crit){
   var seed=exampleSeed(task||'');
-  return [
+  var frames=[
     {t:'Analyse WHY you took your approach — weigh the alternatives you considered and justify the decision.',
      ex:'In reality it might read: “I chose this approach over the alternative because it best fitted the business goal; the trade-off was a slower setup, but on balance it was the right call because it reduced risk and was easier for the team to sustain.” — put your own real decision and reasoning here.'},
     {t:'Quantify the impact'+(seed?' (e.g. on '+seed+')':'')+' — a real number, a before-vs-after, or genuine feedback, not just "it went well".',
@@ -513,6 +520,13 @@ function distList(codes,ksb,task){
     {t:'Reflect on the longer-term effect on the business and what you would refine next time.',
      ex:'In reality it might read: “The lasting effect was that the team adopted the new method as standard, so the benefit kept compounding; next time I would involve finance earlier to speed up sign-off.” — put your own honest reflection here.'}
   ];
+  // Brief-derived section: only offer distinction when the brief actually provides distinction criteria.
+  if(Array.isArray(crit)){
+    if(!crit.length)return []; // no distinction on offer for this task → the guide hides the block
+    var out=crit.map(function(cr){var t=clean(cr);return {t:'The brief\'s Distinction criteria: '+learnerVoice(t)+'.',ex:null};});
+    return out.concat(frames.slice(0,2)); // the real criteria + a couple of higher-order moves to hit them
+  }
+  return frames; // hand-mapped section (no brief) — keep the generic distinction guidance
 }
 function learnerVoice(s){
   s=(s||'').replace(/^they\s+/i,'').replace(/^(describes|explains|identifies|demonstrates|analyses|evaluates|shows|monitors|uses|considers|applies|reviews)\b/i,function(m){var map={describes:'Describe',explains:'Explain',identifies:'Identify',demonstrates:'Demonstrate',analyses:'Analyse',evaluates:'Evaluate',shows:'Show',monitors:'Monitor',uses:'Use',considers:'Consider',applies:'Apply',reviews:'Review'};return map[m.toLowerCase()]||m;});
@@ -641,7 +655,12 @@ function render(){
       cov+='<div class="cgrp '+g+'"><div class="ch">'+CIC[g]+GN[g]+'</div>'+gc.map(function(c){return '<div class="krow"><span class="kc">'+c+'</span><span class="kt">'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
     });
     if(!cov)cov='<div class="pb-empty">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
-    var passHtml=codes.length?critHTML(passList(codes,INPUT.ksb,sec.x),'p'):'<em>No KSBs on this task yet — its brief didn\'t cite codes in this standard.</em>';
+    var hasPassCrit=Array.isArray(sec.passCrit)&&sec.passCrit.length;
+    var passHtml=codes.length?critHTML(passList(codes,INPUT.ksb,sec.x,sec.passCrit),'p'):'<em>No KSBs on this task yet — its brief didn\'t cite codes in this standard.</em>';
+    var distItems=codes.length?distList(codes,INPUT.ksb,sec.x,sec.distCrit):[];
+    var distBlock=distItems.length
+      ? '<div class="blk"><div class="lab dist eyebrow">To aim for Distinction'+(Array.isArray(sec.distCrit)&&sec.distCrit.length?' <span class="tag">from the brief</span>':'')+'</div><div data-f="dist" contenteditable="true">'+critHTML(distItems,'d')+'</div></div>'
+      : (INPUT.briefGen&&Array.isArray(sec.distCrit)?'<div class="blk"><div class="lab dist eyebrow">Distinction</div><div class="read pb-empty" style="opacity:.8">This task is assessed at <b>Pass</b> only — the brief sets no distinction criteria for it. Make every point above unmistakably evidenced.</div></div>':'');
     h+='<div class="sec" data-sec="'+i+'">'
       +'<div class="sec-h"><span class="snum">'+(i+1)+'</span><span class="t">'+esc(sec.t)+'</span>'
       +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words<span class="wc-range"> · '+(Math.round(targetFor(sec)*0.9/10)*10).toLocaleString()+'–'+(Math.round(targetFor(sec)*1.1/10)*10).toLocaleString()+' range</span></span>'
@@ -649,8 +668,8 @@ function render(){
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
       +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'from the brief + KSBs':'from your Step 1 notes')+'</span></div><div data-f="wtw" contenteditable="true">'+whatToWrite(sec.x,codes,INPUT.ksb)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
-      +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass <span class="tag">examples to evidence</span></div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
-      +'<div class="blk"><div class="lab dist eyebrow">To aim for Distinction</div><div data-f="dist" contenteditable="true">'+critHTML(distList(codes,INPUT.ksb,sec.x),'d')+'</div></div>'
+      +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass <span class="tag">'+(hasPassCrit?'from the brief + examples':'examples to evidence')+'</span></div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
+      +distBlock
       +'</div>';
   });
   h+='<div class="sec"><div class="sec-h"><span class="snum" style="background:#8b5cf6;color:#fff;box-shadow:0 4px 10px rgba(139,92,246,.3)">✓</span><span class="t">Final checklist for the learner</span><span class="sec-caret" title="Collapse / expand">▾</span></div><div class="blk"><ul>'
@@ -742,7 +761,7 @@ $('word').onclick=exportWord;
 /* ---------- AI improvement (copy-paste bridge — uses the coordinator's own Claude, no API key) ---------- */
 const IMPROVE_SCHEMA={type:'object',properties:{purpose:{type:'string'},whatToWrite:{type:'array',items:{type:'string'}},pass:{type:'array',items:{type:'string'}},distinction:{type:'array',items:{type:'string'}}},required:['purpose','whatToWrite','pass','distinction'],additionalProperties:false};
 const BATCH_SCHEMA={type:'object',properties:{sections:{type:'array',items:IMPROVE_SCHEMA}},required:['sections'],additionalProperties:false};
-const SYS="You are an expert apprenticeship tutor and end-point assessor writing a LEARNER GUIDANCE resource — a coordinator-grade roadmap through a work-based assignment, like a detailed tutor would hand a learner. For each section produce FOUR parts. (1) purpose: one sentence on what this section must demonstrate. (2) whatToWrite: a RICH list of 4-6 CONCRETE content points telling the learner exactly what to write about in THIS section — the real topics, situations, tools, decisions and evidence the task and its KSBs call for (this is the heart of the guide; make it specific and substantial, like a coordinator mapping the section out — NOT a restatement of the KSB wording, which the learner already sees). (3) pass: 2-3 tight assessment-style points a Pass must show. (4) distinction: 2-3 higher-order points (analyse and justify the approach, weigh alternatives, quantify the impact, reflect). RULES: Guidance only — never write the learner's actual answer or a model paragraph; everything is framed as what THEY do from their OWN real workplace. Be specific to what this task is actually about — name the real tools, documents, situations or actions (for example: the spreadsheet or presentation produced, how paper use was cut). Never generic filler that fits any assignment. Keep every point tight and immediately usable.";
+const SYS="You are an expert apprenticeship tutor and end-point assessor writing a LEARNER GUIDANCE resource — a coordinator-grade roadmap through a work-based assignment, like a detailed tutor would hand a learner. For each section produce FOUR parts. (1) purpose: one sentence on what this section must demonstrate. (2) whatToWrite: a RICH list of 4-6 CONCRETE content points telling the learner exactly what to write about in THIS section — the real topics, situations, tools, decisions and evidence the task and its KSBs call for (this is the heart of the guide; make it specific and substantial, like a coordinator mapping the section out — NOT a restatement of the KSB wording, which the learner already sees). (3) pass: 2-3 tight assessment-style points a Pass must show. (4) distinction: 2-3 higher-order points (analyse and justify the approach, weigh alternatives, quantify the impact, reflect). RULES: Guidance only — never write the learner's actual answer or a model paragraph; everything is framed as what THEY do from their OWN real workplace. Be specific to what this task is actually about — name the real tools, documents, situations or actions (for example: the spreadsheet or presentation produced, how paper use was cut). Never generic filler that fits any assignment. Keep every point tight and immediately usable. GRADING (important): when the brief supplies its own Pass criteria, your 'pass' points must directly address them, not generic evidence prompts. Only produce 'distinction' points when the brief actually offers a distinction; if a section is marked 'Distinction: NOT AVAILABLE', return an EMPTY distinction array for it — never invent a distinction where the brief grades Pass-only.";
 
 /* copy-paste bridge: build a prompt, user runs it in their own Claude, pastes the JSON back */
 var bridgeResolve=null,bridgeReject=null;
@@ -781,10 +800,22 @@ $('bridge-copy').onclick=function(){
 $('bridge-use').onclick=function(){try{var out=parseReply($('bridge-result').value);var r=bridgeResolve;closeBridge();if(r)r(out);}catch(e){setBStatus(e.message||'Could not read that reply.','err');}};
 $('bridge-cancel').onclick=function(){var j=bridgeReject;closeBridge();if(j)j(new Error('cancelled'));};
 $('bridge').onclick=function(e){if(e.target===$('bridge')){var j=bridgeReject;closeBridge();if(j)j(new Error('cancelled'));}};
+// The brief's own grading criteria for a section — fed to the AI so Pass/Distinction advice targets what the assessor actually marks.
+function critText(sec){
+  if(!sec)return '';
+  var p=(sec.passCrit||[]),m=(sec.meritCrit||[]),d=(sec.distCrit||[]),s='';
+  if(p.length)s+='\nThe brief\'s Pass criteria (your "pass" points MUST address these): '+p.join(' | ');
+  if(m.length)s+='\nThe brief\'s Merit criteria: '+m.join(' | ');
+  if(Array.isArray(sec.distCrit)){
+    s+=d.length?('\nThe brief\'s Distinction criteria (your "distinction" points MUST target these): '+d.join(' | '))
+               :'\nDistinction: NOT AVAILABLE for this task — return an EMPTY "distinction" array.';
+  }
+  return s;
+}
 function sectionPrompt(i){
   var sec=INPUT.sections[i];var codes=sec.c||[];
   var ksbLines=codes.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'(none mapped)';
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+'\n\nWrite guidance for THIS section as JSON: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about here — the real topics, situations, tools, decisions and evidence this task and its KSBs call for (specific and substantial, a coordinator mapping the section out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show; "distinction" = 2-3 higher-order points (analyse & justify, weigh alternatives, quantify impact, reflect). Everything is guidance the learner applies to their OWN workplace — never write their answer. Return JSON only.'+ctx();
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\nSection '+(i+1)+': '+sec.t+'\nWhat this section should cover: '+(sec.x||'(not specified)')+'\nKSBs mapped to this section:\n'+ksbLines+critText(sec)+'\n\nWrite guidance for THIS section as JSON: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about here — the real topics, situations, tools, decisions and evidence this task and its KSBs call for (specific and substantial, a coordinator mapping the section out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show, directly addressing the brief\'s Pass criteria above where given; "distinction" = points targeting the brief\'s Distinction criteria (analyse & justify, weigh alternatives, quantify impact, reflect) — but an EMPTY array if distinction is marked NOT AVAILABLE. Everything is guidance the learner applies to their OWN workplace — never write their answer. Return JSON only.'+ctx();
 }
 function fillSection(i,out){
   var sec=document.querySelector('.sec[data-sec="'+i+'"]');if(!sec)return;
@@ -803,9 +834,9 @@ function allSectionsPrompt(){
   var lines=INPUT.sections.map(function(sec,i){
     var codes=sec.c||[];
     var ksb=codes.map(function(c){return '  '+c+': '+clean(INPUT.ksb[c]||'');}).join('\n')||'  (none mapped)';
-    return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb;
+    return 'SECTION '+(i+1)+': '+sec.t+'\nShould cover: '+(sec.x||'(not specified)')+'\nKSBs:\n'+ksb+critText(sec);
   }).join('\n\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about in that section — the real topics, situations, tools, decisions and evidence that section and its KSBs call for (specific and substantial, a coordinator mapping it out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show; "distinction" = 2-3 higher-order points (analyse & justify, weigh alternatives, quantify impact, reflect). Everything is guidance the learner applies to their OWN workplace — never write their answer.\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, whatToWrite[], pass[], distinction[]}.'+ctx();
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nThere are '+INPUT.sections.length+' sections below. For EACH section, in order, write: "purpose" (one sentence); "whatToWrite" = 4-6 CONCRETE content points telling the learner exactly what to write about in that section — the real topics, situations, tools, decisions and evidence that section and its KSBs call for (specific and substantial, a coordinator mapping it out; NOT a restatement of the KSB wording); "pass" = 2-3 tight points a Pass must show, directly addressing that section\'s brief Pass criteria where given; "distinction" = points targeting that section\'s brief Distinction criteria (analyse & justify, weigh alternatives, quantify impact, reflect) — but an EMPTY array for any section where distinction is marked NOT AVAILABLE. Everything is guidance the learner applies to their OWN workplace — never write their answer.\n\n'+lines+'\n\nReturn JSON with a "sections" array in the SAME order as above, each item {purpose, whatToWrite[], pass[], distinction[]}.'+ctx();
 }
 document.addEventListener('click',function(e){if(!e.target.closest)return;var b=e.target.closest('[data-imp]');if(b){improveSection(+b.dataset.imp,b);return;}var g=e.target.closest('[data-genex]');if(g){generateExemplar(g);return;}var la=e.target.closest('[data-loadassign]');if(la){loadAssignment();return;}var ca=e.target.closest('[data-clearassign]');if(ca){clearAssignment();return;}var dm=e.target.closest('[data-dummy]');if(dm){PARTB=dummyExemplar();renderPartB();toast('Offline dummy example inserted — edit it, or replace with ✨ Generate');}});
 $('improveall').onclick=async function(){
@@ -921,11 +952,21 @@ function tierKSBs(){
   return {required:required,reqLabel:R.reqLabel,met:met,weak:weak,missing:missing,semUsed:semUsed};
 }
 /* deeper read — Claude via the copy-paste bridge (AC proxy can automate later) */
-var REVIEW_SYS="You are an experienced apprenticeship end-point assessor giving developmental feedback — NOT a formal grade. Review the finished assignment against the required KSBs. For EACH required KSB return: verdict = one of 'evidenced' | 'partial' | 'missing', and a one-sentence, specific reason grounded in what the assignment does or doesn't show; for partial/missing say what to add. Be fair but rigorous.";
+var REVIEW_SYS="You are an experienced apprenticeship end-point assessor giving developmental feedback — NOT a formal grade. Review the finished assignment against the required KSBs. For EACH required KSB return: verdict = one of 'evidenced' | 'partial' | 'missing', and a one-sentence, specific reason grounded in what the assignment does or doesn't show; for partial/missing say what to add. In 'overall', judge how well the assignment matches the brief: whether it currently meets the Pass criteria, and — only where Distinction criteria are provided — whether it reaches distinction or what is missing to get there (do not comment on distinction where none is offered). Be fair but rigorous.";
 var REVIEW_SCHEMA={type:'object',properties:{overall:{type:'string'},ksbs:{type:'array',items:{type:'object',properties:{code:{type:'string'},verdict:{type:'string'},comment:{type:'string'}},required:['code','verdict','comment'],additionalProperties:false}}},required:['overall','ksbs'],additionalProperties:false};
+function allCritText(){
+  if(!INPUT||!INPUT.sections)return '';
+  var p=[],d=[];
+  INPUT.sections.forEach(function(s){(s.passCrit||[]).forEach(function(c){if(p.indexOf(c)<0)p.push(c);});(s.distCrit||[]).forEach(function(c){if(d.indexOf(c)<0)d.push(c);});});
+  var s='';
+  if(p.length)s+='\n\nBrief Pass criteria:\n- '+p.join('\n- ');
+  if(d.length)s+='\n\nBrief Distinction criteria:\n- '+d.join('\n- ');
+  else if(p.length)s+='\n\n(The brief offers no distinction — assess for Pass only.)';
+  return s;
+}
 function reviewPrompt(){
   var req=reqSet().required, ksbLines=req.map(function(c){return c+': '+clean(INPUT.ksb[c]||'');}).join('\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nRequired KSBs:\n'+ksbLines+'\n\nFinished assignment:\n"""\n'+(ASSIGN.text||'').slice(0,12000)+'\n"""\n\nReturn JSON: "overall" (2-3 sentence summary) and "ksbs" (one item per required KSB above: code, verdict, comment).';
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nRequired KSBs:\n'+ksbLines+allCritText()+'\n\nFinished assignment:\n"""\n'+(ASSIGN.text||'').slice(0,12000)+'\n"""\n\nReturn JSON: "overall" (2-3 sentences on how well it matches the brief — Pass readiness, and distinction readiness only where distinction is offered) and "ksbs" (one item per required KSB above: code, verdict, comment).';
 }
 async function runAIReview(){
   if(!ASSIGN)return;
@@ -985,8 +1026,14 @@ function renderPartB(){
 const EXEMPLAR_SYS="You are writing an ILLUSTRATIVE worked example for an apprenticeship step guide — a teaching aid, NOT the apprentice’s submission. INTEGRITY RULES (critical): (1) Invent ONE plausible but generic illustrative workplace scenario for this standard; it must NOT be tailored to any specific real apprentice — the apprentice writes their OWN version from their OWN workplace, and this only shows what good looks like. (2) Write section by section following the given structure; each section’s prose must evidence its mapped KSBs at distinction level (analyse / evaluate / justify, not just describe). (3) Immediately after the sentence(s) that evidence a KSB, add an inline tag in square brackets with the code(s), e.g. [K1, S15] — these are for the tutor and are removed before submission. (4) Keep it realistic but plainly an EXAMPLE; do not invent real companies, named people, or confidential data. Write in the first person as the illustrative apprentice.";
 const EXEMPLAR_SCHEMA={type:'object',properties:{scenario:{type:'string'},sections:{type:'array',items:{type:'object',properties:{title:{type:'string'},exemplar:{type:'string'}},required:['title','exemplar'],additionalProperties:false}}},required:['scenario','sections'],additionalProperties:false};
 function exemplarPrompt(){
-  var lines=INPUT.sections.map(function(sec,i){var codes=(sec.c||[]).map(function(c){return c+' ('+clean(INPUT.ksb[c]||'')+')';}).join('; ');return (i+1)+'. '+sec.t+' — cover: '+(sec.x||'')+' — KSBs: '+(codes||'none');}).join('\n');
-  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose, adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.'+ctx();
+  var lines=INPUT.sections.map(function(sec,i){
+    var codes=(sec.c||[]).map(function(c){return c+' ('+clean(INPUT.ksb[c]||'')+')';}).join('; ');
+    var p=(sec.passCrit||[]),d=(sec.distCrit||[]),cr='';
+    if(p.length)cr+=' — Pass criteria: '+p.join('; ');
+    if(Array.isArray(sec.distCrit))cr+=d.length?(' — Distinction criteria: '+d.join('; ')):' — (Pass-only: write a strong, clear Pass here, not a forced distinction)';
+    return (i+1)+'. '+sec.t+' — cover: '+(sec.x||'')+' — KSBs: '+(codes||'none')+cr;
+  }).join('\n');
+  return 'Standard: '+(INPUT.standardName||INPUT.std)+'\n\nWrite a worked example across these '+INPUT.sections.length+' sections. Invent ONE consistent illustrative scenario for the whole example:\n'+lines+'\n\nFor each section write ~200-280 words of first-person exemplar prose that meets the section\'s Pass criteria and, where Distinction criteria are given, clearly reaches them (analyse / evaluate / justify); adding inline [KSB tags] after the sentences that evidence each mapped KSB. Return JSON: the scenario, and a sections array (title + exemplar) in the same order.'+ctx();
 }
 async function generateExemplar(btn){
   if(btn){btn.classList.add('busy');btn.disabled=true;}
@@ -1053,26 +1100,46 @@ function briefCodes(txt,ksb){
 function parseBriefToSections(brief,ksb){
   ksb=ksb||{};
   var lines=brief.replace(/\r/g,'').split('\n').map(function(l){return l.trim();}).filter(function(l){return l;});
-  var markRe=/^(?:task\s*)?((?:[PMD]\d+(?:\.\d+)?)|(?:T\d+))[\).:]?\s+(.+)/i; // pass/merit/distinction/task criteria — NOT K/S/B codes
-  var numRe=/^(\d+)[\).:]\s+(.+)/;
+  // A task/section header: "Task 1", "Task 1 (P1):", "Activity 2 -", "Section 3", or a bare criterion code "P1"/"D1.2"/"T3", or "1." — never a K/S/B code.
+  var wordRe=/^(task|activity|section|part|question|assessment|objective)\s*(\d+)\b(.*)$/i;
+  var codeRe=/^((?:[PMD]\d+(?:\.\d+)?)|(?:T\d+))\b[\).:\-–\s]+(.+)$/i;
+  var numRe=/^(\d{1,2})[\).:]\s+(.+)$/;
+  function stripLead(s){s=(s||'').replace(/^[\s:().,\-–]+/,'');s=s.replace(/^[PMD]\d+(?:\.\d+)?[\s:().,\-–]+/i,'');return s.trim();}
+  function header(l){
+    var m=wordRe.exec(l);if(m)return {label:m[1].charAt(0).toUpperCase()+m[1].slice(1).toLowerCase()+' '+m[2],rest:stripLead(m[3])};
+    m=codeRe.exec(l);if(m)return {label:m[1].toUpperCase(),rest:m[2].trim()};
+    return null;
+  }
+  // a grading-criteria line the brief spells out: "Pass: …", "Distinction: …", "To achieve a distinction, …", "For a merit …"
+  function critOf(l){
+    return /^(?:to\s+(?:achieve|attain|get|reach|show)\s+(?:a\s+)?|for\s+(?:a\s+)?)(pass|merit|distinction)\b[\s,:–\-]+(.+)$/i.exec(l)
+        || /^(pass|merit|distinction)\b\s*(?:grade|level|criteria|criterion|standard)?\s*[:–\-]\s*(.*)$/i.exec(l);
+  }
   var idxs=[],useNum=false;
-  lines.forEach(function(l,i){if(markRe.test(l))idxs.push(i);});
+  lines.forEach(function(l,i){if(header(l))idxs.push(i);});
   if(!idxs.length){lines.forEach(function(l,i){if(numRe.test(l))idxs.push(i);});useNum=true;}
   var secs=[];
   if(idxs.length){
     for(var k=0;k<idxs.length;k++){
-      var start=idxs[k],end=(k+1<idxs.length?idxs[k+1]:lines.length);
-      var block=lines.slice(start,end).join(' ');
-      var mm=(useNum?numRe:markRe).exec(lines[start]);
-      var code=(mm[1]||'').toUpperCase();
-      var rest=(mm[2]||'').replace(/\s*\([KSB\d,;\s]*\)\s*/g,' ').replace(/\s{2,}/g,' ').trim();
-      var codes=briefCodes(block,ksb);
-      var words=rest.split(/\s+/);
-      secs.push({t:code+' · '+words.slice(0,9).join(' ')+(words.length>9?'…':''),x:rest,c:codes});
+      var start=idxs[k],end=(k+1<idxs.length?idxs[k+1]:lines.length),blockLines=lines.slice(start,end);
+      var label,body=[];
+      if(useNum){var nm=numRe.exec(lines[start]);label='Task '+nm[1];body.push(nm[2]);}
+      else{var h=header(lines[start]);label=h.label;if(h.rest)body.push(h.rest);}
+      var pass=[],merit=[],dist=[],pending=null;
+      for(var j=1;j<blockLines.length;j++){
+        var ln=blockLines[j],cm=critOf(ln);
+        if(cm){var g=cm[1].toLowerCase(),txt=(cm[2]||'').trim(),bucket=g==='pass'?pass:g==='merit'?merit:dist;if(txt)bucket.push(txt);pending=txt?null:bucket;continue;}
+        if(pending){pending.push(ln);continue;}
+        body.push(ln);
+      }
+      var blockText=blockLines.join(' '),codes=briefCodes(blockText,ksb);
+      var xtext=body.join(' ').replace(/\s*\([KSB\d,;\s]*\)\s*/g,' ').replace(/\s{2,}/g,' ').trim();
+      var words=xtext.split(/\s+/);
+      secs.push({t:label+(xtext?' · '+words.slice(0,9).join(' ')+(words.length>9?'…':''):''),x:xtext,c:codes,passCrit:pass,meritCrit:merit,distCrit:dist});
     }
   }else{
     var all=briefCodes(brief,ksb);
-    if(all.length)secs.push({t:(lines[0]||'Assignment brief').slice(0,70),x:brief.slice(0,700).trim(),c:all});
+    if(all.length)secs.push({t:(lines[0]||'Assignment brief').slice(0,70),x:brief.slice(0,700).trim(),c:all,passCrit:[],meritCrit:[],distCrit:[]});
   }
   // honour the brief's suggested word count — split it across sections, weighted by KSB load
   var totM=brief.match(/word\s*count[^\d]{0,24}(\d{3,5})/i)||brief.match(/\b(\d{3,5})\s*words?\b/i);
