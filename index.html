@@ -620,7 +620,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <summary style="cursor:pointer;font-weight:600;font-size:14px;color:var(--teal);list-style:none;display:flex;align-items:center;gap:9px;user-select:none"><span style="font-size:16px">&#127919;</span>Isolate a department&rsquo;s budget <span style="font-weight:400;color:var(--text3);font-size:12.5px">&mdash; optional: plan one team&rsquo;s slice of the levy &#9662;</span></summary>
         <p class="step-sub" style="margin-top:11px">Set what a single team can spend from the levy and how many people to train, then add their programmes below. This tracks the spend against the cap &mdash; and cross-checks it against what your company levy actually holds.</p>
         <div class="form-grid">
-          <div class="field"><label>Department / team</label><input id="dept-name" placeholder="e.g. Finance" oninput="renderDeptBudget()"></div>
+          <div class="field"><label>Department / team</label><input id="dept-name" list="deptList" autocomplete="off" placeholder="e.g. Finance" oninput="renderDeptBudget()"></div>
           <div class="field"><label>Levy budget cap (&pound;)</label><input id="dept-cap" type="number" min="0" placeholder="e.g. 40000" oninput="renderDeptBudget()"></div>
           <div class="field"><label>Headcount goal <span style="color:var(--text3)">(optional)</span></label><input id="dept-goal" type="number" min="0" placeholder="e.g. 10" oninput="renderDeptBudget()"></div>
         </div>
@@ -658,6 +658,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div class="field">
           <label>Learners</label>
           <input type="number" id="inp-count" placeholder="1" min="1">
+        </div>
+        <div class="field">
+          <label>Department / team <span style="color:var(--text3)">(optional)</span></label>
+          <input type="text" id="inp-dept" list="deptList" placeholder="e.g. Finance — leave blank if unknown" autocomplete="off">
+          <datalist id="deptList"></datalist>
         </div>
         <div class="date-pair">
           <div class="date-pair-field">
@@ -816,7 +821,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1699,8 +1704,8 @@ function addUnit(){
   document.getElementById('progTable').classList.remove('hidden');
 }
 function addProgramme(overrides){
-  let name,cost,count,start,epa,age;
-  if(overrides){({name,cost,count,start,epa,age}=overrides);}
+  let name,cost,count,start,epa,age,dept;
+  if(overrides){({name,cost,count,start,epa,age,dept}=overrides);}
   else{
     const idx=parseInt(sel.value);if(!idx){alert('Select an apprenticeship standard.');return;}
     const s=STANDARDS[idx],isC=s.name==='Other / custom';
@@ -1714,12 +1719,13 @@ function addProgramme(overrides){
     if(mBetween(start,epa)<RULEBOOK.apprenticeshipMinMonths&&!confirm('This apprenticeship runs '+mBetween(start,epa)+' months — under the '+RULEBOOK.apprenticeshipMinMonths+'-month minimum, so it would not be levy-eligible as an apprenticeship. Add it anyway?'))return;
     var a1=parseInt(document.getElementById('inp-age1621').value)||0,a2=parseInt(document.getElementById('inp-age2224').value)||0,a3=parseInt(document.getElementById('inp-age25').value)||0;
     if(a1+a2+a3>0)age={y:a1,m:a2,o:a3};
+    dept=(document.getElementById('inp-dept').value||'').trim();
     sel.value=0;onStandardChange();
-    ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25'].forEach(id=>document.getElementById(id).value='');
+    ['inp-name-custom','inp-cost','inp-count','inp-dept','inp-age1621','inp-age2224','inp-age25'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('inp-start').value='';document.getElementById('inp-epa').value='';
     updateDurReadout();
   }
-  var prog={name,cost,count,start,epa};if(age)prog.age=age;
+  var prog={name,cost,count,start,epa};if(age)prog.age=age;if(dept)prog.dept=dept;
   programmes.push(prog);
   renderProgrammes();renderProjection();saveState();
   document.getElementById('levySummary').classList.remove('hidden');
@@ -1745,7 +1751,7 @@ function renderDeptBudget(){
   var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
   var gv=function(id){var e=document.getElementById(id);return e?(parseFloat((e.value||'').toString().replace(/[£,\s]/g,''))||0):0;};
   var cap=gv('dept-cap'), goalEl=document.getElementById('dept-goal'), goal=goalEl?(parseInt(goalEl.value)||0):0;
-  var nameEl=document.getElementById('dept-name'), name=(nameEl&&nameEl.value.trim())||'This department';
+  var nameEl=document.getElementById('dept-name'), enteredName=(nameEl&&nameEl.value.trim())||'', name=enteredName||'This department';
   if(!cap){el.innerHTML='';return;}
   // --- COMPANY LEVY from Step 1 (the REAL engine value, so this carve-out tracks the calculator) ---
   var d=(typeof levyReportData==='function')?levyReportData():null;
@@ -1754,9 +1760,13 @@ function renderDeptBudget(){
   var committed = (d&&(d.levyPlanCost>0||d.planCost>0))?(+(d.levyPlanCost||d.planCost)):0; // company's existing commitments
   var yrs = (d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
   var hasCompany = companyLevy>0;
-  // --- this department's planned programmes (the plan below is treated as this team's) ---
+  // --- this department's planned programmes: isolate to tagged programmes when tags are in use, else count all (envelope) ---
+  var deptKey=enteredName.toLowerCase();
+  var anyTagged=(programmes||[]).some(function(p){return (p.dept||'').trim();});
+  var isolated = !!deptKey && anyTagged;
+  var planProgs = isolated ? (programmes||[]).filter(function(p){return (p.dept||'').trim().toLowerCase()===deptKey;}) : (programmes||[]);
   var allocated=0,learners=0,progs=0;
-  (programmes||[]).forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
+  planProgs.forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
   var avg=learners?allocated/learners:((d&&d.perHead)?+d.perHead:0);
   var h='<div style="margin-top:14px;background:rgba(var(--wash),0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px">';
   // ===== 1) CARVE-OUT of the company levy =====
@@ -1783,7 +1793,8 @@ function renderDeptBudget(){
   if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the ring-fenced budget &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the cap.</div>';
   else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left in budget'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
   h+='<div style="font-size:12.5px;color:var(--text3);margin-top:6px">'+learners+' learner'+(learners!==1?'s':'')+' across '+progs+' programme'+(progs!==1?'s':'')+(goal?' &middot; <b style="color:'+(learners>=goal?'var(--teal)':'var(--text2)')+'">'+learners+' of '+goal+'</b> toward your goal':'')+'.</div>';
-  h+='<div style="font-size:11.5px;color:var(--text3);margin-top:5px;font-style:italic">'+(progs===0?'The programmes you add below count as this team&rsquo;s plan.':'Counts every programme currently in the calculator as this team&rsquo;s plan &mdash; use one scenario per department to isolate.')+'</div>';
+  var deptNote = isolated ? (progs>0 ? ('&#10003; Isolated to the '+progs+' programme'+(progs!==1?'s':'')+' tagged &ldquo;'+esc(enteredName)+'&rdquo;.') : ('No programmes are tagged &ldquo;'+esc(enteredName)+'&rdquo; yet &mdash; add the tag on a programme below to track this team&rsquo;s spend.')) : (anyTagged ? ('Name a team above that matches a programme&rsquo;s tag to isolate &mdash; otherwise this counts every programme.') : ('Counts every programme as this team&rsquo;s plan &mdash; tag programmes with an optional <b>Department</b> to isolate one team.'));
+  h+='<div style="font-size:11.5px;color:var(--text3);margin-top:5px;font-style:italic">'+deptNote+'</div>';
   if(goal&&avg>0){var fundable=Math.floor(cap/avg);
     h+='<div style="font-size:12.5px;color:var(--text3);margin-top:8px;padding-top:9px;border-top:1px solid var(--border)">At '+fmt(Math.round(avg))+'/learner, '+fmt(cap)+' funds about <b style="color:'+(fundable>=goal?'var(--teal)':'var(--amber)')+'">'+fundable+'</b> &mdash; '+(fundable>=goal?('enough for your goal of '+goal+'.'):('short of your goal of '+goal+' by '+(goal-fundable)+' &mdash; raise the cap to &asymp;'+fmt(Math.round(goal*avg))+', or reduce the goal.'))+'</div>';}
   h+='</div>';el.innerHTML=h;
@@ -1796,19 +1807,22 @@ function renderProgrammes(){
   const LIMIT=5, many=programmes.length>LIMIT, collapsed=many&&!progExpanded;
   let rows=programmes.map((p,i)=>{
     const hide=(collapsed&&i>=LIMIT)?' style="display:none"':'';
+    const dChip=p.dept?(' <span class="badge" style="background:rgba(var(--wash),0.07);color:var(--text2);border:1px solid var(--border);font-weight:500" title="Team / department">'+String(p.dept).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})+'</span>'):'';
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span>${dChip}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}${dChip}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
+  var dl=document.getElementById('deptList');
+  if(dl){var seen={},opts='';programmes.forEach(function(p){var dp=(p.dept||'').trim();if(dp&&!seen[dp.toLowerCase()]){seen[dp.toLowerCase()]=1;opts+='<option value="'+dp.replace(/"/g,'&quot;')+'">';}});dl.innerHTML=opts;}
   if(typeof renderDeptBudget==='function')renderDeptBudget();
 }
 
