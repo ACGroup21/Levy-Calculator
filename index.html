@@ -10,11 +10,22 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --teal:#2DD4B2;--navy:#374D6A;--bg:#050C18;
-  --glass:rgba(255,255,255,0.04);--border:rgba(45,212,178,0.18);--border2:rgba(45,212,178,0.4);
+  --wash:255,255,255; /* overlay base — flips to dark in light mode so rgba(var(--wash),x) works in both */
+  --glass:rgba(var(--wash),0.04);--border:rgba(45,212,178,0.18);--border2:rgba(45,212,178,0.4);
   --text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;
   --amber:#f5a623;--red:#ff4c6a;--purple:#a78bfa;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
 }
+:root[data-theme="light"]{
+  --bg:#e9eff6;
+  --wash:23,37,58;
+  --glass:rgba(var(--wash),0.045);--border:rgba(23,37,58,0.14);--border2:rgba(45,212,178,0.55);
+  --text:#0e1a27;--text2:#3c4c5d;--text3:#63788b;
+  --navy:#5a7290;
+}
+:root[data-theme="light"] .aurora{opacity:.35}
+/* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
+.lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
 
 .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
@@ -66,20 +77,20 @@ body[data-goal="capability"]{--goal-accent:#a78bfa}
 body[data-goal="headcount"]{--goal-accent:#39A0D4}
 body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
-.goal-tile{display:flex;flex-direction:column;text-align:left;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
+.goal-tile{display:flex;flex-direction:column;text-align:left;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
 .goal-tile:hover{border-color:var(--teal);background:rgba(32,214,195,0.06)}
-.goal-tile.sel{border-color:var(--goal-accent);background:rgba(255,255,255,0.05);box-shadow:0 0 0 1px var(--goal-accent) inset}
+.goal-tile.sel{border-color:var(--goal-accent);background:rgba(var(--wash),0.05);box-shadow:0 0 0 1px var(--goal-accent) inset}
 .goal-tile.sel .gt-ic,.goal-tile.sel .gt-lb{color:var(--goal-accent);transition:color .2s}
 .goal-tile .gt-ic{font-size:18px;height:24px;line-height:1;margin-bottom:6px;display:flex;align-items:center}
-.goal-suggest-btn{background:rgba(255,255,255,0.05);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:7px;padding:3px 10px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.goal-suggest-btn{background:rgba(var(--wash),0.05);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:7px;padding:3px 10px;font-family:inherit;font-size:12.5px;cursor:pointer}
 #goalSuggest{margin-top:8px;font-size:13px;line-height:2}
-.goal-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--goal-accent);background:rgba(255,255,255,0.04);border:1px solid var(--goal-accent);border-radius:7px;padding:3px 10px;margin-bottom:9px}
+.goal-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--goal-accent);background:rgba(var(--wash),0.04);border:1px solid var(--goal-accent);border-radius:7px;padding:3px 10px;margin-bottom:9px}
 .goal-tile .gt-lb{font-size:14px;font-weight:600;margin-bottom:3px}
 .goal-tile .gt-sb{font-size:12px;color:var(--text3);line-height:1.35}
-.goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(255,255,255,0.025);border:1px solid var(--goal-accent);border-radius:12px;padding:13px 17px;margin:10px 0 2px;transition:border-color .25s}
+.goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(var(--wash),0.025);border:1px solid var(--goal-accent);border-radius:12px;padding:13px 17px;margin:10px 0 2px;transition:border-color .25s}
 .goal-emph .ge-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--goal-accent);opacity:.95;margin-bottom:2px}
 .goal-emph .ge-goal{font-size:15px;font-weight:600;color:var(--text)}
-.goal-emph .ge-metric{display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,0.10);padding-left:18px}
+.goal-emph .ge-metric{display:flex;flex-direction:column;border-left:1px solid rgba(var(--wash),0.10);padding-left:18px}
 .goal-emph .ge-num{font-size:22px;font-weight:700;color:var(--goal-accent);line-height:1.05;transition:color .25s}
 .goal-emph .ge-lab{font-size:11px;color:var(--text3)}
 .goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
@@ -94,19 +105,19 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .step-chip{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--teal);letter-spacing:0.12em;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.25);border-radius:4px;padding:3px 9px}
 .step-chip.ksb{color:var(--purple);background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.25)}
 .step-title{font-size:16px;font-weight:500;color:var(--text)}
-.proj-range{display:flex;gap:2px;margin-left:auto;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:9px;padding:2px}
+.proj-range{display:flex;gap:2px;margin-left:auto;background:rgba(var(--wash),0.04);border:1px solid rgba(var(--wash),0.1);border-radius:9px;padding:2px}
 .proj-range button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:7px;padding:5px 11px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .proj-range button:hover{color:var(--text)}
 .proj-range button.on{background:var(--teal);color:#06121f;font-weight:600}
 .lvy-overlay{position:fixed;left:-30000px;top:0;display:none}
 .lvy-bar{position:fixed;top:0;left:0;right:0;margin:0 auto;z-index:3;display:flex;align-items:center;gap:14px;max-width:1159px;padding:12px 18px;flex-wrap:wrap;background:rgba(3,8,16,0.55);backdrop-filter:blur(9px);border-radius:0 0 14px 14px}
 .lvy-bar .lvy-spacer{flex:1}
-.lvy-toggle{display:flex;gap:2px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:9px;padding:2px}
+.lvy-toggle{display:flex;gap:2px;background:rgba(var(--wash),0.06);border:1px solid rgba(var(--wash),0.12);border-radius:9px;padding:2px}
 .lvy-toggle button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:7px;padding:6px 13px;cursor:pointer;white-space:nowrap}
 .lvy-toggle button.on{background:var(--teal);color:#06121f;font-weight:600}
-.lvy-btn{font-size:13px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);border-radius:8px;padding:8px 15px;cursor:pointer}
+.lvy-btn{font-size:13px;background:rgba(var(--wash),0.06);border:1px solid rgba(var(--wash),0.15);color:var(--text);border-radius:8px;padding:8px 15px;cursor:pointer}
 .lvy-page{position:relative;width:1123px;max-width:100%;border-radius:6px;overflow:hidden;margin-bottom:18px;box-shadow:0 12px 40px rgba(0,0,0,0.55);color:#fff;background:radial-gradient(900px 520px at 80% -10%,rgba(45,212,178,0.12),transparent 60%),radial-gradient(760px 520px at -8% 112%,rgba(123,97,255,0.10),transparent 55%),linear-gradient(150deg,#06172E 0%,#0F2A4A 62%,#06172E 100%)}
-.lvy-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,0.05) 1px,transparent 1px);background-size:24px 24px;opacity:.45;pointer-events:none}
+.lvy-page::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(var(--wash),0.05) 1px,transparent 1px);background-size:24px 24px;opacity:.45;pointer-events:none}
 .lvy-page::after{content:'';position:absolute;inset:6px;border:1px solid rgba(45,212,178,0.16);border-radius:5px;pointer-events:none}
 .lvy-inner{position:relative;z-index:1;box-sizing:border-box;min-height:794px;padding:30px 54px;display:flex;flex-direction:column;font-family:Inter,Arial,sans-serif}
 #lvyReportBg{position:fixed;inset:0;z-index:0;pointer-events:none}
@@ -114,45 +125,45 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .lvy-interp{margin-top:16px}
 .lvy-lead{font-size:13px;color:#aebecb;line-height:1.5;max-width:780px;margin-bottom:6px}
 .lvy-cards{display:flex;gap:16px}
-.lvy-card{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:12px 16px}
+.lvy-card{flex:1;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.09);border-radius:12px;padding:12px 16px}
 .lvy-card-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#2DD4B2;margin-bottom:7px}
 .lvy-card-b{font-size:12.5px;color:#d2dde7;line-height:1.5}
 .lvy-util{margin-top:15px}
 .lvy-util-rows{display:flex;flex-direction:column;gap:9px;max-width:640px}
 .lvy-util-row{display:flex;align-items:center;gap:12px}
 .lvy-util-row .yr{font-family:'JetBrains Mono',monospace;font-size:11px;color:#8ba0b6;min-width:52px}
-.lvy-util-row .bar{flex:1;height:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:99px;overflow:hidden}
+.lvy-util-row .bar{flex:1;height:11px;background:rgba(var(--wash),0.06);border:1px solid rgba(var(--wash),0.1);border-radius:99px;overflow:hidden}
 .lvy-util-row .bar .fill{height:100%;border-radius:99px}
 .lvy-util-row .pct{font-family:'JetBrains Mono',monospace;font-size:11px;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
 .lvy-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:26px}
 .lvy-brand{font-size:13px;color:#8ba0b6;letter-spacing:.02em}
 .lvy-title{font-size:30px;font-weight:800;margin-top:2px}
-.lvy-verdict{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.03);border:1px solid;border-radius:14px;padding:14px 20px;margin-bottom:13px}
-.lvy-decide{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 16px;margin-bottom:12px}
+.lvy-verdict{display:flex;justify-content:space-between;align-items:center;background:rgba(var(--wash),0.03);border:1px solid;border-radius:14px;padding:14px 20px;margin-bottom:13px}
+.lvy-decide{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:10px 16px;margin-bottom:12px}
 .lvy-decide-rec{flex:1;min-width:300px;font-size:13px;color:#dfe9f2;line-height:1.45}
 .lvy-decide-t{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.1em;color:#2DD4B2;display:block;margin-bottom:3px}
 .lvy-risk{display:flex;gap:16px;flex-wrap:wrap}
 .lvy-risk-item{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#8ba0b6;white-space:nowrap}
 .lvy-risk-item i{width:9px;height:9px;border-radius:50%;display:inline-block}
-.lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:12px 24px}
+.lvy-figs{display:flex;gap:18px;flex-wrap:wrap;background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.07);border-radius:14px;padding:12px 24px}
 .lvy-note{margin-top:auto;padding-top:10px;font-size:10.5px;color:#6e8499;line-height:1.5}
 .lvy-sec{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin:3px 0 7px}
 .lvy-table{width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:6px}
-.lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(255,255,255,0.12)}
-.lvy-table td{padding:3px 10px;border-bottom:1px solid rgba(255,255,255,0.06);color:#c7d6e2}
+.lvy-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#7e95ab;text-align:left;padding:6px 10px;border-bottom:1px solid rgba(var(--wash),0.12)}
+.lvy-table td{padding:3px 10px;border-bottom:1px solid rgba(var(--wash),0.06);color:#c7d6e2}
 .lvy-table td.r,.lvy-table th.r{text-align:right;font-variant-numeric:tabular-nums}
 .lvy-money{display:inline-flex;justify-content:flex-start;gap:1px;min-width:84px;font-variant-numeric:tabular-nums;text-align:left}
 .lvy-money .cur{opacity:1}
 .lvy-figs .lvy-fv{font-variant-numeric:tabular-nums}
 .lvy-cols{display:flex;gap:22px;margin-top:6px}
-.lvy-col{flex:1;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:13px 15px}
+.lvy-col{flex:1;background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.07);border-radius:12px;padding:13px 15px}
 .lvy-body{font-size:12.5px;color:#c7d6e2;line-height:1.6}
 .lvy-move{margin-top:6px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.22);border-radius:12px;padding:8px 16px}
 .lvy-move-t{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#2DD4B2;margin-bottom:6px}
 .lvy-ol{margin:7px 0 0;padding-left:20px}
 .lvy-ol li{margin-bottom:5px;line-height:1.5}
 .lvy-true{display:flex;align-items:stretch;gap:14px;margin-top:4px}
-.lvy-true-cell{flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:16px 18px;text-align:center}
+.lvy-true-cell{flex:1;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.09);border-radius:12px;padding:16px 18px;text-align:center}
 .lvy-true-lab{font-size:11px;color:#8ba0b6;margin-bottom:8px}
 .lvy-true-num{font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
 .lvy-true-sub{font-size:11px;color:#7e95ab;margin-top:6px}
@@ -173,13 +184,13 @@ button{font-family:var(--sans);cursor:pointer}
 .btn-demo{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;font-size:13px;font-weight:500;background:rgba(45,212,178,0.1);color:var(--teal);border:1px solid rgba(45,212,178,0.35);border-radius:8px;transition:all .2s}
 .btn-demo:hover{background:rgba(45,212,178,0.18);box-shadow:0 0 20px rgba(45,212,178,0.15)}
 .btn-add{width:100%;padding:10px;font-size:13px;font-weight:500;background:rgba(45,212,178,0.08);color:var(--teal);border:1px solid rgba(45,212,178,0.3);border-radius:8px;letter-spacing:.03em;transition:all .2s}
-.btn-clear{padding:10px 16px;font-size:13px;font-weight:500;background:transparent;color:var(--text3);border:1px solid rgba(255,255,255,0.14);border-radius:8px;letter-spacing:.03em;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-clear{padding:10px 16px;font-size:13px;font-weight:500;background:transparent;color:var(--text3);border:1px solid rgba(var(--wash),0.14);border-radius:8px;letter-spacing:.03em;cursor:pointer;transition:all .2s;white-space:nowrap}
 .btn-clear:hover{color:var(--red);border-color:rgba(255,76,106,0.45);background:rgba(255,76,106,0.06)}
-.rs-toggle{display:inline-flex;border:1px solid rgba(255,255,255,0.12);border-radius:8px;overflow:hidden}
+.rs-toggle{display:inline-flex;border:1px solid rgba(var(--wash),0.12);border-radius:8px;overflow:hidden}
 .rs-opt{font-family:var(--mono);font-size:11px;font-weight:600;padding:6px 14px;background:transparent;color:var(--text3);border:none;cursor:pointer;transition:all .15s}
 .rs-opt.active{background:var(--teal);color:#04121e}
 .btn-add:hover{background:rgba(45,212,178,0.16);box-shadow:0 0 20px rgba(45,212,178,0.1)}
-.btn-rm{padding:3px 9px;font-size:12px;background:transparent;color:var(--text3);border:1px solid rgba(255,255,255,0.08);border-radius:5px;transition:all .15s}
+.btn-rm{padding:3px 9px;font-size:12px;background:transparent;color:var(--text3);border:1px solid rgba(var(--wash),0.08);border-radius:5px;transition:all .15s}
 .btn-rm:hover{color:var(--red);border-color:var(--red);background:rgba(255,76,106,0.08)}
 
 .status{margin-top:10px;font-size:13px;font-family:var(--mono);display:none}
@@ -196,7 +207,7 @@ button{font-family:var(--sans);cursor:pointer}
 
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1rem;margin-bottom:1rem}
 .field label{display:block;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-.field input,.field select{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;transition:all .2s;appearance:none;-webkit-appearance:none}
+.field input,.field select{width:100%;background:rgba(var(--wash),0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;transition:all .2s;appearance:none;-webkit-appearance:none}
 .field input:focus,.field select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,178,0.1)}
 .field input::placeholder{color:var(--text3)}
 .field select option,#rev-period option{background:#0c1a2c;color:var(--text)}
@@ -206,23 +217,23 @@ button{font-family:var(--sans);cursor:pointer}
 .date-pair{display:flex;flex-direction:column;gap:10px}
 .date-pair-field{display:flex;flex-direction:column}
 .date-pair-field label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
-.date-pair-field input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;transition:all .2s}
+.date-pair-field input{width:100%;background:rgba(var(--wash),0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;transition:all .2s}
 .date-pair-field input:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,178,0.1)}
 .date-pair-field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.4) sepia(1) hue-rotate(150deg)}
 .epa-chip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;padding:1px 6px;border-radius:99px;white-space:nowrap;background:rgba(245,166,35,0.1);color:var(--amber);border:1px solid rgba(245,166,35,0.3)}
 
 /* level filter pills + standard search */
 .level-filter{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
-.lvl-pill{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;cursor:pointer;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:var(--text3);transition:all .15s}
-.lvl-pill:hover{color:var(--text);border-color:rgba(255,255,255,0.3)}
+.lvl-pill{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.04em;padding:5px 12px;border-radius:99px;cursor:pointer;background:rgba(var(--wash),0.04);border:1px solid rgba(var(--wash),0.12);color:var(--text3);transition:all .15s}
+.lvl-pill:hover{color:var(--text);border-color:rgba(var(--wash),0.3)}
 .lvl-pill.active{color:#04121e;font-weight:700}
-.lvl-pill[data-lvl="all"]{color:var(--text2);border-color:rgba(255,255,255,0.2)}
+.lvl-pill[data-lvl="all"]{color:var(--text2);border-color:rgba(var(--wash),0.2)}
 .lvl-pill[data-lvl="all"].active{background:#3d5170;border-color:#3d5170;color:#eef3f8}
 .lvl-pill.l2{--c:#2DD4B2}.lvl-pill.l3{--c:#38BDF8}.lvl-pill.l4{--c:#818CF8}
 .lvl-pill.l5{--c:#A78BFA}.lvl-pill.l6{--c:#F472B6}.lvl-pill.l7{--c:#F5A623}
 .lvl-pill.l2,.lvl-pill.l3,.lvl-pill.l4,.lvl-pill.l5,.lvl-pill.l6,.lvl-pill.l7{color:var(--c);border-color:color-mix(in srgb,var(--c) 45%,transparent)}
 .lvl-pill.l2.active,.lvl-pill.l3.active,.lvl-pill.l4.active,.lvl-pill.l5.active,.lvl-pill.l6.active,.lvl-pill.l7.active{background:var(--c);border-color:var(--c);color:#04121e}
-.standard-search{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;margin-bottom:8px;transition:all .2s}
+.standard-search{width:100%;background:rgba(var(--wash),0.03);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 11px;margin-bottom:8px;transition:all .2s}
 .standard-search:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(45,212,178,0.1)}
 .standard-search::placeholder{color:var(--text3)}
 
@@ -231,17 +242,17 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.25rem}
 .plan-label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
 .month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:1.25rem}
-.month-cell{position:relative;text-align:center;font-family:var(--mono);font-size:12px;padding:9px 4px;border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);color:var(--text2);transition:all .15s;user-select:none}
-.month-cell:hover{border-color:rgba(255,255,255,0.3)}
+.month-cell{position:relative;text-align:center;font-family:var(--mono);font-size:12px;padding:9px 4px;border-radius:8px;cursor:pointer;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);color:var(--text2);transition:all .15s;user-select:none}
+.month-cell:hover{border-color:rgba(var(--wash),0.3)}
 .month-cell.peak{background:rgba(255,76,106,0.14);border-color:rgba(255,76,106,0.5);color:#ff8fa3}
 .month-cell.quiet{background:rgba(45,212,178,0.14);border-color:rgba(45,212,178,0.5);color:var(--teal)}
 .month-cell .bh{position:absolute;top:3px;right:5px;font-size:8px;opacity:.65}
 @media(max-width:560px){.month-grid{grid-template-columns:repeat(4,1fr)}}
-.otj-details{margin-bottom:1.25rem;border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 14px}
+.otj-details{margin-bottom:1.25rem;border:1px solid rgba(var(--wash),0.08);border-radius:8px;padding:10px 14px}
 .otj-details summary{cursor:pointer;font-size:12.5px;color:var(--text2);font-weight:500}
 .otj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:12px}
 .otj-grid .field label{margin-bottom:4px}
-.otj-grid input{width:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(45,212,178,0.2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 9px}
+.otj-grid input{width:100%;background:rgba(var(--wash),0.03);border:1px solid rgba(45,212,178,0.2);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:13px;padding:7px 9px}
 .plan-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin:1.25rem 0}
 .plan-stat{background:rgba(129,140,248,0.05);border:1px solid rgba(129,140,248,0.18);border-radius:10px;padding:1rem}
 .plan-stat .pl{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
@@ -250,7 +261,7 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-rec{padding:12px 15px;border-radius:9px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;margin-top:10px}
 .plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
 .plan-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;column-gap:18px;font-size:12.5px;margin-top:6px}
-.plan-prog-grid>span{padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06)}
+.plan-prog-grid>span{padding:8px 0;border-bottom:1px solid rgba(var(--wash),0.06)}
 .plan-prog-grid .ppn{color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-prog-grid .ppc{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
 .plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:9px;padding:10px 14px;background:rgba(129,140,248,0.04)}
@@ -273,13 +284,13 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-score{display:flex;align-items:baseline;gap:14px;margin:16px 0 4px}
 .jd-score-num{font-size:36px;font-weight:700;font-family:var(--mono);line-height:1}
 .jd-score-lbl{font-size:13px;color:var(--text2)}
-.jd-bar{height:7px;border-radius:99px;background:rgba(255,255,255,0.06);overflow:hidden;margin:6px 0 4px}
+.jd-bar{height:7px;border-radius:99px;background:rgba(var(--wash),0.06);overflow:hidden;margin:6px 0 4px}
 .jd-bar span{display:block;height:100%;border-radius:99px}
 .jd-group{margin-top:16px}
 .jd-group-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
 .jd-ksb{display:flex;gap:10px;align-items:flex-start;padding:8px 11px;border-radius:8px;margin-bottom:5px;font-size:12.5px;line-height:1.5;border:1px solid transparent}
 .jd-ksb.hit{background:rgba(45,212,178,0.07);border-color:rgba(45,212,178,0.25)}
-.jd-ksb.miss{background:rgba(255,255,255,0.02);border-color:rgba(255,255,255,0.06);opacity:.72}
+.jd-ksb.miss{background:rgba(var(--wash),0.02);border-color:rgba(var(--wash),0.06);opacity:.72}
 .jd-id{font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;width:36px}
 .jd-ksb.hit .jd-id{color:var(--teal)}.jd-ksb.miss .jd-id{color:var(--text3)}
 .jd-stmt{flex:1;color:var(--text2)}
@@ -298,7 +309,7 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-fair-q{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text2);cursor:pointer;line-height:1.45}
 .jd-fair-q input{margin-top:2px;accent-color:var(--teal);flex-shrink:0}
 .jd-verdict{font-size:12.5px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
-.jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12.5px;color:var(--text2);line-height:1.5}
+.jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12.5px;color:var(--text2);line-height:1.5}
 .jd-upload{margin-bottom:1rem;padding:14px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:9px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
 /* shortfall advisor */
@@ -312,7 +323,7 @@ button{font-family:var(--sans);cursor:pointer}
 .sw{overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:520px}
 th{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;white-space:nowrap}
-td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;white-space:nowrap;color:var(--text2);vertical-align:middle}
+td{padding:10px 12px;border-bottom:1px solid rgba(var(--wash),0.04);font-size:13px;white-space:nowrap;color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(45,212,178,0.02)}
 th.r,td.r{text-align:right}
@@ -348,7 +359,7 @@ th.r,td.r{text-align:right}
 .expiry-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
 .expiry-table{width:100%;min-width:0;max-width:540px;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12px}
 .expiry-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:4px 10px;border-bottom:1px solid rgba(245,166,35,0.2)}
-.expiry-table td{padding:4px 10px;border-bottom:1px solid rgba(255,255,255,0.05);color:var(--text2);font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.expiry-table td{padding:4px 10px;border-bottom:1px solid rgba(var(--wash),0.05);color:var(--text2);font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .expiry-table th.r,.expiry-table td.r{text-align:right}
 .expiry-table th:not(.r),.expiry-table td:not(.r){text-align:left}
 .expiry-table .c-red{color:var(--red)}.expiry-table .c-amber{color:var(--amber)}
@@ -424,7 +435,7 @@ details summary:hover,details[open] summary{color:var(--teal)}
 .add-prog-btn:hover{background:rgba(45,212,178,0.2);box-shadow:0 0 12px rgba(45,212,178,0.12)}
 
 .copilot-input-row{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border);background:rgba(5,12,24,0.5);flex-shrink:0}
-#copilot-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;resize:none;min-height:40px;max-height:100px}
+#copilot-input{flex:1;background:rgba(var(--wash),0.04);border:1px solid rgba(45,212,178,0.2);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;padding:9px 12px;outline:none;transition:border-color .2s;resize:none;min-height:40px;max-height:100px}
 #copilot-input:focus{border-color:var(--teal)}
 #copilot-input::placeholder{color:var(--text3)}
 .copilot-send{width:38px;height:38px;border-radius:8px;flex-shrink:0;align-self:flex-end;background:rgba(45,212,178,0.12);border:1px solid rgba(45,212,178,0.3);color:var(--teal);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -439,6 +450,12 @@ footer{position:relative;z-index:1;text-align:center;padding:2rem;font-family:va
 footer span{color:var(--teal)}
 .hidden{display:none!important}
 </style>
+<script>
+function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');}
+try{if(localStorage.getItem('ac_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}
+document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStorage.getItem('ac_theme')||'dark');}catch(e){}});
+</script>
 </head>
 <body>
 
@@ -467,6 +484,7 @@ footer span{color:var(--teal)}
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
+    <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
     <span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span>
     <div class="header-badge"><span class="pulse-dot"></span>UK ESFA &middot; 2026 Rules</div>
   </div>
@@ -488,8 +506,8 @@ footer span{color:var(--teal)}
     <div id="goalGrid" class="goal-grid"></div>
     <div id="goalNoteWrap" style="margin-top:12px;display:none">
       <div style="display:flex;gap:8px;align-items:center">
-        <input id="goalNote" type="text" maxlength="140" placeholder="Add a short note (optional) — e.g. the role, team or capability" oninput="onGoalNoteInput()" onblur="commitGoalNote()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="flex:1;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit">
-        <button type="button" id="goalNoteBtn" onclick="commitGoalNote()" style="flex:0 0 auto;background:rgba(255,255,255,0.04);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:9px;padding:9px 16px;font-size:13px;font-family:inherit;cursor:pointer">Save</button>
+        <input id="goalNote" type="text" maxlength="140" placeholder="Add a short note (optional) — e.g. the role, team or capability" oninput="onGoalNoteInput()" onblur="commitGoalNote()" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}" style="flex:1;box-sizing:border-box;background:rgba(var(--wash),0.04);border:1px solid rgba(var(--wash),0.12);border-radius:9px;padding:10px 12px;color:var(--text);font-size:13px;font-family:inherit">
+        <button type="button" id="goalNoteBtn" onclick="commitGoalNote()" style="flex:0 0 auto;background:rgba(var(--wash),0.04);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:9px;padding:9px 16px;font-size:13px;font-family:inherit;cursor:pointer">Save</button>
       </div>
       <div id="goalNoteSaved" style="font-size:12px;color:var(--goal-accent);margin-top:6px;display:none">&#10003; Saved</div>
       <div id="goalSuggest" style="display:none"></div>
@@ -511,24 +529,24 @@ footer span{color:var(--teal)}
       <span style="font-size:13px;color:var(--text3)">No file to hand?</span>
       <button class="btn-demo" onclick="loadDemo()">&#9654;&nbsp; Load full working demo</button>
       <span style="font-size:12px;color:var(--text3)">Levy data + 3 sample programmes</span>
-      <button id="clearDataBtn" onclick="clearSavedData()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:6px 12px">Clear saved data</button>
+      <button id="clearDataBtn" onclick="clearSavedData()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:6px 12px">Clear saved data</button>
     </div>
     <div id="csvStatus" class="status"></div>
-    <details style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:13px">
+    <details style="margin-top:14px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
       <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128200;</span>Don&rsquo;t have your ESFA export? <span style="color:var(--teal)">Estimate from payroll &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-        <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
-        <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromPayroll()" style="white-space:nowrap">Estimate my levy</button>
       </div>
       <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
     </details>
-    <details style="margin-top:10px;border-top:1px solid rgba(255,255,255,0.07);padding-top:13px">
+    <details style="margin-top:10px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
       <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
-        <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
-        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromContributions()" style="white-space:nowrap">Work back my pay bill</button>
       </div>
       <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
@@ -624,9 +642,9 @@ footer span{color:var(--teal)}
         <details style="margin:9px 0 2px;grid-column:1/-1">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
           </div>
           <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5">Under-25 apprentices carry <strong>0% employer NIC</strong> up to &pound;50,270 (a real saving); at Level&nbsp;7, only 16&ndash;21 stay levy-funded from Jan 2026. Leave blank to skip &mdash; the plan just uses the total learner count.</div>
         </details>
@@ -638,11 +656,11 @@ footer span{color:var(--teal)}
           <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
             <div>
               <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Learner&rsquo;s hourly wage <span style="opacity:.7">— optional</span></label>
-              <input id="lc-wage" type="number" min="0" step="0.5" placeholder="defaults to plan rate" oninput="renderLearnerCost()" style="width:180px;max-width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
+              <input id="lc-wage" type="number" min="0" step="0.5" placeholder="defaults to plan rate" oninput="renderLearnerCost()" style="width:180px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
             </div>
             <div>
               <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Off-the-job hrs / week <span style="opacity:.7">— statutory min 6</span></label>
-              <input id="lc-otj" type="number" min="0" step="0.5" value="6" oninput="renderLearnerCost()" style="width:160px;max-width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
+              <input id="lc-otj" type="number" min="0" step="0.5" value="6" oninput="renderLearnerCost()" style="width:160px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
             </div>
           </div>
         </div>
@@ -698,7 +716,7 @@ footer span{color:var(--teal)}
         <button class="btn-demo" onclick="openLevyReport('finance',this)">&#128196;&nbsp; Finance / SLT &#8599;</button>
         <button class="btn-demo" onclick="openLevyReport('hr',this)">&#128196;&nbsp; HR / L&amp;D &#8599;</button>
       </div>
-      <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
+      <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
       <div id="affordLadder"></div>
@@ -758,7 +776,7 @@ footer span{color:var(--teal)}
       <span id="jdDropText">&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop</span>
       <input type="file" id="jdFile" accept=".txt,.pdf,.docx,text/plain" style="display:none">
     </div>
-    <div class="field"><label>Job description</label><textarea id="jd-text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(255,255,255,0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
+    <div class="field"><label>Job description</label><textarea id="jd-text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(var(--wash),0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn-demo" onclick="jdDemo()">&#9654;&nbsp; See a sample report</button><span style="font-size:12px;color:var(--text3)">Loads a sample standard + JD and opens the report</span></div>
     <div id="jd-results"></div>
@@ -767,7 +785,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20d</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1086,7 +1104,7 @@ function onStandardChange(){
 }
 
 function lcCell(lab,val,sub,col){
-  return '<div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:9px 11px;min-width:0">'+
+  return '<div style="background:rgba(var(--wash),0.025);border:1px solid rgba(var(--wash),0.07);border-radius:9px;padding:9px 11px;min-width:0">'+
     '<div style="font-size:10.5px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
     '<div style="font-family:\'JetBrains Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
     '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4">'+sub+'</div></div>';
@@ -1116,7 +1134,7 @@ function renderLearnerCost(){
   var levyAvail=levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0;
   if(levyAvail>0&&band>0){
     var nFund=Math.floor(levyAvail/band), yl=(M/12)+' year'+((M/12)!==1?'s':'');
-    capHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:var(--text2);line-height:1.5">&#128101; <strong style="color:#fff">How many can I train?</strong> At '+fmt(band)+'/learner, your levy (&asymp;&nbsp;'+fmt(Math.round(levyAvail))+' over '+yl+') funds about <strong style="color:#2DD4B2">'+nFund+'</strong> at this standard.</div>';
+    capHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12.5px;color:var(--text2);line-height:1.5">&#128101; <strong style="color:#fff">How many can I train?</strong> At '+fmt(band)+'/learner, your levy (&asymp;&nbsp;'+fmt(Math.round(levyAvail))+' over '+yl+') funds about <strong style="color:#2DD4B2">'+nFund+'</strong> at this standard.</div>';
   }
   // Level 7 age gate — verified against gov.uk (DfE update 28 May 2025), effective 1 Jan 2026
   var l7Html='';
@@ -1483,7 +1501,7 @@ function renderDataQuality(findings){
     :{c:'#2DD4B2',bg:'rgba(45,212,178,0.07)',bd:'rgba(45,212,178,0.3)',t:'✓ Data looks consistent'};
   const items=findings.map(f=>'<li style="margin:3px 0">'+(f.sev==='error'?'⛔ ':f.sev==='warn'?'△ ':'· ')+f.msg+'</li>').join('');
   const acked=!!scnDataAck;
-  const ackRow='<label style="display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:var(--text2);cursor:pointer">'+
+  const ackRow='<label style="display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12.5px;color:var(--text2);cursor:pointer">'+
     '<input type="checkbox" '+(acked?'checked':'')+' onchange="setDataAck(this.checked)" style="margin-top:2px;flex:none">'+
     '<span>I’ve reviewed this summary and confirm it reflects my levy account.'+(acked?' <strong style="color:#2DD4B2">Confirmed '+scnDataAck+'.</strong>':' <span style="color:var(--text3)">Your report records whether this has been confirmed.</span>')+'</span></label>';
   el.innerHTML='<div style="background:'+head.bg+';border:1px solid '+head.bd+';border-radius:12px;padding:12px 16px;margin-bottom:1.25rem">'+
@@ -1524,13 +1542,13 @@ function fundingRulesRef(){
 function renderRulesRef(){
   var el=document.getElementById('rulesRef');if(!el)return;
   var rows=fundingRulesRef().map(function(r){
-    return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;padding:9px 0;border-top:1px solid rgba(255,255,255,0.06)">'+
+    return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;padding:9px 0;border-top:1px solid rgba(var(--wash),0.06)">'+
       '<div><div style="font-weight:600;color:var(--text);font-size:13.5px">'+r.label+'</div><div style="font-size:12px;color:var(--text3);line-height:1.45;margin-top:2px">'+r.detail+'</div></div>'+
       '<div style="text-align:right;white-space:nowrap"><div style="font-family:\'JetBrains Mono\',monospace;color:var(--teal);font-size:13px">'+r.value+'</div><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+r.eff+'</div></div>'+
     '</div>';
   }).join('');
-  el.innerHTML='<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:6px 16px 14px;margin-top:8px">'+rows+
-    '<div style="margin-top:12px;font-size:11px;color:var(--text3);border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">Rules version <strong style="color:var(--text2)">'+RULEBOOK.version+'</strong> · as of '+RULEBOOK.asOf+' · source: <a href="'+RULEBOOK.source+'" target="_blank" rel="noopener" style="color:var(--blue)">gov.uk apprenticeship funding rules ↗</a>. The engine reads every figure from these values — update them once a year and all projections follow.</div>'+
+  el.innerHTML='<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:12px;padding:6px 16px 14px;margin-top:8px">'+rows+
+    '<div style="margin-top:12px;font-size:11px;color:var(--text3);border-top:1px solid rgba(var(--wash),0.06);padding-top:10px">Rules version <strong style="color:var(--text2)">'+RULEBOOK.version+'</strong> · as of '+RULEBOOK.asOf+' · source: <a href="'+RULEBOOK.source+'" target="_blank" rel="noopener" style="color:var(--blue)">gov.uk apprenticeship funding rules ↗</a>. The engine reads every figure from these values — update them once a year and all projections follow.</div>'+
   '</div>';
 }
 // ── Show-the-working part 1: trace each headline figure to its actual inputs + the rule behind it
@@ -1540,7 +1558,7 @@ function renderProjWorking(d){
   var apprs=programmes.filter(function(p){return p.type!=='unit';});
   var unitsArr=programmes.filter(function(p){return p.type==='unit';});
   var T=Math.round(RULEBOOK.draw.training*100),E=Math.round(RULEBOOK.draw.epa*100);
-  function row(label,calc){return '<div style="padding:9px 0;border-top:1px solid rgba(255,255,255,0.06)"><div style="font-weight:600;color:var(--text);font-size:13px;margin-bottom:3px">'+label+'</div><div style="font-size:12px;color:var(--text2);line-height:1.55">'+calc+'</div></div>';}
+  function row(label,calc){return '<div style="padding:9px 0;border-top:1px solid rgba(var(--wash),0.06)"><div style="font-weight:600;color:var(--text);font-size:13px;margin-bottom:3px">'+label+'</div><div style="font-size:12px;color:var(--text2);line-height:1.55">'+calc+'</div></div>';}
   var html='';
   if(apprs.length){
     html+=row(T+'% training draw = '+fmt(d.tT)+' <span style="color:var(--text3);font-weight:400">· rule: '+T+'/'+E+' drawdown</span>',
@@ -1565,8 +1583,8 @@ function renderProjWorking(d){
   html+=row('Closing balance = '+fmt(d.bals[d.M-1])+' <span style="color:var(--text3);font-weight:400">· opening + income − drawdown</span>',
     'Opening '+fmt(levyData.balance)+', plus '+fmt(totalInc)+' levy income, less the training / EPA / unit amounts above, over '+d.M+' months. The balance is floored at £0 — in any exhausted month the shortfall becomes co-investment, not a negative pot.');
   pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
-    '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:4px 16px 12px;margin-top:8px">'+html+
-    '<div style="margin-top:11px;font-size:11px;color:var(--text3);border-top:1px solid rgba(255,255,255,0.06);padding-top:9px">Every rate above is read from the funding rulebook (see “Funding rules applied” near the top). Figures use the data you provided'+(scnDataAck?'.':' — not yet confirmed.')+'</div>'+
+    '<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:12px;padding:4px 16px 12px;margin-top:8px">'+html+
+    '<div style="margin-top:11px;font-size:11px;color:var(--text3);border-top:1px solid rgba(var(--wash),0.06);padding-top:9px">Every rate above is read from the funding rulebook (see “Funding rules applied” near the top). Figures use the data you provided'+(scnDataAck?'.':' — not yet confirmed.')+'</div>'+
   '</div></details>';
 }
 
@@ -1709,7 +1727,7 @@ function renderProgrammes(){
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
     return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--teal)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
-  if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
+  if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
 }
 
@@ -1885,7 +1903,7 @@ function renderAffordLadder(coInvest,expiry){
   ];
   var cards=rungs.map(function(r){
     var on=(r.n-1===rec);
-    return '<div style="flex:1;min-width:0;background:rgba(255,255,255,0.03);border:1px solid '+(on?r.accent:'rgba(255,255,255,0.09)')+';border-radius:12px;padding:13px 15px;'+(on?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+'">'+
+    return '<div style="flex:1;min-width:0;background:rgba(var(--wash),0.03);border:1px solid '+(on?r.accent:'rgba(var(--wash),0.09)')+';border-radius:12px;padding:13px 15px;'+(on?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+'">'+
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:5px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:9.5px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'</div>'+
       '<div style="font-weight:700;color:#fff;font-size:14px">'+r.type+'</div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:18px;color:'+r.accent+';margin:5px 0">'+fmt(r.cost)+'<span style="font-size:11px;color:#7e95ab"> /learner</span></div>'+
@@ -2101,7 +2119,7 @@ function levyPage1(d,framing){
         '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
-        '<div style="text-align:right;border-left:1px solid rgba(255,255,255,0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
+        '<div style="text-align:right;border-left:1px solid rgba(var(--wash),0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
       '<div class="lvy-figs">'+figures+'</div>'+
       utilSection+
       '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
@@ -2286,7 +2304,7 @@ function renderProjection(){
   const tc=ts.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
   if(projChart)projChart.destroy();
-  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:'rgba(123,97,255,0.72)',stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(255,255,255,0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
+  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:'rgba(123,97,255,0.72)',stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(var(--wash),0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(var(--wash),0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(var(--wash),0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(var(--wash),0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length, coMonths=coSet.size, reserveMonths=tot.filter((s,i)=>s>income[i]&&!coSet.has(i)).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
@@ -2675,7 +2693,7 @@ function jdDemo(){
   var res=document.getElementById('jd-results');if(res)res.scrollIntoView({behavior:'smooth',block:'start'});
 }
 var JD_HF="'Montserrat','League Spartan',Inter,Arial,sans-serif";
-var JD_CYAN='#20D6C3',JD_PURPLE='#7B61FF',JD_GOLD='#C89622',JD_PANEL='#0F2A4A',JD_PANEL2='#123255',JD_CB='1px solid rgba(255,255,255,0.08)',JD_WT='rgba(255,255,255,0.10)';
+var JD_CYAN='#20D6C3',JD_PURPLE='#7B61FF',JD_GOLD='#C89622',JD_PANEL='#0F2A4A',JD_PANEL2='#123255',JD_CB='1px solid rgba(var(--wash),0.08)',JD_WT='rgba(var(--wash),0.10)';
 function jdDonut(pct,size,sw,color){var r=(size-sw)/2,c=2*Math.PI*r,off=c*(1-pct/100),m=size/2;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'"><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="'+JD_WT+'" stroke-width="'+sw+'"/><circle cx="'+m+'" cy="'+m+'" r="'+r+'" fill="none" stroke="'+color+'" stroke-width="'+sw+'" stroke-linecap="round" stroke-dasharray="'+c+'" stroke-dashoffset="'+off+'" transform="rotate(-90 '+m+' '+m+')"/><text x="50%" y="50%" dy="0.34em" text-anchor="middle" fill="#fff" font-family="'+JD_HF+'" font-size="'+Math.round(size*0.27)+'" font-weight="800">'+pct+'%</text></svg>';}
 function jdBar(pct,color){return '<div style="height:6px;background:'+JD_WT+';border-radius:3px;overflow:hidden;margin-top:6px"><div style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px"></div></div>';}
 var JDIC={book:'<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',tools:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',brief:'<rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',brain:'<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/>',cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>',bulb:'<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .6-1.7 1.4-2.5A4.6 4.6 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.8.8 1.2 1.5 1.4 2.5"/>',check:'<path d="M20 6 9 17l-5-5"/>',target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',chev:'<path d="m9 18 6-6-6-6"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>'};
@@ -2715,7 +2733,7 @@ function jdBuildReport(){
       '<div style="display:flex;gap:10px;align-items:flex-start"><span style="color:'+c.col+';font-size:8px;margin-top:6px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:12.5px;min-width:34px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:12.5px;line-height:1.5;flex:1">'+it.stmt+'</span><span class="rev-ind" style="color:'+c.col+';font-size:10px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px">In reality '+jdIcon('chev',c.col,13)+'</span></div>'+
       '<div class="reveal" style="display:none;margin-left:44px;margin-top:7px;background:rgba(32,214,195,0.07);border-left:2px solid '+c.col+';padding:7px 11px"><span style="color:'+c.col+';font-size:9px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:12px;line-height:1.5">'+jdReality(it.stmt,c.key)+'</span></div>'+
     '</div>';}).join('');
-    var panel='<div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;background:rgba(255,255,255,0.03);border:'+JD_CB+';border-radius:12px;padding:16px 20px">'+jdDonut(c.pct,80,9,c.col)+'<div style="flex:1"><div style="font-size:14px;color:#dfe9f2;font-weight:600">'+c.covered+' of '+c.total+' '+c.label.toLowerCase()+' evidenced by the job description</div><div style="color:'+c.col+';font-weight:600;margin-top:4px;font-size:13px">'+gaps.length+' to develop through work-exposure</div>'+jdBar(c.pct,c.col)+'</div></div>'+
+    var panel='<div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;background:rgba(var(--wash),0.03);border:'+JD_CB+';border-radius:12px;padding:16px 20px">'+jdDonut(c.pct,80,9,c.col)+'<div style="flex:1"><div style="font-size:14px;color:#dfe9f2;font-weight:600">'+c.covered+' of '+c.total+' '+c.label.toLowerCase()+' evidenced by the job description</div><div style="color:'+c.col+';font-weight:600;margin-top:4px;font-size:13px">'+gaps.length+' to develop through work-exposure</div>'+jdBar(c.pct,c.col)+'</div></div>'+
       (cov.length?'<div style="margin-bottom:'+(gaps.length?'22px':'0')+'"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'+jdIcon('check',JD_CYAN,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div><div style="columns:2;column-gap:34px">'+covRows+'</div></div>':'')+
       (gaps.length?'<div><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+jdIcon('cal',c.col,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">To develop — work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:12.5px;margin-bottom:14px;line-height:1.5">Arrange real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each:</div>'+gapRows+'</div>':'<div style="display:flex;align-items:center;gap:9px;color:'+JD_CYAN+';font-weight:600;font-size:14px">'+jdIcon('check',JD_CYAN,17)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>');
     return '<div style="border:'+JD_CB+';border-radius:14px;overflow:hidden;margin-bottom:14px;background:rgba(15,42,74,0.92)">'+
@@ -2740,9 +2758,9 @@ function jdBuildReport(){
     '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12.5px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
     '<div style="margin-top:18px;background:'+P+';border:'+JD_CB+';border-radius:16px;display:flex;align-items:center;padding:22px 28px">'+
       '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief",JD_CYAN,30)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:4px">'+d.stdName+'</div></div></div>'+
-      '<div style="width:1px;height:54px;background:rgba(255,255,255,0.09)"></div>'+
+      '<div style="width:1px;height:54px;background:rgba(var(--wash),0.09)"></div>'+
       '<div style="flex:1;display:flex;align-items:center;gap:16px;padding-left:24px">'+jdDonut(score,64,7,scol)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">COVERAGE</div><div style="color:#fff;font-size:14px;margin-top:4px">'+d.covered+' of '+d.total+' KSBs evidenced</div><div style="color:'+JD_CYAN+';font-size:13px;margin-top:2px">'+(d.total-d.covered)+' to bridge</div></div></div>'+
-      '<div style="width:1px;height:54px;background:rgba(255,255,255,0.09)"></div>'+
+      '<div style="width:1px;height:54px;background:rgba(var(--wash),0.09)"></div>'+
       '<div style="flex:0 0 196px;display:flex;align-items:flex-start;gap:14px;padding-left:24px">'+jdIcon("brain",JD_PURPLE,28)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">AI ANALYSIS</div><div style="color:#9fb1c2;font-size:12px;margin-top:4px;line-height:1.5">Indicative keyword analysis, not a compliance verdict.</div></div></div>'+
     '</div>'+
     '<div style="display:flex;gap:18px;margin-top:20px;align-items:flex-start">'+
@@ -2752,9 +2770,9 @@ function jdBuildReport(){
           '<div style="margin:16px 0 6px;display:flex;justify-content:center">'+jdDonut(score,116,11,scol)+'</div>'+
           '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.06em">OVERALL COVERAGE</div>'+
           '<div style="display:flex;justify-content:center;margin:8px 0 4px">'+jdEcg(JD_CYAN)+'</div>'+
-          '<div style="height:1px;background:rgba(255,255,255,0.08);margin:12px 0 18px"></div>'+
+          '<div style="height:1px;background:rgba(var(--wash),0.08);margin:12px 0 18px"></div>'+
           '<div style="text-align:left">'+sideCats+'</div>'+
-          '<div style="height:1px;background:rgba(255,255,255,0.08);margin:6px 0 14px"></div>'+
+          '<div style="height:1px;background:rgba(var(--wash),0.08);margin:6px 0 14px"></div>'+
           '<div style="display:flex;justify-content:space-between;text-align:left"><div><div style="color:#8ba0b6;font-size:10px;letter-spacing:.05em">TOTAL KSBS</div><div style="margin-top:3px"><span style="color:#fff;font-size:20px;font-weight:800;font-family:'+JD_HF+'">'+d.covered+'</span><span style="color:#8ba0b6;font-size:12px"> of '+d.total+'</span></div></div><div><div style="color:#8ba0b6;font-size:10px;letter-spacing:.05em">TO BRIDGE</div><div style="color:'+JD_CYAN+';font-size:20px;font-weight:800;margin-top:3px;font-family:'+JD_HF+'">'+(d.total-d.covered)+'</div></div></div>'+
         '</div>'+
         '<div style="background:'+P+';border:'+JD_CB+';border-radius:16px;padding:16px;margin-top:16px">'+
@@ -2769,7 +2787,7 @@ function jdBuildReport(){
       '</div>'+
     '</div>'+
   '</div>'+
-  '<div style="position:relative;z-index:2;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Arthur Curtis Education · JD Matcher · indicative keyword analysis, not a compliance verdict</span></div>';
+  '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Arthur Curtis Education · JD Matcher · indicative keyword analysis, not a compliance verdict</span></div>';
   return el;
 }
 var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,j,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.8,0,7);ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
@@ -2777,7 +2795,7 @@ function jdReportDocHTML(){
   var el=jdBuildReport();el.style.position='relative';el.style.left='auto';el.style.top='auto';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JD Matcher Report — '+lastJD.stdName+'</title>'+
     '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">'+
-    '<style>html,body{margin:0;background:#06121f;font-family:Inter,system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(255,255,255,0.08)}.rpbar button{font-family:Inter,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(255,255,255,0.04)!important}.gap-item:hover{background:rgba(255,255,255,0.05)}'+
+    '<style>html,body{margin:0;background:#06121f;font-family:Inter,system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(var(--wash),0.08)}.rpbar button{font-family:Inter,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:8px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(var(--wash),0.04)!important}.gap-item:hover{background:rgba(var(--wash),0.05)}'+
     '@keyframes acspin{to{transform:rotate(360deg)}}.rep-ring{transform-box:fill-box;transform-origin:center}.rep-a{animation:acspin 70s linear infinite}.rep-b{animation:acspin 48s linear infinite reverse}.rep-c{animation:acspin 90s linear infinite}.rep-d{animation:acspin 36s linear infinite reverse}'+
     '@media print{.rpbar{display:none}.rpwrap{padding:0}.rpwrap>div{box-shadow:none}.acc-panel{display:block!important}.rep-ring{animation:none}@page{size:A4;margin:0}}</style></head><body>'+
     '<div class="rpbar"><button class="ghost" onclick="window.close()">&#10005;&nbsp; Close report</button><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button><span style="color:#8ba0b6;font-size:12px;align-self:center;margin-left:4px">For the PDF, use the <strong style="color:#cfe0ee">PDF</strong> button on the calculator</span></div>'+
@@ -2795,7 +2813,7 @@ function jdPageDecor(W,H,cid){
 }
 /* draws network + dotted border frame straight onto the canvas (fast for html2canvas, unlike thousands of SVG circles) */
 function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}var m=20,T=46,s=18;ctx.fillStyle='rgba(54,194,224,0.55)';for(var gx=m;gx<=W-m;gx+=s)for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T){ctx.beginPath();ctx.arc(gx,gy,1.05,0,7);ctx.fill();}}}catch(e){}}
-function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
+function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
 var JD_PG_W=1123, JD_PG_H=794;
 /* large-text mode: content pages render onto a small virtual page (468px) so reading text scales to ~18pt large print when fit to A4 (the summary stays full-size, handled in jdBuildPdfPages) */
 var JD_LARGE=false;
@@ -2874,7 +2892,7 @@ function jdPdfKsbBody(c){
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the JD ('+cov.length+')</span></div>'+
       '<div style="overflow:hidden">'+covRows+'</div>'+
     '</div>'+
-    '<div style="width:1px;background:rgba(255,255,255,0.08)"></div>'+
+    '<div style="width:1px;background:rgba(var(--wash),0.08)"></div>'+
     '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div>'+
       '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
@@ -2894,7 +2912,7 @@ function jdKsbBodySubset(c,cov,devSub,gapsTotal){
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the JD ('+cov.length+')</span></div>'+
       '<div style="overflow:hidden">'+covRows+'</div>'+
     '</div>'+
-    '<div style="width:1px;background:rgba(255,255,255,0.08)"></div>'+
+    '<div style="width:1px;background:rgba(var(--wash),0.08)"></div>'+
     '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gapsTotal+')</span></div>'+
       '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
@@ -2903,10 +2921,10 @@ function jdKsbBodySubset(c,cov,devSub,gapsTotal){
   '</div>';
 }
 function jdKsbContInner(c,devSub){
-  return '<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px"><span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:19px;font-family:'+JD_HF+'">'+c.key+'</span><span style="font-family:'+JD_HF+';font-size:25px;font-weight:800;color:#fff">'+c.label+'</span><span style="color:#8ba0b6;font-size:13px;align-self:flex-end;padding-bottom:4px">Work-exposure plan (continued)</span></div>'+
+  return '<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(var(--wash),0.08);margin-bottom:16px"><span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:19px;font-family:'+JD_HF+'">'+c.key+'</span><span style="font-family:'+JD_HF+';font-size:25px;font-weight:800;color:#fff">'+c.label+'</span><span style="color:#8ba0b6;font-size:13px;align-self:flex-end;padding-bottom:4px">Work-exposure plan (continued)</span></div>'+
     '<div style="columns:2;column-gap:26px;flex:1;min-height:0">'+devSub.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>';
 }
-function jdSecTitle(c,suffix){return '<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:16px"><span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:19px;font-family:'+JD_HF+'">'+c.key+'</span><span style="font-family:'+JD_HF+';font-size:25px;font-weight:800;color:#fff">'+c.label+'</span><span style="color:#8ba0b6;font-size:13px;align-self:flex-end;padding-bottom:4px">'+suffix+'</span></div>';}
+function jdSecTitle(c,suffix){return '<div style="display:flex;align-items:center;gap:13px;padding-bottom:13px;border-bottom:1px solid rgba(var(--wash),0.08);margin-bottom:16px"><span style="display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:19px;font-family:'+JD_HF+'">'+c.key+'</span><span style="font-family:'+JD_HF+';font-size:25px;font-weight:800;color:#fff">'+c.label+'</span><span style="color:#8ba0b6;font-size:13px;align-self:flex-end;padding-bottom:4px">'+suffix+'</span></div>';}
 function jdEvidFirstInner(c,sub,total){
   var body=total?'<div style="columns:'+(JD_LARGE?2:3)+';column-gap:26px">'+sub.map(jdEvidItemHtml).join('')+'</div>':'<div style="color:#8ba0b6;font-size:12px;line-height:1.5">None of this standard&rsquo;s '+c.label.toLowerCase()+' are evidenced by the job description yet &mdash; all are covered in the work-exposure plan that follows.</div>';
   return jdPdfKsbHead(c)+'<div style="display:flex;align-items:center;gap:7px;margin:4px 0 12px">'+jdIcon('check',JD_CYAN,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+total+')</span></div>'+body;
@@ -2921,7 +2939,7 @@ function jdDevContInner(c,sub){return jdSecTitle(c,'Work-exposure plan (continue
 function jdKsbCombinedInner(c,cov,gaps){
   var evid='<div style="display:flex;align-items:center;gap:7px;margin:4px 0 10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div>'+(cov.length?'<div style="columns:'+(JD_LARGE?2:3)+';column-gap:26px">'+cov.map(jdEvidItemHtml).join('')+'</div>':'<div style="color:#8ba0b6;font-size:12px;line-height:1.5">None of this standard&rsquo;s '+c.label.toLowerCase()+' are evidenced by the job description yet.</div>');
   var dev=gaps.length?'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div><div style="columns:2;column-gap:26px">'+gaps.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>':'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:13px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
-  var divider='<div style="height:1px;background:rgba(255,255,255,0.12);margin:18px 0"></div>';
+  var divider='<div style="height:1px;background:rgba(var(--wash),0.12);margin:18px 0"></div>';
   return jdPdfKsbHead(c)+evid+divider+dev;
 }
 function jdBuildPdfPages(){
@@ -2936,9 +2954,9 @@ function jdBuildPdfPages(){
     '<div style="color:'+JD_CYAN+';font-size:11px;font-weight:700;letter-spacing:.07em;font-family:'+JD_HF+';text-align:center">MATCH SCORE</div>'+
     '<div style="display:flex;justify-content:center;margin:12px 0 8px">'+jdDonut(score,120,11,scol)+'</div>'+
     '<div style="text-align:center;color:#8ba0b6;font-size:10px;letter-spacing:.06em">OVERALL COVERAGE</div>'+
-    '<div style="height:1px;background:rgba(255,255,255,0.08);margin:14px 0 12px"></div>'+
+    '<div style="height:1px;background:rgba(var(--wash),0.08);margin:14px 0 12px"></div>'+
     sideCats+
-    '<div style="height:1px;background:rgba(255,255,255,0.08);margin:4px 0 12px"></div>'+
+    '<div style="height:1px;background:rgba(var(--wash),0.08);margin:4px 0 12px"></div>'+
     '<div style="display:flex;justify-content:space-between"><div><div style="color:#8ba0b6;font-size:10px;letter-spacing:.05em">TOTAL KSBS</div><div style="margin-top:2px"><span style="color:#fff;font-size:18px;font-weight:800;font-family:'+JD_HF+'">'+d.covered+'</span><span style="color:#8ba0b6;font-size:11px"> of '+d.total+'</span></div></div><div style="text-align:right"><div style="color:#8ba0b6;font-size:10px;letter-spacing:.05em">TO BRIDGE</div><div style="color:'+JD_CYAN+';font-size:18px;font-weight:800;margin-top:2px;font-family:'+JD_HF+'">'+(d.total-d.covered)+'</div></div></div>'+
   '</div>';
   var col2='<div style="flex:1;background:'+P+';border:'+JD_CB+';border-radius:14px;padding:18px;display:flex;flex-direction:column">'+
@@ -2948,7 +2966,7 @@ function jdBuildPdfPages(){
     cats.map(function(c){return '<div style="display:flex;align-items:center;gap:13px;margin-bottom:13px">'+jdDonut(c.pct,52,6,c.col)+'<div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</span><span style="color:'+c.col+';font-size:12px;font-weight:700">'+c.covered+' / '+c.total+'</span></div>'+jdBar(c.pct,c.col)+'</div></div>';}).join('')+
     '<div style="margin-top:auto;display:flex;align-items:center;gap:8px;color:#9fb1c2;font-size:10.5px;line-height:1.4">'+jdIcon("brain",JD_PURPLE,16)+'<span>Indicative keyword analysis, not a compliance verdict.</span></div>'+
   '</div>';
-  var inThis=cats.map(function(c){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:12px;font-family:'+JD_HF+'">'+c.key+'</span><div style="flex:1"><div style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</div><div style="color:#8ba0b6;font-size:10.5px"><span class="pgref" data-k="'+c.key+'">Page</span></div></div><span style="color:'+c.col+';font-size:11px;font-weight:700">'+(c.total-c.covered)+' to develop</span></div>';}).join('');
+  var inThis=cats.map(function(c){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(var(--wash),0.06)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:7px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:12px;font-family:'+JD_HF+'">'+c.key+'</span><div style="flex:1"><div style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</div><div style="color:#8ba0b6;font-size:10.5px"><span class="pgref" data-k="'+c.key+'">Page</span></div></div><span style="color:'+c.col+';font-size:11px;font-weight:700">'+(c.total-c.covered)+' to develop</span></div>';}).join('');
   var col3='<div style="flex:0 0 286px;display:flex;flex-direction:column;gap:12px">'+
     '<div style="background:'+P+';border:'+JD_CB+';border-radius:14px;padding:16px">'+
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+jdIcon("bulb",JD_CYAN,18)+'<span style="color:'+JD_CYAN+';font-size:12px;font-weight:700;letter-spacing:.05em;font-family:'+JD_HF+'">INSIGHT</span></div>'+
@@ -3412,7 +3430,7 @@ document.addEventListener('keydown',e=>{
       var got; try{got=(typeof c[2]==='function')?c[2]():c[2];}catch(err){got=NaN;} // lazy cases compute at open (e.g. the assembly test sets+restores globals)
       var exp=c[3],ok=Math.abs(got-exp)<0.005;if(ok)pass++;
       if(c[0]!==grp){grp=c[0];rows+='<tr><td colspan="4" style="padding:11px 8px 3px;color:#8fb8cc;font-weight:600;font-size:12px">'+grp+'</td></tr>';}
-      rows+='<tr style="border-top:1px solid rgba(255,255,255,0.06)">'+
+      rows+='<tr style="border-top:1px solid rgba(var(--wash),0.06)">'+
         '<td style="padding:6px 8px;font-size:12.5px">'+c[1]+' <a href="'+SRC[c[4]]+'" target="_blank" rel="noopener" style="color:#39A0D4;font-size:10px">gov.uk</a></td>'+
         '<td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:12px">'+fmt(got)+'</td>'+
         '<td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:12px;color:#8fb8cc">'+fmt(exp)+'</td>'+
@@ -3430,7 +3448,7 @@ document.addEventListener('keydown',e=>{
       var ex=document.getElementById('goldenPanel');if(ex){ex.remove();return;}
       var p=document.createElement('div');p.id='goldenPanel';
       p.style.cssText='position:fixed;top:20px;right:20px;bottom:20px;width:min(580px,92vw);overflow:auto;z-index:9999;background:#0c1726;border:1px solid rgba(45,212,178,0.32);border-radius:14px;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,0.6);color:#e9f3fa;font-family:Inter,system-ui,sans-serif';
-      p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:monospace;font-size:10px;letter-spacing:.1em;color:#2DD4B2">GOLDEN-CASE CORRECTNESS SUITE · gov.uk-verified</div><button onclick="document.getElementById(\'goldenPanel\').remove()" style="background:none;border:1px solid rgba(255,255,255,0.2);color:#8fb8cc;border-radius:6px;padding:3px 9px;cursor:pointer">&#10005;</button></div>'+runGoldenCases();
+      p.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-family:monospace;font-size:10px;letter-spacing:.1em;color:#2DD4B2">GOLDEN-CASE CORRECTNESS SUITE · gov.uk-verified</div><button onclick="document.getElementById(\'goldenPanel\').remove()" style="background:none;border:1px solid rgba(var(--wash),0.2);color:#8fb8cc;border-radius:6px;padding:3px 9px;cursor:pointer">&#10005;</button></div>'+runGoldenCases();
       document.body.appendChild(p);
     }
   });
