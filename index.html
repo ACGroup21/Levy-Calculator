@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20o</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1762,8 +1762,7 @@ function renderDeptBudget(){
   var hasCompany = companyLevy>0;
   // --- this department's planned programmes: isolate to tagged programmes when tags are in use, else count all (envelope) ---
   var deptKey=enteredName.toLowerCase();
-  var anyTagged=(programmes||[]).some(function(p){return (p.dept||'').trim();});
-  var isolated = !!deptKey && anyTagged;
+  var isolated = !!deptKey; // naming a team isolates strictly to ITS tagged programmes — untagged / other-team never count
   var planProgs = isolated ? (programmes||[]).filter(function(p){return (p.dept||'').trim().toLowerCase()===deptKey;}) : (programmes||[]);
   var allocated=0,learners=0,progs=0;
   planProgs.forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
@@ -1793,7 +1792,7 @@ function renderDeptBudget(){
   if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the ring-fenced budget &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the cap.</div>';
   else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left in budget'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
   h+='<div style="font-size:12.5px;color:var(--text3);margin-top:6px">'+learners+' learner'+(learners!==1?'s':'')+' across '+progs+' programme'+(progs!==1?'s':'')+(goal?' &middot; <b style="color:'+(learners>=goal?'var(--teal)':'var(--text2)')+'">'+learners+' of '+goal+'</b> toward your goal':'')+'.</div>';
-  var deptNote = isolated ? (progs>0 ? ('&#10003; Isolated to the '+progs+' programme'+(progs!==1?'s':'')+' tagged &ldquo;'+esc(enteredName)+'&rdquo;.') : ('No programmes are tagged &ldquo;'+esc(enteredName)+'&rdquo; yet &mdash; add the tag on a programme below to track this team&rsquo;s spend.')) : (anyTagged ? ('Name a team above that matches a programme&rsquo;s tag to isolate &mdash; otherwise this counts every programme.') : ('Counts every programme as this team&rsquo;s plan &mdash; tag programmes with an optional <b>Department</b> to isolate one team.'));
+  var deptNote = isolated ? (progs>0 ? ('&#10003; Isolated to the '+progs+' programme'+(progs!==1?'s':'')+' tagged &ldquo;'+esc(enteredName)+'&rdquo; &mdash; untagged programmes aren&rsquo;t counted here.') : ('No programmes are tagged &ldquo;'+esc(enteredName)+'&rdquo; yet &mdash; add the tag on a programme below so it counts toward this team. Untagged programmes aren&rsquo;t attributed to any team.')) : ('Counts every programme as this plan &mdash; name a team above to isolate only its tagged programmes.');
   h+='<div style="font-size:11.5px;color:var(--text3);margin-top:5px;font-style:italic">'+deptNote+'</div>';
   if(goal&&avg>0){var fundable=Math.floor(cap/avg);
     h+='<div style="font-size:12.5px;color:var(--text3);margin-top:8px;padding-top:9px;border-top:1px solid var(--border)">At '+fmt(Math.round(avg))+'/learner, '+fmt(cap)+' funds about <b style="color:'+(fundable>=goal?'var(--teal)':'var(--amber)')+'">'+fundable+'</b> &mdash; '+(fundable>=goal?('enough for your goal of '+goal+'.'):('short of your goal of '+goal+' by '+(goal-fundable)+' &mdash; raise the cap to &asymp;'+fmt(Math.round(goal*avg))+', or reduce the goal.'))+'</div>';}
