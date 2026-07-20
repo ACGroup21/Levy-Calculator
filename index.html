@@ -767,7 +767,7 @@ footer span{color:var(--teal)}
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20b</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1690,21 +1690,27 @@ function clearProgForm(){
 
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
 
+let progExpanded=false;
+function toggleProgList(){progExpanded=!progExpanded;renderProgrammes();}
 function renderProgrammes(){
   const pt=document.getElementById('progTable');
   pt.classList.toggle('hidden',!programmes.length);
-  document.getElementById('progBody').innerHTML=programmes.map((p,i)=>{
+  const LIMIT=5, many=programmes.length>LIMIT, collapsed=many&&!progExpanded;
+  let rows=programmes.map((p,i)=>{
+    const hide=(collapsed&&i>=LIMIT)?' style="display:none"':'';
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
+  if(many)rows+=`<tr class="prog-more"><td colspan="9" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
+  document.getElementById('progBody').innerHTML=rows;
 }
 
 // FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
