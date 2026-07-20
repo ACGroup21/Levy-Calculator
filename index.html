@@ -603,6 +603,18 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
     <div class="step-row" id="sec-programmes"><span class="step-chip">STEP 02</span><span class="step-title">Add Apprenticeship Programmes</span></div>
     <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. 80% drawn monthly; 20% released on EPA completion.</p>
+    <div class="card" id="deptBudgetCard" style="border-color:var(--border2)">
+      <details>
+        <summary style="cursor:pointer;font-weight:600;font-size:14px;color:var(--teal);list-style:none;display:flex;align-items:center;gap:9px;user-select:none"><span style="font-size:16px">&#127919;</span>Isolate a department&rsquo;s budget <span style="font-weight:400;color:var(--text3);font-size:12.5px">&mdash; optional: plan one team&rsquo;s slice of the levy &#9662;</span></summary>
+        <p class="step-sub" style="margin-top:11px">Set what a single team can spend from the levy and how many people to train, then add their programmes below. This tracks the spend against the cap &mdash; and cross-checks it against what your company levy actually holds.</p>
+        <div class="form-grid">
+          <div class="field"><label>Department / team</label><input id="dept-name" placeholder="e.g. Finance" oninput="renderDeptBudget()"></div>
+          <div class="field"><label>Levy budget cap (&pound;)</label><input id="dept-cap" type="number" min="0" placeholder="e.g. 40000" oninput="renderDeptBudget()"></div>
+          <div class="field"><label>Headcount goal <span style="color:var(--text3)">(optional)</span></label><input id="dept-goal" type="number" min="0" placeholder="e.g. 10" oninput="renderDeptBudget()"></div>
+        </div>
+        <div id="deptReadout"></div>
+      </details>
+    </div>
     <div class="card">
       <div class="form-grid">
         <div class="field" style="grid-column:span 2">
@@ -792,7 +804,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20k</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1715,6 +1727,29 @@ function clearProgForm(){
 
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
 
+// ── Department budget planner (#B): plan one team's slice against a fixed levy cap ──
+function renderDeptBudget(){
+  var el=document.getElementById('deptReadout'); if(!el) return;
+  var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var gv=function(id){var e=document.getElementById(id);return e?(parseFloat((e.value||'').toString().replace(/[£,\s]/g,''))||0):0;};
+  var cap=gv('dept-cap'), goalEl=document.getElementById('dept-goal'), goal=goalEl?(parseInt(goalEl.value)||0):0;
+  var nameEl=document.getElementById('dept-name'), name=(nameEl&&nameEl.value.trim())||'This department';
+  if(!cap){el.innerHTML='';return;}
+  var allocated=0,learners=0,progs=0;
+  (programmes||[]).forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
+  var remaining=cap-allocated, over=remaining<0, pct=Math.max(0,Math.min(100,allocated/cap*100)), avg=learners?allocated/learners:0;
+  var barCol=over?'var(--red)':(pct>85?'var(--amber)':'var(--teal)');
+  var M=(typeof projYears==='number'?projYears:3)*12, levyAvail=levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0, yl=(M/12)+' year'+((M/12)!==1?'s':'');
+  var h='<div style="margin-top:14px;background:rgba(var(--wash),0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:9px"><span style="font-weight:700;color:var(--text);font-size:14px">'+esc(name)+'</span><span style="font-family:var(--mono);font-size:13px;color:var(--text2)"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(allocated)+'</b> of '+fmt(cap)+' allocated</span></div>';
+  h+='<div style="height:9px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:11px"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barCol+';border-radius:99px;transition:width .3s"></div></div>';
+  if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the cap &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the budget.</div>';
+  else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at your average '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
+  h+='<div style="font-size:12.5px;color:var(--text3);margin-top:6px">'+learners+' learner'+(learners!==1?'s':'')+' across '+progs+' programme'+(progs!==1?'s':'')+(goal?' &middot; <b style="color:'+(learners>=goal?'var(--teal)':'var(--text2)')+'">'+learners+' of '+goal+'</b> toward your goal':'')+'.</div>';
+  if(levyAvail>0)h+='<div style="font-size:12px;color:'+(cap>levyAvail?'var(--amber)':'var(--text3)')+';margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+(cap>levyAvail?('&#9888; This '+fmt(cap)+' cap is more than the &asymp;'+fmt(Math.round(levyAvail))+' your company levy holds over '+yl+' &mdash; a department can&rsquo;t draw more than the company has.'):('&#10003; Within the &asymp;'+fmt(Math.round(levyAvail))+' your company levy holds over '+yl+'.'))+'</div>';
+  else h+='<div style="font-size:12px;color:var(--text3);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">Add your levy data in the <b>Levy</b> section to check this cap against what the company actually holds.</div>';
+  h+='</div>';el.innerHTML=h;
+}
 let progExpanded=false;
 function toggleProgList(){progExpanded=!progExpanded;renderProgrammes();}
 function renderProgrammes(){
@@ -1736,6 +1771,7 @@ function renderProgrammes(){
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
+  if(typeof renderDeptBudget==='function')renderDeptBudget();
 }
 
 // FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
