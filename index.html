@@ -30,7 +30,19 @@
 :root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#3b82f6}
 /* Scheme A — warm accents: terracotta on EPA chips + the Add-programme CTA in light mode */
 :root[data-theme="light"] .badge-epa,:root[data-theme="light"] .epa-chip{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;border-color:rgba(194,96,60,0.32)!important}
-:root[data-theme="light"] .btn-add{background:rgba(194,96,60,0.09);color:#c2603c;border-color:rgba(194,96,60,0.34)}
+:root[data-theme="light"] .btn-add{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;-webkit-text-fill-color:#c2603c!important;border-color:rgba(194,96,60,0.34)!important}
+:root[data-theme="light"] .btn-add:hover{background:rgba(194,96,60,0.17)!important;box-shadow:0 0 18px rgba(194,96,60,0.14)!important}
+/* teal component tints → cobalt in light */
+:root[data-theme="light"] .step-chip,:root[data-theme="light"] .btn-demo,:root[data-theme="light"] .jd-hit-tag,:root[data-theme="light"] .copilot-send{background:rgba(37,99,235,0.08)!important;color:#2563eb!important;-webkit-text-fill-color:#2563eb!important;border-color:rgba(37,99,235,0.28)!important}
+:root[data-theme="light"] .btn-demo:hover{background:rgba(37,99,235,0.16)!important;box-shadow:0 0 18px rgba(37,99,235,0.14)!important}
+:root[data-theme="light"] .jd-ksb.hit{background:rgba(37,99,235,0.06)!important;border-color:rgba(37,99,235,0.25)!important}
+/* purple KSB/units tints → slate-blue in light (purple is out) */
+:root[data-theme="light"] .badge-ksb,:root[data-theme="light"] .ksb-badge,:root[data-theme="light"] .ksb-indicator,:root[data-theme="light"] .step-chip.ksb,:root[data-theme="light"] .step-chip.jd{background:rgba(74,90,138,0.1)!important;color:#46567f!important;-webkit-text-fill-color:#46567f!important;border-color:rgba(74,90,138,0.3)!important}
+:root[data-theme="light"] .jd-upload{border-color:rgba(37,99,235,0.38)!important}
+:root[data-theme="light"] .jd-details{border-top-color:rgba(74,90,138,0.2)!important}
+/* gold suitability/verdict tints → terracotta in light */
+:root[data-theme="light"] .jd-suit{background:rgba(194,96,60,0.08)!important;border-color:rgba(194,96,60,0.34)!important}
+:root[data-theme="light"] .jd-verdict{border-top-color:rgba(194,96,60,0.22)!important}
 /* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
 .lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
@@ -459,7 +471,7 @@ footer span{color:var(--teal)}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
-function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');}
+function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');try{if(typeof projChart!=='undefined'&&projChart&&typeof renderProjection==='function')renderProjection();}catch(e){}}
 try{if(localStorage.getItem('ac_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}
 document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStorage.getItem('ac_theme')||'dark');}catch(e){}});
 </script>
@@ -804,7 +816,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20l</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2346,8 +2358,13 @@ function renderProjection(){
   const coSet=new Set(ciBase.months.map(m=>m.i)); // months that ACTUALLY trigger co-investment (pot exhausted) — not just demand>income
   const tc=ts.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
+  // theme-aware chart palette — cobalt income + terracotta balance in light, teal/purple in dark
+  const _lt=document.documentElement.getAttribute('data-theme')==='light';
+  const cLine=_lt?'#2563eb':'#2DD4B2', cUnits=_lt?'rgba(90,114,170,0.72)':'rgba(123,97,255,0.72)', cBal=_lt?'#c2603c':'#a78bfa';
+  const cTipBg=_lt?'rgba(255,255,255,0.97)':'rgba(5,12,24,0.95)', cTipBorder=_lt?'rgba(37,99,235,0.25)':'rgba(45,212,178,0.3)', cTipTitle=_lt?'#1f2f4a':'#2DD4B2', cTipBody=_lt?'#4a5a70':'#8fb8cc';
+  const cAxis=_lt?'rgba(15,27,46,0.12)':'rgba(45,212,178,0.15)', cTick=_lt?'#5a6a80':'#7fa3ba', cTickDim=_lt?'#7a889a':'#3d6880', cBalTick=_lt?'#c2603c':'#a78bfa', cBalBorder=_lt?'rgba(194,96,60,0.3)':'rgba(167,139,250,0.3)';
   if(projChart)projChart.destroy();
-  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:'#2DD4B2',borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:'rgba(123,97,255,0.72)',stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:'#a78bfa',borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(5,12,24,0.95)',borderColor:'rgba(45,212,178,0.3)',borderWidth:1,titleColor:'#2DD4B2',bodyColor:'#8fb8cc',titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(var(--wash),0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#3d6880'},grid:{color:'rgba(var(--wash),0.04)'},border:{color:'rgba(45,212,178,0.15)'}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(var(--wash),0.03)'},border:{color:'rgba(45,212,178,0.15)'}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#7fa3ba'},grid:{color:'rgba(var(--wash),0.04)'},border:{color:'rgba(45,212,178,0.15)'}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:'#a78bfa'},grid:{drawOnChartArea:false},border:{color:'rgba(167,139,250,0.3)'}}}}});
+  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:cLine,borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:cUnits,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:cBal,borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:cTipBg,borderColor:cTipBorder,borderWidth:1,titleColor:cTipTitle,bodyColor:cTipBody,titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:cTickDim},grid:{color:'rgba(var(--wash),0.03)'},border:{color:cAxis}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cTickDim},grid:{color:'rgba(var(--wash),0.04)'},border:{color:cAxis}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:cTick},grid:{color:'rgba(var(--wash),0.03)'},border:{color:cAxis}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cTick},grid:{color:'rgba(var(--wash),0.04)'},border:{color:cAxis}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cBalTick},grid:{drawOnChartArea:false},border:{color:cBalBorder}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length, coMonths=coSet.size, reserveMonths=tot.filter((s,i)=>s>income[i]&&!coSet.has(i)).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
