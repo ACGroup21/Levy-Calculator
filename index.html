@@ -1342,7 +1342,8 @@ function parseESFA(text){
     else if(iD>=0&&r[iD]&&r[iD].length>=7)mk=r[iD].slice(0,7);
     else{mk='Unknown';issues.unknownMonth++;}
     if(!mm[mk])mm[mk]={levy:0,topup:0,paid:0};
-    mm[mk].levy+=lv;mm[mk].topup+=tp;mm[mk].paid+=pd;tI+=lv+tp;tO+=pd;
+    var pdOut=Math.abs(pd); // ledger exports record spend as negative; a payment is always an outflow
+    mm[mk].levy+=lv;mm[mk].topup+=tp;mm[mk].paid+=pdOut;tI+=lv+tp;tO+=pdOut;
     // collect per-learner apprenticeship rows so we can reconstruct in-flight programmes
     var uln=iU>=0?(r[iU]||'').trim():'';
     if(uln&&iCn>=0&&(r[iCn]||'').trim()){
