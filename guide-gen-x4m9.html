@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Step-Guide Generator — Assignment Builder</title>
+<title>Assignment Guide — Assignment Builder</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
 <style>
   :root{
@@ -375,9 +375,9 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="crumb"><a href="ksb-mapper-x7k2.html">◂ Coverage Mapper</a> &nbsp;/&nbsp; Step 2 · Write the step-by-step guide</div>
-  <div class="ttl"><h1>Step-Guide Generator 📝</h1><span class="tagv">Step 2 · v1 · offline</span></div>
-  <p class="lede">Turns the Step 1 mapping into a <b>Part A step guide</b> — per section: word target, purpose, what to write, the real KSB coverage, and Pass / Distinction criteria. Everything is a <b>draft you edit</b>; the KSB coverage is taken verbatim from the standard. Print to a clean learner document.</p>
+  <div class="crumb"><a href="assignment-builder-tk9x2.html">◂ Assignment Builder</a> &nbsp;/&nbsp; Assignment Guide</div>
+  <div class="ttl"><h1>Assignment Guide 📝</h1><span class="tagv">brief → learner guide</span></div>
+  <p class="lede">Pick a standard and <b>drop the assignment brief</b> — this builds the <b>step-by-step learner guide</b> straight from it: per task a word target, purpose, what to write, the real KSB coverage, and Pass / Distinction criteria (distinction shown only where the brief offers it). Everything is a <b>draft you edit</b>; KSB text is verbatim from the standard. Print to a clean learner document.</p>
 
   <div class="controls">
     <span class="src" id="src"></span>
@@ -589,7 +589,7 @@ function emptyHTML(){
     +'<div class="ep-lab">Apprenticeship standard</div>'
     +'<input id="stdSearch" class="ep-search" placeholder="🔍  Type to filter standards (e.g. data, nurse, project)…" autocomplete="off">'
     +'<select id="stdSelect" class="ep-select"><option value="">Loading the standards library…</option></select>'
-    +'<p class="ep-note">Pick a standard to load its KSBs — then add a brief and load a finished assignment to check it. For a full step-by-step guide, start in the <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>.</p>'
+    +'<p class="ep-note">Pick a standard, then <b>drop the assignment brief</b> — the guide builds itself from the brief\'s tasks and the KSBs they cite; load a finished assignment to check it. Prefer to map KSBs to sections by hand? Use the optional <a href="ksb-mapper-x7k2.html">Coverage Mapper</a>.</p>'
     +'</div></div>';
 }
 function loadStdLib(){
@@ -654,7 +654,7 @@ function render(){
       if(!gc.length)return;
       cov+='<div class="cgrp '+g+'"><div class="ch">'+CIC[g]+GN[g]+'</div>'+gc.map(function(c){return '<div class="krow"><span class="kc">'+c+'</span><span class="kt">'+esc(clean(INPUT.ksb[c]||''))+'</span></div>';}).join('')+'</div>';
     });
-    if(!cov)cov='<div class="pb-empty">⚠ No KSBs mapped to this section yet — map it in Step 1.</div>';
+    if(!cov)cov='<div class="pb-empty">⚠ This task doesn\'t cite any KSB codes for this standard — add the codes in the brief, or map it by hand in the Coverage Mapper.</div>';
     var hasPassCrit=Array.isArray(sec.passCrit)&&sec.passCrit.length;
     var passHtml=codes.length?critHTML(passList(codes,INPUT.ksb,sec.x,sec.passCrit),'p'):'<em>No KSBs on this task yet — its brief didn\'t cite codes in this standard.</em>';
     var distItems=codes.length?distList(codes,INPUT.ksb,sec.x,sec.distCrit):[];
@@ -666,7 +666,7 @@ function render(){
       +'<span class="target">~<span class="wc" data-n="'+targetFor(sec)+'">0</span> words<span class="wc-range"> · '+(Math.round(targetFor(sec)*0.9/10)*10).toLocaleString()+'–'+(Math.round(targetFor(sec)*1.1/10)*10).toLocaleString()+' range</span></span>'
       +'<button class="aibtn" data-imp="'+i+'" title="Improve Purpose / Pass / Distinction with AI">✨ Improve</button><span class="sec-caret" title="Collapse / expand">▾</span></div>'
       +'<div class="blk"><div class="lab purpose eyebrow">Purpose</div><div class="read purpose" data-f="purpose" contenteditable="true">'+esc(draftPurpose(codes,INPUT.ksb))+'</div></div>'
-      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'from the brief + KSBs':'from your Step 1 notes')+'</span></div><div data-f="wtw" contenteditable="true">'+whatToWrite(sec.x,codes,INPUT.ksb)+'</div></div>'
+      +'<div class="blk"><div class="lab write eyebrow">What to write <span class="tag">'+(INPUT.briefGen?'from the brief + KSBs':'from your mapped notes')+'</span></div><div data-f="wtw" contenteditable="true">'+whatToWrite(sec.x,codes,INPUT.ksb)+'</div></div>'
       +'<div class="blk"><div class="lab cov eyebrow">KSB coverage <span class="tag">verbatim from the standard</span></div><div class="cov-box">'+cov+'</div></div>'
       +'<div class="blk"><div class="lab pass eyebrow">To achieve a Pass <span class="tag">'+(hasPassCrit?'from the brief + examples':'examples to evidence')+'</span></div><div data-f="pass" contenteditable="true">'+passHtml+'</div></div>'
       +distBlock
