@@ -17,13 +17,17 @@
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
 }
 :root[data-theme="light"]{
-  --bg:#e9eff6;
-  --wash:23,37,58;
-  --glass:rgba(var(--wash),0.045);--border:rgba(23,37,58,0.14);--border2:rgba(11,143,118,0.5);
-  --text:#0e1a27;--text2:#3c4c5d;--text3:#63788b;
-  --teal:#0b8f76;--navy:#5a7290;--purple:#7a52d6;--amber:#b7791a;--red:#d61f45;
+  --bg:#f1f4f9;                 /* soft light-grey page so white cards pop */
+  --wash:30,41,59;
+  --glass:#ffffff;             /* solid white surfaces */
+  --border:#e2e8f0;--border2:#0b8f76;
+  --text:#131d29;--text2:#46566a;--text3:#7a889a;
+  --teal:#0b8f76;--navy:#46607a;--purple:#6d43c9;--amber:#a86a12;--red:#d61f45;
 }
-:root[data-theme="light"] .aurora{opacity:.35}
+:root[data-theme="light"] .aurora{display:none}                 /* drop the coloured haze — keep it clean white */
+:root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
+:root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
+:root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#2DD4B2}
 /* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
 .lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
@@ -785,7 +789,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20g</div>
 </footer>
 
 <!-- copilot FAB -->
