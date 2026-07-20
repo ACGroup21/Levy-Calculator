@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Levy Calculator — Light-mode schemes</title></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Levy Calculator — Cobalt + orange variations</title></head>
 <body>
 <style>
   *{box-sizing:border-box}
@@ -70,40 +70,35 @@
 
 <div class="wrap">
   <div class="head">
-    <h1>Levy Calculator — light-mode schemes</h1>
-    <p>Five directions, each a <b>white/light base with a blue anchor</b> and a different second colour, over its own <b>living constellation background</b> that shimmers within the palette. Same real data in every one so you can compare like-for-like.</p>
-    <p class="hint">Pick a number and I'll apply it to the live calculator — or mix (e.g. "3's colours, 5's background").</p>
+    <h1>Cobalt &amp; Slate + orange — four variations</h1>
+    <p>You picked <b>01 Cobalt &amp; Slate</b> with <b>02's warm orange</b> as the second colour. Here are four ways to combine them — same clean blue/slate frame, different <b>orange shade</b> and <b>how boldly it's used</b> (from a whisper on the money figures to leading the headline).</p>
+    <p class="hint">Pick a letter and I'll apply it — or mix (e.g. "B's orange but A's restraint," or "C but a brighter blue").</p>
   </div>
   <div id="grid"></div>
 </div>
 
 <script>
 const SCHEMES=[
-  {n:'01',name:'Cobalt & Slate',tag:'Minimal · corporate · maximum trust',
+  {n:'A',name:'Cobalt & Terracotta',tag:'Restrained — orange only on the money figures',
    page:'#f4f7fc',card:'#ffffff',text:'#0f1b2e',muted:'#4a5a70',faint:'#8fa0b7',line:'#e4eaf3',
-   primary:'#2563eb',chip:'#eaf1fe',pos:'#1e40af',
-   bg:{hue:220,spread:16,accentHue:206,accentMix:0.14},
-   hex:['#2563EB primary','#1E40AF deep','#0F1B2E ink']},
-  {n:'02',name:'Denim & Terracotta',tag:'Warm · editorial · grounded',
-   page:'#f8f6f3',card:'#ffffff',text:'#182133',muted:'#4c5568',faint:'#97a0b2',line:'#ece7e1',
-   primary:'#2f5fb0',chip:'#e9eff9',pos:'#c2603c',
-   bg:{hue:218,spread:16,accentHue:16,accentMix:0.24},
-   hex:['#2F5FB0 denim','#C2603C terracotta','#182133 ink']},
-  {n:'03',name:'Harbour Blue & Emerald',tag:'Blue for trust · green for money',
-   page:'#f2f7f8',card:'#ffffff',text:'#0d1f26',muted:'#42596a',faint:'#8aa4b0',line:'#e1ecef',
-   primary:'#0369a1',chip:'#e5f2f8',pos:'#059669',
-   bg:{hue:202,spread:34,accentHue:158,accentMix:0.34},
-   hex:['#0369A1 primary','#059669 emerald','#0D1F26 ink']},
-  {n:'04',name:'Navy & Amber',tag:'Editorial · warm · confident',
-   page:'#f8f7f3',card:'#ffffff',text:'#182338',muted:'#4c566b',faint:'#98a1b3',line:'#ebe7e0',
-   primary:'#1e3a8a',chip:'#eaeefb',pos:'#c2740a',
-   bg:{hue:224,spread:14,accentHue:38,accentMix:0.18},
-   hex:['#1E3A8A navy','#C2740A amber','#182338 ink']},
-  {n:'05',name:'Sky & Coral',tag:'Friendly · approachable · fresh',
-   page:'#f3f8fc',card:'#ffffff',text:'#0c1c2b',muted:'#42576a',faint:'#89a0b3',line:'#e2edf4',
-   primary:'#0284c7',chip:'#e5f4fc',pos:'#e11d5c',
-   bg:{hue:200,spread:16,accentHue:350,accentMix:0.24},
-   hex:['#0284C7 sky','#E11D5C coral','#0C1C2B ink']}
+   primary:'#2563eb',chip:'#eaf1fe',pos:'#c2603c',
+   bg:{hue:220,spread:16,accentHue:18,accentMix:0.1},
+   hex:['#2563EB cobalt','#C2603C terracotta','#0F1B2E ink']},
+  {n:'B',name:'Cobalt & Tangerine',tag:'Balanced — brighter orange on figures, tags & chip',
+   page:'#f4f7fc',card:'#ffffff',text:'#0f1b2e',muted:'#4a5a70',faint:'#8fa0b7',line:'#e4eaf3',
+   primary:'#2563eb',chip:'#eaf1fe',pos:'#ea580c',
+   bg:{hue:220,spread:16,accentHue:24,accentMix:0.2},
+   hex:['#2563EB cobalt','#EA580C tangerine','#0F1B2E ink']},
+  {n:'C',name:'Cobalt & Burnt Orange',tag:'Editorial — deeper, muted, premium',
+   page:'#f7f6f2',card:'#ffffff',text:'#151f2e',muted:'#4d576a',faint:'#96a0af',line:'#eae7df',
+   primary:'#1d4ed8',chip:'#e9eef9',pos:'#b45309',
+   bg:{hue:222,spread:14,accentHue:32,accentMix:0.16},
+   hex:['#1D4ED8 deep cobalt','#B45309 burnt orange','#151F2E ink']},
+  {n:'D',name:'Blue frame · Orange hero',tag:'Bold — orange leads the headline & primary button',
+   page:'#f4f7fc',card:'#ffffff',text:'#0f1b2e',muted:'#4a5a70',faint:'#8fa0b7',line:'#e4eaf3',
+   primary:'#2563eb',chip:'#eaf1fe',pos:'#f97316',heroAccent:true,btnAccent:true,
+   bg:{hue:220,spread:16,accentHue:26,accentMix:0.3},
+   hex:['#2563EB cobalt','#F97316 orange','#0F1B2E ink']}
 ];
 
 function ui(s){
@@ -117,7 +112,7 @@ function ui(s){
     <div class="stats">
       <div class="card big">
         <div class="lab">Levy available · next 3 years</div>
-        <div class="fig">£248,500</div>
+        <div class="fig"${s.heroAccent?' style="color:var(--pos)"':''}>£248,500</div>
         <div class="sub">Balance £41,200 + £8,200/mo incoming</div>
         <div class="pill">▲ funds 19 apprentices</div>
       </div>
@@ -134,7 +129,7 @@ function ui(s){
         <tr><td class="nm">L5 Coaching professional</td><td class="r">£5,000</td><td class="r pos">£10,000</td><td class="r">2</td></tr>
       </tbody></table>
       <div class="chips">
-        <button class="btn">+ Add programme</button>
+        <button class="btn"${s.btnAccent?' style="background:var(--pos);box-shadow:0 4px 12px color-mix(in srgb,var(--pos) 42%,transparent)"':''}>+ Add programme</button>
         <span class="chip">8 learners on plan</span>
         <span class="chip acc">Monthly draw ~£4,967</span>
       </div>
