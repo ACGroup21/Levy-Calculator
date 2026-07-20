@@ -67,6 +67,7 @@
   .chip.st-live{color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.08)}
   .chip.st-build{color:var(--gold);border-color:rgba(224,164,59,0.4);background:rgba(224,164,59,0.08)}
   .chip.st-discovery{color:var(--blue);border-color:rgba(57,160,212,0.4);background:rgba(57,160,212,0.08)}
+  .chip.st-complete{color:var(--teal);border-color:rgba(45,212,178,0.4);background:rgba(45,212,178,0.08)}
 
   .road{margin-top:2px}
   .rstage{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text2);text-transform:uppercase;margin:18px 0 8px}
@@ -97,7 +98,7 @@
   <div class="sub">Every app, tracker &amp; client build in one place &middot; <b>internal</b> vs <b style="color:#E0A43B">external</b> lanes, split into <b>builds</b> &amp; <b style="color:#E0A43B">trackers</b></div>
 
   <div class="stats">
-    <div class="stat b"><div class="n">4</div><div class="l">Builds (products)</div></div>
+    <div class="stat b"><div class="n">5</div><div class="l">Builds (products)</div></div>
     <div class="stat t"><div class="n">4</div><div class="l">Trackers (boards)</div></div>
     <div class="stat v"><div class="n">7</div><div class="l">Live &amp; reachable</div></div>
     <div class="stat"><div class="n" style="color:var(--blue)">25+</div><div class="l">Roadmap ideas</div></div>
@@ -162,7 +163,7 @@
   <!-- EXTERNAL -->
   <div class="lane external">
     <span class="lh"><span class="dot"></span>External — Client builds</span>
-    <span class="ct">1 build &middot; 0 trackers</span>
+    <span class="ct">2 builds &middot; 0 trackers</span>
     <span class="line"></span>
   </div>
   <div class="grid">
@@ -174,6 +175,12 @@
       <div class="desc">Client #1. Apprentice progress tracker + learner-review app + provider-data reconcile. Review form built.</div>
       <div class="meta"><span class="chip type">client</span><span class="chip st-build">in build</span></div>
     </a>
+
+    <div class="card">
+      <div class="head"><span class="sdot live"></span><span class="name">National Debtline — Conversation Tracker</span></div>
+      <div class="desc">Client #2. Stage-by-stage call aid that re-contextualises the whole track when new info appears, plus a daily gov-change watcher. Built &amp; shipped in a Cowork session.</div>
+      <div class="meta"><span class="chip type">client</span><span class="chip st-complete">complete</span></div>
+    </div>
 
   </div>
 
