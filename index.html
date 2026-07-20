@@ -617,14 +617,15 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. 80% drawn monthly; 20% released on EPA completion.</p>
     <div class="card" id="deptBudgetCard" style="border-color:var(--border2)">
       <details>
-        <summary style="cursor:pointer;font-weight:600;font-size:14px;color:var(--teal);list-style:none;display:flex;align-items:center;gap:9px;user-select:none"><span style="font-size:16px">&#127919;</span>Isolate a department&rsquo;s budget <span style="font-weight:400;color:var(--text3);font-size:12.5px">&mdash; optional: plan one team&rsquo;s slice of the levy &#9662;</span></summary>
-        <p class="step-sub" style="margin-top:11px">Set what a single team can spend from the levy and how many people to train, then add their programmes below. This tracks the spend against the cap &mdash; and cross-checks it against what your company levy actually holds.</p>
-        <div class="form-grid">
-          <div class="field"><label>Department / team</label><input id="dept-name" list="deptList" autocomplete="off" placeholder="e.g. Finance" oninput="renderDeptBudget()"></div>
-          <div class="field"><label>Levy budget cap (&pound;)</label><input id="dept-cap" type="number" min="0" placeholder="e.g. 40000" oninput="renderDeptBudget()"></div>
-          <div class="field"><label>Headcount goal <span style="color:var(--text3)">(optional)</span></label><input id="dept-goal" type="number" min="0" placeholder="e.g. 10" oninput="renderDeptBudget()"></div>
+        <summary style="cursor:pointer;font-weight:600;font-size:14px;color:var(--teal);list-style:none;display:flex;align-items:center;gap:9px;user-select:none"><span style="font-size:16px">&#127919;</span>Ring-fence levy for a department or project <span style="font-weight:400;color:var(--text3);font-size:12.5px">&mdash; optional: reserve part of the pot, no plan needed &#9662;</span></summary>
+        <p class="step-sub" style="margin-top:11px">Set aside part of your company levy for a team or project &mdash; even one that isn&rsquo;t planned yet. The calculator checks each reservation against what the pot actually holds and shows its share. Tick <b>Apply to my projection</b> to reserve it, so the plan below flags any overspend.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+          <div class="field" style="flex:2;min-width:160px;margin:0"><label>Department / project <span style="color:var(--text3)">(optional)</span></label><input id="rf-name" placeholder="e.g. Finance, or Project Atlas" onkeydown="if(event.key==='Enter')addRingfence()"></div>
+          <div class="field" style="flex:1;min-width:130px;margin:0"><label>Amount to reserve (&pound;)</label><input id="rf-amount" type="number" min="0" placeholder="e.g. 40000" onkeydown="if(event.key==='Enter')addRingfence()"></div>
+          <button class="btn-add" style="width:auto;padding:10px 20px" onclick="addRingfence()">+ Ring-fence</button>
         </div>
-        <div id="deptReadout"></div>
+        <div id="rfList" style="margin-top:4px"></div>
+        <label style="display:flex;align-items:center;gap:9px;margin-top:13px;font-size:13px;color:var(--text2);cursor:pointer;user-select:none"><input type="checkbox" id="rf-apply" onchange="toggleRingfenceApply()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--teal)"> <span><b>Apply to my projection</b> <span style="color:var(--text3);font-size:12px">&mdash; reserve the ring-fenced levy so the plan below flags overspend</span></span></label>
       </details>
     </div>
     <div class="card">
@@ -658,11 +659,6 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div class="field">
           <label>Learners</label>
           <input type="number" id="inp-count" placeholder="1" min="1">
-        </div>
-        <div class="field">
-          <label>Department / team <span style="color:var(--text3)">(optional)</span></label>
-          <input type="text" id="inp-dept" list="deptList" placeholder="e.g. Finance — leave blank if unknown" autocomplete="off">
-          <datalist id="deptList"></datalist>
         </div>
         <div class="date-pair">
           <div class="date-pair-field">
@@ -821,7 +817,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20p</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1269,11 +1265,12 @@ const SCEN_KEY='ac_scenario_v1';
 const RULES_VERSION=RULEBOOK.version;
 const SCEN_SCHEMA=1;
 let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null, scnDataAck=null, lastDataFindings=[];
+let ringfences=[], ringfenceApply=false;
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1285,12 +1282,14 @@ function applyScenario(s){
   if(s.talent!==undefined)scnTalent=s.talent;
   if(s.cohortMin!==undefined)scnCohortMin=s.cohortMin;
   if(s.dataAck!==undefined)scnDataAck=s.dataAck;
+  if(Array.isArray(s.ringfences))ringfences=s.ringfences;
+  if(s.ringfenceApply!==undefined)ringfenceApply=!!s.ringfenceApply;
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function persistScenario(force){
   try{
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
-    const hasData=force||hasLevy||programmes.length||scnGoal||scnTalent;
+    const hasData=force||hasLevy||programmes.length||scnGoal||scnTalent||(ringfences&&ringfences.length);
     if(!hasData){localStorage.removeItem(SCEN_KEY);return;}
     localStorage.setItem(SCEN_KEY,JSON.stringify(buildScenario()));
   }catch(e){/* storage unavailable — fail silently */}
@@ -1313,6 +1312,7 @@ function loadState(){
     }
     if(!s)return false;
     applyScenario(s);
+    if(typeof renderRingfences==='function')renderRingfences();
     let any=false;
     if(levyData&&levyData.byMonth&&levyData.byMonth.length){renderSummary();renderMonthTable();any=true;}
     if(Array.isArray(programmes)&&programmes.length){renderProgrammes();renderProjection();any=true;}
@@ -1328,7 +1328,7 @@ function loadState(){
 function clearSavedData(){
   if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
   try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
-  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;if(typeof renderRingfences==='function')renderRingfences();
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
@@ -1704,8 +1704,8 @@ function addUnit(){
   document.getElementById('progTable').classList.remove('hidden');
 }
 function addProgramme(overrides){
-  let name,cost,count,start,epa,age,dept;
-  if(overrides){({name,cost,count,start,epa,age,dept}=overrides);}
+  let name,cost,count,start,epa,age;
+  if(overrides){({name,cost,count,start,epa,age}=overrides);}
   else{
     const idx=parseInt(sel.value);if(!idx){alert('Select an apprenticeship standard.');return;}
     const s=STANDARDS[idx],isC=s.name==='Other / custom';
@@ -1719,13 +1719,12 @@ function addProgramme(overrides){
     if(mBetween(start,epa)<RULEBOOK.apprenticeshipMinMonths&&!confirm('This apprenticeship runs '+mBetween(start,epa)+' months — under the '+RULEBOOK.apprenticeshipMinMonths+'-month minimum, so it would not be levy-eligible as an apprenticeship. Add it anyway?'))return;
     var a1=parseInt(document.getElementById('inp-age1621').value)||0,a2=parseInt(document.getElementById('inp-age2224').value)||0,a3=parseInt(document.getElementById('inp-age25').value)||0;
     if(a1+a2+a3>0)age={y:a1,m:a2,o:a3};
-    dept=(document.getElementById('inp-dept').value||'').trim();
     sel.value=0;onStandardChange();
-    ['inp-name-custom','inp-cost','inp-count','inp-dept','inp-age1621','inp-age2224','inp-age25'].forEach(id=>document.getElementById(id).value='');
+    ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('inp-start').value='';document.getElementById('inp-epa').value='';
     updateDurReadout();
   }
-  var prog={name,cost,count,start,epa};if(age)prog.age=age;if(dept)prog.dept=dept;
+  var prog={name,cost,count,start,epa};if(age)prog.age=age;
   programmes.push(prog);
   renderProgrammes();renderProjection();saveState();
   document.getElementById('levySummary').classList.remove('hidden');
@@ -1746,58 +1745,54 @@ function clearProgForm(){
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
 
 // ── Department budget planner (#B): plan one team's slice against a fixed levy cap ──
-function renderDeptBudget(){
-  var el=document.getElementById('deptReadout'); if(!el) return;
+function ringfenceTotal(){return (typeof ringfences!=='undefined'&&ringfences?ringfences:[]).reduce(function(a,b){return a+(+b.amount||0);},0);}
+function renderRingfences(){
+  var el=document.getElementById('rfList');if(!el)return;
+  if(typeof ringfences==='undefined'||!ringfences)ringfences=[];
   var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
-  var gv=function(id){var e=document.getElementById(id);return e?(parseFloat((e.value||'').toString().replace(/[£,\s]/g,''))||0):0;};
-  var cap=gv('dept-cap'), goalEl=document.getElementById('dept-goal'), goal=goalEl?(parseInt(goalEl.value)||0):0;
-  var nameEl=document.getElementById('dept-name'), enteredName=(nameEl&&nameEl.value.trim())||'', name=enteredName||'This department';
-  if(!cap){el.innerHTML='';return;}
-  // --- COMPANY LEVY from Step 1 (the REAL engine value, so this carve-out tracks the calculator) ---
+  var chk=document.getElementById('rf-apply'); if(chk) chk.checked=!!ringfenceApply;
   var d=(typeof levyReportData==='function')?levyReportData():null;
   var M=(typeof projYears==='number'?projYears:3)*12;
-  var companyLevy = (d&&d.levyAvail>0)?(+d.levyAvail) : (levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0);
-  var committed = (d&&(d.levyPlanCost>0||d.planCost>0))?(+(d.levyPlanCost||d.planCost)):0; // company's existing commitments
-  var yrs = (d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
-  var hasCompany = companyLevy>0;
-  // --- this department's planned programmes: isolate to tagged programmes when tags are in use, else count all (envelope) ---
-  var deptKey=enteredName.toLowerCase();
-  var isolated = !!deptKey; // naming a team isolates strictly to ITS tagged programmes — untagged / other-team never count
-  var planProgs = isolated ? (programmes||[]).filter(function(p){return (p.dept||'').trim().toLowerCase()===deptKey;}) : (programmes||[]);
-  var allocated=0,learners=0,progs=0;
-  planProgs.forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
-  var avg=learners?allocated/learners:((d&&d.perHead)?+d.perHead:0);
-  var h='<div style="margin-top:14px;background:rgba(var(--wash),0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px">';
-  // ===== 1) CARVE-OUT of the company levy =====
-  if(hasCompany){
-    var slicePct=Math.max(0,Math.min(100,cap/companyLevy*100));
-    var overCompany=cap>companyLevy+0.5, remainderCo=companyLevy-cap;
-    h+='<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Carved from your company levy &mdash; from Step&nbsp;1</div>';
-    h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:var(--text);font-size:14px">'+esc(name)+' &mdash; <b style="color:var(--money)">'+fmt(cap)+'</b> ring-fenced</span><span style="font-size:12px;color:var(--text3)">'+slicePct.toFixed(0)+'% of '+fmt(Math.round(companyLevy))+' company levy</span></div>';
-    h+='<div style="height:11px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+Math.min(100,slicePct).toFixed(1)+'%;background:'+(overCompany?'var(--red)':'var(--money)')+';border-radius:99px;transition:width .3s"></div></div>';
-    if(overCompany)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; This '+fmt(cap)+' is more than the &asymp;'+fmt(Math.round(companyLevy))+' your company levy holds over '+yl+' &mdash; a department can&rsquo;t ring-fence more than the company has. Lower the cap, or raise the company levy in Step&nbsp;1.</div>';
-    else{
-      h+='<div style="font-size:12.5px;color:var(--text2)">&#10003; Leaves <b style="color:var(--teal)">'+fmt(Math.round(remainderCo))+'</b> of company levy for the rest of the organisation over '+yl+'.</div>';
-      if(committed>0.5){var freeAfter=companyLevy-committed; h+='<div style="font-size:12px;color:'+(cap>freeAfter+0.5?'var(--amber)':'var(--text3)')+';margin-top:5px">'+(cap>freeAfter+0.5?('&#9888; Your existing plan already commits '+fmt(Math.round(committed))+', leaving only &asymp;'+fmt(Math.round(Math.max(0,freeAfter)))+' uncommitted &mdash; this ring-fence overlaps that spend.'):('Your existing plan commits '+fmt(Math.round(committed))+'; &asymp;'+fmt(Math.round(freeAfter))+' of company levy is still uncommitted.'))+'</div>';}
-    }
-    h+='<div style="border-top:1px solid var(--border);margin:12px 0 0"></div>';
+  var companyLevy=(d&&d.levyAvail>0)?(+d.levyAvail):((levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0));
+  var yrs=(d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
+  if(!ringfences.length){el.innerHTML='<div style="font-size:12.5px;color:var(--text3);margin-top:9px">No ring-fences yet &mdash; reserve part of your levy above (e.g. &pound;40,000 for Finance).</div>';return;}
+  var rows=ringfences.map(function(r,i){
+    var amt=+r.amount||0, pct=companyLevy>0?(amt/companyLevy*100):0;
+    return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)">'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--text);font-size:13.5px">'+esc((r.name&&r.name.trim())||'Unnamed reservation')+'</div>'+
+      '<div style="font-size:11.5px;color:var(--text3)">'+(companyLevy>0?(pct.toFixed(1)+'% of your company levy'):'add levy in Step 1 to see its share')+'</div></div>'+
+      '<div style="font-family:var(--mono);font-size:14px;color:var(--money);font-weight:600">'+fmt(amt)+'</div>'+
+      '<button class="btn-rm" onclick="removeRingfence('+i+')" title="Remove">&#10005;</button></div>';
+  }).join('');
+  var total=ringfenceTotal(), over=total>companyLevy+0.5, remaining=companyLevy-total, totPct=companyLevy>0?(total/companyLevy*100):0;
+  var summary;
+  if(companyLevy>0){
+    summary='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:var(--text);font-size:13.5px">Total ring-fenced</span><span style="font-family:var(--mono);font-size:14px"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(total)+'</b> <span style="color:var(--text3);font-size:12px">('+totPct.toFixed(0)+'% of '+fmt(Math.round(companyLevy))+')</span></span></div>'+
+      '<div style="height:10px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:9px"><div style="height:100%;width:'+Math.min(100,totPct).toFixed(1)+'%;background:'+(over?'var(--red)':'var(--money)')+';border-radius:99px;transition:width .3s"></div></div>'+
+      (over
+        ? '<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; Your reservations total '+fmt(total)+', but your company levy only holds &asymp;'+fmt(Math.round(companyLevy))+' over '+yl+' &mdash; over by '+fmt(Math.round(total-companyLevy))+'. Reduce a ring-fence.</div>'
+        : '<div style="font-size:13px;color:var(--text2)">&#10003; Available from your pot &mdash; leaves <b style="color:var(--teal)">'+fmt(Math.round(remaining))+'</b> of company levy unreserved over '+yl+'.</div>')+
+      (ringfenceApply?'':'<div style="font-size:11.5px;color:var(--text3);margin-top:6px;font-style:italic">Informational only &mdash; tick &ldquo;Apply to my projection&rdquo; to reserve this against the plan below.</div>')+
+      '</div>';
   }else{
-    h+='<div style="font-size:12.5px;color:var(--amber);margin-bottom:4px">&#9888; No company levy yet &mdash; add your levy in <b>Step&nbsp;1</b> so this budget can be carved from what the company actually holds. Showing the department plan only.</div><div style="border-top:1px solid var(--border);margin:12px 0 0"></div>';
+    summary='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12.5px;color:var(--amber)">&#9888; Add your levy in <b>Step&nbsp;1</b> to check these '+fmt(total)+' of reservations against what the pot actually holds.</div>';
   }
-  // ===== 2) DEPARTMENT PLAN vs its ring-fenced budget =====
-  var remaining=cap-allocated, over=remaining<0, pct=Math.max(0,Math.min(100,allocated/cap*100));
-  var barCol=over?'var(--red)':(pct>85?'var(--amber)':'var(--teal)');
-  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin:12px 0 9px"><span style="font-weight:700;color:var(--text);font-size:13.5px">'+esc(name)+'&rsquo;s plan</span><span style="font-family:var(--mono);font-size:13px;color:var(--text2)"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(allocated)+'</b> of '+fmt(cap)+' spent</span></div>';
-  h+='<div style="height:9px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:11px"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barCol+';border-radius:99px;transition:width .3s"></div></div>';
-  if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the ring-fenced budget &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the cap.</div>';
-  else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left in budget'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
-  h+='<div style="font-size:12.5px;color:var(--text3);margin-top:6px">'+learners+' learner'+(learners!==1?'s':'')+' across '+progs+' programme'+(progs!==1?'s':'')+(goal?' &middot; <b style="color:'+(learners>=goal?'var(--teal)':'var(--text2)')+'">'+learners+' of '+goal+'</b> toward your goal':'')+'.</div>';
-  var deptNote = isolated ? (progs>0 ? ('&#10003; Isolated to the '+progs+' programme'+(progs!==1?'s':'')+' tagged &ldquo;'+esc(enteredName)+'&rdquo; &mdash; untagged programmes aren&rsquo;t counted here.') : ('No programmes are tagged &ldquo;'+esc(enteredName)+'&rdquo; yet &mdash; add the tag on a programme below so it counts toward this team. Untagged programmes aren&rsquo;t attributed to any team.')) : ('Counts every programme as this plan &mdash; name a team above to isolate only its tagged programmes.');
-  h+='<div style="font-size:11.5px;color:var(--text3);margin-top:5px;font-style:italic">'+deptNote+'</div>';
-  if(goal&&avg>0){var fundable=Math.floor(cap/avg);
-    h+='<div style="font-size:12.5px;color:var(--text3);margin-top:8px;padding-top:9px;border-top:1px solid var(--border)">At '+fmt(Math.round(avg))+'/learner, '+fmt(cap)+' funds about <b style="color:'+(fundable>=goal?'var(--teal)':'var(--amber)')+'">'+fundable+'</b> &mdash; '+(fundable>=goal?('enough for your goal of '+goal+'.'):('short of your goal of '+goal+' by '+(goal-fundable)+' &mdash; raise the cap to &asymp;'+fmt(Math.round(goal*avg))+', or reduce the goal.'))+'</div>';}
-  h+='</div>';el.innerHTML=h;
+  el.innerHTML=rows+summary;
 }
+function addRingfence(){
+  if(typeof ringfences==='undefined'||!ringfences)ringfences=[];
+  var nameEl=document.getElementById('rf-name'), amtEl=document.getElementById('rf-amount');
+  var name=(nameEl&&nameEl.value.trim())||'';
+  var amount=amtEl?(parseFloat((amtEl.value||'').toString().replace(/[£,\s]/g,''))||0):0;
+  if(amount<=0){alert('Enter an amount to ring-fence.');return;}
+  ringfences.push({name:name,amount:amount});
+  if(nameEl)nameEl.value='';if(amtEl)amtEl.value='';
+  renderRingfences();saveState();
+  if(programmes.length&&typeof renderProjection==='function')renderProjection();
+}
+function removeRingfence(i){if(typeof ringfences==='undefined'||!ringfences)return;ringfences.splice(i,1);renderRingfences();saveState();if(programmes.length&&typeof renderProjection==='function')renderProjection();}
+function toggleRingfenceApply(){var chk=document.getElementById('rf-apply');ringfenceApply=chk?!!chk.checked:false;renderRingfences();saveState();if(programmes.length&&typeof renderProjection==='function')renderProjection();}
 let progExpanded=false;
 function toggleProgList(){progExpanded=!progExpanded;renderProgrammes();}
 function renderProgrammes(){
@@ -1806,23 +1801,20 @@ function renderProgrammes(){
   const LIMIT=5, many=programmes.length>LIMIT, collapsed=many&&!progExpanded;
   let rows=programmes.map((p,i)=>{
     const hide=(collapsed&&i>=LIMIT)?' style="display:none"':'';
-    const dChip=p.dept?(' <span class="badge" style="background:rgba(var(--wash),0.07);color:var(--text2);border:1px solid var(--border);font-weight:500" title="Team / department">'+String(p.dept).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];})+'</span>'):'';
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span>${dChip}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}${dChip}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
-  var dl=document.getElementById('deptList');
-  if(dl){var seen={},opts='';programmes.forEach(function(p){var dp=(p.dept||'').trim();if(dp&&!seen[dp.toLowerCase()]){seen[dp.toLowerCase()]=1;opts+='<option value="'+dp.replace(/"/g,'&quot;')+'">';}});dl.innerHTML=opts;}
-  if(typeof renderDeptBudget==='function')renderDeptBudget();
+  if(typeof renderRingfences==='function')renderRingfences();
 }
 
 // FIFO levy-account simulation. Oldest funds drawn first; tranches expire 24m (pre-Aug 2026)
@@ -1916,19 +1908,23 @@ LevyEngine.simCoInvest=simCoInvest; LevyEngine.simulateLevyFIFO=simulateLevyFIFO
 function renderCapacity(d){
   var el=document.getElementById('projCapacity');if(!el)return;
   if(!d||!d.heads||!d.perHead||d.levyAvail<=0){el.innerHTML='';return;}
-  var cap=Math.floor(d.levyAvail/d.perHead);            // people fundable at their average programme cost
-  var over=(d.levyPlanCost||d.planCost)>d.levyAvail+0.5; // levy-eligible cost exceeds levy available over the horizon (L7 22+ self-fund already excluded)
+  var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
+  var avail=Math.max(0,d.levyAvail-rfTotal);            // ring-fenced levy is reserved — not available to this plan
+  var rfNames=(rfTotal>0)?ringfences.filter(function(r){return +r.amount>0;}).map(function(r){return (r.name&&r.name.trim())||'unnamed';}).join(', '):'';
+  var cap=Math.floor(avail/d.perHead);                  // people fundable at their average cost, after ring-fencing
+  var over=(d.levyPlanCost||d.planCost)>avail+0.5;      // plan exceeds what's available once reservations are held back
   var yrs=d.years, yl=yrs+' year'+(yrs!==1?'s':''), avgTxt=fmt(Math.round(d.perHead));
+  var rfNote=(rfTotal>0)?('<div style="margin-top:9px;font-size:12px;color:var(--text2);background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.3);border-radius:9px;padding:9px 12px">&#128274; <strong style="color:#E0A43B">'+fmt(Math.round(rfTotal))+' ring-fenced</strong> ('+rfNames+') &mdash; reserved and held back here, so &asymp;'+fmt(Math.round(avail))+' of your &asymp;'+fmt(Math.round(d.levyAvail))+' levy is available to this plan.</div>'):'';
   if(!over){
     var head=Math.max(0,cap-d.heads);
     el.innerHTML='<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.28);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
       '<div style="font-weight:700;color:#2DD4B2;margin-bottom:5px">&#128101; Training capacity &mdash; about '+cap+' apprentice'+(cap!==1?'s':'')+'</div>'+
-      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy (&asymp;&nbsp;'+fmt(Math.round(d.levyAvail))+' over '+yl+') funds about <strong>'+cap+'</strong> at your average programme cost of '+avgTxt+' each. You&rsquo;ve planned <strong>'+d.heads+'</strong>'+(head>0?(' &mdash; headroom for about <strong>'+head+' more</strong>'):' &mdash; you&rsquo;re at capacity')+'.</div></div>';
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">'+(rfTotal>0?'After ring-fencing, your available levy (&asymp;&nbsp;'+fmt(Math.round(avail))+' over '+yl+')':'Your levy (&asymp;&nbsp;'+fmt(Math.round(avail))+' over '+yl+')')+' funds about <strong>'+cap+'</strong> at your average programme cost of '+avgTxt+' each. You&rsquo;ve planned <strong>'+d.heads+'</strong>'+(head>0?(' &mdash; headroom for about <strong>'+head+' more</strong>'):' &mdash; you&rsquo;re at capacity')+'.</div>'+rfNote+'</div>';
   }else{
-    var gap=(d.levyPlanCost||d.planCost)-d.levyAvail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
+    var gap=(d.levyPlanCost||d.planCost)-avail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
     el.innerHTML='<div style="background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.4);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
-      '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your levy</div>'+
-      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but your levy provides <strong>'+fmt(Math.round(d.levyAvail))+'</strong> &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, or reduce/adjust programmes &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div></div>';
+      '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your '+(rfTotal>0?'available levy':'levy')+'</div>'+
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but '+(rfTotal>0?('after ring-fencing '+fmt(Math.round(rfTotal))+' ('+rfNames+') only <strong>'+fmt(Math.round(avail))+'</strong> is available'):('your levy provides <strong>'+fmt(Math.round(avail))+'</strong>'))+' &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, reduce/adjust programmes'+(rfTotal>0?', or release some ring-fenced levy':'')+' &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div>'+rfNote+'</div>';
   }
   if(d.niRelief>0.5){
     el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
@@ -2409,7 +2405,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());updateSectionNav();
+  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
