@@ -816,7 +816,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1747,19 +1747,45 @@ function renderDeptBudget(){
   var cap=gv('dept-cap'), goalEl=document.getElementById('dept-goal'), goal=goalEl?(parseInt(goalEl.value)||0):0;
   var nameEl=document.getElementById('dept-name'), name=(nameEl&&nameEl.value.trim())||'This department';
   if(!cap){el.innerHTML='';return;}
+  // --- COMPANY LEVY from Step 1 (the REAL engine value, so this carve-out tracks the calculator) ---
+  var d=(typeof levyReportData==='function')?levyReportData():null;
+  var M=(typeof projYears==='number'?projYears:3)*12;
+  var companyLevy = (d&&d.levyAvail>0)?(+d.levyAvail) : (levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0);
+  var committed = (d&&(d.levyPlanCost>0||d.planCost>0))?(+(d.levyPlanCost||d.planCost)):0; // company's existing commitments
+  var yrs = (d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
+  var hasCompany = companyLevy>0;
+  // --- this department's planned programmes (the plan below is treated as this team's) ---
   var allocated=0,learners=0,progs=0;
   (programmes||[]).forEach(function(p){allocated+=(+p.cost||0)*(+p.count||0);learners+=(+p.count||0);progs++;});
-  var remaining=cap-allocated, over=remaining<0, pct=Math.max(0,Math.min(100,allocated/cap*100)), avg=learners?allocated/learners:0;
-  var barCol=over?'var(--red)':(pct>85?'var(--amber)':'var(--teal)');
-  var M=(typeof projYears==='number'?projYears:3)*12, levyAvail=levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0, yl=(M/12)+' year'+((M/12)!==1?'s':'');
+  var avg=learners?allocated/learners:((d&&d.perHead)?+d.perHead:0);
   var h='<div style="margin-top:14px;background:rgba(var(--wash),0.03);border:1px solid var(--border);border-radius:12px;padding:14px 16px">';
-  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:9px"><span style="font-weight:700;color:var(--text);font-size:14px">'+esc(name)+'</span><span style="font-family:var(--mono);font-size:13px;color:var(--text2)"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(allocated)+'</b> of '+fmt(cap)+' allocated</span></div>';
+  // ===== 1) CARVE-OUT of the company levy =====
+  if(hasCompany){
+    var slicePct=Math.max(0,Math.min(100,cap/companyLevy*100));
+    var overCompany=cap>companyLevy+0.5, remainderCo=companyLevy-cap;
+    h+='<div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Carved from your company levy &mdash; from Step&nbsp;1</div>';
+    h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:var(--text);font-size:14px">'+esc(name)+' &mdash; <b style="color:var(--money)">'+fmt(cap)+'</b> ring-fenced</span><span style="font-size:12px;color:var(--text3)">'+slicePct.toFixed(0)+'% of '+fmt(Math.round(companyLevy))+' company levy</span></div>';
+    h+='<div style="height:11px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:8px"><div style="height:100%;width:'+Math.min(100,slicePct).toFixed(1)+'%;background:'+(overCompany?'var(--red)':'var(--money)')+';border-radius:99px;transition:width .3s"></div></div>';
+    if(overCompany)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; This '+fmt(cap)+' is more than the &asymp;'+fmt(Math.round(companyLevy))+' your company levy holds over '+yl+' &mdash; a department can&rsquo;t ring-fence more than the company has. Lower the cap, or raise the company levy in Step&nbsp;1.</div>';
+    else{
+      h+='<div style="font-size:12.5px;color:var(--text2)">&#10003; Leaves <b style="color:var(--teal)">'+fmt(Math.round(remainderCo))+'</b> of company levy for the rest of the organisation over '+yl+'.</div>';
+      if(committed>0.5){var freeAfter=companyLevy-committed; h+='<div style="font-size:12px;color:'+(cap>freeAfter+0.5?'var(--amber)':'var(--text3)')+';margin-top:5px">'+(cap>freeAfter+0.5?('&#9888; Your existing plan already commits '+fmt(Math.round(committed))+', leaving only &asymp;'+fmt(Math.round(Math.max(0,freeAfter)))+' uncommitted &mdash; this ring-fence overlaps that spend.'):('Your existing plan commits '+fmt(Math.round(committed))+'; &asymp;'+fmt(Math.round(freeAfter))+' of company levy is still uncommitted.'))+'</div>';}
+    }
+    h+='<div style="border-top:1px solid var(--border);margin:12px 0 0"></div>';
+  }else{
+    h+='<div style="font-size:12.5px;color:var(--amber);margin-bottom:4px">&#9888; No company levy yet &mdash; add your levy in <b>Step&nbsp;1</b> so this budget can be carved from what the company actually holds. Showing the department plan only.</div><div style="border-top:1px solid var(--border);margin:12px 0 0"></div>';
+  }
+  // ===== 2) DEPARTMENT PLAN vs its ring-fenced budget =====
+  var remaining=cap-allocated, over=remaining<0, pct=Math.max(0,Math.min(100,allocated/cap*100));
+  var barCol=over?'var(--red)':(pct>85?'var(--amber)':'var(--teal)');
+  h+='<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin:12px 0 9px"><span style="font-weight:700;color:var(--text);font-size:13.5px">'+esc(name)+'&rsquo;s plan</span><span style="font-family:var(--mono);font-size:13px;color:var(--text2)"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(allocated)+'</b> of '+fmt(cap)+' spent</span></div>';
   h+='<div style="height:9px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:11px"><div style="height:100%;width:'+pct.toFixed(1)+'%;background:'+barCol+';border-radius:99px;transition:width .3s"></div></div>';
-  if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the cap &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the budget.</div>';
-  else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at your average '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
+  if(over)h+='<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; '+fmt(-remaining)+' over the ring-fenced budget &mdash; trim about '+Math.ceil((-remaining)/(avg||cap))+' learner(s), or raise the cap.</div>';
+  else h+='<div style="font-size:13px;color:var(--text2)"><b style="color:var(--teal)">'+fmt(remaining)+'</b> left in budget'+(avg>0?' &mdash; room for about <b style="color:var(--teal)">'+Math.floor(remaining/avg)+'</b> more at '+fmt(Math.round(avg))+'/learner':'')+'.</div>';
   h+='<div style="font-size:12.5px;color:var(--text3);margin-top:6px">'+learners+' learner'+(learners!==1?'s':'')+' across '+progs+' programme'+(progs!==1?'s':'')+(goal?' &middot; <b style="color:'+(learners>=goal?'var(--teal)':'var(--text2)')+'">'+learners+' of '+goal+'</b> toward your goal':'')+'.</div>';
-  if(levyAvail>0)h+='<div style="font-size:12px;color:'+(cap>levyAvail?'var(--amber)':'var(--text3)')+';margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">'+(cap>levyAvail?('&#9888; This '+fmt(cap)+' cap is more than the &asymp;'+fmt(Math.round(levyAvail))+' your company levy holds over '+yl+' &mdash; a department can&rsquo;t draw more than the company has.'):('&#10003; Within the &asymp;'+fmt(Math.round(levyAvail))+' your company levy holds over '+yl+'.'))+'</div>';
-  else h+='<div style="font-size:12px;color:var(--text3);margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">Add your levy data in the <b>Levy</b> section to check this cap against what the company actually holds.</div>';
+  h+='<div style="font-size:11.5px;color:var(--text3);margin-top:5px;font-style:italic">'+(progs===0?'The programmes you add below count as this team&rsquo;s plan.':'Counts every programme currently in the calculator as this team&rsquo;s plan &mdash; use one scenario per department to isolate.')+'</div>';
+  if(goal&&avg>0){var fundable=Math.floor(cap/avg);
+    h+='<div style="font-size:12.5px;color:var(--text3);margin-top:8px;padding-top:9px;border-top:1px solid var(--border)">At '+fmt(Math.round(avg))+'/learner, '+fmt(cap)+' funds about <b style="color:'+(fundable>=goal?'var(--teal)':'var(--amber)')+'">'+fundable+'</b> &mdash; '+(fundable>=goal?('enough for your goal of '+goal+'.'):('short of your goal of '+goal+' by '+(goal-fundable)+' &mdash; raise the cap to &asymp;'+fmt(Math.round(goal*avg))+', or reduce the goal.'))+'</div>';}
   h+='</div>';el.innerHTML=h;
 }
 let progExpanded=false;
