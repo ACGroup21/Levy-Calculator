@@ -817,7 +817,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20u</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2163,11 +2163,16 @@ function renderLevyReport(){
 }
 function levyPage1(d,framing){
   var rag=levyRag(d), h=levyHeadline(d,framing), fin=framing==='finance';
+  // ring-fence overlay (only when the user ticked "Apply to my projection" — otherwise byte-identical)
+  var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
+  var rfAvail=Math.max(0,d.levyAvail-rfTotal), rfPlan=(d.levyPlanCost||d.planCost);
+  var rfNames=(rfTotal>0)?ringfences.filter(function(r){return +r.amount>0;}).map(function(r){return (r.name&&r.name.trim())||'unnamed';}).join(', '):'';
+  var rfOver=(rfTotal>0)&&(rfPlan>rfAvail+0.5), rfGap=rfOver?(rfPlan-rfAvail):0;
   var goalChip=(scnGoal&&scnGoal.key)?'<span style="display:inline-flex;align-items:center;gap:7px;font-size:11px"><span style="width:7px;height:7px;border-radius:50%;background:#2DD4B2;box-shadow:0 0 9px #2DD4B2,0 0 4px #2DD4B2"></span><span style="color:#2DD4B2;text-shadow:0 0 9px rgba(45,212,178,0.75);font-weight:700;letter-spacing:.02em">Goal</span><span style="color:#c7d6e2">&nbsp;'+scnGoal.label+'</span></span>':'';
   var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figures=fin
-    ? fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+fig('Account balance',lvK(d.balance))
-    : fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+fig('Levy per head',lvK(d.perHead));
+    ? fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+(rfTotal>0?fig('Avail. after ring-fence',lvK(rfAvail),rfOver?'#e0607a':'#E0A43B'):fig('Account balance',lvK(d.balance)))
+    : fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+(rfTotal>0?fig('Avail. after ring-fence',lvK(rfAvail),rfOver?'#e0607a':'#E0A43B'):fig('Levy per head',lvK(d.perHead)));
   var narrative=fin
     ? 'Your levy carries this plan. '+(d.stage==='Under-using'?'The priority now is putting more of it to work before it expires.':d.stage==='Scaling'?'Keep co-investment in view as your commitments grow.':'It is working efficiently — protect the surplus and the timing.')
     : 'A structured investment in '+d.heads+' of your people'+(d.subjectCount>1?' across '+d.subjectCount+' skill areas':'')+', building capability that is evidenced at assessment, not assumed.';
@@ -2192,15 +2197,16 @@ function levyPage1(d,framing){
   var utilBars=(d.yearUtil||[]).map(function(u,i){var pct=Math.round(u*100),over=pct>100,col=over?'#e0607a':(pct>=85?'#E0A43B':'#2DD4B2');return '<div class="lvy-util-row"><span class="yr">Year '+(i+1)+'</span><div class="bar"><div class="fill" style="width:'+Math.min(100,pct)+'%;background:'+col+'"></div></div><span class="pct" style="color:'+col+'">'+pct+'%</span></div>';}).join('');
   var utilSection='<div class="lvy-util"><div class="lvy-sec">Levy utilisation by year</div><div class="lvy-util-rows">'+utilBars+'</div></div>';
   // Board decision: the recommendation (the "ask") + a 3-dimension risk-on-a-page, each grounded in a real signal
-  var finRisk=d.coInvest>d.planCost*0.10?2:((d.coInvest>0||d.expiry>d.annual*0.15)?1:0);
+  var finRisk=(rfOver||d.coInvest>d.planCost*0.10)?2:((d.coInvest>0||d.expiry>d.annual*0.15)?1:0);
   var cohMin=scnCohortMin||0, belowCoh=cohMin?d.programmes.some(function(p){return p.type!=='unit'&&(+p.count||0)<cohMin;}):false;
   var capBuffer=(planCfg.headcount||1)*(planCfg.hours||37.5)*((planCfg.dip||10)/100);
   var delivRisk=(d.otjHrsWk>capBuffer)?2:(belowCoh?1:0);
   var compRisk=d.programmes.filter(function(p){return p.type!=='unit';}).every(function(p){return mBetween(p.start,p.epa)>=RULEBOOK.apprenticeshipMinMonths;})?0:2;
   var rWord=['Low','Watch','High'], rCol=['#2DD4B2','#E0A43B','#e0607a'];
-  var rec=d.coInvest<1?('Proceed — your levy funds this plan in full; approve the '+d.heads+' planned start'+(d.heads!==1?'s':'')+'.')
+  var rec=rfOver?('Reduce scope or release reservations before approval — after ring-fencing '+lvK(rfTotal)+' ('+rfNames+'), only '+lvK(rfAvail)+' of levy is available and this plan commits '+lvK(rfPlan)+' ('+lvK(rfGap)+' over).')
+    :(d.coInvest<1?('Proceed — your levy funds this plan in full; approve the '+d.heads+' planned start'+(d.heads!==1?'s':'')+'.')
     :(d.coInvest<d.planCost*0.10?('Proceed — approve a co-investment budget of '+lvK(d.coInvest)+' over '+d.years+' years.')
-    :('Review scope or phasing before approval — '+lvK(d.coInvest)+' co-investment is significant against the '+lvK(d.planCost)+' plan.'));
+    :('Review scope or phasing before approval — '+lvK(d.coInvest)+' co-investment is significant against the '+lvK(d.planCost)+' plan.')));
   function riskItem(lab,lvl){return '<span class="lvy-risk-item"><i style="background:'+rCol[lvl]+'"></i>'+lab+' <b style="color:'+rCol[lvl]+'">'+rWord[lvl]+'</b></span>';}
   var decideStrip='<div class="lvy-decide"><div class="lvy-decide-rec"><span class="lvy-decide-t">RECOMMENDATION</span>'+rec+'</div><div class="lvy-risk">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div></div>';
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
