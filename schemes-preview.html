@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Levy Calculator — Light-mode schemes</title></head>
+<body>
+<style>
+  *{box-sizing:border-box}
+  :root{--f:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--m:ui-monospace,'SF Mono',Menlo,Consolas,monospace}
+  body{margin:0}
+  .wrap{max-width:1000px;margin:0 auto;padding:26px 18px 70px;font-family:var(--f);color:#0f172a}
+  .head h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+  .head p{font-size:14.5px;color:#51617a;line-height:1.55;margin:0 0 4px;max-width:70ch}
+  .head .hint{font-size:13px;color:#7c8aa0;margin-top:8px}
+  #grid{display:flex;flex-direction:column;gap:26px;margin-top:26px}
+
+  .scheme{position:relative;border-radius:20px;overflow:hidden;background:var(--page);
+    border:1px solid var(--line);box-shadow:0 10px 34px rgba(20,32,54,.09)}
+  .scheme canvas.bg{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+  .ui{position:relative;z-index:1;padding:20px 22px 22px}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .mark{width:34px;height:34px;border-radius:9px;background:var(--primary);color:#fff;font-weight:800;
+    font-size:15px;display:flex;align-items:center;justify-content:center;letter-spacing:-.03em;flex:0 0 auto;
+    box-shadow:0 3px 10px color-mix(in srgb,var(--primary) 45%,transparent)}
+  .brand{line-height:1.15}
+  .brand b{font-size:14px;color:var(--text);font-weight:700}
+  .brand span{display:block;font-size:10.5px;color:var(--faint);font-family:var(--m);letter-spacing:.06em;text-transform:uppercase}
+  .nav{display:flex;gap:7px;margin-left:6px}
+  .nav i{width:8px;height:8px;border-radius:50%;background:var(--faint);opacity:.5}
+  .nav i.on{background:var(--primary);opacity:1;box-shadow:0 0 8px var(--primary)}
+  .num{margin-left:auto;font-family:var(--m);font-weight:800;font-size:22px;color:var(--primary);opacity:.9}
+
+  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;
+    box-shadow:0 1px 3px rgba(20,32,54,.05);backdrop-filter:blur(2px)}
+  .card.big{flex:1 1 260px}
+  .lab{font-size:10.5px;font-family:var(--m);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:6px}
+  .fig{font-size:31px;font-weight:800;letter-spacing:-.02em;color:var(--text);font-variant-numeric:tabular-nums}
+  .sub{font-size:12px;color:var(--muted);margin-top:3px}
+  .pill{display:inline-block;margin-top:9px;font-size:11px;font-weight:700;font-family:var(--m);
+    color:var(--pos);background:color-mix(in srgb,var(--pos) 12%,var(--card));border:1px solid color-mix(in srgb,var(--pos) 30%,transparent);
+    border-radius:99px;padding:2px 9px}
+  .card.side{flex:1 1 200px}
+  .card.side .fig{font-size:22px}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{font-family:var(--m);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);
+    text-align:left;padding:0 0 8px;font-weight:600}
+  th.r,td.r{text-align:right}
+  td{padding:8px 0;border-top:1px solid var(--line);color:var(--text);font-variant-numeric:tabular-nums}
+  td.nm{font-weight:600}
+  td.pos{color:var(--pos);font-weight:700;font-family:var(--m)}
+  .tag{font-family:var(--m);font-size:9px;font-weight:700;letter-spacing:.03em;padding:1px 6px;border-radius:5px;
+    color:var(--pos);background:color-mix(in srgb,var(--pos) 13%,var(--card));border:1px solid color-mix(in srgb,var(--pos) 28%,transparent);margin-left:6px}
+
+  .chips{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px}
+  .btn{background:var(--primary);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-weight:700;
+    font-size:12.5px;font-family:var(--f);cursor:default;box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 40%,transparent)}
+  .chip{font-size:11.5px;font-weight:600;color:var(--primary);background:var(--chip);
+    border:1px solid color-mix(in srgb,var(--primary) 22%,transparent);border-radius:99px;padding:5px 12px}
+  .chip.acc{color:var(--pos);background:color-mix(in srgb,var(--pos) 12%,var(--card));border-color:color-mix(in srgb,var(--pos) 30%,transparent)}
+
+  .foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px;padding-top:15px;border-top:1px solid var(--line)}
+  .sw{display:flex;gap:5px}
+  .sw i{width:26px;height:26px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+  .meta b{font-size:15px;color:var(--text);font-weight:800}
+  .meta span{display:block;font-size:12px;color:var(--muted);margin-top:1px}
+  .hex{margin-left:auto;font-family:var(--m);font-size:11px;color:var(--faint);text-align:right;line-height:1.7}
+  @media(max-width:560px){.hex{display:none}}
+</style>
+
+<div class="wrap">
+  <div class="head">
+    <h1>Levy Calculator — light-mode schemes</h1>
+    <p>Five directions, each a <b>white/light base with a blue anchor</b> and a different second colour, over its own <b>living constellation background</b> that shimmers within the palette. Same real data in every one so you can compare like-for-like.</p>
+    <p class="hint">Pick a number and I'll apply it to the live calculator — or mix (e.g. "3's colours, 5's background").</p>
+  </div>
+  <div id="grid"></div>
+</div>
+
+<script>
+const SCHEMES=[
+  {n:'01',name:'Cobalt & Slate',tag:'Minimal · corporate · maximum trust',
+   page:'#f4f7fc',card:'#ffffff',text:'#0f1b2e',muted:'#4a5a70',faint:'#8fa0b7',line:'#e4eaf3',
+   primary:'#2563eb',chip:'#eaf1fe',pos:'#1e40af',
+   bg:{hue:220,spread:16,accentHue:206,accentMix:0.14},
+   hex:['#2563EB primary','#1E40AF deep','#0F1B2E ink']},
+  {n:'02',name:'Denim & Terracotta',tag:'Warm · editorial · grounded',
+   page:'#f8f6f3',card:'#ffffff',text:'#182133',muted:'#4c5568',faint:'#97a0b2',line:'#ece7e1',
+   primary:'#2f5fb0',chip:'#e9eff9',pos:'#c2603c',
+   bg:{hue:218,spread:16,accentHue:16,accentMix:0.24},
+   hex:['#2F5FB0 denim','#C2603C terracotta','#182133 ink']},
+  {n:'03',name:'Harbour Blue & Emerald',tag:'Blue for trust · green for money',
+   page:'#f2f7f8',card:'#ffffff',text:'#0d1f26',muted:'#42596a',faint:'#8aa4b0',line:'#e1ecef',
+   primary:'#0369a1',chip:'#e5f2f8',pos:'#059669',
+   bg:{hue:202,spread:34,accentHue:158,accentMix:0.34},
+   hex:['#0369A1 primary','#059669 emerald','#0D1F26 ink']},
+  {n:'04',name:'Navy & Amber',tag:'Editorial · warm · confident',
+   page:'#f8f7f3',card:'#ffffff',text:'#182338',muted:'#4c566b',faint:'#98a1b3',line:'#ebe7e0',
+   primary:'#1e3a8a',chip:'#eaeefb',pos:'#c2740a',
+   bg:{hue:224,spread:14,accentHue:38,accentMix:0.18},
+   hex:['#1E3A8A navy','#C2740A amber','#182338 ink']},
+  {n:'05',name:'Sky & Coral',tag:'Friendly · approachable · fresh',
+   page:'#f3f8fc',card:'#ffffff',text:'#0c1c2b',muted:'#42576a',faint:'#89a0b3',line:'#e2edf4',
+   primary:'#0284c7',chip:'#e5f4fc',pos:'#e11d5c',
+   bg:{hue:200,spread:16,accentHue:350,accentMix:0.24},
+   hex:['#0284C7 sky','#E11D5C coral','#0C1C2B ink']}
+];
+
+function ui(s){
+  return `<canvas class="bg"></canvas><div class="ui">
+    <div class="topbar">
+      <div class="mark">ac</div>
+      <div class="brand"><b>arthur curtis</b><span>Levy affordability</span></div>
+      <div class="nav"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      <div class="num">${s.n}</div>
+    </div>
+    <div class="stats">
+      <div class="card big">
+        <div class="lab">Levy available · next 3 years</div>
+        <div class="fig">£248,500</div>
+        <div class="sub">Balance £41,200 + £8,200/mo incoming</div>
+        <div class="pill">▲ funds 19 apprentices</div>
+      </div>
+      <div class="card side">
+        <div class="lab">Your direct cash</div>
+        <div class="fig">£41,600</div>
+        <div class="sub">off-the-job time · co-invest £0</div>
+      </div>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>Programme</th><th class="r">Idv cost</th><th class="r">Total levy</th><th class="r">Learners</th></tr></thead><tbody>
+        <tr><td class="nm">L3 Data technician<span class="tag">EXISTING</span></td><td class="r">£13,000</td><td class="r pos">£52,000</td><td class="r">4</td></tr>
+        <tr><td class="nm">L7 Senior people professional</td><td class="r">£19,000</td><td class="r pos">£19,000</td><td class="r">1</td></tr>
+        <tr><td class="nm">L5 Coaching professional</td><td class="r">£5,000</td><td class="r pos">£10,000</td><td class="r">2</td></tr>
+      </tbody></table>
+      <div class="chips">
+        <button class="btn">+ Add programme</button>
+        <span class="chip">8 learners on plan</span>
+        <span class="chip acc">Monthly draw ~£4,967</span>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="sw"><i style="background:${s.primary}"></i><i style="background:${s.pos}"></i><i style="background:${s.text}"></i><i style="background:${s.page};box-shadow:inset 0 0 0 1px ${s.line}"></i></div>
+      <div class="meta"><b>${s.n} · ${s.name}</b><span>${s.tag}</span></div>
+      <div class="hex">${s.hex.join('<br>')}</div>
+    </div>
+  </div>`;
+}
+
+const grid=document.getElementById('grid');
+SCHEMES.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='scheme';
+  el.style.cssText=`--page:${s.page};--card:${s.card};--text:${s.text};--muted:${s.muted};--faint:${s.faint};--line:${s.line};--primary:${s.primary};--chip:${s.chip};--pos:${s.pos}`;
+  el.innerHTML=ui(s);
+  grid.appendChild(el);
+});
+
+const DPR=Math.min(window.devicePixelRatio||1,2);
+function animate(cv,opt){
+  const ctx=cv.getContext('2d'); let W,H,nodes=[],t=0;
+  function rz(){const r=cv.getBoundingClientRect();W=cv.width=Math.max(1,Math.round(r.width*DPR));H=cv.height=Math.max(1,Math.round(r.height*DPR));
+    const N=Math.min(46,Math.round(r.width*r.height/12000)+12);
+    nodes=Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*0.16*DPR,vy:(Math.random()-.5)*0.16*DPR,
+      r:(Math.random()*1.4+0.9)*DPR,hj:(Math.random()-.5)*opt.spread,phase:Math.random()*6.283,accent:Math.random()<(opt.accentMix||0)}));}
+  const LINK=118*DPR;
+  function hue(n){return Math.round(((n.accent?opt.accentHue:(opt.hue+n.hj+Math.sin(t*0.006+n.phase)*opt.spread*0.35))%360+360)%360);}
+  function draw(){
+    ctx.clearRect(0,0,W,H); t+=0.5;
+    for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;}
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
+      if(d<LINK){const o=(1-d/LINK)*0.15;ctx.strokeStyle='hsla('+hue(a)+',68%,52%,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.7;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
+    for(const n of nodes){n.phase+=0.02;const gl=0.5+0.5*Math.sin(n.phase),h=hue(n);
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.fillStyle='hsla('+h+',74%,50%,'+(0.32+0.4*gl).toFixed(3)+')';ctx.fill();
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r*3,0,7);ctx.fillStyle='hsla('+h+',80%,58%,'+(0.05*gl).toFixed(3)+')';ctx.fill();}
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',rz); rz(); draw();
+}
+document.querySelectorAll('.scheme canvas.bg').forEach((cv,i)=>animate(cv,SCHEMES[i].bg));
+</script>
+</body>
+</html>
