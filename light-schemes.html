@@ -44,7 +44,48 @@
   <p class="lead">Five directions for the calculator's light mode. Every one sits on a <b>pure white page</b> — no silver, no gradient, no glare. What differs is the <b>palette</b> and, importantly, <b>how each section is designated</b> (background tint vs. border vs. top bar vs. left rail vs. label chip).</p>
   <p class="note">Each demo shows the same four section types — SETUP · RESULTS · WATCH · metric tiles — so you can compare how the design tells them apart. Pick a number (and mix-and-match a designation method with a palette if you like).</p>
   <div id="app"></div>
+  <div id="darkdemo"></div>
 </div>
+<script>
+(function(){
+  // dark-mode counterpart of Scheme 03 (top accent bar)
+  var C={ card:'#0f1e33', hair:'#1d3350', text:'#e9f3fa', text2:'#a7bccf', text3:'#7890a6', money:'#2DD4B2',
+    input:'#2DD4B2', result:'#45dd85', warn:'#f5b13a' };
+  function card(accent){return 'border-radius:12px;padding:13px 15px;background:'+C.card+';border:1px solid '+C.hair+';border-top:3px solid '+accent+';';}
+  function head(accent,txt){return '<span class="sec-h" style="color:'+accent+'"><i style="width:8px;height:8px;border-radius:50%;background:'+accent+';display:inline-block"></i>'+txt+'</span>';}
+  var setup='<div style="'+card(C.input)+'">'+head(C.input,'Step 01 · Setup')+
+    '<div class="sec-t" style="color:'+C.text+'">Your levy</div>'+
+    '<div class="fld" style="color:'+C.text2+';border-color:rgba(255,255,255,.08)"><span>Annual pay bill</span><span style="color:'+C.text+'">£4,500,000</span></div>'+
+    '<div class="fld" style="color:'+C.text2+';border-color:rgba(255,255,255,.08)"><span>Levy balance</span><span style="color:'+C.text+'">£38,200</span></div>'+
+    '<div class="sub" style="color:'+C.text3+';margin-top:7px">Enter or import from ESFA</div></div>';
+  var result='<div style="'+card(C.result)+'">'+head(C.result,'Results')+
+    '<div class="sec-t" style="color:'+C.text+'">Forecast</div>'+
+    '<div class="big" style="color:'+C.money+'">£151,682</div>'+
+    '<div class="sub" style="color:'+C.text2+'">levy available over 3 years</div>'+
+    '<div class="sub" style="color:'+C.result+';font-weight:600;margin-top:6px">&#10003; Plan fully funded</div></div>';
+  var warn='<div style="'+card(C.warn)+'">'+head(C.warn,'Watch')+
+    '<div class="sec-t" style="color:'+C.text+'">Co-investment</div>'+
+    '<div class="big" style="color:'+C.warn+';font-size:20px">£1,750</div>'+
+    '<div class="sub" style="color:'+C.text2+'">in 2 exhausted months — deferring the EPA clears it.</div></div>';
+  var tiles=[['Levy-funded','£142k',C.input],['Employer cash','£1,750',C.money],['At risk','£9,000',C.warn]].map(function(m){
+    return '<div style="border-radius:12px;padding:11px 13px;background:'+C.card+';border:1px solid '+C.hair+'"><div class="tile-l" style="color:'+C.text3+'">'+m[0]+'</div><div class="tile-v" style="color:'+m[2]+'">'+m[1]+'</div></div>';
+  }).join('');
+  document.getElementById('darkdemo').innerHTML=
+    '<div style="margin-top:34px;border-radius:18px;padding:24px 22px 26px;background:#070f1d;border:1px solid #182a41">'+
+      '<span class="scheme-n" style="color:#5f7891">SCHEME 03 · DARK MODE</span>'+
+      '<div class="scheme-name" style="color:'+C.text+';margin-bottom:2px">Top accent bar — in dark</div>'+
+      '<div class="scheme-method" style="color:'+C.text2+'">The same method carries straight over: <b style="color:#cfe0ee">dark glass cards</b>, a hairline border, and the coloured bar on top &mdash; now <b style="color:#cfe0ee">brighter (teal / green / amber)</b> so it pops against the navy. Money returns to teal, matching the app&rsquo;s established dark palette. The top bar keeps the exact same section language across both themes.</div>'+
+      '<div class="pal">'+
+        '<span class="sw" style="border-color:#22344c;color:#9fb4c8"><i style="background:#050C18"></i>page #050C18</span>'+
+        '<span class="sw" style="border-color:#22344c;color:#9fb4c8"><i style="background:'+C.card+'"></i>card '+C.card+'</span>'+
+        '<span class="sw" style="border-color:#22344c;color:#9fb4c8"><i style="background:'+C.input+'"></i>setup '+C.input+'</span>'+
+        '<span class="sw" style="border-color:#22344c;color:#9fb4c8"><i style="background:'+C.result+'"></i>results '+C.result+'</span>'+
+        '<span class="sw" style="border-color:#22344c;color:#9fb4c8"><i style="background:'+C.warn+'"></i>watch '+C.warn+'</span>'+
+      '</div>'+
+      '<div class="demo">'+setup+result+warn+'<div class="metrics">'+tiles+'</div></div>'+
+    '</div>';
+})();
+</script>
 <script>
 var SCHEMES=[
   {
