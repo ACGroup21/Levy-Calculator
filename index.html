@@ -347,6 +347,18 @@ button{font-family:var(--sans);cursor:pointer}
 .bm-goal{color:var(--teal);font-size:11px;white-space:nowrap}
 .bm-clean{border-color:var(--border2)}
 .bm-clean .bm-head{color:var(--teal)}
+/* what-if comparison */
+.wi-scroll{overflow-x:auto}
+.wi-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:420px}
+.wi-h{text-align:right;padding:6px 12px;font-weight:700;color:var(--text);font-size:12.5px;border-bottom:1px solid var(--border2);vertical-align:top}
+.wi-h:first-child{text-align:left}
+.wi-rec{color:var(--teal)}
+.wi-tag{display:block;font-family:var(--mono);font-size:8.5px;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.wi-l{text-align:left;padding:7px 12px;color:var(--text2);white-space:nowrap}
+.wi-c{text-align:right;padding:7px 12px;font-family:var(--mono);color:var(--text);font-variant-numeric:tabular-nums}
+.wi-best{color:var(--teal);font-weight:700}
+.wi-notes{margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--text3);line-height:1.5}
+.wi-foot{margin-top:9px;font-size:11px;color:var(--text3);font-style:italic;line-height:1.5}
 /* shortfall advisor */
 .sf-box{margin-top:1rem;padding:12px 15px;border-radius:9px;font-size:13px;line-height:1.6}
 .sf-box.ok{background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3)}
@@ -766,6 +778,10 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       </div>
       <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
       <div id="bestMoves"></div>
+      <details id="whatIfCard" style="margin-top:12px">
+        <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#9878;&#65039;</span>Compare your options <span style="color:var(--text3);font-size:12.5px">&mdash; the same people, planned differently &#9662;</span></summary>
+        <div id="whatIfBody" style="margin-top:11px"></div>
+      </details>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
       <div id="affordLadder"></div>
@@ -834,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20x</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1953,6 +1969,37 @@ function renderCapacity(d){
       ' <a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk</a></div>';
   }
 }
+// ── What-if: compare the same people planned differently, each costed end-to-end by the real engine ──
+function _wiWith(variant,fn){var save=programmes;programmes=variant;try{return fn();}finally{programmes=save;}}
+function _wiShift(iso,months){if(!iso)return iso;var d=new Date(iso);d.setMonth(d.getMonth()+months);return d.toISOString().slice(0,10);}
+function whatIfScenarios(){
+  return [
+    {name:'As planned',note:'Everyone starts and completes on your current dates.',t:function(ps){return ps;}},
+    {name:'Longer durations',note:'Each apprenticeship runs 6 months longer, so the 80% training draw spreads over more months.',t:function(ps){return ps.map(function(p){return (p.type==='unit'||!p.epa)?p:Object.assign({},p,{epa:_wiShift(p.epa,6)});});}},
+    {name:'Phased (two waves)',note:'Each cohort split 50/50 — the second wave starts a year later, halving the concurrent draw.',t:function(ps){var out=[];ps.forEach(function(p){var c=+p.count||0;if(c<2){out.push(p);return;}var w1=Math.ceil(c/2);out.push(Object.assign({},p,{count:w1}));var p2=Object.assign({},p,{count:c-w1,start:_wiShift(p.start,12)});if(p.epa)p2.epa=_wiShift(p.epa,12);out.push(p2);});return out;}}
+  ];
+}
+function renderWhatIf(){
+  var el=document.getElementById('whatIfBody'); if(!el) return;
+  if(!programmes.length){el.innerHTML='<div style="font-size:12.5px;color:var(--text3)">Add programmes to compare options.</div>';return;}
+  var scens=whatIfScenarios().map(function(s){
+    var d=_wiWith(s.t(programmes.map(function(p){return Object.assign({},p);})),levyReportData);
+    return {name:s.name,note:s.note,coInvest:d.coInvest||0,empCash:(d.coInvest||0)+(d.selfFundCost||0),expiry:d.expiry||0,endBal:d.endBal||0,planCost:d.planCost||0};
+  });
+  var col=function(f){return scens.map(f);};
+  var span=function(a){return Math.max.apply(null,a)-Math.min.apply(null,a);};
+  var minCo=Math.min.apply(null,col(function(s){return s.coInvest;})), minCash=Math.min.apply(null,col(function(s){return s.empCash;}));
+  var minExp=Math.min.apply(null,col(function(s){return s.expiry;})), maxBal=Math.max.apply(null,col(function(s){return s.endBal;}));
+  var goal=(typeof scnGoal!=='undefined'&&scnGoal&&scnGoal.key)||null;
+  var recIdx=0,recBest=Infinity;
+  scens.forEach(function(s,i){var m=(goal==='expiry')?s.expiry:s.empCash;if(m<recBest-0.5){recBest=m;recIdx=i;}});
+  var cell=function(v,best){return '<td class="wi-c'+(best?' wi-best':'')+'">'+fmt(Math.round(v))+'</td>';};
+  var head='<tr><th class="wi-h"></th>'+scens.map(function(s,i){return '<th class="wi-h'+(i===recIdx?' wi-rec':'')+'">'+s.name+(i===recIdx?'<span class="wi-tag">recommended</span>':'')+'</th>';}).join('')+'</tr>';
+  var row=function(lab,key,lowIsBest){var vals=col(function(s){return s[key];});var sp=span(vals);var best=lowIsBest?Math.min.apply(null,vals):Math.max.apply(null,vals);return '<tr><td class="wi-l">'+lab+'</td>'+scens.map(function(s){return cell(s[key],sp>0.5&&s[key]===best);}).join('')+'</tr>';};
+  var rows=row('Co-investment','coInvest',true)+row('Employer cash','empCash',true)+row('At risk of expiry','expiry',true)+row('End balance','endBal',false);
+  var notes='<div class="wi-notes">'+scens.map(function(s){return '<div><b style="color:var(--text)">'+s.name+'</b> &mdash; '+s.note+'</div>';}).join('')+'</div>';
+  el.innerHTML='<div class="wi-scroll"><table class="wi-tbl">'+head+rows+'</table></div>'+notes+'<div class="wi-foot">Every figure is recomputed by the real engine for that plan &mdash; the training investment ('+fmt(Math.round(scens[0].planCost))+') is unchanged; only the timing differs. Illustrative &mdash; the actual phasing is yours to set.</div>';
+}
 // "Your best moves" — fuses the scattered advisor hints into ONE ranked, engine-costed panel.
 // Each move's £ impact is recomputed by the real co-invest engine (simCoInvest); ranked by saving, goal first.
 function renderBestMoves(income,tot,ev,labels,pmk,uTot,best,d){
@@ -2528,7 +2575,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
+  renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderWhatIf();renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
