@@ -331,6 +331,22 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12.5px;color:var(--text2);line-height:1.5}
 .jd-upload{margin-bottom:1rem;padding:14px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:9px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
+/* best-moves (recommendations) panel */
+.bm-panel{margin-top:1rem;background:rgba(var(--wash),0.03);border:1px solid var(--border2);border-radius:14px;padding:15px 18px}
+.bm-head{font-weight:700;font-size:14px;color:var(--text);display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
+.bm-head>span:first-child{font-size:17px}
+.bm-sub{font-weight:400;font-size:11.5px;color:var(--text3)}
+.bm-move{border-top:1px solid var(--border);padding:11px 0 3px}
+.bm-move:first-of-type{border-top:none;padding-top:2px}
+.bm-move-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.bm-rk{font-family:var(--mono);font-size:15px;color:var(--teal);font-weight:700;line-height:1}
+.bm-t{font-weight:600;font-size:13.5px;color:var(--text);flex:1;min-width:0}
+.bm-save{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal);background:rgba(var(--wash),0.05);border:1px solid var(--border2);border-radius:99px;padding:2px 10px;white-space:nowrap}
+.bm-save.soft{color:var(--amber);border-color:var(--amber)}
+.bm-why{font-size:12.5px;color:var(--text2);line-height:1.5;margin-top:4px}
+.bm-goal{color:var(--teal);font-size:11px;white-space:nowrap}
+.bm-clean{border-color:var(--border2)}
+.bm-clean .bm-head{color:var(--teal)}
 /* shortfall advisor */
 .sf-box{margin-top:1rem;padding:12px 15px;border-radius:9px;font-size:13px;line-height:1.6}
 .sf-box.ok{background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3)}
@@ -749,6 +765,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <button class="btn-demo" onclick="openLevyReport('hr',this)">&#128196;&nbsp; HR / L&amp;D &#8599;</button>
       </div>
       <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
+      <div id="bestMoves"></div>
       <div id="shortfallAdvice"></div>
       <div class="warn-box" id="expiryWarning">&#9651;&nbsp;<strong>Expiry risk:</strong> <span id="expiryText"></span></div>
       <div id="affordLadder"></div>
@@ -817,7 +834,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20w</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1936,6 +1953,57 @@ function renderCapacity(d){
       ' <a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk</a></div>';
   }
 }
+// "Your best moves" — fuses the scattered advisor hints into ONE ranked, engine-costed panel.
+// Each move's £ impact is recomputed by the real co-invest engine (simCoInvest); ranked by saving, goal first.
+function renderBestMoves(income,tot,ev,labels,pmk,uTot,best,d){
+  var el=document.getElementById('bestMoves'); if(!el) return;
+  var base=simCoInvest(income,tot,pmk,uTot).total, N=income.length, moves=[];
+  // 1. extend duration (already engine-costed in renderProjection via a +6-month re-run)
+  if(best&&best.saving>1) moves.push({save:best.saving,goal:'cash',
+    title:'Extend '+best.name+' to '+(best.curDur+6)+' months',
+    why:'Spreads the 80% training draw over more months, lowering the monthly peak that triggers co-investment.'});
+  // 2 & 3. best defer + best spread across the EPA completion events
+  var bDefer=null,bSpread=null;
+  ev.forEach(function(e){
+    var mvBest=-1,mvTc=base;
+    for(var j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){var t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;var c=simCoInvest(income,t2,pmk,uTot).total;if(c<mvTc-1){mvTc=c;mvBest=j;}}
+    if(mvBest>=0&&(base-mvTc)>(bDefer?bDefer.save:0)) bDefer={save:base-mvTc,name:e.name,to:labels[mvBest],resid:mvTc};
+    var spK=0,spTc=base;
+    for(var k=2;k<=6&&e.idx+k-1<N;k++){var t3=tot.slice();t3[e.idx]-=e.amount;var per=e.amount/k;for(var m=0;m<k;m++)t3[e.idx+m]+=per;var c2=simCoInvest(income,t3,pmk,uTot).total;if(c2<spTc-1){spTc=c2;spK=k;}if(c2<1)break;}
+    if(spK&&(base-spTc)>(bSpread?bSpread.save:0)) bSpread={save:base-spTc,name:e.name,k:spK,from:labels[e.idx],resid:spTc};
+  });
+  if(bDefer) moves.push({save:bDefer.save,goal:'cash',
+    title:'Defer '+bDefer.name+'’s completion payment to '+bDefer.to,
+    why:'The 20% EPA payment lands in an exhausted month; moving it to when the pot has recovered cuts co-investment'+(bDefer.resid<1?' to nil':' to '+fmt(bDefer.resid))+'. Keep the EPA date &mdash; negotiate the payment schedule.'});
+  if(bSpread) moves.push({save:bSpread.save,goal:'cash',
+    title:'Spread '+bSpread.name+'’s completion payment over '+bSpread.k+' months',
+    why:'Splitting the 20% from '+bSpread.from+' keeps each month under the levy line'+(bSpread.resid<1?', removing co-investment entirely':', cutting it to '+fmt(bSpread.resid))+'.'});
+  // 4. gift / transfer-in when over-committed (ring-fence-aware)
+  var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
+  var avail=d?Math.max(0,d.levyAvail-rfTotal):0, plan=d?(d.levyPlanCost||d.planCost):0;
+  if(d&&plan>avail+0.5){var gap=plan-avail;
+    moves.push({save:gap,soft:true,goal:'headcount',
+      title:'Apply for a levy transfer to cover the ~'+fmt(Math.round(gap))+' shortfall',
+      why:'Your plan commits more than your levy holds'+(rfTotal>0?' after ring-fencing '+fmt(Math.round(rfTotal)):'')+'. Another employer can gift up to 50% of their levy (≈'+fmt(Math.round(d.transferCap))+'/yr) to fully fund the excess.'});}
+  // 5. put idle levy to work (expiry) — only when NOT co-investing
+  if(base<1&&d&&d.expiry>1){
+    moves.push({save:d.expiry,soft:true,goal:'expiry',
+      title:'Put ~'+fmt(Math.round(d.expiry))+' of idle levy to work before it expires',
+      why:'This levy is forecast to go unused (24-month expiry). Add units, a foundation apprenticeship or an extra cohort &mdash; or gift it as social value.'});}
+  // goal-fit first, then £ impact desc
+  var goal=(typeof scnGoal!=='undefined'&&scnGoal&&scnGoal.key)||null;
+  moves.sort(function(a,b){var ga=(goal&&a.goal===goal)?1:0,gb=(goal&&b.goal===goal)?1:0;if(ga!==gb)return gb-ga;return (b.save||0)-(a.save||0);});
+  if(!moves.length){
+    el.innerHTML='<div class="bm-panel bm-clean"><div class="bm-head"><span>&#10003;</span>Your plan is already optimal</div><div class="bm-why" style="margin-top:2px">No move the engine tested &mdash; extend, defer, spread, transfer &mdash; reduces co-investment or idle levy. Your levy is well-matched to your plan.</div></div>';
+    return;}
+  var rk=['①','②','③','④','⑤'];
+  var rows=moves.slice(0,5).map(function(mv,i){
+    var tag=mv.save>1?('<span class="bm-save'+(mv.soft?' soft':'')+'">'+(mv.soft?'covers ':'saves ')+fmt(Math.round(mv.save))+'</span>'):'';
+    var star=(goal&&mv.goal===goal)?' <span class="bm-goal">&#127919; serves your goal</span>':'';
+    return '<div class="bm-move"><div class="bm-move-h"><span class="bm-rk">'+rk[i]+'</span><span class="bm-t">'+mv.title+'</span>'+tag+'</div><div class="bm-why">'+mv.why+star+'</div></div>';
+  }).join('');
+  el.innerHTML='<div class="bm-panel"><div class="bm-head"><span>&#127919;</span>Your best moves <span class="bm-sub">ranked by impact &mdash; each figure is your real co-investment, recomputed by the engine</span></div>'+rows+'</div>';
+}
 function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
   const base=simCoInvest(income,tot,pmk,uTot);
@@ -2430,9 +2498,8 @@ function renderProjection(){
   // Duration sensitivity: re-run the real co-invest engine on a +6-month hypothetical per programme
   const apprTot=(progs)=>{const t=Array(M).fill(0);progs.forEach(p=>{if(p.type==='unit')return;const sm=mKey(p.start),em=mKey(p.epa),dr=mBetween(p.start,p.epa);const ec=lvyEligCount(p),mt=(p.cost*RULEBOOK.draw.training/dr)*ec,et=p.cost*RULEBOOK.draw.epa*ec;for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)t[i]+=mt;}const ei=em-pmk;if(ei>=0&&ei<M)t[ei]+=et;});return t;};
   const ciBase=simCoInvest(income,tot,pmk,us);
-  let durTip='';
+  let durTip='', best=null;
   if(ciBase.total>1){
-    let best=null;
     programmes.forEach((p,idx)=>{
       if(p.type==='unit')return;
       const curDur=mBetween(p.start,p.epa),ne=new Date(p.epa);ne.setMonth(ne.getMonth()+6);
@@ -2461,7 +2528,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
+  renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
