@@ -27,7 +27,9 @@
 :root[data-theme="light"] .aurora{display:none}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
-:root[data-theme="light"] header{--text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;--wash:255,255,255;--teal:#3b82f6}
+:root[data-theme="light"] header{background:rgba(255,255,255,0.82);border-bottom-color:#e2e8f2;--teal:#2563eb}
+:root[data-theme="light"] .logo-mark-img{filter:brightness(0) saturate(100%) invert(13%) sepia(38%) saturate(1500%) hue-rotate(196deg) brightness(96%) contrast(96%)}
+:root[data-theme="light"] .header-badge{background:#eef2f9;border-color:#dbe3ef;color:var(--text2)}
 /* Scheme A — warm accents: terracotta on EPA chips + the Add-programme CTA in light mode */
 :root[data-theme="light"] .badge-epa,:root[data-theme="light"] .epa-chip{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;border-color:rgba(194,96,60,0.32)!important}
 :root[data-theme="light"] .btn-add{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;-webkit-text-fill-color:#c2603c!important;border-color:rgba(194,96,60,0.34)!important}
@@ -850,7 +852,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20z</div>
 </footer>
 
 <!-- copilot FAB -->
