@@ -817,7 +817,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-20v</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2157,9 +2157,59 @@ function setLevyFraming(f){
   document.querySelectorAll('#levyFramingToggle button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-f')===f);});
   renderLevyReport();
 }
+function levyBoardCover(d){
+  var fmt=lvK;
+  // ring-fence overlay (only when the user ticked "Apply to my projection")
+  var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
+  var avail=Math.max(0,d.levyAvail-rfTotal), rfPlan=(d.levyPlanCost||d.planCost);
+  var overLevy=rfPlan>avail+0.5, overGap=overLevy?(rfPlan-avail):0;
+  var empCash=(d.coInvest||0)+(d.selfFundCost||0);
+  var teams=(rfTotal>0)?ringfences.filter(function(r){return +r.amount>0;}).length:0;
+  // ── risk (mirrors the P1 decision strip, ring-fence-aware) ──
+  var finRisk=(overLevy||d.coInvest>d.planCost*0.10)?2:((d.coInvest>0||d.expiry>d.annual*0.15)?1:0);
+  var cohMin=scnCohortMin||0, belowCoh=cohMin?d.programmes.some(function(p){return p.type!=='unit'&&(+p.count||0)<cohMin;}):false;
+  var capBuffer=(planCfg.headcount||1)*(planCfg.hours||37.5)*((planCfg.dip||10)/100);
+  var delivRisk=(d.otjHrsWk>capBuffer)?2:(belowCoh?1:0);
+  var compRisk=d.programmes.filter(function(p){return p.type!=='unit';}).every(function(p){return mBetween(p.start,p.epa)>=RULEBOOK.apprenticeshipMinMonths;})?0:2;
+  var rWord=['Low','Watch','High'], rCol=['#2DD4B2','#E0A43B','#e0607a'];
+  function riskItem(lab,lvl){return '<span class="lvy-risk-item"><i style="background:'+rCol[lvl]+'"></i>'+lab+' <b style="color:'+rCol[lvl]+'">'+rWord[lvl]+'</b></span>';}
+  // ── decision ──
+  var dec = overLevy
+    ? {word:'Defer / re-scope',col:'#e0607a',note:'The plan commits '+fmt(rfPlan)+' but only '+fmt(avail)+' of levy is available'+(rfTotal>0?' after ring-fencing '+fmt(rfTotal):'')+' &mdash; '+fmt(overGap)+' short. Reduce scope, phase starts, or secure a levy transfer before approval.'}
+    : (d.coInvest>d.planCost*0.10
+      ? {word:'Approve with conditions',col:'#E0A43B',note:'Approve subject to a co-investment budget of '+fmt(d.coInvest)+' over '+d.years+' years.'}
+      : {word:'Approve',col:'#2DD4B2',note:d.coInvest>0?('Approve &mdash; co-investment of '+fmt(d.coInvest)+' is modest against the '+fmt(d.planCost)+' plan.'):'Approve &mdash; your levy funds this plan in full.'});
+  // ── figures ──
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:120px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var figs=fig('Total commitment',fmt(d.planCost))
+    +fig('Levy-funded',fmt(d.levyCovered),'#2DD4B2')
+    +fig('Employer cash',empCash?fmt(empCash):'£0',empCash?'#E0A43B':'#2DD4B2')
+    +fig('Off-the-job time',fmt(d.otjCost))
+    +fig('At risk of expiry',d.expiry?fmt(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2');
+  // ── allocation ──
+  var alloc;
+  if(rfTotal>0){
+    var arows=ringfences.filter(function(r){return +r.amount>0;}).map(function(r){var pct=d.levyAvail>0?(+r.amount/d.levyAvail*100):0;return '<div style="display:flex;justify-content:space-between;font-size:12px;color:#c7d6e2;padding:3px 0"><span>'+((r.name&&r.name.trim())||'Unnamed reservation')+'</span><span style="font-family:\'JetBrains Mono\',monospace">'+fmt(+r.amount)+' <span style="color:#7e95ab">('+pct.toFixed(0)+'%)</span></span></div>';}).join('');
+    alloc='<div class="lvy-sec">Levy allocation</div><div style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:11px 15px">'+arows+'<div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:#fff;border-top:1px solid rgba(var(--wash),0.14);margin-top:6px;padding-top:6px"><span>Ring-fenced total &middot; '+fmt(avail)+' left for the plan</span><span style="font-family:\'JetBrains Mono\',monospace">'+fmt(rfTotal)+'</span></div></div>';
+  } else {
+    alloc='<div class="lvy-sec">Levy allocation</div><div style="font-size:12.5px;color:#8ba0b6;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:11px 15px">No departmental ring-fences set &mdash; the full '+fmt(d.levyAvail)+' pot is available to this plan.</div>';
+  }
+  // ── ask ──
+  var ask='Approve <b style="color:#fff">'+fmt(d.planCost)+'</b> to train <b style="color:#fff">'+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</b>'+(teams>1?(' across <b style="color:#fff">'+teams+' teams</b>'):'')+' over <b style="color:#fff">'+d.years+' year'+(d.years!==1?'s':'')+'</b>. <b style="color:#2DD4B2">'+fmt(d.levyCovered)+'</b> is levy-funded; employer cash exposure is <b style="color:'+(empCash?'#E0A43B':'#2DD4B2')+'">'+fmt(empCash)+'</b>'+(d.otjCost?(', plus <b style="color:#fff">'+fmt(d.otjCost)+'</b> of off-the-job staff time'):'')+'.';
+  return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
+    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
+      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
+    '<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
+    '<div class="lvy-sec">The numbers</div><div class="lvy-figs" style="margin-bottom:16px">'+figs+'</div>'+
+    '<div class="lvy-sec">Risk assessment</div><div class="lvy-risk" style="margin-bottom:16px">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div>'+
+    alloc+
+    '<div class="lvy-decide" style="margin-top:16px;border-color:'+dec.col+'55"><div class="lvy-decide-rec"><span class="lvy-decide-t" style="color:'+dec.col+'">RECOMMENDATION &middot; '+dec.word.toUpperCase()+'</span>'+dec.note+'</div></div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only &mdash; based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'.'+dataAckNote()+' Full analysis follows in the Affordability Report.</div>'+
+    '</div></div>';
+}
 function renderLevyReport(){
   var d=levyReportData();
-  document.getElementById('levyReportPages').innerHTML=levyPage1(d,LEVY_FRAMING)+levyPage2(d,LEVY_FRAMING)+levyPage3(d,LEVY_FRAMING);
+  document.getElementById('levyReportPages').innerHTML=levyBoardCover(d)+levyPage1(d,LEVY_FRAMING)+levyPage2(d,LEVY_FRAMING)+levyPage3(d,LEVY_FRAMING);
 }
 function levyPage1(d,framing){
   var rag=levyRag(d), h=levyHeadline(d,framing), fin=framing==='finance';
