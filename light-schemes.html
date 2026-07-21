@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Light-mode schemes — Levy Calculator</title>
+<style>
+  *{box-sizing:border-box}
+  :root{--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+  html,body{margin:0;background:#ffffff;color:#0f1b2e;font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:24px;font-weight:800;letter-spacing:-.01em;margin:0 0 6px}
+  .lead{color:#586a82;font-size:14.5px;max-width:760px;margin:0 0 6px}
+  .note{color:#8090a4;font-size:12.5px;font-family:var(--mono);letter-spacing:.02em;margin:0 0 34px}
+  .scheme{border:1px solid #e7ecf3;border-radius:18px;padding:22px 22px 24px;margin-bottom:22px;background:#fff}
+  .scheme-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:10px;margin-bottom:4px}
+  .scheme-n{font-family:var(--mono);font-size:11px;color:#9aa7b8;letter-spacing:.14em}
+  .scheme-name{font-size:18px;font-weight:700}
+  .scheme-method{font-size:13px;color:#5c6e86;margin:2px 0 16px;max-width:760px}
+  .scheme-method b{color:#28374d}
+  /* palette strip */
+  .pal{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .sw{display:flex;align-items:center;gap:7px;border:1px solid #eef1f6;border-radius:8px;padding:4px 9px 4px 5px;font-family:var(--mono);font-size:10.5px;color:#54627a}
+  .sw i{width:16px;height:16px;border-radius:4px;border:1px solid rgba(20,30,45,.08);display:block}
+  /* demo grid */
+  .demo{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .demo .metrics{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:2px}
+  .sec-h{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .sec-t{font-weight:700;font-size:14px;margin-bottom:2px}
+  .fld{display:flex;justify-content:space-between;border-bottom:1px dashed rgba(20,30,45,.1);padding:5px 0;font-size:12.5px}
+  .fld span:last-child{font-family:var(--mono);font-weight:600}
+  .big{font-family:var(--mono);font-size:24px;font-weight:800;line-height:1.1;margin:3px 0}
+  .sub{font-size:12px}
+  .chip{display:inline-block;font-family:var(--mono);font-size:8.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:5px}
+  .tile-l{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .tile-v{font-family:var(--mono);font-size:18px;font-weight:800}
+  @media(max-width:720px){.demo,.demo .metrics{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Light-mode schemes</h1>
+  <p class="lead">Five directions for the calculator's light mode. Every one sits on a <b>pure white page</b> — no silver, no gradient, no glare. What differs is the <b>palette</b> and, importantly, <b>how each section is designated</b> (background tint vs. border vs. top bar vs. left rail vs. label chip).</p>
+  <p class="note">Each demo shows the same four section types — SETUP · RESULTS · WATCH · metric tiles — so you can compare how the design tells them apart. Pick a number (and mix-and-match a designation method with a palette if you like).</p>
+  <div id="app"></div>
+</div>
+<script>
+var SCHEMES=[
+  {
+    n:'01', name:'Cobalt · Tinted sections', style:'tint',
+    method:'Sections are told apart by a <b>soft background tint</b>: blue = setup, green = results, amber = watch. Borders are a slightly deeper shade of the same tint. Calm, colour-coded, easy to scan.',
+    text:'#0f1b2e', text2:'#45566e', text3:'#6b7c92', accent:'#2563eb', money:'#c2603c', hair:'#e6ebf2', card:'#fff',
+    types:{ input:{bg:'#eef3fd',border:'#d7e4f8',accent:'#2563eb'}, result:{bg:'#ecf6ef',border:'#cfe8d6',accent:'#2f8f57'}, warn:{bg:'#fdf5e8',border:'#f0e0bf',accent:'#b8791a'} }
+  },
+  {
+    n:'02', name:'Cobalt · Bordered white', style:'border',
+    method:'Cards stay <b>pure white</b>; the section type is carried entirely by a <b>coloured border</b> (blue / green / amber). Crisp and minimal — the white cards read cleanly against the white page via the coloured edge.',
+    text:'#0f1b2e', text2:'#45566e', text3:'#6b7c92', accent:'#2563eb', money:'#c2603c', hair:'#e6ebf2', card:'#fff',
+    types:{ input:{bg:'#fff',border:'#2563eb',accent:'#2563eb'}, result:{bg:'#fff',border:'#2f8f57',accent:'#2f8f57'}, warn:{bg:'#fff',border:'#d09324',accent:'#b8791a'} }
+  },
+  {
+    n:'03', name:'Cobalt · Top accent bar', style:'topbar',
+    method:'White cards with a thin hairline border and a <b>coloured bar across the top</b>. Structured and dashboard-like — the top bar labels the section without tinting the whole card.',
+    text:'#0f1b2e', text2:'#45566e', text3:'#6b7c92', accent:'#2563eb', money:'#c2603c', hair:'#e6ebf2', card:'#fff',
+    types:{ input:{bg:'#fff',border:'#e6ebf2',accent:'#2563eb'}, result:{bg:'#fff',border:'#e6ebf2',accent:'#2f8f57'}, warn:{bg:'#fff',border:'#e6ebf2',accent:'#d18a1f'} }
+  },
+  {
+    n:'04', name:'Teal · Left rail', style:'rail',
+    method:'A cooler teal palette. Cards are white with a hairline border and a <b>coloured left rail</b> marking the section type. The rail is a quiet, editorial way to designate — content stays clean white.',
+    text:'#12262a', text2:'#40565b', text3:'#6a7e82', accent:'#0d8f86', money:'#c2603c', hair:'#e4ecec', card:'#fff',
+    types:{ input:{bg:'#fff',border:'#e4ecec',accent:'#0d8f86'}, result:{bg:'#fff',border:'#e4ecec',accent:'#2f8f57'}, warn:{bg:'#fff',border:'#e4ecec',accent:'#c58a2a'} }
+  },
+  {
+    n:'05', name:'Warm · Label chips', style:'chip',
+    method:'A warmer mood — cards are a soft warm off-white (still on a white page) with a <b>small uppercase label chip</b> in the section colour. Rust as the primary accent, charcoal text. Approachable and human.',
+    text:'#241d17', text2:'#4a4038', text3:'#7a6f64', accent:'#b8502f', money:'#a05a26', hair:'#ece3d7', card:'#faf7f2',
+    types:{ input:{bg:'#faf7f2',border:'#ece3d7',accent:'#b8502f'}, result:{bg:'#faf7f2',border:'#ece3d7',accent:'#3f7d55'}, warn:{bg:'#faf7f2',border:'#ece3d7',accent:'#b07d1e'} }
+  }
+];
+
+function cardStyle(s,t){
+  var b='border-radius:12px;padding:13px 15px;';
+  if(s.style==='tint')   return b+'background:'+t.bg+';border:1px solid '+t.border+';';
+  if(s.style==='border') return b+'background:#fff;border:1.6px solid '+t.border+';';
+  if(s.style==='topbar') return b+'background:#fff;border:1px solid '+s.hair+';border-top:3px solid '+t.accent+';';
+  if(s.style==='rail')   return b+'background:#fff;border:1px solid '+s.hair+';border-left:4px solid '+t.accent+';';
+  if(s.style==='chip')   return b+'background:'+s.card+';border:1px solid '+s.hair+';';
+}
+function label(s,t,txt){
+  var dot='<i style="width:8px;height:8px;border-radius:50%;background:'+t.accent+';display:inline-block"></i>';
+  if(s.style==='chip') return '<span class="chip" style="background:'+hexA(t.accent,.12)+';color:'+t.accent+'">'+txt+'</span>';
+  return '<span class="sec-h" style="color:'+t.accent+'">'+dot+txt+'</span>';
+}
+function hexA(hex,a){var h=hex.replace('#','');var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+function sw(name,hex){return '<span class="sw"><i style="background:'+hex+'"></i>'+name+' '+hex+'</span>';}
+
+function render(){
+  var html=SCHEMES.map(function(s){
+    var ti=s.types.input, tr=s.types.result, tw=s.types.warn;
+    var pal=[sw('page','#ffffff'),sw('card',s.card),sw('border',s.hair),sw('accent',s.accent),sw('money',s.money),sw('text',s.text),sw('muted',s.text3)].join('');
+    // SETUP card
+    var setup='<div style="'+cardStyle(s,ti)+'">'+label(s,ti,'Step 01 · Setup')+
+      '<div class="sec-t" style="color:'+s.text+'">Your levy</div>'+
+      '<div class="fld" style="color:'+s.text2+'"><span>Annual pay bill</span><span style="color:'+s.text+'">£4,500,000</span></div>'+
+      '<div class="fld" style="color:'+s.text2+'"><span>Levy balance</span><span style="color:'+s.text+'">£38,200</span></div>'+
+      '<div class="sub" style="color:'+s.text3+';margin-top:7px">Enter or import from ESFA</div></div>';
+    // RESULTS card
+    var result='<div style="'+cardStyle(s,tr)+'">'+label(s,tr,'Results')+
+      '<div class="sec-t" style="color:'+s.text+'">Forecast</div>'+
+      '<div class="big" style="color:'+s.money+'">£151,682</div>'+
+      '<div class="sub" style="color:'+s.text2+'">levy available over 3 years</div>'+
+      '<div class="sub" style="color:'+tr.accent+';font-weight:600;margin-top:6px">&#10003; Plan fully funded</div></div>';
+    // WATCH card
+    var warn='<div style="'+cardStyle(s,tw)+'">'+label(s,tw,'Watch')+
+      '<div class="sec-t" style="color:'+s.text+'">Co-investment</div>'+
+      '<div class="big" style="color:'+tw.accent+';font-size:20px">£1,750</div>'+
+      '<div class="sub" style="color:'+s.text2+'">in 2 exhausted months — deferring the EPA clears it.</div></div>';
+    // metric tiles
+    var tiles=[['Levy-funded','£142k',s.accent],['Employer cash','£1,750',s.money],['At risk','£9,000',tw.accent]].map(function(m){
+      var st=cardStyle(s,ti).replace('padding:13px 15px','padding:11px 13px');
+      return '<div style="'+st+'"><div class="tile-l" style="color:'+s.text3+'">'+m[0]+'</div><div class="tile-v" style="color:'+m[2]+'">'+m[1]+'</div></div>';
+    }).join('');
+    return '<div class="scheme">'+
+      '<div class="scheme-head"><div><span class="scheme-n">SCHEME '+s.n+'</span><div class="scheme-name" style="color:'+s.text+'">'+s.name+'</div></div></div>'+
+      '<div class="scheme-method" style="color:'+s.text2+'">'+s.method+'</div>'+
+      '<div class="pal">'+pal+'</div>'+
+      '<div class="demo">'+setup+result+warn+'<div class="metrics">'+tiles+'</div></div>'+
+      '</div>';
+  }).join('');
+  document.getElementById('app').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
