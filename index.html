@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22p</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1377,7 +1377,7 @@ function expMo(mk){return mk<RULE_MK?RULEBOOK.expiryMonths.before:RULEBOOK.expir
 function mKey(date){if(typeof date==='string'){var m=date.match(/^(\d{4})-(\d{1,2})/);if(m)return (+m[1])*12+(+m[2]-1);}const d=new Date(date);return d.getFullYear()*12+d.getMonth();} // parse 'YYYY-MM-DD' by its literal year-month (timezone-independent); Date objects keep local getMonth (byte-identical)
 function mBetween(a,b){return Math.max(1,mKey(b)-mKey(a));}
 function mk2d(mk){return new Date(Math.floor(mk/12),mk%12,1);}
-function mkLbl(mk){return mk2d(mk).toLocaleDateString('en-GB',{month:'short',year:'numeric'});}
+function mkLbl(mk){return mk2d(mk).toLocaleDateString('en-GB',{month:'short',year:'numeric'}).replace('Sept ','Sep ');} /* en-GB gives "Sept" (4ch) for Sep only — normalise to 3ch so the year aligns in mono tables */
 function isoMo(mk){const d=mk2d(mk);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 
 document.getElementById('csvFile').addEventListener('change',e=>{if(e.target.files[0])readCSV(e.target.files[0]);});
