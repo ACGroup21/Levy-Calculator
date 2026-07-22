@@ -48,6 +48,8 @@
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
 
 .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+/* phased fade when switching light/dark — only active during the toggle, so normal interactions aren't affected */
+html.theme-anim,html.theme-anim *:not(canvas):not(.aurora-blob){transition:background-color .5s ease,color .5s ease,border-color .5s ease,box-shadow .5s ease,fill .5s ease,stroke .5s ease!important}
 .aurora-blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.38;animation:drift linear infinite}
 .blob1{width:700px;height:700px;background:#0d4a42;top:-200px;left:-200px;animation-duration:30s}
 .blob2{width:550px;height:550px;background:#1a3a58;top:25%;right:-150px;animation-duration:38s;animation-direction:reverse}
@@ -499,7 +501,7 @@ footer span{color:var(--teal)}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
-function toggleTheme(){applyTheme(document.documentElement.getAttribute('data-theme')==='light'?'dark':'light');try{if(typeof projChart!=='undefined'&&projChart&&typeof renderProjection==='function')renderProjection();}catch(e){}}
+function toggleTheme(){var r=document.documentElement;r.classList.add('theme-anim');clearTimeout(window._tAnim);window._tAnim=setTimeout(function(){r.classList.remove('theme-anim');},600);applyTheme(r.getAttribute('data-theme')==='light'?'dark':'light');try{if(typeof projChart!=='undefined'&&projChart&&typeof renderProjection==='function')renderProjection();}catch(e){}}
 try{if(localStorage.getItem('ac_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}
 document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStorage.getItem('ac_theme')||'dark');}catch(e){}});
 </script>
@@ -850,7 +852,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22r</div>
 </footer>
 
 <!-- copilot FAB -->

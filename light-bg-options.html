@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Light-mode background options</title>
+<style>
+  *{box-sizing:border-box}
+  :root{--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+  html,body{margin:0;background:#0d1622;color:#e9f1fa;font-family:var(--sans);font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:36px 22px 70px}
+  h1{font-size:22px;font-weight:800;margin:0 0 6px}
+  .lead{color:#9fb2c6;font-size:14px;max-width:720px;margin:0 0 4px}
+  .note{color:#7c93aa;font-family:var(--mono);font-size:11.5px;letter-spacing:.02em;margin:0 0 28px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .opt{border-radius:16px;overflow:hidden;border:1px solid #22344a;background:#0f1c2c}
+  .stage{position:relative;height:250px;overflow:hidden}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .samp{position:absolute;left:22px;right:22px;bottom:20px;background:#fff;border:1px solid #e6ebf2;border-radius:12px;box-shadow:0 2px 5px rgba(20,30,45,.06),0 8px 24px rgba(20,30,45,.06);padding:14px 16px}
+  .samp .k{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8a99ad}
+  .samp .t{font-weight:700;color:#0f1b2e;font-size:14px;margin:1px 0 6px}
+  .samp .row{display:flex;justify-content:space-between;font-size:12.5px;color:#45566e;border-top:1px dashed #e6ebf2;padding:4px 0}
+  .samp .row b{font-family:var(--mono);color:#0f1b2e}
+  .samp .money{font-family:var(--mono);font-size:20px;font-weight:800;color:#c2603c;margin-top:5px}
+  .samp .bar{height:3px;background:#2563eb;border-radius:3px;margin:-14px -16px 12px;border-radius:12px 12px 0 0}
+  .meta{display:flex;justify-content:space-between;align-items:baseline;padding:12px 16px;gap:10px}
+  .meta .nm{font-weight:700;font-size:15px}
+  .meta .hx{font-family:var(--mono);font-size:11px;color:#8aa0b6}
+  .meta .hint{font-size:12px;color:#8aa0b6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Light-mode background — options</h1>
+  <p class="lead">Four backgrounds for light mode — <b>no silver/grey</b>. Each shows the <b>loose, interchanging-colour stars</b> on that ground, with a sample card so you can see how content sits on it.</p>
+  <p class="note">Pick a number (or a name). The stars + card are the same across all — only the background colour changes.</p>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+var OPTS=[
+  {n:'01', name:'Pure white', bg:'#ffffff', hint:'Clean and bright'},
+  {n:'02', name:'Warm paper', bg:'#fbf9f4', hint:'Soft warmth — no grey'},
+  {n:'03', name:'Cream',      bg:'#f9f5ea', hint:'Warmer, editorial'},
+  {n:'04', name:'Sky',        bg:'#e9f1ff', hint:'Clearly blue — not silver'}
+];
+var HUES=[220,262,182,18,45]; // cobalt, violet, teal, terracotta, gold — interchanging
+var grid=document.getElementById('grid');
+var canvases=[];
+OPTS.forEach(function(o){
+  var el=document.createElement('div'); el.className='opt';
+  el.innerHTML='<div class="stage" style="background:'+o.bg+'"><canvas></canvas>'+
+    '<div class="samp"><div class="bar"></div><div class="k">Step 01 · Forecast</div><div class="t">Levy affordability</div>'+
+    '<div class="row"><span>Levy available</span><b>£151,682</b></div>'+
+    '<div class="row"><span>Plan cost</span><b>£58,000</b></div>'+
+    '<div class="money">£142,000 <span style="font-size:11px;color:#8a99ad;font-weight:400">levy-funded</span></div></div></div>'+
+    '<div class="meta"><span class="nm">'+o.n+' · '+o.name+'</span><span class="hx">'+o.bg+'</span><span class="hint">'+o.hint+'</span></div>';
+  grid.appendChild(el);
+  canvases.push(el.querySelector('canvas'));
+});
+function initStars(cv){
+  var w=cv.clientWidth,h=cv.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=w*dpr;cv.height=h*dpr;var ctx=cv.getContext('2d');ctx.scale(dpr,dpr);
+  var n=Math.round(w*h/5200);
+  var stars=[];for(var i=0;i<n;i++)stars.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.5+.7,vx:(Math.random()-.5)*.12,vy:(Math.random()-.5)*.12,phase:Math.random()*6.28,speed:.01+Math.random()*.02,hoff:Math.random()});
+  return {ctx:ctx,w:w,h:h,stars:stars};
+}
+var scenes=canvases.map(initStars);
+var t=0;
+function frame(){
+  t+=0.5;
+  scenes.forEach(function(s){
+    s.ctx.clearRect(0,0,s.w,s.h);
+    s.stars.forEach(function(st){
+      st.x+=st.vx;st.y+=st.vy;st.phase+=st.speed;
+      if(st.x<0||st.x>s.w)st.vx*=-1;if(st.y<0||st.y>s.h)st.vy*=-1;
+      var hue=Math.round(((t*0.28+st.hoff*360)%360+360)%360);
+      var gl=0.5+0.5*Math.sin(st.phase);
+      s.ctx.beginPath();s.ctx.arc(st.x,st.y,st.r,0,7);
+      s.ctx.fillStyle='hsla('+hue+',70%,52%,'+(0.22+0.28*gl).toFixed(3)+')';s.ctx.fill();
+      s.ctx.beginPath();s.ctx.arc(st.x,st.y,st.r*3,0,7);
+      s.ctx.fillStyle='hsla('+hue+',75%,58%,'+(0.05*gl).toFixed(3)+')';s.ctx.fill();
+    });
+  });
+  requestAnimationFrame(frame);
+}
+frame();
+addEventListener('resize',function(){scenes=canvases.map(initStars);});
+</script>
+</body>
+</html>
