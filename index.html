@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1957,7 +1957,7 @@ function renderCapacity(d){
     var gap=(d.levyPlanCost||d.planCost)-avail, overN=Math.max(1,d.heads-cap), cap50=Math.round(d.transferCap);
     el.innerHTML='<div style="background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.4);border-radius:12px;padding:13px 16px;margin-top:1rem">'+
       '<div style="font-weight:700;color:#ff8fa3;margin-bottom:5px">&#9888;&#65039; You&rsquo;ve exceeded your '+(rfTotal>0?'available levy':'levy')+'</div>'+
-      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but '+(rfTotal>0?('after ring-fencing '+fmt(Math.round(rfTotal))+' ('+rfNames+') only <strong>'+fmt(Math.round(avail))+'</strong> is available'):('your levy provides <strong>'+fmt(Math.round(avail))+'</strong>'))+' &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; retime or spread your starts, extend durations, reduce/adjust programmes'+(rfTotal>0?', or release some ring-fenced levy':'')+' &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div>'+rfNote+'</div>';
+      '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but '+(rfTotal>0?('after ring-fencing '+fmt(Math.round(rfTotal))+' ('+rfNames+') only <strong>'+fmt(Math.round(avail))+'</strong> is available'):('your levy provides <strong>'+fmt(Math.round(avail))+'</strong>'))+' &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; stagger your starts into waves, or reduce/adjust the plan'+(rfTotal>0?', or release some ring-fenced levy':'')+' &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div>'+rfNote+'</div>';
   }
   if(d.niRelief>0.5){
     el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
@@ -2316,7 +2316,7 @@ function levyPage1(d,framing){
   var interpLead=fin
     ? 'Beyond the totals above — how hard your levy is working, what to do next, and the rule change to plan around:'
     : 'Beyond the headcount above — what your people gain, where they could go next, and the impact beyond your own teams:';
-  var finAction=d.expiry?('Commit or gift '+lvK(d.giftable)+' before it ages out to recover otherwise-lost funding.'):(d.coInvest?('Defer or spread the EPA payments, or gift surplus earlier, to trim the '+lvK(d.coInvest)+' co-investment.'):'Hold the current commitment level — the levy is being used efficiently.');
+  var finAction=d.expiry?('Commit or gift '+lvK(d.giftable)+' before it ages out to recover otherwise-lost funding.'):(d.coInvest?('Stagger your starts into waves, or gift surplus levy earlier, to trim the '+lvK(d.coInvest)+' co-investment.'):'Hold the current commitment level — the levy is being used efficiently.');
   var fin2026='Co-investment rises 5%→25% and expiry shortens 24→12 months from Aug 2026 — '+(d.expiry?'acting before then protects '+lvK(d.giftable)+'.':'front-load new starts to stay ahead.');
   var progLab=d.maxLevel?('Level '+(d.maxLevel+1)+(d.maxLevel+2<=7?'–'+(d.maxLevel+2):'')+' standards'):'higher or specialist standards';
   var progText=d.maxLevel?('Completers are well placed to progress to '+progLab+' — '+(d.maxLevel>=5?'senior, specialist or degree-level roles':'higher technical or first-line management roles')+'.'):'Completers can progress to higher or specialist standards in the same areas.';
@@ -2377,7 +2377,7 @@ function levyPage2(d,framing){
   var leftTitle=fin?'Optimisation &amp; risk':'Development plan';
   var leftBody=fin
     ? (d.coInvest
-        ? lvK(d.coInvest)+' of employer co-investment falls in '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+'. Reduce it by deferring or spreading the EPA completion payments, or gifting surplus levy earlier so less is drawn down later.'
+        ? lvK(d.coInvest)+' of employer co-investment falls in '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+'. Reduce it by staggering your starts into waves (lowering the concurrent monthly draw), or gifting surplus levy earlier so less is drawn down later.'
         : 'No employer co-investment is required on the current plan — the levy covers training and assessment in full.')
       +' <span style="color:#8ba0b6">From Aug 2026 the co-investment rate rises to 25% and new funds expire after 12 months — plan commitments around that change.</span>'
     : d.heads+' people develop through '+d.progCount+' programme'+(d.progCount!==1?'s':'')+', building capability on the job alongside structured off-the-job training. Each completion is evidenced at end-point assessment (EPA). Use the JD Matcher to confirm each programme covers the skills the role needs.';
@@ -2404,7 +2404,7 @@ function levyPage2(d,framing){
     moveLead='You are near capacity, with '+lvK(d.coInvest)+' of co-investment appearing.';
     moveList=['Add people through <strong style="color:#a78bfa">apprenticeship units</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, single-element, ~5% co-invest) — cheaper and faster than a full standard.',
       'Stagger new starts into '+troughTxt+' so they don&rsquo;t stack onto your peak-drawdown months.',
-      'Or defer / spread the EPA completion payments to flatten the peaks.'];
+      'Or bring in a levy transfer (up to 50% of another employer&rsquo;s levy) to cover the peak-drawdown months.'];
   } else {
     moveLead='Your levy is well-used across the plan.';
     moveList=['Progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.',
@@ -2516,18 +2516,9 @@ function renderProjection(){
   // Duration sensitivity: re-run the real co-invest engine on a +6-month hypothetical per programme
   const apprTot=(progs)=>{const t=Array(M).fill(0);progs.forEach(p=>{if(p.type==='unit')return;const sm=mKey(p.start),em=mKey(p.epa),dr=mBetween(p.start,p.epa);const ec=lvyEligCount(p),mt=(p.cost*RULEBOOK.draw.training/dr)*ec,et=p.cost*RULEBOOK.draw.epa*ec;for(let mk=sm;mk<em;mk++){const i=mk-pmk;if(i>=0&&i<M)t[i]+=mt;}const ei=em-pmk;if(ei>=0&&ei<M)t[ei]+=et;});return t;};
   const ciBase=simCoInvest(income,tot,pmk,us);
+  // "extend duration" hint removed — extending isn't a permissible cash lever (verify-advice-outputs rule).
+  // durTip/best kept empty so the renderShortfallAdvice / renderBestMoves calls that still receive them stay safe.
   let durTip='', best=null;
-  if(ciBase.total>1){
-    programmes.forEach((p,idx)=>{
-      if(p.type==='unit')return;
-      const curDur=mBetween(p.start,p.epa),ne=new Date(p.epa);ne.setMonth(ne.getMonth()+6);
-      if(mKey(ne)-pmk>=M)return; // keep the EPA inside the projection horizon to assess honestly
-      const progs2=programmes.map((q,j)=>j===idx?Object.assign({},q,{epa:ne.toISOString().slice(0,10)}):q);
-      const saving=ciBase.total-simCoInvest(income,apprTot(progs2),pmk,us).total;
-      if(saving>50&&(!best||saving>best.saving))best={name:p.name,curDur,saving};
-    });
-    if(best)durTip=`<strong>Extend duration:</strong> running <strong>${best.name}</strong> over <strong>${best.curDur+6} months</strong> instead of ${best.curDur} would cut co-investment by about <strong>${fmt(best.saving)}</strong> — a longer programme spreads the 80% training draw across more months, lowering the monthly peak that triggers it.`;
-  }
   let bal=levyData.balance;
   const bals=combined.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
   const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
