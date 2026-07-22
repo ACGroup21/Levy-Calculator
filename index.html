@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22g</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2610,6 +2610,17 @@ function renderProjection(){
     const enabled=Math.floor(svGift/svPerHead), src=exp.total>1?'otherwise-expiring':'surplus';
     sv.style.display='block';
     sv.innerHTML=`&#129309; <strong>Social value.</strong> Gifting <span class="amt">${fmt(svGift)}</span> of ${src} levy to an SME, charity or supply-chain partner ${enabled>=1?`could fully fund <span class="amt">~${enabled}</span> apprenticeship${enabled!==1?'s':''} elsewhere`:'contributes toward funding an apprenticeship elsewhere'} <span style="color:var(--text3)">(based on your average programme cost of ${fmt(svPerHead)} per apprentice)</span>. Evidences the UK Social Value Model theme <strong>&ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;</strong>, reportable in tenders and CSR. <span style="color:var(--text3)">Indicative, based on your figures.</span>`;
+    // CSR source index — provenance of each figure (mirrors "Show the working")
+    const tcapPct=Math.round(RULEBOOK.transferCapPct*100);
+    const rowCSR=function(lab,basis){return '<div style="padding:8px 0;border-top:1px solid rgba(var(--wash),0.06)"><div style="font-weight:600;color:var(--text);font-size:12.5px;margin-bottom:3px">'+lab+'</div><div style="font-size:11.5px;color:var(--text2);line-height:1.5">'+basis+'</div></div>';};
+    sv.innerHTML+='<details style="margin-top:11px"><summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3)">CSR SOURCE INDEX</span><span style="color:var(--teal)">Where this is drawn from &#9662;</span></summary>'+
+      '<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:11px;padding:2px 15px 11px;margin-top:8px">'+
+      rowCSR('Giftable levy &mdash; '+fmt(svGift), (exp.total>1?('The lesser of your forecast expiry (<strong>'+fmt(exp.total)+'</strong>) and the '+tcapPct+'% annual transfer cap (<strong>'+fmt(Math.max(0,annual*RULEBOOK.transferCapPct))+'</strong>). Rule: a levy transfer is capped at '+tcapPct+'% of your annual levy.'):'Your projected levy surplus after the plan &mdash; levy not committed to your own programmes.'))+
+      rowCSR('Apprenticeships funded elsewhere &mdash; ~'+enabled, '<strong>'+fmt(svGift)+'</strong> giftable &divide; average programme cost <strong>'+fmt(svPerHead)+'</strong> = ~<strong>'+enabled+'</strong>. Whole apprenticeships enabled &mdash; no monetised multiplier is applied.')+
+      rowCSR('Average programme cost &mdash; '+fmt(svPerHead), 'Total committed <strong>'+fmt(svCommitted)+'</strong> &divide; <strong>'+svHeads+'</strong> planned learner'+(svHeads!==1?'s':'')+', from the programmes you entered.')+
+      rowCSR('Framework &mdash; UK Social Value Model', 'Theme <strong>Tackling economic inequality</strong>, outcome <strong>employment &amp; skills</strong> (Procurement Policy Note 06/20, Cabinet Office). Gifting levy evidences apprenticeship creation in your supply chain or community. <a href="https://www.gov.uk/government/publications/social-value-model" target="_blank" rel="noopener" style="color:var(--teal)">gov.uk</a>')+
+      '<div style="margin-top:10px;font-size:11px;color:var(--text3);border-top:1px solid rgba(var(--wash),0.06);padding-top:8px">Indicative, based on your figures'+(scnDataAck?'.':' &mdash; levy data not yet confirmed.')+' Report the enabled apprenticeships, not a fabricated &pound; value.</div>'+
+      '</div></details>';
   }else sv.style.display='none';
   const ci=simCoInvest(income,tot,pmk,us);
   lastGoalCtx={endBal:bals[M-1],exp,ci,ev,income,tot};
