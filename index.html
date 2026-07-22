@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22q</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2060,40 +2060,47 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul>${unavoid}</div>`;
 }
 
+var ladderOpen=null,_ladderArgs=null;
 function renderAffordLadder(coInvest,expiry){
   var el=document.getElementById('affordLadder');if(!el)return;
   var apprs=programmes.filter(function(p){return p.type!=='unit';});
-  if(!apprs.length){el.innerHTML='';return;}
+  if(!apprs.length){el.innerHTML='';ladderOpen=null;return;}
+  _ladderArgs={co:coInvest,exp:expiry};
   var u=UNIT_PRESETS.reduce(function(a,b){return b.rate<a.rate?b:a;});
   var l2=STANDARDS.filter(function(s){return s.level===2&&s.band>0;}).reduce(function(a,b){return(!a||b.band<a.band)?b:a;},null);
   var full=apprs.reduce(function(a,b){return b.cost>a.cost?b:a;});
-  var fullDur=mBetween(full.start,full.epa), uWeeks=Math.max(1,Math.round((u.hours||30)/9));
+  var fullDur=mBetween(full.start,full.epa), uWeeks=Math.max(1,Math.round((u.hours||30)/9)), RB=RULEBOOK;
   var rec,recMsg;
   if(coInvest>1){rec=0;recMsg='You’re co-investing <strong>'+fmt(coInvest)+'</strong> — starting on a lower rung adds capability with far less drawdown pressure, then scale up as the pot recovers.';}
   else if(expiry>1){rec=2;recMsg='About <strong>'+fmt(expiry)+'</strong> of levy is forecast to go unused — you can comfortably fund the full standard, or add units / foundations to put more of it to work.';}
   else{rec=1;recMsg='Your levy is well-matched to your plan — the lower rungs add capability quickly without raising co-investment.';}
   var rungs=[
-    {n:1,accent:'#a78bfa',type:'Unit',cost:u.rate,coinv:'5%',dur:'~'+uWeeks+' week'+(uWeeks!==1?'s':''),builds:'One capability element — e.g. '+u.name.split('–')[0].trim(),note:'Fully levy-covered (5% only if the pot is short)'},
-    {n:2,accent:'#2DD4B2',type:'Foundation apprenticeship',cost:l2?l2.band:3000,coinv:'none · 16–21',dur:'8+ months · Level 2',builds:'Entry-level role competence — 16–21 hires only',note:'16–21 only (or to 24: care leaver / EHCP / prison leaver) — fully government-funded, no employer co-invest, plus up to £2,000 employer incentive'},
-    {n:3,accent:'#1a88c0',type:'Full standard',cost:full.cost,coinv:'5% / 25%',dur:fullDur+' months',builds:'Full occupational competence — '+full.name,note:'Your plan’s largest programme'}
+    {n:1,accent:'#a78bfa',type:'Unit',cost:u.rate,coinv:'5%',dur:'~'+uWeeks+' week'+(uWeeks!==1?'s':''),builds:'One capability element — e.g. '+u.name.split('–')[0].trim(),note:'Levy-funded; co-invest only if your pot is short',
+      detail:'<strong style="color:var(--text)">What it is:</strong> a single capability element (a Skills England unit, ~30&ndash;140 guided-learning hours) — not a full apprenticeship.<br><strong style="color:var(--text)">Funding:</strong> drawn from your levy pot in two milestones ('+Math.round(RB.unit.m1*100)+'% at ~30% of delivery, '+Math.round(RB.unit.m2*100)+'% on completion). Apprenticeship units are eligible for funding under the Aug 2025 rules.<br><strong style="color:var(--text)">Best when:</strong> you need one specific skill quickly, not a whole role. Available to any age.'},
+    {n:2,accent:'#2DD4B2',type:'Foundation apprenticeship',cost:l2?l2.band:3000,coinv:'none · 16–21',dur:'8+ months · Level 2',builds:'Entry-level role competence — 16–21 hires only',note:'16–21 only — fully funded + up to £2,000 incentive',
+      detail:'<strong style="color:var(--text)">What it is:</strong> a Level 2 apprenticeship (a real job with training), minimum 8 months — the new entry tier.<br><strong style="color:var(--text)">Eligibility:</strong> 16&ndash;21 only (or up to 24 for care leavers, prison leavers, or those with an EHCP) — not available for older hires.<br><strong style="color:var(--text)">Funding:</strong> fully government-funded, no employer co-investment, plus an up-to-&pound;2,000 employer incentive (paid in 3 instalments).<br><strong style="color:var(--text)">Progression:</strong> leads into a full apprenticeship standard. Verified vs the gov.uk Aug 2025–Jul 2026 funding rules.'},
+    {n:3,accent:'#1a88c0',type:'Full standard',cost:full.cost,coinv:'5% / 25%',dur:fullDur+' months',builds:'Full occupational competence — '+full.name,note:'Your plan’s largest programme',
+      detail:'<strong style="color:var(--text)">What it is:</strong> the complete apprenticeship — '+full.name+' — building full occupational competence over '+fullDur+' months.<br><strong style="color:var(--text)">Funding:</strong> the band ('+fmt(full.cost)+') is drawn from your levy monthly (80% across delivery), with 20% released at end-point assessment; if the pot runs short you co-invest 5% (25% from Aug 2026).<br><strong style="color:var(--text)">Best when:</strong> you need the full role, any age. This is your plan’s largest programme.'}
   ];
   var cards=rungs.map(function(r){
-    var on=(r.n-1===rec);
-    return '<div style="flex:1;min-width:0;background:rgba(var(--wash),0.03);border:1px solid '+(on?r.accent:'rgba(var(--wash),0.09)')+';border-radius:12px;padding:13px 15px;'+(on?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+'">'+
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:5px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:9.5px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'</div>'+
+    var on=(r.n-1===rec), open=(ladderOpen===r.n), hl=on||open;
+    return '<div onclick="toggleLadderRung('+r.n+')" title="Tap for detail" style="flex:1;min-width:0;cursor:pointer;background:rgba(var(--wash),0.03);border:1px solid '+(hl?r.accent:'rgba(var(--wash),0.09)')+';border-radius:12px;padding:13px 15px;'+(hl?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+';transition:border-color .15s">'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:5px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:9.5px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'<span style="margin-left:auto;font-size:11px;color:'+r.accent+'">'+(open?'&#9652;':'&#9662;')+'</span></div>'+
       '<div style="font-weight:700;color:var(--text);font-size:14px">'+r.type+'</div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:18px;color:'+r.accent+';margin:5px 0">'+fmt(r.cost)+'<span style="font-size:11px;color:#7e95ab"> /learner</span></div>'+
       '<div style="font-size:11.5px;color:#aebecb;line-height:1.5"><div>⏱ '+r.dur+' · co-invest '+r.coinv+'</div><div style="margin-top:3px">'+r.builds+'</div></div>'+
       '<div style="font-size:10px;color:#7e95ab;margin-top:7px;font-style:italic">'+r.note+'</div>'+
     '</div>';
   }).join('<div style="display:flex;align-items:center;color:#43607a;font-size:18px;padding:0 1px">→</div>');
+  var dp=(ladderOpen&&rungs[ladderOpen-1])?('<div style="margin-top:11px;background:rgba(var(--wash),0.03);border:1px solid '+rungs[ladderOpen-1].accent+'55;border-radius:11px;padding:13px 16px;font-size:12.5px;color:var(--text2);line-height:1.6"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-weight:700;color:var(--text)">Rung '+ladderOpen+' — '+rungs[ladderOpen-1].type+'</span><span onclick="toggleLadderRung('+ladderOpen+')" style="cursor:pointer;font-size:11px;color:var(--text3)">close &#10005;</span></div>'+rungs[ladderOpen-1].detail+'</div>'):'';
   el.innerHTML='<div class="card" style="padding:1rem 1.1rem;margin-top:1.25rem">'+
     '<div style="font-weight:700;color:var(--text);margin-bottom:3px">Affordability ladder</div>'+
-    '<div style="font-size:12.5px;color:#aebecb;margin-bottom:13px">Three ways to build the same capability, cheapest first. '+recMsg+'</div>'+
-    '<div style="display:flex;gap:8px;align-items:stretch">'+cards+'</div>'+
+    '<div style="font-size:12.5px;color:#aebecb;margin-bottom:13px">Three ways to build the same capability, cheapest first. '+recMsg+' <span style="color:var(--text3)">Tap a rung for detail.</span></div>'+
+    '<div style="display:flex;gap:8px;align-items:stretch">'+cards+'</div>'+dp+
     '<div style="font-size:10.5px;color:#7e95ab;margin-top:11px;font-style:italic">Indicative funding caps (ex-VAT). Unit rates: Skills England presets; apprenticeship bands: maximum government contribution — verify against your negotiated price. Foundation apprenticeships are 16–21 only (fully funded + up to £2,000 incentive); verified vs the gov.uk Aug 2025–Jul 2026 funding rules.</div>'+
   '</div>';
 }
+function toggleLadderRung(n){ladderOpen=(ladderOpen===n)?null:n;if(_ladderArgs)renderAffordLadder(_ladderArgs.co,_ladderArgs.exp);}
 
 /* ══════════════════════════════════════════════════════════════════════════
    Levy affordability report (#7) — on-screen, framing-toggled (Finance/SLT ⇄ HR),
