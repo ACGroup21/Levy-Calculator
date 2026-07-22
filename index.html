@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22l</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2730,20 +2730,22 @@ function renderPlan(){
   const backfillFTE=withinBuffer?0:(lostHrs-bufferHrs)/hours;
   const quiet=planCfg.months.map((s,i)=>s===2?MONTH_NAMES[i]:null).filter(Boolean);
   const peak=planCfg.months.map((s,i)=>s===1?MONTH_NAMES[i]:null).filter(Boolean);
-  // Build intensity "phases" per programme, scaled by its real duration & level.
-  // Two phases that actually depend on start timing: the early demanding ramp (after onboarding)
-  // and the EPA-prep window near the end. The long plateau in between spans every month and
-  // doesn't discriminate between start months, so it's excluded.
+  // Build intensity "phases" per programme, scaled by its real duration & level. Off-the-job training is a
+  // steady weekly minimum throughout (that doesn't depend on start month, so the plateau is excluded); the two
+  // pinch-points that DO depend on when you start are: (a) onboarding + foundational learning — heaviest support,
+  // so you want to START in a quiet period — and (b) the end-point-assessment window near the end. Both scale
+  // with duration & level. This is workforce-planning judgment, not a funding rule.
   function progPhases(p){
     const dur=Math.max(3,Math.round((new Date(p.epa)-new Date(p.start))/(30.44*864e5)));
     const level=progLevel(p);
     const amp=Math.min(0.95,0.7+0.05*(level-2)); // L2≈0.7 … L7≈0.95 sustained demand
     const phases=[];
-    // early demanding phase: starts after ~1mo onboarding, length scales with duration
-    const earlyEnd=Math.min(dur-1,Math.max(3,Math.round(dur*0.3)));
-    for(let m=1;m<=earlyEnd;m++)phases.push({offset:m,weight:amp*Math.min(1,m/3)});
-    // EPA-prep window: final ~3 months, high intensity (revision + assessment)
-    for(let m=Math.max(1,dur-3);m<dur;m++)phases.push({offset:m,weight:Math.min(1,amp+0.2),epa:true});
+    // onboarding + foundational period — starts at month 0 (induction is the heaviest support), length scales with duration
+    const earlyEnd=Math.min(dur-1,Math.max(2,Math.round(dur*0.3)));
+    for(let m=0;m<=earlyEnd;m++)phases.push({offset:m,weight:amp});
+    // EPA-prep window: the final stretch (gateway + revision + assessment), length scales with duration/level
+    const epaLen=Math.min(dur-1,Math.max(2,Math.round(dur*0.18)));
+    for(let m=dur-epaLen;m<dur;m++)phases.push({offset:m,weight:Math.min(1,amp+0.2),epa:true});
     return {name:p.name,phases,count:p.count,dur};
   }
   const curves=programmes.map(progPhases);
@@ -2785,12 +2787,14 @@ function renderPlan(){
   // timing — driven by the learning-intensity scoring
   let timing='';
   if(!marked){
-    timing=`Mark your peak and quiet months on the calendar above for tailored start-timing advice. As a rule, aim for the <strong>demanding learning phase and EPA-prep window</strong> — not the light onboarding month — to fall in quieter periods.`;
+    timing=`Mark your peak and quiet months on the calendar above for tailored start-timing advice. As a rule, <strong>start in a quiet period</strong> — onboarding is the heaviest support period — and keep the <strong>end-point-assessment window</strong> clear of your peaks too.`;
   }else{
-    timing+=`<strong>Best months to start: ${bestMonths.join(', ')}.</strong> Tuned to each programme's duration and level, this keeps the demanding learning phase and the EPA-prep window clear of your peaks. `;
-    if(worstMonths.length)timing+=`<span style="color:#f5c87a">Avoid starting in ${worstMonths.join(', ')}</span> — either the demanding phase collides with a peak, or you'd start straight after one while the team is still clearing backlog. `;
+    timing+=`<strong>Best months to start: ${bestMonths.join(', ')}.</strong> Tuned to each programme's duration and level, this lands onboarding and the EPA-prep window in your quieter periods. `;
+    if(worstMonths.length)timing+=`<span style="color:#f5c87a">Avoid starting in ${worstMonths.join(', ')}</span> — either onboarding or the EPA window collides with a peak, or you'd start straight after one while the team is still clearing backlog. `;
     if(clashProgs.length)timing+=`<br><br><span style="color:#f5c87a">⚠ ${clashProgs.length} added programme${clashProgs.length>1?'s have':' has'} a demanding phase landing in a peak month: ${clashProgs.join(', ')} — consider shifting the start.</span> `;
+    timing+=`<br><br><strong>If a peak start is unavoidable</strong>, put your <strong>most experienced people</strong> into the cohorts nearest the peak — they absorb the extra load best while learning — and keep developing hires in the quieter windows.`;
   }
+  timing+=`<br><br><span style="color:var(--text3)">Timing is workforce judgment, not a funding rule — off-the-job training runs at a steady weekly minimum (≈6 hrs/wk) throughout; only onboarding and end-point assessment really hinge on when you start, and the start date is yours to choose.</span>`;
   timing+=`<br><br>Bank-holiday weeks mean fewer training days — build slack into those weeks (dated list below).`;
   html+=`<div class="plan-rec" style="margin-top:10px">${timing}</div>`;
   // dated bank holidays within the projection window
