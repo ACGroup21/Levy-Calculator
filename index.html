@@ -11,7 +11,7 @@
 :root{
   --teal:#2DD4B2;--navy:#374D6A;--bg:#050C18;
   --wash:255,255,255; /* overlay base — flips to dark in light mode so rgba(var(--wash),x) works in both */
-  --glass:rgba(var(--wash),0.04);--border:rgba(45,212,178,0.18);--border2:rgba(45,212,178,0.4);
+  --glass:#0f1826;--border:rgba(45,212,178,0.18);--border2:rgba(45,212,178,0.4);   /* solid card — opaque so the starfield stays BEHIND, not through */
   --text:#e9f3fa;--text2:#b3d2e2;--text3:#7fa3ba;
   --amber:#f5a623;--red:#ff4c6a;--purple:#a78bfa;--money:var(--teal);
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22e</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -3746,17 +3746,7 @@ document.addEventListener('keydown',e=>{
       n.x+=n.vx;n.y+=n.vy;
       if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;
     }
-    // links — hue shifts over time
-    for(let i=0;i<nodes.length;i++){
-      for(let j=i+1;j<nodes.length;j++){
-        const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);
-        if(d<LINK){
-          const o=(1-d/LINK)*0.16, hh=HUE(a);
-          ctx.strokeStyle='hsla('+hh+',66%,'+(_lt?50:55)+'%,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.6;
-          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
-        }
-      }
-    }
+    // (connecting links removed — loose, unconnected stars)
     // nodes — pulsing glow, cycling hue
     for(const n of nodes){
       n.phase+=n.speed;
