@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22k</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1975,7 +1975,7 @@ function _wiShift(iso,months){if(!iso)return iso;var d=new Date(iso);d.setMonth(
 function whatIfScenarios(){
   return [
     {name:'As planned',note:'Everyone starts and completes on your current dates.',t:function(ps){return ps;}},
-    {name:'Longer durations',note:'Each apprenticeship runs 6 months longer, so the 80% training draw spreads over more months.',t:function(ps){return ps.map(function(p){return (p.type==='unit'||!p.epa)?p:Object.assign({},p,{epa:_wiShift(p.epa,6)});});}},
+    {name:'Later start',note:'Every start pushed 6 months later, so the levy pot builds up before the training draw begins. Trade-off: capability lands later.',t:function(ps){return ps.map(function(p){var q=Object.assign({},p,{start:_wiShift(p.start,6)});if(p.epa)q.epa=_wiShift(p.epa,6);return q;});}},
     {name:'Phased (two waves)',note:'Each cohort split 50/50 — the second wave starts a year later, halving the concurrent draw.',t:function(ps){var out=[];ps.forEach(function(p){var c=+p.count||0;if(c<2){out.push(p);return;}var w1=Math.ceil(c/2);out.push(Object.assign({},p,{count:w1}));var p2=Object.assign({},p,{count:c-w1,start:_wiShift(p.start,12)});if(p.epa)p2.epa=_wiShift(p.epa,12);out.push(p2);});return out;}}
   ];
 }
@@ -2004,27 +2004,18 @@ function renderWhatIf(){
 // Each move's £ impact is recomputed by the real co-invest engine (simCoInvest); ranked by saving, goal first.
 function renderBestMoves(income,tot,ev,labels,pmk,uTot,best,d){
   var el=document.getElementById('bestMoves'); if(!el) return;
-  var base=simCoInvest(income,tot,pmk,uTot).total, N=income.length, moves=[];
-  // 1. extend duration (already engine-costed in renderProjection via a +6-month re-run)
-  if(best&&best.saving>1) moves.push({save:best.saving,goal:'cash',
-    title:'Extend '+best.name+' to '+(best.curDur+6)+' months',
-    why:'Spreads the 80% training draw over more months, lowering the monthly peak that triggers co-investment.'});
-  // 2 & 3. best defer + best spread across the EPA completion events
-  var bDefer=null,bSpread=null;
-  ev.forEach(function(e){
-    var mvBest=-1,mvTc=base;
-    for(var j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){var t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;var c=simCoInvest(income,t2,pmk,uTot).total;if(c<mvTc-1){mvTc=c;mvBest=j;}}
-    if(mvBest>=0&&(base-mvTc)>(bDefer?bDefer.save:0)) bDefer={save:base-mvTc,name:e.name,to:labels[mvBest],resid:mvTc};
-    var spK=0,spTc=base;
-    for(var k=2;k<=6&&e.idx+k-1<N;k++){var t3=tot.slice();t3[e.idx]-=e.amount;var per=e.amount/k;for(var m=0;m<k;m++)t3[e.idx+m]+=per;var c2=simCoInvest(income,t3,pmk,uTot).total;if(c2<spTc-1){spTc=c2;spK=k;}if(c2<1)break;}
-    if(spK&&(base-spTc)>(bSpread?bSpread.save:0)) bSpread={save:base-spTc,name:e.name,k:spK,from:labels[e.idx],resid:spTc};
-  });
-  if(bDefer) moves.push({save:bDefer.save,goal:'cash',
-    title:'Defer '+bDefer.name+'’s completion payment to '+bDefer.to,
-    why:'The 20% EPA payment lands in an exhausted month; moving it to when the pot has recovered cuts co-investment'+(bDefer.resid<1?' to nil':' to '+fmt(bDefer.resid))+'. Keep the EPA date &mdash; negotiate the payment schedule.'});
-  if(bSpread) moves.push({save:bSpread.save,goal:'cash',
-    title:'Spread '+bSpread.name+'’s completion payment over '+bSpread.k+' months',
-    why:'Splitting the 20% from '+bSpread.from+' keeps each month under the levy line'+(bSpread.resid<1?', removing co-investment entirely':', cutting it to '+fmt(bSpread.resid))+'.'});
+  var base=simCoInvest(income,tot,pmk,uTot).total, moves=[];
+  // 1. Stagger / phase starts — the ONE verified timing lever. The 80% is paid in monthly instalments over each start's
+  // census months, so spacing starts genuinely lowers the concurrent draw. (Extending duration and deferring/spreading the
+  // 20% completion payment were REMOVED — not permissible under the funding rules: the completion element is a single
+  // payment released on completion, and duration is the genuine planned delivery. See verify-advice-outputs.)
+  if(base>1 && typeof _wiWith==='function' && typeof _wiShift==='function'){
+    var _phase=function(ps){var out=[];ps.forEach(function(p){var c=+p.count||0;if(c<2){out.push(p);return;}var w1=Math.ceil(c/2);out.push(Object.assign({},p,{count:w1}));var p2=Object.assign({},p,{count:c-w1,start:_wiShift(p.start,12)});if(p.epa)p2.epa=_wiShift(p.epa,12);out.push(p2);});return out;};
+    var phCo=(_wiWith(_phase(programmes.map(function(p){return Object.assign({},p);})),levyReportData).coInvest)||0;
+    if(base-phCo>50) moves.push({save:base-phCo,goal:'cash',
+      title:'Stagger your starts into waves',
+      why:'Spacing cohorts out lowers the concurrent monthly training draw, so more of it stays under your levy income. Splitting each cohort into two waves ~12 months apart cuts co-investment'+((base-phCo)>=base-1?' to nil':' to '+fmt(phCo))+' &mdash; the trade-off is a later start for the second wave.'});
+  }
   // 4. gift / transfer-in when over-committed (ring-fence-aware)
   var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
   var avail=d?Math.max(0,d.levyAvail-rfTotal):0, plan=d?(d.levyPlanCost||d.planCost):0;
@@ -2041,7 +2032,7 @@ function renderBestMoves(income,tot,ev,labels,pmk,uTot,best,d){
   var goal=(typeof scnGoal!=='undefined'&&scnGoal&&scnGoal.key)||null;
   moves.sort(function(a,b){var ga=(goal&&a.goal===goal)?1:0,gb=(goal&&b.goal===goal)?1:0;if(ga!==gb)return gb-ga;return (b.save||0)-(a.save||0);});
   if(!moves.length){
-    el.innerHTML='<div class="bm-panel bm-clean"><div class="bm-head"><span>&#10003;</span>Your plan is already optimal</div><div class="bm-why" style="margin-top:2px">No move the engine tested &mdash; extend, defer, spread, transfer &mdash; reduces co-investment or idle levy. Your levy is well-matched to your plan.</div></div>';
+    el.innerHTML='<div class="bm-panel bm-clean"><div class="bm-head"><span>&#10003;</span>Your plan is already optimal</div><div class="bm-why" style="margin-top:2px">No move the engine tested &mdash; staggering your starts, a levy transfer, or putting idle levy to work &mdash; improves on your current plan. Your levy is well-matched to it.</div></div>';
     return;}
   var rk=['①','②','③','④','⑤'];
   var rows=moves.slice(0,5).map(function(mv,i){
@@ -2055,36 +2046,16 @@ function renderShortfallAdvice(income,tot,ev,labels,pmk,uTot,durTip){
   const el=document.getElementById('shortfallAdvice');if(!el)return;
   const base=simCoInvest(income,tot,pmk,uTot);
   if(base.total<1){el.innerHTML='';return;}
-  const N=income.length;
-  let recs=durTip?('<li>'+durTip+'</li>'):'';
-  ev.slice().sort((a,b)=>b.amount-a.amount).forEach(e=>{
-    let mvBest=-1,mvTc=base.total;
-    for(let j=e.idx+1;j<=Math.min(N-1,e.idx+6);j++){
-      const t2=tot.slice();t2[e.idx]-=e.amount;t2[j]+=e.amount;
-      const c=simCoInvest(income,t2,pmk,uTot).total;if(c<mvTc-1){mvTc=c;mvBest=j;}
-    }
-    let spK=0,spTc=base.total;
-    for(let k=2;k<=6&&e.idx+k-1<N;k++){
-      const t2=tot.slice();t2[e.idx]-=e.amount;const per=e.amount/k;
-      for(let m=0;m<k;m++)t2[e.idx+m]+=per;
-      const c=simCoInvest(income,t2,pmk,uTot).total;
-      if(c<1){spK=k;spTc=c;break;}
-      if(c<spTc-1){spTc=c;spK=k;}
-    }
-    const opts=[];
-    if(mvBest>=0)opts.push(`<strong>defer</strong> the payment to <strong>${labels[mvBest]}</strong> (co-investment ${mvTc<1?'down to nil':'↓ to '+fmt(mvTc)})`);
-    if(spK)opts.push(`<strong>spread</strong> it over <strong>${spK} months</strong> (${fmt(e.amount/spK)}/mo from ${labels[e.idx]}) (co-investment ${spTc<1?'down to nil':'↓ to '+fmt(spTc)})`);
-    if(opts.length)recs+=`<li>The <strong>${fmt(e.amount)}</strong> completion payment (20%) for <strong>${e.name}</strong> in ${labels[e.idx]} falls in a month your levy is exhausted — keep the EPA assessment as-is and negotiate the payment schedule: ${opts.join(', or ')}.</li>`;
-  });
-  recs+=`<li>You can also gift surplus levy earlier (so less is drawn down later), stagger programme starts, or accept the co-investment as a planned cost.</li>`;
   const mList=base.months.map(m=>labels[m.i]).join(', ');
   const has25=base.months.some(m=>m.rate>=0.25);
-  // unavoidable floor: co-investment from the training draw alone — deferring/spreading EPA can't touch this
-  var trainOnly=tot.slice(); ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});
-  var floorCo=simCoInvest(income,trainOnly,pmk,uTot).total;
-  var unavoid=floorCo>1
-    ? '<div style="margin-top:10px;padding:10px 12px;background:rgba(255,76,106,0.06);border:1px solid rgba(255,76,106,0.28);border-radius:8px"><strong style="color:#ff8fa3">&#9888; Some co-investment is unavoidable.</strong> About <strong>'+fmt(floorCo)+'</strong> comes from your monthly training draw out-pacing the levy &mdash; not EPA timing &mdash; so deferring or spreading payments won&rsquo;t remove it. Reduce it by extending durations, staggering starts or fewer concurrent learners; whatever remains is a real cost to <strong>budget for</strong>'+(has25?', charged at <strong>25%</strong> for spend from Aug 2026.':' (5%).')+' It is carried into the cost report.</div>'
-    : '<div style="margin-top:8px;font-size:12px;color:var(--text3)">Retiming the EPA payments above can bring co-investment close to nil. Anything you don&rsquo;t retime is a real cost to budget for'+(has25?' (25% from Aug 2026)':' (5%)')+' &mdash; it is carried into the cost report.</div>';
+  // Verified-sound levers only (gov.uk funding rules): stagger starts, transfer, reduce concurrent load, or budget for it.
+  // Deferring / spreading the 20% completion payment is NOT offered — it's a single payment released on completion, not
+  // employer-schedulable; and extending duration needs genuinely longer delivery. See verify-advice-outputs rule.
+  let recs='<li><strong>Stagger your starts.</strong> Beginning cohorts in separate waves lowers the concurrent monthly training draw, so more of it stays under your levy income &mdash; see <em>Compare your options</em> for the costed effect.</li>'
+    +'<li><strong>Bring in a levy transfer.</strong> Another employer can gift you up to '+Math.round(RULEBOOK.transferCapPct*100)+'% of their levy to cover the exhausted months.</li>'
+    +'<li><strong>Reduce the concurrent load</strong> &mdash; fewer learners starting at once, or a lower-cost rung first (a unit or foundation), then scale up as the pot recovers.</li>'
+    +'<li><strong>Or budget for it.</strong> Any co-investment you don&rsquo;t design out is a real, planned cost &mdash; it is carried into the cost report.</li>';
+  var unavoid='<div style="margin-top:8px;font-size:12px;color:var(--text3)">Co-investment is driven by your monthly training draw out-pacing the levy in the months above. The 20% completion payment is released on completion and isn&rsquo;t employer-schedulable, so it can&rsquo;t be re-timed to dodge a month &mdash; the real levers are the <em>timing and size of your starts</em>'+(has25?' (charged at 25% for spend from Aug 2026)':' (5%)')+'.</div>';
   el.innerHTML=`<div class="sf-box bad">${goalTag('cash','Serves your goal — minimise cash')}<strong>&#9888; Co-investment cost: ${fmt(base.total)}.</strong> In ${base.months.length} month${base.months.length>1?'s':''} (${mList}) your levy account is exhausted, so you co-invest on the uncovered cost — employer pays <strong>5%</strong> before Aug 2026${has25?' and <strong>25%</strong> from Aug 2026':''}, the government pays the rest. Each month stands alone: next month's levy can't repay an earlier month's co-investment, so act ahead of time.
     <div style="margin:8px 0 4px;color:var(--text2)">Ways to reduce it:</div><ul class="sf-list">${recs}</ul>${unavoid}</div>`;
 }
