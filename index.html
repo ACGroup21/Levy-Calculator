@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22o</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2387,7 +2387,7 @@ function levyPage2(d,framing){
     : 'No levy is currently forecast to expire — your plan puts the available funding to work.';
   var bench=RULEBOOK.achievementBenchmark, tgt=Math.min(bench+RULEBOOK.ambitionMargin.aboveAverage,0.90), lead=Math.min(bench+RULEBOOK.ambitionMargin.sectorLeading,0.90);
   var compAt=function(r){return Math.round(d.heads*r);}, expAt=function(r){return (1-r)*d.planCost;};
-  var passBody='<strong style="color:#fff">'+Math.round(bench*100)+'%</strong> minimum to stay on track <span style="color:#7e95ab">(national average — below this you fall behind the sector)</span>.<br><br>'+
+  var passBody='<strong style="color:#fff">'+Math.round(bench*100)+'%</strong> completion benchmark <span style="color:#7e95ab">(the recent national apprenticeship achievement rate, QAR — below it your cohort trails the sector average)</span>.<br><br>'+
     'Aim <strong style="color:#fff">'+Math.round(tgt*100)+'%</strong>: ~'+compAt(tgt)+' of '+d.heads+' achieve · '+lvK(expAt(tgt))+' of training exposed if completion falls short.<br><br>'+
     'Sector-leading '+Math.round(lead*100)+'%: ~'+compAt(lead)+' of '+d.heads+'.';
   var trough=(d.yearUtil&&d.yearUtil.length>1)?d.yearUtil.indexOf(Math.min.apply(null,d.yearUtil)):-1;
