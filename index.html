@@ -27,6 +27,8 @@
 :root[data-theme="light"] .aurora{display:none}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;border-color:#e6ebf2;border-top-color:var(--card-accent,var(--teal));box-shadow:0 1px 2px rgba(20,30,45,0.04),0 4px 14px rgba(20,30,45,0.05)}
 :root[data-theme="light"] .metric{background:#fff;border-color:#e6ebf2}
+/* section-type designation via the top bar: results (forecast/plan) = green, everything else = cobalt (default) */
+#projectionSection .card,#planSection .card{--card-accent:var(--green)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
 :root[data-theme="light"] header{background:rgba(255,255,255,0.82);border-bottom-color:#e2e8f2;--teal:#2563eb}
 :root[data-theme="light"] .logo-mark-img{filter:brightness(0) saturate(100%) invert(13%) sepia(38%) saturate(1500%) hue-rotate(196deg) brightness(96%) contrast(96%)}
@@ -765,7 +767,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div class="legend">
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#1a88c0"></span>80% training draw</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#b87510"></span>20% EPA completion</span>
-        <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#2DD4B2"></span>Monthly levy income</span>
+        <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#2563eb"></span>Monthly levy income</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#a78bfa"></span>Levy balance (pot)</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#c02040"></span>Shortfall</span>
       </div>
@@ -852,7 +854,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22b</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2567,7 +2569,7 @@ function renderProjection(){
   const ec=es.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
   // theme-aware chart palette — cobalt income + terracotta balance in light, teal/purple in dark
   const _lt=document.documentElement.getAttribute('data-theme')==='light';
-  const cLine=_lt?'#2563eb':'#2DD4B2', cUnits=_lt?'rgba(90,114,170,0.72)':'rgba(123,97,255,0.72)', cBal=_lt?'#c2603c':'#a78bfa';
+  const cLine='#2563eb', cUnits=_lt?'rgba(90,114,170,0.72)':'rgba(123,97,255,0.72)', cBal=_lt?'#c2603c':'#a78bfa';
   const cTipBg=_lt?'rgba(255,255,255,0.97)':'rgba(5,12,24,0.95)', cTipBorder=_lt?'rgba(37,99,235,0.25)':'rgba(45,212,178,0.3)', cTipTitle=_lt?'#1f2f4a':'#2DD4B2', cTipBody=_lt?'#4a5a70':'#8fb8cc';
   const cAxis=_lt?'rgba(15,27,46,0.12)':'rgba(45,212,178,0.15)', cTick=_lt?'#5a6a80':'#7fa3ba', cTickDim=_lt?'#7a889a':'#3d6880', cBalTick=_lt?'#c2603c':'#a78bfa', cBalBorder=_lt?'rgba(194,96,60,0.3)':'rgba(167,139,250,0.3)';
   if(projChart)projChart.destroy();
