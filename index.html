@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2074,7 +2074,7 @@ function renderAffordLadder(coInvest,expiry){
   else{rec=1;recMsg='Your levy is well-matched to your plan — the lower rungs add capability quickly without raising co-investment.';}
   var rungs=[
     {n:1,accent:'#a78bfa',type:'Unit',cost:u.rate,coinv:'5%',dur:'~'+uWeeks+' week'+(uWeeks!==1?'s':''),builds:'One capability element — e.g. '+u.name.split('–')[0].trim(),note:'Fully levy-covered (5% only if the pot is short)'},
-    {n:2,accent:'#2DD4B2',type:'Foundation apprenticeship',cost:l2?l2.band:3000,coinv:'5% / 25%',dur:'8–12 months',builds:'Entry-level role competence (Level 2)',note:'Typical entry-tier band — 8-month minimum'},
+    {n:2,accent:'#2DD4B2',type:'Foundation apprenticeship',cost:l2?l2.band:3000,coinv:'none · 16–21',dur:'8+ months · Level 2',builds:'Entry-level role competence — 16–21 hires only',note:'16–21 only (or to 24: care leaver / EHCP / prison leaver) — fully government-funded, no employer co-invest, plus up to £2,000 employer incentive'},
     {n:3,accent:'#1a88c0',type:'Full standard',cost:full.cost,coinv:'5% / 25%',dur:fullDur+' months',builds:'Full occupational competence — '+full.name,note:'Your plan’s largest programme'}
   ];
   var cards=rungs.map(function(r){
@@ -2091,7 +2091,7 @@ function renderAffordLadder(coInvest,expiry){
     '<div style="font-weight:700;color:var(--text);margin-bottom:3px">Affordability ladder</div>'+
     '<div style="font-size:12.5px;color:#aebecb;margin-bottom:13px">Three ways to build the same capability, cheapest first. '+recMsg+'</div>'+
     '<div style="display:flex;gap:8px;align-items:stretch">'+cards+'</div>'+
-    '<div style="font-size:10.5px;color:#7e95ab;margin-top:11px;font-style:italic">Indicative funding caps (ex-VAT). Unit rates: Skills England presets; apprenticeship bands: maximum government contribution — verify against your negotiated price.</div>'+
+    '<div style="font-size:10.5px;color:#7e95ab;margin-top:11px;font-style:italic">Indicative funding caps (ex-VAT). Unit rates: Skills England presets; apprenticeship bands: maximum government contribution — verify against your negotiated price. Foundation apprenticeships are 16–21 only (fully funded + up to £2,000 incentive); verified vs the gov.uk Aug 2025–Jul 2026 funding rules.</div>'+
   '</div>';
 }
 
