@@ -892,7 +892,10 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         </summary>
         <div style="margin-top:14px">
         <p class="step-sub" style="margin-top:0">Tick the reports you need and build one master document &mdash; or generate just the board cover. Everything is assembled from the data you&rsquo;ve entered; nothing leaves your browser.</p>
-        <div style="font-size:12.5px;color:var(--text3);margin-bottom:11px">Include in the report:</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+          <span style="font-size:12.5px;color:var(--text3)">Include in the report:</span>
+          <button type="button" id="reportSelectAll" onclick="toggleSelectAllReports()" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.3);border-radius:7px;padding:4px 11px;cursor:pointer">Select all</button>
+        </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)">
           <div style="display:flex;align-items:center;gap:9px">
@@ -936,7 +939,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23d</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1165,7 +1168,7 @@ function setLevelFilter(lvl,btn){
     if(lvl==='7'){
       const now=new Date();
       const cut=new Date(now.getFullYear()-22,now.getMonth(),now.getDate());
-      const cutStr=cut.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+      const cutStr=fmtDMY(cut);
       box.style.display='block';
       box.innerHTML=`<strong>⚠ Level 7 — funding restricted since 1 January 2026.</strong><br>Level 7 apprenticeships are only levy-funded for learners aged <strong>under 22</strong> at their start date. To be eligible today, a learner must be born <strong>on or after ${cutStr}</strong>.<br><span style="font-size:11.5px;opacity:.85">Exception: learners aged 22–24 who have an EHC plan or are care-experienced remain eligible. Older learners must be self-funded.</span>`;
     }else{
@@ -1439,7 +1442,7 @@ function loadState(){
     if(migrated){persistScenario(true);try{localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}}
     if(!any)return false;
     const savedAt=s.meta&&s.meta.savedAt;
-    const when=savedAt?new Date(savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+    const when=savedAt?fmtDMY(savedAt):'';
     setStatus(`Restored your saved data${when?' from '+when:''}. Upload a new file to replace it, or use “Clear saved data”.`,'ok');
     toggleClearBtn(true);
     return true;
@@ -1458,13 +1461,15 @@ function clearSavedData(){
 
 const fmt=v=>'£'+Math.round(v).toLocaleString('en-GB');
 const nv=s=>parseFloat((s||'').toString().replace(/[£,\s]/g,''))||0;
-const fmtD=s=>{const d=new Date(s);return d.toLocaleDateString('en-GB',{month:'short',year:'numeric'});};
+const MON3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fmtD=s=>{const d=new Date(s);return isNaN(d)?'':MON3[d.getMonth()]+' '+d.getFullYear();};
+const fmtDMY=s=>{const d=new Date(s);return isNaN(d)?'':d.getDate()+' '+MON3[d.getMonth()]+' '+d.getFullYear();};
 const RULE_MK=RULEBOOK.boundaryMk;
 function expMo(mk){return mk<RULE_MK?RULEBOOK.expiryMonths.before:RULEBOOK.expiryMonths.from;}
 function mKey(date){if(typeof date==='string'){var m=date.match(/^(\d{4})-(\d{1,2})/);if(m)return (+m[1])*12+(+m[2]-1);}const d=new Date(date);return d.getFullYear()*12+d.getMonth();} // parse 'YYYY-MM-DD' by its literal year-month (timezone-independent); Date objects keep local getMonth (byte-identical)
 function mBetween(a,b){return Math.max(1,mKey(b)-mKey(a));}
 function mk2d(mk){return new Date(Math.floor(mk/12),mk%12,1);}
-function mkLbl(mk){return mk2d(mk).toLocaleDateString('en-GB',{month:'short',year:'numeric'}).replace('Sept ','Sep ');} /* en-GB gives "Sept" (4ch) for Sep only — normalise to 3ch so the year aligns in mono tables */
+function mkLbl(mk){var d=mk2d(mk);return MON3[d.getMonth()]+' '+d.getFullYear();} /* fixed 3-letter month so the year aligns in mono tables */
 function isoMo(mk){const d=mk2d(mk);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 
 document.getElementById('csvFile').addEventListener('change',e=>{if(e.target.files[0])readCSV(e.target.files[0]);});
@@ -1864,7 +1869,7 @@ function setDataAck(on){
 }
 function dataAckNote(){
   return scnDataAck
-    ? ' Levy data confirmed by the employer on '+new Date(scnDataAck).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.'
+    ? ' Levy data confirmed by the employer on '+fmtDMY(scnDataAck)+'.'
     : ' Levy data not yet confirmed by the employer.';
 }
 function methodNote(){
@@ -2631,11 +2636,23 @@ function renderReportPicker(){
       '<input type="checkbox" data-part="'+p.k+'" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="syncReportSel()" style="margin-top:2px;width:16px;height:16px;accent-color:var(--teal);flex:0 0 auto">'+
       '<span><span style="font-weight:600;color:var(--text);font-size:13.5px">'+p.lb+'</span>'+(disabled?' <span style="font-size:11px;color:var(--text3)">&mdash; sync a tracker report to include</span>':'')+'<br><span style="font-size:12px;color:var(--text3)">'+p.sb+'</span></span></label>';
   }).join('');
-  updateReportNote();
+  updateReportNote();updateSelectAllLabel();
 }
 function syncReportSel(){
   document.querySelectorAll('#reportPicker input[data-part]').forEach(function(c){reportSel[c.getAttribute('data-part')]=c.checked;});
-  updateReportNote();
+  updateReportNote();updateSelectAllLabel();
+}
+function toggleSelectAllReports(){
+  var boxes=[].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
+  if(!boxes.length)return;
+  var allOn=boxes.every(function(b){return b.checked;});
+  boxes.forEach(function(b){b.checked=!allOn;});
+  syncReportSel();
+}
+function updateSelectAllLabel(){
+  var btn=document.getElementById('reportSelectAll');if(!btn)return;
+  var boxes=[].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
+  btn.textContent=(boxes.length&&boxes.every(function(b){return b.checked;}))?'Clear all':'Select all';
 }
 function updateReportNote(){
   var el=document.getElementById('reportPickerNote');if(!el)return;
@@ -2810,7 +2827,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+methodNote()+cohortNote+' Generated '+new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'.</div>'+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+methodNote()+cohortNote+' Generated '+fmtDMY(new Date())+'.</div>'+
   '</div></div>';
 }
 function levyPage3(d,framing){
@@ -2908,7 +2925,7 @@ function renderProjection(){
   let durTip='', best=null;
   let bal=levyData.balance;
   const bals=combined.map((s,i)=>{bal=Math.max(0,bal+income[i]-s);return bal;});
-  const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'});});
+  const labels=Array.from({length:M},(_,i)=>{const d=new Date(ps);d.setMonth(d.getMonth()+i);return MON3[d.getMonth()]+' '+String(d.getFullYear()).slice(-2);});
   const coSet=new Set(ciBase.months.map(m=>m.i)); // months that ACTUALLY trigger co-investment (pot exhausted) — not just demand>income
   const tc=ts.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.75)':'rgba(26,136,192,0.65)');
   const ec=es.map((_,i)=>coSet.has(i)?'rgba(192,32,64,0.9)':'rgba(184,117,16,0.85)');
@@ -2996,7 +3013,7 @@ const BANK_HOLIDAYS=[
   {d:'2029-12-25',n:'Christmas Day'},{d:'2029-12-26',n:'Boxing Day'},
 ];
 const BANK_HOL_MONTHS=[...new Set(BANK_HOLIDAYS.map(h=>new Date(h.d).getMonth()))]; // months that ever contain a BH
-const fmtBH=iso=>new Date(iso).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+const fmtBH=iso=>{const d=new Date(iso);return d.toLocaleDateString('en-GB',{weekday:'short'})+' '+d.getDate()+' '+MON3[d.getMonth()]+' '+d.getFullYear();};
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let planCfg={headcount:10,hours:37.5,dip:10,rate:18,months:Array(12).fill(0),otj:{2:6,3:6,4:6,5:6,6:6,7:6}};
 function resetPlan(){
@@ -3383,7 +3400,7 @@ function jdBuildReport(){
   el.innerHTML=jdReportDecor()+'<div style="position:relative;z-index:2;flex:1 0 auto;padding:46px 46px 0">'+
     '<img src="'+window.AC_LOGO_WHITE+'" style="height:50px;margin-bottom:28px">'+
     '<div style="font-family:'+JD_HF+';font-size:54px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.0">JD Matcher Report</div>'+
-    '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Levy Affordability Calculator</span><span style="color:#7e93a8"> · '+new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})+'</span></div>'+
+    '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Levy Affordability Calculator</span><span style="color:#7e93a8"> · '+fmtDMY(new Date())+'</span></div>'+
     '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12.5px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
     '<div style="margin-top:18px;background:'+P+';border:'+JD_CB+';border-radius:16px;display:flex;align-items:center;padding:22px 28px">'+
       '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief",JD_CYAN,30)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:4px">'+d.stdName+'</div></div></div>'+
@@ -3576,7 +3593,7 @@ function jdBuildPdfPages(){
   var v=jdVerdict(score,d.roleMatch,d.roleTitle);
   var scol=score>=50?JD_CYAN:score>=30?JD_GOLD:'#ec5a72';
   var biggest=cats.slice().sort(function(a,b){return (b.total-b.covered)-(a.total-a.covered)||a.pct-b.pct;})[0];
-  var date=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+  var date=fmtDMY(new Date());
   var P='rgba(15,42,74,0.92)';
   var sideCats=cats.map(function(c){return '<div style="margin-bottom:11px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+jdIcon(c.ic,c.col,16)+'<span style="color:#dfe9f2;font-size:11px;font-weight:600;letter-spacing:.03em;flex:1">'+c.label.toUpperCase()+'</span><span style="color:'+c.col+';font-size:11px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col)+'</div>';}).join('');
   var col1='<div style="flex:0 0 264px;background:'+P+';border:'+JD_CB+';border-radius:14px;padding:18px;display:flex;flex-direction:column">'+
