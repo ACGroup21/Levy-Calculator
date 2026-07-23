@@ -90,6 +90,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .led-nav button:hover .dot{border-color:var(--teal)}
 .led-nav button.active{color:var(--teal)}
 .led-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 9px var(--teal)}
+.led-nav .led-badge{font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.06em;color:var(--text3);border:1px solid rgba(var(--wash),0.22);border-radius:4px;padding:2px 4px;line-height:1;min-width:15px;text-align:center;flex-shrink:0;transition:all .15s}
+.led-nav button:hover .led-badge{border-color:var(--teal);color:var(--text2)}
+.led-nav button.active .led-badge{background:var(--teal);color:#04121f;border-color:var(--teal);box-shadow:0 0 9px rgba(45,212,178,.5)}
 .led-nav button.pending{opacity:.4}
 :root{--goal-accent:#2DD4B2}
 body[data-goal="cash"]{--goal-accent:#2DD4B2}
@@ -557,14 +560,14 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
   </div>
   <nav class="led-nav" id="ledNav" aria-label="Section navigation">
-    <button data-target="sec-goal" onclick="goSection('sec-goal')"><span class="dot"></span><span class="lbl">Goal</span></button>
-    <button data-target="sec-levy" onclick="goSection('sec-levy')"><span class="dot"></span><span class="lbl">Levy</span></button>
+    <button data-target="sec-goal" onclick="goSection('sec-goal')"><span class="led-badge">START</span><span class="lbl">Goal</span></button>
+    <button data-target="sec-levy" onclick="goSection('sec-levy')"><span class="led-badge">01</span><span class="lbl">Levy</span></button>
     <button data-target="trackerCard" onclick="goDelivery()"><span class="dot"></span><span class="lbl">Delivery</span></button>
-    <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="dot"></span><span class="lbl">Programmes</span></button>
-    <button id="led-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="dot"></span><span class="lbl">Forecast</span></button>
-    <button id="led-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span><span class="lbl">Plan</span></button>
-    <button id="led-reports" data-target="sec-reports" onclick="goReports()"><span class="dot"></span><span class="lbl">Reports</span></button>
-    <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD Matcher</span></button>
+    <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="led-badge">02</span><span class="lbl">Programmes</span></button>
+    <button id="led-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="led-badge">03</span><span class="lbl">Forecast</span></button>
+    <button id="led-plan" data-target="planSection" onclick="goSection('planSection')"><span class="led-badge">PLAN</span><span class="lbl">Plan</span></button>
+    <button id="led-reports" data-target="sec-reports" onclick="goReports()"><span class="led-badge">04</span><span class="lbl">Reports</span></button>
+    <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="led-badge">JD</span><span class="lbl">JD Matcher</span></button>
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
@@ -982,7 +985,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23j</div>
 </footer>
 
 <!-- copilot FAB -->
