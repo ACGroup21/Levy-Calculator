@@ -619,8 +619,9 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <input type="file" id="trackerFile" accept=".csv,.tsv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none">
       </div>
       <div class="demo-row">
-        <span style="font-size:13px;color:var(--text3)">No tracker to hand?</span>
-        <button class="btn-demo" onclick="loadTrackerDemo()">&#9654;&nbsp; Load a sample report</button>
+        <button class="btn-demo" onclick="pullDeliveryFromLevy()">&#11015;&nbsp; Pull from my levy data</button>
+        <span style="font-size:12px;color:var(--text3)">or</span>
+        <button class="btn-demo" onclick="loadTrackerDemo()" style="background:none;border:1px solid rgba(var(--wash),0.15)">&#9654;&nbsp; Load a sample report</button>
         <button id="clearTrackerBtn" onclick="clearDelivery()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:6px 12px">Clear delivery data</button>
       </div>
       <div id="trackerStatus" class="status"></div>
@@ -902,7 +903,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22z</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1541,7 +1542,7 @@ function renderDeliverySync(){
   el.innerHTML='<div style="margin-top:14px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.20);border-radius:12px;padding:13px 16px">'+
     '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px"><span style="color:var(--teal);font-size:15px">&#10003;</span><span style="font-weight:600;color:var(--text);font-size:13.5px">Delivery synchronised &mdash; '+n+' learner'+(n!==1?'s':'')+' from your tracker</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
-      chip('on programme',by.in_progress,'var(--teal)')+chip('at gateway',by.gateway,'#a78bfa')+
+      chip('on programme',by.in_progress,'#eab308')+chip('at gateway',by.gateway,'#a78bfa')+
       chip('achieved',by.achieved,'#2DD4B2')+chip('withdrawn',by.withdrawn,'var(--red)')+chip('paused',by.paused,'#e0a13e')+
     '</div>'+
     (overdue?'<div style="margin-top:10px;font-size:12px;color:var(--red)">&#9888; '+overdue+' live learner'+(overdue!==1?'s are':' is')+' past the planned end date &mdash; check progress or re-plan.</div>':'')+
@@ -1555,7 +1556,7 @@ function deliveryTable(){
   if(!delivery.length)return '';
   var n=delivery.length;
   var dfmt=function(s){return (s&&/^\d{4}-\d{2}-\d{2}/.test(s))?fmtD(s):'<span style="color:var(--text3)">&mdash;</span>';};
-  var smeta={in_progress:['On programme','var(--teal)'],gateway:['At gateway','#a78bfa'],achieved:['Achieved','#2DD4B2'],withdrawn:['Withdrawn','var(--red)'],paused:['Paused','#e0a13e']};
+  var smeta={in_progress:['On programme','#eab308'],gateway:['At gateway','#a78bfa'],achieved:['Achieved','#2DD4B2'],withdrawn:['Withdrawn','var(--red)'],paused:['Paused','#e0a13e']};
   var trs=delivery.map(function(d){
     var m=smeta[d.status]||['&mdash;','var(--text3)'];
     return '<tr style="border-top:1px solid rgba(var(--wash),0.06)">'+
@@ -1566,14 +1567,14 @@ function deliveryTable(){
       '<td style="padding:6px 12px;white-space:nowrap"><span style="display:inline-block;font-size:10.5px;color:'+m[1]+';border:1px solid '+m[1]+';border-radius:20px;padding:1px 8px">'+m[0]+'</span>'+(d.outcome?' <span style="font-size:11px;color:var(--text3)">'+escHtml(d.outcome)+'</span>':'')+'</td>'+
     '</tr>';
   }).join('');
-  return '<div style="margin-top:12px"><div style="font-size:12px;color:var(--text3);margin-bottom:6px">The synchronised report &mdash; '+n+' learner'+(n!==1?'s':'')+' read from your file:</div>'+
-    '<div style="overflow:auto;max-height:300px;border:1px solid rgba(var(--wash),0.09);border-radius:10px">'+
+  return '<details open style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;color:var(--text3);user-select:none;padding:2px 0">The synchronised report &mdash; '+n+' learner'+(n!==1?'s':'')+' read from your file</summary>'+
+    '<div style="overflow:auto;max-height:300px;border:1px solid rgba(var(--wash),0.09);border-radius:10px;margin-top:6px">'+
     '<table style="border-collapse:collapse;width:100%;font-size:12px">'+
     '<thead><tr style="position:sticky;top:0;background:var(--glass);color:var(--text3);text-align:left">'+
       '<th style="padding:8px 12px;font-weight:600">Learner</th><th style="padding:8px 12px;font-weight:600">Standard</th>'+
       '<th style="padding:8px 12px;font-weight:600">Start</th><th style="padding:8px 12px;font-weight:600">Planned end</th>'+
       '<th style="padding:8px 12px;font-weight:600">Status</th></tr></thead>'+
-    '<tbody>'+trs+'</tbody></table></div></div>';
+    '<tbody>'+trs+'</tbody></table></div></details>';
 }
 function clearDelivery(){delivery=[];renderDeliverySync();setStatus2('','');saveState&&saveState();}
 var TRK_SAMPLE_CSV=['learner,standard,level,start,planned end,actual end,status,outcome,price',
@@ -1597,6 +1598,28 @@ function downloadTrackerSample(){dlCSV('AC-tracker-sample.csv',TRK_SAMPLE_CSV);}
 function loadTrackerDemo(){
   var tc=document.getElementById('trackerCard');if(tc&&!tc.open)tc.open=true;
   parseTracker(TRK_SAMPLE_CSV);
+}
+// Build delivery rows from the levy plan / ESFA-imported learners already loaded.
+// Levy data gives who/what/when (standard, start, planned end) but NOT outcomes — those come from a real tracker report.
+function pullDeliveryFromLevy(){
+  var tc=document.getElementById('trackerCard');if(tc&&!tc.open)tc.open=true;
+  var appr=(typeof programmes!=='undefined'&&programmes?programmes:[]).filter(function(p){return p.type!=='unit';});
+  if(!appr.length){setStatus2('No programmes to pull yet — upload your ESFA levy transactions or add programmes in Step 2 first.','warn');return;}
+  if(delivery.length&&!confirm('Replace the current delivery data with '+appr.reduce(function(a,p){return a+Math.max(1,parseInt(p.count)||1);},0)+' learners built from your levy plan?'))return;
+  var out=[];
+  appr.forEach(function(p){
+    var cnt=Math.max(1,parseInt(p.count)||1);
+    var std=(typeof matchStandardByCourse==='function')?matchStandardByCourse(p.name,p.level||0):null;
+    var short=(p.name||'Apprenticeship').replace(/^l\s?\d+\s+/i,'');
+    for(var k=1;k<=cnt;k++){
+      out.push({learner:short+(cnt>1?' #'+k:''),standard:p.name||'',level:std?std.level:(p.level||0),
+        start:p.start||'',plannedEnd:p.epa||'',actualEnd:'',status:'in_progress',outcome:'',
+        price:+p.cost||0,std:std?std.name:'',stdBand:std?std.band:0,src:'levy'});
+    }
+  });
+  delivery=out;
+  setStatus2('[OK] Pulled '+out.length+' learner'+(out.length!==1?'s':'')+' from your levy plan ('+appr.length+' programme'+(appr.length!==1?'s':'')+'). These show as in progress — drop in a tracker report to add real outcomes.','ok');
+  renderDeliverySync();saveState&&saveState();
 }
 
 function parseESFA(text){
