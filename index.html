@@ -120,6 +120,23 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 @media(max-width:760px){header .header-badge{display:none}}
+/* burger function menu + pointing arrow */
+.nav-back{position:fixed;inset:0;background:rgba(2,6,14,0.55);backdrop-filter:blur(2px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
+.nav-back.open{opacity:1;pointer-events:auto}
+.nav-drawer{position:fixed;top:0;right:0;height:100%;width:330px;max-width:86vw;background:var(--glass);border-left:1px solid var(--border2);box-shadow:-14px 0 46px rgba(0,0,0,.5);z-index:301;transform:translateX(102%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;backdrop-filter:blur(22px)}
+.nav-drawer.open{transform:translateX(0)}
+.nav-drawer .nav-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex:0 0 auto}
+.nav-drawer .nav-head b{font-size:14px;color:var(--text);letter-spacing:.02em}
+.nav-drawer .nav-x{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
+.nav-drawer .nav-x:hover{color:var(--text)}
+.nav-list{overflow-y:auto;padding:10px 12px 26px;flex:1 1 auto}
+.nav-list .nav-grp{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin:16px 8px 5px}
+.nav-list .nav-grp:first-child{margin-top:4px}
+.nav-list button.nav-item{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:none;color:var(--text2);font-family:inherit;font-size:13px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s,color .12s}
+.nav-list button.nav-item:hover{background:rgba(var(--wash),0.06);color:var(--text)}
+.nav-list button.nav-item .nd{width:6px;height:6px;border-radius:50%;background:var(--teal);opacity:.5;flex:0 0 auto}
+#funcArrow{position:fixed;z-index:305;pointer-events:none;opacity:0;transform:translate(-6px,-50%);transition:opacity .35s ease,transform .35s ease;color:var(--teal);filter:drop-shadow(0 0 7px var(--teal))}
+#funcArrow.show{opacity:1;transform:translate(0,-50%)}
 @media(max-width:560px){.logo-sub{display:none}}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
@@ -537,6 +554,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
+    <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
     <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
     <span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span>
     <div class="header-badge"><span class="pulse-dot"></span>UK ESFA &middot; 2026 Rules</div>
@@ -940,13 +958,21 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23g</div>
 </footer>
 
 <!-- copilot FAB -->
 <button class="copilot-fab" onclick="toggleCopilot()" title="Levy Co-pilot" aria-label="Open AI co-pilot">
   &#10024;<span class="fab-ping"></span>
 </button>
+
+<!-- burger function menu + pointing arrow -->
+<div class="nav-back" id="navBack" onclick="closeNav()"></div>
+<nav class="nav-drawer" id="navDrawer" aria-label="All functions" aria-hidden="true">
+  <div class="nav-head"><b>&#9776;&nbsp; All functions</b><button class="nav-x" onclick="closeNav()" aria-label="Close">&times;</button></div>
+  <div class="nav-list" id="navList"></div>
+</nav>
+<div id="funcArrow" aria-hidden="true"><svg width="46" height="26" viewBox="0 0 46 26" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 13 H36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M31 5 L42 13 L31 21" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
 
 <!-- copilot panel -->
 <div class="copilot-panel" id="copilotPanel" role="dialog" aria-label="Levy planning co-pilot">
@@ -2597,6 +2623,49 @@ function openBoardCover(btn){
 }
 function goDelivery(){var tc=document.getElementById('trackerCard');if(tc)tc.open=true;goSection('trackerCard');}
 function goReports(){var rc=document.getElementById('reportsCard');if(rc)rc.open=true;goSection('sec-reports');}
+// ── Burger function menu: jump to any function + fade an arrow in from the left margin ──
+var NAV_INDEX=[
+  {sec:'Goal',items:[{lb:'Choose your goal',id:'goalGrid'},{lb:'Goal emphasis',id:'goalEmphasis'}]},
+  {sec:'Levy',items:[{lb:'Upload ESFA transactions',id:'dropzone'},{lb:'Estimate levy from payroll',id:'est-paybill'},{lb:'Work back from declared levy',id:'rev-levy'},{lb:'Data quality checks',id:'dataQuality'}]},
+  {sec:'Delivery',items:[{lb:'Tracker report sync',id:'trackerCard'},{lb:'Achievement rate (QAR)',id:'qarSection'}]},
+  {sec:'Programmes',items:[{lb:'Ring-fence my levy',id:'rf-name'},{lb:'Gift / transfer levy',id:'rf-gift'},{lb:'Add a programme',id:'sec-programmes'},{lb:'Cohort age mix & NI relief',id:'inp-age1621'},{lb:'Cost per learner',id:'learnerCost'}]},
+  {sec:'Forecast',items:[{lb:'Projection chart',id:'projChart'},{lb:'Plan capacity',id:'projCapacity'},{lb:'Show the working',id:'projWorking'},{lb:'Your best moves',id:'bestMoves'},{lb:'Compare options (what-if)',id:'whatIfCard'},{lb:'Shortfall advice',id:'shortfallAdvice'},{lb:'Expiry risk',id:'expiryWarning'},{lb:'Affordability ladder',id:'affordLadder'},{lb:'Completion schedule',id:'epaList'},{lb:'Transfer / gifting',id:'giftMetrics'}]},
+  {sec:'Plan',items:[{lb:'Off-the-job planner',id:'planResults'},{lb:'Peaks & troughs calendar',id:'monthGrid'}]},
+  {sec:'Reports',items:[{lb:'Report builder',id:'reportsCard'}]},
+  {sec:'Tools',items:[{lb:'JD Matcher',id:'sec-jd'},{lb:'Funding co-pilot',id:'__copilot'}]}
+];
+function buildNavDrawer(){
+  var el=document.getElementById('navList');if(!el)return;
+  el.innerHTML=NAV_INDEX.map(function(g){
+    return '<div class="nav-grp">'+g.sec+'</div>'+g.items.map(function(it){
+      return '<button type="button" class="nav-item" onclick="navJump(\''+it.id+'\')"><span class="nd"></span>'+it.lb+'</button>';
+    }).join('');
+  }).join('');
+}
+function openNav(){document.getElementById('navBack').classList.add('open');document.getElementById('navDrawer').classList.add('open');document.getElementById('navDrawer').setAttribute('aria-hidden','false');}
+function closeNav(){document.getElementById('navBack').classList.remove('open');document.getElementById('navDrawer').classList.remove('open');document.getElementById('navDrawer').setAttribute('aria-hidden','true');}
+// Arrow tracks the target through the (smooth) scroll, then settles + holds 2.5s + fades.
+function showFuncArrow(el){
+  var a=document.getElementById('funcArrow');if(!a)return;
+  clearTimeout(a._fade);clearTimeout(a._settle);
+  if(a._onScroll)window.removeEventListener('scroll',a._onScroll,true);
+  function place(){var r=el.getBoundingClientRect();a.style.top=Math.min(Math.max(r.top+r.height/2,64),window.innerHeight-30)+'px';var l=r.left-52;a.style.left=(l<6?6:l)+'px';}
+  function finish(){if(a._onScroll){window.removeEventListener('scroll',a._onScroll,true);a._onScroll=null;}clearTimeout(a._fade);a._fade=setTimeout(function(){a.classList.remove('show');},2500);}
+  place();a.classList.add('show');
+  a._onScroll=function(){place();clearTimeout(a._settle);a._settle=setTimeout(finish,120);};
+  window.addEventListener('scroll',a._onScroll,true);
+  a._settle=setTimeout(finish,350); // no-scroll case (target already in view)
+}
+function navJump(id){
+  closeNav();
+  if(id==='__copilot'){toggleCopilot();return;}
+  var el=document.getElementById(id);if(!el)return;
+  for(var p=el.parentElement;p;p=p.parentElement){if(p.tagName&&p.tagName.toLowerCase()==='details')p.open=true;}
+  if(el.offsetParent===null){var fb=document.getElementById('sec-levy');if(fb)fb.scrollIntoView({behavior:'smooth',block:'start'});return;}
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+  showFuncArrow(el);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
 (function(){var rc=document.getElementById('reportsCard');if(rc)rc.addEventListener('toggle',function(){var c=document.getElementById('reportsChev');if(c)c.innerHTML=rc.open?'&#9652;':'&#9662;';});})();
 function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
 /* Animated backdrop for the report overlay: drifting network + rising motes (on-screen only;
@@ -4463,6 +4532,7 @@ renderGoalGrid();
 renderRulesRef();
 renderReportPicker();
 renderQAR();
+buildNavDrawer();
 </script>
 <div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
 </body>
