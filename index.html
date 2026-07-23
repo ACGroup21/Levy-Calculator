@@ -97,8 +97,9 @@ body[data-goal="expiry"]{--goal-accent:#E0A43B}
 body[data-goal="capability"]{--goal-accent:#a78bfa}
 body[data-goal="headcount"]{--goal-accent:#39A0D4}
 body[data-goal="other"]{--goal-accent:#8FB4C6}
-.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:10px}
-.goal-tile{display:flex;flex-direction:column;text-align:left;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
+.goal-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+.goal-tile{flex:0 0 calc(33.333% - 7px);min-width:170px;display:flex;flex-direction:column;text-align:left;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
+@media(max-width:560px){.goal-tile{flex-basis:100%}}
 .goal-tile:hover{border-color:var(--teal);background:rgba(32,214,195,0.06)}
 .goal-tile.sel{border-color:var(--goal-accent);background:rgba(var(--wash),0.05);box-shadow:0 0 0 1px var(--goal-accent) inset}
 .goal-tile.sel .gt-ic,.goal-tile.sel .gt-lb{color:var(--goal-accent);transition:color .2s}
@@ -852,7 +853,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22u</div>
 </footer>
 
 <!-- copilot FAB -->
