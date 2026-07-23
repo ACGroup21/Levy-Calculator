@@ -17,7 +17,7 @@
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
 }
 :root[data-theme="light"]{                       /* Scheme A — Cobalt & Slate + terracotta */
-  --bg:#f4f7fc;                 /* clean cool page so white cards pop */
+  --bg:#ffffff;                 /* pure white page (user pick) — loose interchanging stars show in the margins */
   --wash:15,27,46;              /* ink-slate overlays */
   --glass:#ffffff;
   --border:#e4eaf3;--border2:#2563eb;
@@ -852,7 +852,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22t</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -3726,8 +3726,9 @@ document.addEventListener('keydown',e=>{
     ctx.clearRect(0,0,w,h);
     t+=0.4;
     const _lt=document.documentElement.getAttribute('data-theme')==='light';
-    const _B=_lt?220:168,_S=_lt?15:22,_ACC=_lt?18:190;
-    const HUE=n=>Math.round((((n.accent?_ACC:_B)+n.hj*_S+Math.sin(t*0.01+n.phase)*_S*0.6)%360+360)%360);
+    let HUE;
+    if(_lt){ HUE=n=>Math.round(((t*0.28+n.phase*57.3+(n.accent?40:0))%360+360)%360); } // light: loose stars interchange colours across the spectrum
+    else{ const _B=168,_S=22,_ACC=190; HUE=n=>Math.round((((n.accent?_ACC:_B)+n.hj*_S+Math.sin(t*0.01+n.phase)*_S*0.6)%360+360)%360); } // dark: bounded teal shimmer (unchanged)
     for(const n of nodes){
       n.x+=n.vx;n.y+=n.vy;
       if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;
@@ -3738,7 +3739,7 @@ document.addEventListener('keydown',e=>{
       n.phase+=n.speed;
       const gl=0.5+0.5*Math.sin(n.phase), hh=HUE(n);
       ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);
-      ctx.fillStyle='hsla('+hh+',72%,'+(_lt?50:55)+'%,'+(0.3+0.45*gl).toFixed(3)+')';ctx.fill();
+      ctx.fillStyle='hsla('+hh+','+(_lt?70:72)+'%,'+(_lt?52:55)+'%,'+(_lt?(0.2+0.26*gl):(0.3+0.45*gl)).toFixed(3)+')';ctx.fill();
       ctx.beginPath();ctx.arc(n.x,n.y,n.r*2.8,0,7);
       ctx.fillStyle='hsla('+hh+',75%,65%,'+(0.05*gl).toFixed(3)+')';ctx.fill();
     }
