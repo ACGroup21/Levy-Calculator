@@ -137,6 +137,20 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .nav-list button.nav-item .nd{width:6px;height:6px;border-radius:50%;background:var(--teal);opacity:.5;flex:0 0 auto}
 #funcArrow{position:fixed;z-index:305;pointer-events:none;opacity:0;transform:translate(-6px,-50%);transition:opacity .35s ease,transform .35s ease;color:var(--teal);filter:drop-shadow(0 0 7px var(--teal))}
 #funcArrow.show{opacity:1;transform:translate(0,-50%)}
+/* funding route: levy vs non-levy */
+.fmode-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:12px 16px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}
+.fmode-q{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);flex:0 0 auto}
+.fmode-toggle{display:inline-flex;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.12);border-radius:9px;padding:2px;flex:0 0 auto}
+.fmode-toggle button{font-family:inherit;font-size:12.5px;border:none;background:transparent;color:var(--text2);border-radius:7px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.fmode-toggle button[data-m="levy"].on{background:var(--teal);color:#04121f;font-weight:600}
+.fmode-toggle button[data-m="nonlevy"].on{background:#3E86E0;color:#fff;font-weight:600}
+.fmode-hint{font-size:12.5px;color:var(--text2);flex:1;min-width:210px;line-height:1.5}
+.fmode-hint b{color:var(--text)}
+.fmode-hint .warn{color:var(--amber)}
+body[data-fmode="nonlevy"] .levy-only{display:none!important}
+.nonlevy-only{display:none}
+body[data-fmode="nonlevy"] .nonlevy-only{display:block}
+body[data-fmode="nonlevy"] .fmode-bar{border-color:rgba(62,134,224,0.45);box-shadow:inset 3px 0 0 #3E86E0}
 @media(max-width:560px){.logo-sub{display:none}}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
@@ -570,6 +584,16 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
+  <!-- FUNDING ROUTE: levy vs non-levy -->
+  <div class="fmode-bar" id="fundingModeBar">
+    <span class="fmode-q">Funding route</span>
+    <div class="fmode-toggle" id="fmodeToggle">
+      <button type="button" data-m="levy" class="on" onclick="setFundingMode('levy',true)">Levy payer</button>
+      <button type="button" data-m="nonlevy" onclick="setFundingMode('nonlevy',true)">Non-levy employer</button>
+    </div>
+    <span class="fmode-hint" id="fmodeHint"></span>
+  </div>
+
   <!-- STEP 00: GOAL -->
   <div class="step-row" id="sec-goal"><span class="step-chip">START</span><span class="step-title">Plan to Achieve</span></div>
   <p class="step-sub">Your goal shapes how the calculator prioritises its recommendations &nbsp;&middot;&nbsp; change it any time by clicking the Goal tab in the top menu</p>
@@ -587,9 +611,9 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   </div>
 
   <!-- STEP 1: LEVY CSV -->
-  <div class="step-row" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title">Upload ESFA Levy Transactions</span></div>
-  <p class="step-sub">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
-  <div class="card">
+  <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title">Upload ESFA Levy Transactions</span></div>
+  <p class="step-sub levy-only">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
+  <div class="card levy-only">
     <div class="upload-zone" id="dropzone" onclick="document.getElementById('csvFile').click()">
       <div class="upload-icon">&#8679;</div>
       <div class="upload-title">Click to upload or drag &amp; drop</div>
@@ -832,7 +856,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
     <div class="divider"></div>
 
-    <div id="projectionSection" class="hidden">
+    <div id="nonLevyPanel" class="nonlevy-only"></div>
+    <div id="projectionSection" class="hidden levy-only">
       <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title">Affordability Projection</span><div class="proj-range" id="projRange"><button data-y="1" onclick="setProjYears(1)">1 year</button><button data-y="2" onclick="setProjYears(2)">2 years</button><button data-y="3" class="on" onclick="setProjYears(3)">3 years</button></div></div>
       <div id="goalEmphasis"></div>
       <div class="legend">
@@ -901,7 +926,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       </div>
     </div>
 
-    <div id="sec-reports">
+    <div id="sec-reports" class="levy-only">
       <div class="divider"></div>
       <details class="card" id="reportsCard">
         <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px;user-select:none">
@@ -958,7 +983,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23h</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1419,7 +1444,7 @@ function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.random
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1434,6 +1459,7 @@ function applyScenario(s){
   if(Array.isArray(s.ringfences))ringfences=s.ringfences;
   if(s.ringfenceApply!==undefined)ringfenceApply=!!s.ringfenceApply;
   if(Array.isArray(s.delivery)){delivery=s.delivery;if(typeof renderDeliverySync==='function')renderDeliverySync();}
+  if(s.fundingMode&&typeof setFundingMode==='function')setFundingMode(s.fundingMode,false);
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function persistScenario(force){
@@ -1478,7 +1504,7 @@ function loadState(){
 function clearSavedData(){
   if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
   try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
-  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();if(typeof renderNonLevy==='function')renderNonLevy();
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
@@ -2666,6 +2692,94 @@ function navJump(id){
   showFuncArrow(el);
 }
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
+// ── FUNDING ROUTE: levy vs non-levy ──
+// Verified vs gov.uk (apprenticeship funding for non-levy employers; technical funding guide from Aug 2025):
+// no levy pot → govt funds 95% / employer co-invests 5% (→ 25% from Aug 2026); 100% funded for 16–21 (from 1 Apr 2024)
+// and 22–24 with an EHC plan / care experience. Reuses the programme age-mix that drives NI relief + the L7 gate.
+var fundingMode='levy';
+function currentPayBillGuess(){
+  var e=document.getElementById('est-paybill');
+  if(e&&e.value){var v=parseFloat((e.value||'').toString().replace(/[£,\s]/g,''));if(v>0)return v;}
+  if(typeof levyData!=='undefined'&&levyData&&levyData.monthlyAvg>0){var annualLevy=levyData.monthlyAvg*12/1.1;return (annualLevy+RULEBOOK.levyAllowance)/RULEBOOK.levyRate;}
+  return 0;
+}
+function updateFmodeHint(){
+  var el=document.getElementById('fmodeHint');if(!el)return;var pb=currentPayBillGuess(),msg;
+  if(fundingMode==='nonlevy'){
+    msg='No levy pot &mdash; the government funds <b>95%</b> of each apprenticeship (<b>100%</b> for 16&ndash;21s); you co-invest the rest.';
+    if(pb&&pb>3000000)msg+=' <span class="warn">&#9888; At &pound;'+(pb/1e6).toFixed(1)+'m your pay bill is over &pound;3m &mdash; you would actually pay the levy. Modelling a hypothetical?</span>';
+  }else{
+    msg='Pay bill over &pound;3m &mdash; you pay the 0.5% levy and draw training from your pot.';
+    if(pb&&pb>0&&pb<3000000)msg+=' <span class="warn">&#9888; At &pound;'+(pb/1e6).toFixed(2)+'m your pay bill is below &pound;3m &mdash; you likely would not pay the levy. Switch to Non-levy?</span>';
+  }
+  el.innerHTML=msg;
+}
+function setFundingMode(m,userChose){
+  fundingMode=(m==='nonlevy')?'nonlevy':'levy';
+  document.body.setAttribute('data-fmode',fundingMode);
+  document.querySelectorAll('#fmodeToggle button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===fundingMode);});
+  var ls=document.getElementById('levySummary');
+  if(fundingMode==='nonlevy'){
+    if(ls)ls.classList.remove('hidden');
+    if(typeof renderProgrammes==='function')renderProgrammes();
+    renderNonLevy();
+  }else{
+    var hasData=(typeof levyData!=='undefined'&&levyData&&levyData.byMonth&&levyData.byMonth.length)||(programmes&&programmes.length);
+    if(ls&&!hasData)ls.classList.add('hidden');
+  }
+  updateFmodeHint();
+  if(userChose&&typeof persistScenario==='function'){try{persistScenario(true);}catch(e){}}
+}
+function nonLevyFunding(){
+  var appr=(programmes||[]).filter(function(p){return p.type!=='unit';});
+  var units=(programmes||[]).filter(function(p){return p.type==='unit';});
+  var band=0,emp=0,ff=0,co=0,tot=0,has25=false,anyAge=false;
+  appr.forEach(function(p){
+    var count=+p.count||0,cost=+p.cost||0,rate=coInvRate(mKey(p.start));
+    var f100=p.age?Math.min(+p.age.y||0,count):0; if(p.age)anyAge=true;
+    var coC=Math.max(0,count-f100);
+    band+=cost*count; emp+=cost*rate*coC; ff+=f100; co+=coC; tot+=count;
+    if(rate>=0.25)has25=true;
+  });
+  var uBand=0,uEmp=0;
+  units.forEach(function(u){var count=+u.count||0,cost=+u.cost||0,rate=(RULEBOOK.unit&&RULEBOOK.unit.coInvest)||0.05;uBand+=cost*count;uEmp+=cost*rate*count;tot+=count;});
+  var totalBand=band+uBand, employer=emp+uEmp, gov=Math.max(0,totalBand-employer);
+  var otj=0; try{if(typeof levyReportData==='function')otj=levyReportData().otjCost||0;}catch(e){}
+  return {totalBand:totalBand,employer:employer,gov:gov,fullyFunded:ff,coCount:co,totalCount:tot,otj:otj,has25:has25,anyAge:anyAge};
+}
+function renderNonLevy(){
+  var el=document.getElementById('nonLevyPanel');if(!el)return;
+  if(fundingMode!=='nonlevy'){el.innerHTML='';return;}
+  var f=nonLevyFunding(), BLUE='#3E86E0';
+  if(!f.totalCount){
+    el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text)">Non-levy funding</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes above to see your co-investment. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you pay the rest.</div></div>';
+    return;
+  }
+  var fig=function(lab,val,c,sub){return '<div class="metric" style="padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">'+lab+'</div><div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var rate=f.has25?'25%':'5%';
+  var figs='<div class="metrics" style="margin-top:0">'+
+    fig('Total training cost',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
+    fig('Government funds',fmt(f.gov),BLUE,'95% + 100% of 16–21s')+
+    fig('Your co-investment',fmt(f.employer),f.employer>0?'var(--money)':BLUE,rate+' of the co-funded bands')+
+    fig('Fully funded (16–21)',String(f.fullyFunded),BLUE,f.fullyFunded?'£0 to you':'enter ages to apply')+
+    (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','staff time, not levy'):'')+
+  '</div>';
+  var notes='<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:13px">'+
+    (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is costed at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;21 full funding</b>.</div>':'')+
+    '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;21</b> at the start (from 1 Apr 2024), and 22&ndash;24 with an EHC plan or care experience (enter as 16&ndash;21 to apply, or verify eligibility).</div>'+
+    (f.has25?'<div>Co-investment is <b>25%</b> for starts from Aug 2026 (applied by start date).</div>':'<div>Co-investment is <b>5%</b> now, rising to <b>25%</b> for starts from Aug 2026.</div>')+
+    '<div>Non-levy employers reserve funding through the apprenticeship service; each reservation expires if unused in its window.</div>'+
+  '</div>';
+  var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; source</summary>'+
+    '<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:9px">'+
+    '<div><b style="color:var(--text2)">Your co-investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–21s) = <b>'+fmt(f.employer)+'</b>.</div>'+
+    '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–21 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the '+f.coCount+' co-funded place'+(f.coCount!==1?'s':'')+' = <b>'+fmt(f.gov)+'</b>.</div>'+
+    '<div style="margin-top:6px">Source: <a href="https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding-for-employers-who-do-not-pay-the-apprenticeship-levy" target="_blank" rel="noopener" style="color:'+BLUE+'">gov.uk &mdash; apprenticeship funding for non-levy employers</a> · rules '+RULEBOOK.version+'. Indicative; confirm reservations and eligibility on your apprenticeship service account.</div>'+
+    '</div></details>';
+  el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)">'+
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text);font-size:15px">Non-levy funding &mdash; your co-investment</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:20px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
+    figs+notes+working+'</div>';
+}
 (function(){var rc=document.getElementById('reportsCard');if(rc)rc.addEventListener('toggle',function(){var c=document.getElementById('reportsChev');if(c)c.innerHTML=rc.open?'&#9652;':'&#9662;';});})();
 function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
 /* Animated backdrop for the report overlay: drifting network + rising motes (on-screen only;
@@ -3086,6 +3200,7 @@ function setProjYears(y){
   if(programmes.length)renderProjection();
 }
 function renderProjection(){
+  if(typeof renderNonLevy==='function')renderNonLevy();
   document.getElementById('projectionSection').classList.remove('hidden');
   const M=projYears*12,ps=new Date(today.getFullYear(),today.getMonth(),1),pmk=mKey(ps);
   const income=Array(M).fill(levyData.monthlyAvg);
@@ -4533,6 +4648,7 @@ renderRulesRef();
 renderReportPicker();
 renderQAR();
 buildNavDrawer();
+setFundingMode(fundingMode,false);
 </script>
 <div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
 </body>
