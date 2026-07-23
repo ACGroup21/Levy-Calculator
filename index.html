@@ -940,7 +940,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23f</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1648,8 +1648,9 @@ function clearDelivery(){delivery=[];renderDeliverySync();renderQAR();setStatus2
 // decomposes as retention × pass; still-in-learning excluded; national 2024/25 = 65.4% (target 67%).
 var QAR_NATIONAL={year:'2024/25',overall:65.4,target:67,
   trend:[{y:'2022/23',r:54.3},{y:'2023/24',r:60.5},{y:'2024/25',r:65.4}],
-  byLevel:{5:66.2,6:69.3},
+  byLevel:{3:66.4,4:60.9,5:66.2,6:69.3}, // verified 2024/25 (gov.uk NARTs via FE Week); L2 & L7 not published as isolated figures → fall back to overall
   source:'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships/2024-25'};
+function qarBench(level){var b=QAR_NATIONAL.byLevel[level];return (b!=null)?{r:b,level:true}:{r:QAR_NATIONAL.overall,level:false};}
 function computeQAR(rows){
   rows=rows||delivery||[];
   var achieved=0,withdrawn=0,failed=0,live=0,atRisk=0;
@@ -1666,8 +1667,10 @@ function computeQAR(rows){
 }
 function qarByStandard(){
   var g={};
-  (delivery||[]).forEach(function(x){var k=x.std||x.standard||'(unmatched)';(g[k]||(g[k]=[])).push(x);});
-  return Object.keys(g).map(function(k){var q=computeQAR(g[k]);return {name:k,leavers:q.leavers,qar:q.qar,achieved:q.achieved,withdrawn:q.withdrawn+q.failed};}).filter(function(r){return r.leavers>0;}).sort(function(a,b){return a.qar-b.qar;});
+  (delivery||[]).forEach(function(x){var k=x.std||x.standard||'(unmatched)';if(!g[k])g[k]={rows:[],level:x.level||0};g[k].rows.push(x);if(!g[k].level&&x.level)g[k].level=x.level;});
+  return Object.keys(g).map(function(k){var q=computeQAR(g[k].rows), lv=g[k].level, b=qarBench(lv);
+    return {name:k,level:lv,bench:b.r,benchIsLevel:b.level,leavers:q.leavers,qar:q.qar,achieved:q.achieved,withdrawn:q.withdrawn+q.failed};
+  }).filter(function(r){return r.leavers>0;}).sort(function(a,b){return a.qar-b.qar;});
 }
 function renderQAR(){
   var el=document.getElementById('qarSection');if(!el)return;
@@ -1694,7 +1697,8 @@ function renderQAR(){
   var byStd=qarByStandard(), drag='';
   if(byStd.length>1){
     var worst=byStd[0];
-    if(worst.qar<qar-0.01)drag='<div style="font-size:12px;color:var(--text2);margin-top:12px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><strong style="color:var(--text)">'+escHtml(worst.name)+'</strong> drags your rate down most &mdash; <b style="color:'+(worst.qar>=N.overall?'#2DD4B2':'var(--red)')+'">'+worst.qar.toFixed(0)+'%</b> ('+worst.achieved+' of '+worst.leavers+'). '+(byStd.length>2?'<span style="color:var(--text3)">'+byStd.length+' standards have leavers; tap show working for the full breakdown.</span>':'')+'</div>';
+    if(worst.qar<qar-0.01){var wvs=worst.bench, wcol=worst.qar>=wvs?'#2DD4B2':'var(--red)';
+      drag='<div style="font-size:12px;color:var(--text2);margin-top:12px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><strong style="color:var(--text)">'+escHtml(worst.name)+'</strong> drags your rate down most &mdash; <b style="color:'+wcol+'">'+worst.qar.toFixed(0)+'%</b> ('+worst.achieved+' of '+worst.leavers+'), against <strong>'+wvs.toFixed(1)+'%</strong> national'+(worst.benchIsLevel?(' for level '+worst.level):'')+'. '+(byStd.length>2?'<span style="color:var(--text3)">'+byStd.length+' standards have leavers; tap show working for the full breakdown.</span>':'')+'</div>';}
   }
   var liveNote=q.live?'<div style="font-size:11.5px;color:var(--text3);margin-top:10px">'+q.live+' learner'+(q.live!==1?'s':'')+' still on programme &mdash; excluded until they leave (as the official QAR excludes still-in-learning).</div>':'';
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:var(--teal)">&#128200;</span> Show the working &amp; source</summary>'+
@@ -1702,8 +1706,8 @@ function renderQAR(){
     '<div><strong style="color:var(--text2)">Achievement rate</strong> = achievements &divide; leavers = '+q.achieved+' &divide; '+q.leavers+' = <b>'+qar.toFixed(1)+'%</b>.</div>'+
     '<div><strong style="color:var(--text2)">Leavers</strong> = achieved ('+q.achieved+') + withdrawn ('+q.withdrawn+') + completed-but-failed ('+q.failed+'). Still-on-programme ('+q.live+') excluded.</div>'+
     '<div><strong style="color:var(--text2)">Decomposition</strong>: retention ('+(q.retention!=null?q.retention.toFixed(1):'—')+'%) &times; pass ('+(q.pass!=null?q.pass.toFixed(1):'—')+'%) = achievement rate.</div>'+
-    (byStd.length?('<div style="margin-top:6px"><strong style="color:var(--text2)">By standard</strong> (lowest first): '+byStd.map(function(r){return escHtml(r.name)+' '+r.qar.toFixed(0)+'% ('+r.achieved+'/'+r.leavers+')';}).join(' &middot; ')+'</div>'):'')+
-    '<div style="margin-top:6px"><strong style="color:var(--text2)">Benchmark</strong>: national all-age all-level rate '+N.overall+'% ('+N.year+', published Mar 2026), target '+N.target+'%. Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'. Source: <a href="'+src+'" target="_blank" rel="noopener" style="color:var(--teal)">gov.uk Explore Education Statistics &mdash; Apprenticeships</a>.</div>'+
+    (byStd.length?('<div style="margin-top:6px"><strong style="color:var(--text2)">By standard</strong> (lowest first, vs national): '+byStd.map(function(r){return escHtml(r.name)+' '+r.qar.toFixed(0)+'% ('+r.achieved+'/'+r.leavers+') vs '+r.bench.toFixed(1)+'%'+(r.benchIsLevel?(' L'+r.level):' overall');}).join(' &middot; ')+'</div>'):'')+
+    '<div style="margin-top:6px"><strong style="color:var(--text2)">Benchmark</strong>: national all-age all-level rate '+N.overall+'% ('+N.year+', published Mar 2026), target '+N.target+'%. By level &mdash; L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (L2 &amp; L7 not published separately &rarr; compared to the overall rate). Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'. Source: <a href="'+src+'" target="_blank" rel="noopener" style="color:var(--teal)">gov.uk Explore Education Statistics &mdash; Apprenticeships</a>.</div>'+
     '<div style="margin-top:6px;font-style:italic">This is an <strong>indicative rate on your own learners</strong>, computed from your tracker export. It is <strong>not</strong> the official ESFA provider QAR, which is calculated from full ILR data on a &ldquo;hybrid end year&rdquo; basis with national inclusion/exclusion rules &mdash; use it to steer, not for published performance management.</div>'+
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:1rem">'+head+
@@ -2584,7 +2588,7 @@ function openLevyReport(framing, btn){ // projection buttons — always the full
 }
 function openMasterReport(btn){
   syncReportSel();
-  var any=['cover','p1','p2','p3','delivery'].some(function(k){return reportSel[k]&&(k!=='delivery'||(delivery&&delivery.length));});
+  var any=['cover','p1','p2','p3','delivery','qar'].some(function(k){return reportSel[k]&&(k!=='delivery'||(delivery&&delivery.length))&&(k!=='qar'||(typeof computeQAR==='function'&&computeQAR().leavers>0));});
   if(!any){alert('Tick at least one report to include.');return;}
   _openReportTab(btn,'Master report'); // uses the picker's reportSel
 }
@@ -2675,7 +2679,7 @@ function levyBoardCover(d){
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only &mdash; based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'.'+dataAckNote()+' Full analysis follows in the Affordability Report.</div>'+
     '</div></div>';
 }
-var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false}; // nothing pre-selected — the user ticks what they want
+var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false,qar:false}; // nothing pre-selected — the user ticks what they want
 function renderLevyReport(sel){
   var s=sel||reportSel, d=levyReportData();
   var html='';
@@ -2684,6 +2688,7 @@ function renderLevyReport(sel){
   if(s.p2)html+=levyPage2(d,LEVY_FRAMING);
   if(s.p3)html+=levyPage3(d,LEVY_FRAMING);
   if(s.delivery&&typeof delivery!=='undefined'&&delivery&&delivery.length)html+=levyDeliveryPage(d);
+  if(s.qar&&typeof computeQAR==='function'&&computeQAR().leavers>0)html+=levyQarPage(d);
   if(!html)html=levyBoardCover(d);
   document.getElementById('levyReportPages').innerHTML=html;
 }
@@ -2693,17 +2698,19 @@ var REPORT_PARTS=[
   {k:'p1',lb:'Affordability &mdash; executive summary',sb:'Verdict, RAG rating, key figures'},
   {k:'p2',lb:'Programme detail',sb:'Per-programme table, movement forward, staying on track'},
   {k:'p3',lb:'Cost &amp; true-cost of ownership',sb:'Levy fee + off-the-job time + NI relief'},
-  {k:'delivery',lb:'Delivery / tracker report',sb:'Synchronised learners &mdash; status, on-track / behind, outcomes'}
+  {k:'delivery',lb:'Delivery / tracker report',sb:'Synchronised learners &mdash; status, on-track / behind, outcomes',
+    avail:function(){return typeof delivery!=='undefined'&&delivery&&delivery.length;},disabledMsg:'sync a tracker report to include'},
+  {k:'qar',lb:'Achievement rate (QAR)',sb:'Your cohort&rsquo;s achievement rate vs national, retention &times; pass, at-risk &pound;',
+    avail:function(){return typeof computeQAR==='function'&&computeQAR().leavers>0;},disabledMsg:'needs learners who have completed or left'}
 ];
 function renderReportPicker(){
   var el=document.getElementById('reportPicker');if(!el)return;
-  var hasDeliv=(typeof delivery!=='undefined'&&delivery&&delivery.length);
-  if(!hasDeliv)reportSel.delivery=false;
   el.innerHTML=REPORT_PARTS.map(function(p){
-    var disabled=(p.k==='delivery'&&!hasDeliv), checked=reportSel[p.k]&&!disabled;
+    var ok=p.avail?!!p.avail():true; if(!ok)reportSel[p.k]=false;
+    var disabled=!ok, checked=reportSel[p.k]&&!disabled;
     return '<label style="display:flex;align-items:flex-start;gap:11px;padding:9px 4px;border-radius:8px;cursor:'+(disabled?'default':'pointer')+';opacity:'+(disabled?'0.5':'1')+'">'+
       '<input type="checkbox" data-part="'+p.k+'" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="syncReportSel()" style="margin-top:2px;width:16px;height:16px;accent-color:var(--teal);flex:0 0 auto">'+
-      '<span><span style="font-weight:600;color:var(--text);font-size:13.5px">'+p.lb+'</span>'+(disabled?' <span style="font-size:11px;color:var(--text3)">&mdash; sync a tracker report to include</span>':'')+'<br><span style="font-size:12px;color:var(--text3)">'+p.sb+'</span></span></label>';
+      '<span><span style="font-weight:600;color:var(--text);font-size:13.5px">'+p.lb+'</span>'+(disabled?' <span style="font-size:11px;color:var(--text3)">&mdash; '+(p.disabledMsg||'not available yet')+'</span>':'')+'<br><span style="font-size:12px;color:var(--text3)">'+p.sb+'</span></span></label>';
   }).join('');
   updateReportNote();updateSelectAllLabel();
 }
@@ -2725,7 +2732,7 @@ function updateSelectAllLabel(){
 }
 function updateReportNote(){
   var el=document.getElementById('reportPickerNote');if(!el)return;
-  var n=['cover','p1','p2','p3','delivery'].filter(function(k){return reportSel[k];}).length;
+  var n=['cover','p1','p2','p3','delivery','qar'].filter(function(k){return reportSel[k];}).length;
   el.innerHTML=n?('Master report will be <strong>'+n+' page'+(n!==1?'s':'')+'</strong>, assembled top-to-bottom in the order above, and open in a new tab as a PDF.'):'Tick at least one section to build a report.';
 }
 function setReportFraming(f){
@@ -2775,6 +2782,41 @@ function levyDeliveryPage(d){
       '<tbody>'+body+'</tbody></table></div>'+
     (more>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+more+' more learner'+(more!==1?'s':'')+' &mdash; full list in the app.</div>':'')+
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Delivery data as provided in your tracker export &mdash; on-track / behind reflects progress against elapsed time. Rules as of '+RULEBOOK.version+'.</div>'+
+    '</div></div>';
+}
+// A4 report page for the achievement rate (QAR) analysis (dark report styling, 794px budget).
+function levyQarPage(d){
+  var q=computeQAR(); if(!q||!q.leavers)return '';
+  var N=QAR_NATIONAL, above=q.qar>=N.overall, col=q.qar>=N.overall?'#2DD4B2':(q.qar>=N.overall-8?'#E0A43B':'#e0607a'), delta=q.qar-N.overall;
+  var fig=function(lab,val,c,sub){return '<div style="flex:1;min-width:120px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'#fff')+'">'+val+'</div>'+(sub?'<div style="font-size:10px;color:#7e95ab;margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var figs=fig('Retention',(q.retention!=null?q.retention.toFixed(0)+'%':'—'),'#fff',q.completers+' of '+q.leavers+' stayed')
+    +fig('Pass rate',(q.pass!=null?q.pass.toFixed(0)+'%':'—'),'#fff',q.achieved+' of '+q.completers+' passed')
+    +fig('Invested in non-achievers',(q.atRisk>0?fmt(q.atRisk):'£0'),q.atRisk>0?'#e0607a':'#2DD4B2',(q.withdrawn+q.failed)+' did not achieve')
+    +fig('Still on programme',q.live,'#E0A43B','excluded until they leave');
+  var byStd=qarByStandard(), CAP=8, shown=byStd.slice(0,CAP), moreS=byStd.length-shown.length;
+  var rows=shown.map(function(r){var c=r.qar>=r.bench?'#2DD4B2':'#e0607a';
+    return '<tr style="border-top:1px solid rgba(255,255,255,0.07)">'+
+      '<td style="padding:5px 10px;color:#eaf1f7">'+escHtml(r.name)+'</td>'+
+      '<td style="padding:5px 10px;color:#9fb2c6;white-space:nowrap">'+(r.level?('L'+r.level):'&mdash;')+'</td>'+
+      '<td style="padding:5px 10px;color:#9fb2c6;text-align:right">'+r.achieved+' / '+r.leavers+'</td>'+
+      '<td style="padding:5px 10px;text-align:right;font-weight:700;color:'+c+'">'+r.qar.toFixed(0)+'%</td>'+
+      '<td style="padding:5px 10px;text-align:right;color:#9fb2c6;white-space:nowrap">'+r.bench.toFixed(1)+'%'+(r.benchIsLevel?'':' *')+'</td></tr>';
+  }).join('');
+  return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
+    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
+      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
+    '<div style="display:flex;align-items:center;gap:26px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.25);border-radius:12px;padding:16px 22px;margin-bottom:16px">'+
+      '<div><div style="font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;color:'+col+';line-height:1">'+q.qar.toFixed(1)+'%</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+q.achieved+' achieved of '+q.leavers+' leaver'+(q.leavers!==1?'s':'')+'</div></div>'+
+      '<div style="flex:1;font-size:13px;color:#c7d6e2;line-height:1.6">'+(above?'<b style="color:#2DD4B2">&#9650; '+Math.abs(delta).toFixed(1)+' pts above</b>':'<b style="color:#e0607a">&#9660; '+Math.abs(delta).toFixed(1)+' pts below</b>')+' the national rate of <b style="color:#fff">'+N.overall+'%</b> ('+N.year+'), against a government target of '+N.target+'%.<br><span style="color:#7e95ab">Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'</span></div></div>'+
+    '<div class="lvy-sec">Retention &times; pass</div><div class="lvy-figs" style="margin-bottom:16px">'+figs+'</div>'+
+    '<div class="lvy-sec">By standard '+(byStd.length>1?'(lowest first)':'')+'</div>'+
+    '<div style="border:1px solid rgba(255,255,255,0.09);border-radius:9px;overflow:hidden;margin-top:6px"><table style="border-collapse:collapse;width:100%;font-size:11.5px">'+
+      '<thead><tr style="background:rgba(255,255,255,0.04);color:#8ba0b6;text-align:left">'+
+        '<th style="padding:7px 10px;font-weight:600">Standard</th><th style="padding:7px 10px;font-weight:600">Level</th>'+
+        '<th style="padding:7px 10px;font-weight:600;text-align:right">Achieved / leavers</th><th style="padding:7px 10px;font-weight:600;text-align:right">Rate</th>'+
+        '<th style="padding:7px 10px;font-weight:600;text-align:right">National</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    (moreS>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+moreS+' more standard'+(moreS!==1?'s':'')+' &mdash; full breakdown in the app.</div>':'')+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Achievement rate = achievements &divide; leavers (leavers = achieved + withdrawn + completed-but-failed; still-in-learning excluded). National 2024/25 = '+N.overall+'% (target '+N.target+'%); by level L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (* L2/L7 vs overall). Source: gov.uk Explore Education Statistics. <b>Indicative rate on your own learners &mdash; not the official ESFA provider QAR</b> (ILR, hybrid-end-year basis).</div>'+
     '</div></div>';
 }
 function levyPage1(d,framing){
