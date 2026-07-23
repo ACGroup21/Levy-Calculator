@@ -96,6 +96,7 @@ body[data-goal="cash"]{--goal-accent:#2DD4B2}
 body[data-goal="expiry"]{--goal-accent:#E0A43B}
 body[data-goal="capability"]{--goal-accent:#a78bfa}
 body[data-goal="headcount"]{--goal-accent:#39A0D4}
+body[data-goal="social"]{--goal-accent:#3aa76a}
 body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .goal-tile{flex:0 0 calc(33.333% - 7px);min-width:170px;display:flex;flex-direction:column;text-align:left;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
@@ -653,6 +654,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
           <div class="field" style="flex:2;min-width:160px;margin:0"><label>Department / project <span style="color:var(--text3)">(optional)</span></label><input id="rf-name" placeholder="e.g. Finance, or Project Atlas" onkeydown="if(event.key==='Enter')addRingfence()"></div>
           <div class="field" style="flex:1;min-width:130px;margin:0"><label>Amount to reserve (&pound;)</label><input id="rf-amount" type="number" min="0" placeholder="e.g. 40000" onkeydown="if(event.key==='Enter')addRingfence()"></div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;padding-bottom:9px" title="Earmark this to gift / transfer to another employer as social value (capped at 50% of your annual levy)"><input type="checkbox" id="rf-gift" style="width:15px;height:15px;cursor:pointer;accent-color:#3aa76a">&#129309; Gift it</label>
           <button class="btn-add" style="width:auto;padding:10px 20px" onclick="addRingfence()">+ Ring-fence</button>
         </div>
         <div id="rfList" style="margin-top:4px"></div>
@@ -853,7 +855,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22v</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1792,12 +1794,18 @@ function renderRingfences(){
   var companyLevy=(d&&d.levyAvail>0)?(+d.levyAvail):((levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0));
   var yrs=(d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
   if(!ringfences.length){el.innerHTML='<div style="font-size:12.5px;color:var(--text3);margin-top:9px">No ring-fences yet &mdash; reserve part of your levy above (e.g. &pound;40,000 for Finance).</div>';return;}
+  var perHead=(d&&d.perHead>0)?d.perHead:0;
+  var giftCap=(levyData?((+levyData.monthlyAvg||0)*12*RULEBOOK.transferCapPct):0);
   var rows=ringfences.map(function(r,i){
-    var amt=+r.amount||0, pct=companyLevy>0?(amt/companyLevy*100):0;
+    var amt=+r.amount||0, pct=companyLevy>0?(amt/companyLevy*100):0, gift=!!r.gift;
+    var enabled=(gift&&perHead>0)?Math.floor(amt/perHead):0, giftOver=gift&&giftCap>0&&amt>giftCap+0.5;
+    var sub=gift
+      ? '<span style="color:#3aa76a">&#129309; to gift'+(enabled>0?' &mdash; funds ~'+enabled+' apprenticeship'+(enabled!==1?'s':'')+' elsewhere':'')+'</span>'+(giftOver?' <span style="color:var(--red)">&#9888; over the '+Math.round(RULEBOOK.transferCapPct*100)+'% transfer cap ('+fmt(Math.round(giftCap))+')</span>':'')
+      : (companyLevy>0?(pct.toFixed(1)+'% of your company levy'):'add levy in Step 1 to see its share');
     return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--text);font-size:13.5px">'+esc((r.name&&r.name.trim())||'Unnamed reservation')+'</div>'+
-      '<div style="font-size:11.5px;color:var(--text3)">'+(companyLevy>0?(pct.toFixed(1)+'% of your company levy'):'add levy in Step 1 to see its share')+'</div></div>'+
-      '<div style="font-family:var(--mono);font-size:14px;color:var(--money);font-weight:600">'+fmt(amt)+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--text);font-size:13.5px">'+esc((r.name&&r.name.trim())||(gift?'Gift':'Unnamed reservation'))+'</div>'+
+      '<div style="font-size:11.5px;color:var(--text3)">'+sub+'</div></div>'+
+      '<div style="font-family:var(--mono);font-size:14px;color:'+(gift?'#3aa76a':'var(--money)')+';font-weight:600">'+fmt(amt)+'</div>'+
       '<button class="btn-rm" onclick="removeRingfence('+i+')" title="Remove">&#10005;</button></div>';
   }).join('');
   var total=ringfenceTotal(), over=total>companyLevy+0.5, remaining=companyLevy-total, totPct=companyLevy>0?(total/companyLevy*100):0;
@@ -1822,8 +1830,9 @@ function addRingfence(){
   var name=(nameEl&&nameEl.value.trim())||'';
   var amount=amtEl?(parseFloat((amtEl.value||'').toString().replace(/[£,\s]/g,''))||0):0;
   if(amount<=0){alert('Enter an amount to ring-fence.');return;}
-  ringfences.push({name:name,amount:amount});
-  if(nameEl)nameEl.value='';if(amtEl)amtEl.value='';
+  var giftEl=document.getElementById('rf-gift'), gift=giftEl?!!giftEl.checked:false;
+  ringfences.push({name:name,amount:amount,gift:gift});
+  if(nameEl)nameEl.value='';if(amtEl)amtEl.value='';if(giftEl)giftEl.checked=false;
   renderRingfences();saveState();
   if(programmes.length&&typeof renderProjection==='function')renderProjection();
 }
@@ -3801,10 +3810,11 @@ const GOALS=[
   {key:'cash',ic:'&pound;',lb:'Minimise cash outlay',sb:'Find the lowest co-investment path'},
   {key:'capability',ic:'&#9678;',lb:'Build a specific capability',sb:'Target a role, skill or succession need'},
   {key:'headcount',ic:'&#10138;',lb:'Maximise people upskilled',sb:'Most apprentices or units per &pound; of levy'},
+  {key:'social',ic:'&#129309;',lb:'Maximise social value',sb:'Gift surplus levy &mdash; fund apprenticeships elsewhere'},
   {key:'other',ic:'&#10067;',lb:'Not sure yet',sb:'Describe it &mdash; we&rsquo;ll suggest a goal if it fits'}
 ];
 // What each goal will do — shown at selection so the effect is understood even before data exists
-const GOAL_FX={expiry:'lead with funds at risk of expiry',cash:'lead with employer co-investment',capability:'lead with what your levy commits to capability',headcount:'lead with people upskilled per &pound;',other:'lead with your projected balance'};
+const GOAL_FX={expiry:'lead with funds at risk of expiry',cash:'lead with employer co-investment',capability:'lead with what your levy commits to capability',headcount:'lead with people upskilled per &pound;',social:'lead with giftable levy &mdash; apprenticeships funded elsewhere',other:'lead with your projected balance'};
 function applyGoalAccent(){
   const k=scnGoal&&scnGoal.key;
   if(k)document.body.setAttribute('data-goal',k);else document.body.removeAttribute('data-goal');
@@ -3923,6 +3933,14 @@ function renderGoalEmphasis(o){
       num=String(heads);lab='people upskilled';
       note=fmt(perHead)+' levy per head · '+fmt(committed)+' committed. More, shorter programmes raise this per £.';
       break;
+    case 'social':{
+      const annual=levyData.monthlyAvg*12, cap=annual*RULEBOOK.transferCapPct;
+      const giftable=atRisk>1?Math.min(atRisk,cap):Math.min(Math.max(0,o.endBal),cap);
+      const enabled=perHead>0?Math.floor(giftable/perHead):0;
+      num=fmt(giftable);lab='giftable levy as social value';
+      note=giftable>500?('Could fund ~<strong>'+enabled+'</strong> apprenticeship'+(enabled!==1?'s':'')+' for an SME, charity or supply-chain partner (at your '+fmt(Math.round(perHead))+'/learner) &mdash; evidences the UK Social Value Model. Ring-fence it as a gift below to earmark it.'):'No surplus levy to gift on the current plan &mdash; your levy is fully committed to your own people.';
+      break;
+    }
     default:{
       const n=(scnGoal.note||'').replace(/[<>&]/g,m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
       num=fmt(o.endBal);lab='projected balance at month 36';
