@@ -604,6 +604,48 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </details>
   </div>
 
+  <!-- TRACKER REPORT SYNC — optional delivery-actuals front door (feeds QAR / on-track / completion-adjusted ROI) -->
+  <details class="card" id="trackerCard" style="margin-top:-4px">
+    <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px;user-select:none">
+      <span style="font-size:18px">&#128202;</span>
+      <span style="flex:1"><span style="font-weight:600;color:var(--text);font-size:14.5px">Do you have an apprentice tracker?</span><br><span style="font-size:12.5px;color:var(--text3)">Drop your report in here for synchronised data &mdash; adds real delivery (starts, planned ends, completions, outcomes) to the forecast.</span></span>
+      <span id="trackerChev" style="color:var(--text3);font-size:12px">&#9662;</span>
+    </summary>
+    <div style="margin-top:14px">
+      <div class="upload-zone" id="trackerDropzone" onclick="document.getElementById('trackerFile').click()">
+        <div class="upload-icon">&#128202;</div>
+        <div class="upload-title">Click to upload or drag &amp; drop your tracker report</div>
+        <div class="upload-sub">CSV, TSV or Excel &nbsp;&middot;&nbsp; AC tracker export format</div>
+        <input type="file" id="trackerFile" accept=".csv,.tsv,.txt,.xls,.xlsx,text/csv,text/plain" style="display:none">
+      </div>
+      <div class="demo-row">
+        <span style="font-size:13px;color:var(--text3)">No tracker to hand?</span>
+        <button class="btn-demo" onclick="loadTrackerDemo()">&#9654;&nbsp; Load a sample report</button>
+        <button id="clearTrackerBtn" onclick="clearDelivery()" style="display:none;margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:6px 12px">Clear delivery data</button>
+      </div>
+      <div id="trackerStatus" class="status"></div>
+      <div id="deliverySync"></div>
+      <details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.07);padding-top:12px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128196;</span>What should the report contain? <span style="color:var(--teal)">See the format &#9662;</span></summary>
+        <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.6">
+          One row per learner. Column names are matched flexibly &mdash; these are the fields the calculator reads:
+          <div style="margin-top:9px;overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;min-width:520px">
+            <tr style="color:var(--text2)"><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Column</th><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Meaning</th><th style="text-align:left;padding:4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Required</th></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">learner</td><td style="padding:4px 12px 4px 0">Name or reference</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">standard</td><td style="padding:4px 12px 4px 0">Standard title or ST reference</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">start</td><td style="padding:4px 12px 4px 0">On-programme start (YYYY-MM-DD)</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">planned&nbsp;end</td><td style="padding:4px 12px 4px 0">Planned end / EPA gateway date</td><td style="padding:4px 0;color:var(--text3)">recommended</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">actual&nbsp;end</td><td style="padding:4px 12px 4px 0">Completion / leaving date (blank if live)</td><td style="padding:4px 0;color:var(--text3)">optional</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">status</td><td style="padding:4px 12px 4px 0">on programme / gateway / achieved / withdrawn / paused</td><td style="padding:4px 0;color:var(--text3)">optional</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">outcome</td><td style="padding:4px 12px 4px 0">Grade &mdash; pass / merit / distinction / fail</td><td style="padding:4px 0;color:var(--text3)">optional</td></tr>
+            <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">price</td><td style="padding:4px 12px 4px 0">Negotiated price (else the band is used)</td><td style="padding:4px 0;color:var(--text3)">optional</td></tr>
+          </table></div>
+          <div style="margin-top:9px">Status and outcome are what a levy export can&rsquo;t give &mdash; they unlock your <strong>real achievement rate (QAR)</strong> and completion-adjusted cost. Everything stays in your browser.</div>
+        </div>
+      </details>
+    </div>
+  </details>
+
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
   <div id="ksbDevPanel" style="display:none">
   <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load Standards &amp; KSB Data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span></div>
@@ -855,7 +897,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22x</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1308,7 +1350,7 @@ function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.random
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1322,12 +1364,13 @@ function applyScenario(s){
   if(s.dataAck!==undefined)scnDataAck=s.dataAck;
   if(Array.isArray(s.ringfences))ringfences=s.ringfences;
   if(s.ringfenceApply!==undefined)ringfenceApply=!!s.ringfenceApply;
+  if(Array.isArray(s.delivery)){delivery=s.delivery;if(typeof renderDeliverySync==='function')renderDeliverySync();}
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
 function persistScenario(force){
   try{
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
-    const hasData=force||hasLevy||programmes.length||scnGoal||scnTalent||(ringfences&&ringfences.length);
+    const hasData=force||hasLevy||programmes.length||scnGoal||scnTalent||(ringfences&&ringfences.length)||(delivery&&delivery.length);
     if(!hasData){localStorage.removeItem(SCEN_KEY);return;}
     localStorage.setItem(SCEN_KEY,JSON.stringify(buildScenario()));
   }catch(e){/* storage unavailable — fail silently */}
@@ -1366,7 +1409,7 @@ function loadState(){
 function clearSavedData(){
   if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
   try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
-  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;if(typeof renderRingfences==='function')renderRingfences();
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
@@ -1406,6 +1449,114 @@ function readCSV(file){
     r.onload=e=>parseESFA(e.target.result);
     r.readAsText(file);
   }
+}
+
+// ── TRACKER REPORT SYNC ── generic delivery-actuals front door (AC tracker export schema) ──
+// delivery = [{learner,standard,level,start,plannedEnd,actualEnd,status,outcome,price,std}]
+var delivery=[];
+(function(){
+  var td=document.getElementById('trackerDropzone'), tf=document.getElementById('trackerFile'),
+      tc=document.getElementById('trackerCard');
+  if(td){
+    td.addEventListener('dragover',function(e){e.preventDefault();td.style.borderColor='#2DD4B2';});
+    td.addEventListener('dragleave',function(){td.style.borderColor='';});
+    td.addEventListener('drop',function(e){e.preventDefault();td.style.borderColor='';if(e.dataTransfer.files[0])readTracker(e.dataTransfer.files[0]);});
+  }
+  if(tf)tf.addEventListener('change',function(e){if(e.target.files[0])readTracker(e.target.files[0]);});
+  if(tc)tc.addEventListener('toggle',function(){var c=document.getElementById('trackerChev');if(c)c.innerHTML=tc.open?'&#9652;':'&#9662;';});
+})();
+function readTracker(file){
+  var isExcel=/\.(xlsx|xls)$/i.test(file.name), r=new FileReader();
+  if(isExcel&&window.XLSX){
+    r.onload=function(e){try{var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];parseTracker(XLSX.utils.sheet_to_csv(ws,{FS:'\t'}));}catch(err){setStatus2('Could not read this Excel file. Try saving it as CSV. ('+err.message+')','warn');}};
+    r.readAsArrayBuffer(file);
+  }else{r.onload=function(e){parseTracker(e.target.result);};r.readAsText(file);}
+}
+function setStatus2(msg,kind){var el=document.getElementById('trackerStatus');if(!el)return;el.textContent=msg;el.className='status '+(kind==='ok'?'ok':kind==='warn'?'warn':'');}
+function trkDate(s){s=(s||'').toString().trim();if(!s)return '';if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);var m=/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/.exec(s);if(m)return m[3]+'-'+('0'+m[2]).slice(-2)+'-'+('0'+m[1]).slice(-2);return s;}
+function trkStatus(raw,actualEnd,outcome){
+  var s=(raw||'').toString().toLowerCase(), o=(outcome||'').toString().toLowerCase();
+  if(/withdraw|left|early leaver|dropped|non-?completion/.test(s))return 'withdrawn';
+  if(/pause|break in learning|\bbil\b|suspend/.test(s))return 'paused';
+  if(/gateway|end.?point|awaiting epa|epa/.test(s))return 'gateway';
+  if(/achiev|pass|complet|certificat|distinction|merit/.test(s))return /fail/.test(o)?'withdrawn':'achieved';
+  if(/on.?programme|in.?learning|in.?progress|active|live|ongoing/.test(s))return 'in_progress';
+  // no usable status word — infer from dates/outcome
+  if(actualEnd)return /fail/.test(o)?'withdrawn':'achieved';
+  return 'in_progress';
+}
+function parseTracker(text){
+  if(text.charCodeAt(0)===0xFEFF)text=text.slice(1);
+  var firstLine=text.split(/\r?\n/)[0]||'';
+  var sep=firstLine.includes('\t')?'\t':(firstLine.includes(';')&&!firstLine.includes(',')?';':',');
+  var lines=text.trim().split(/\r?\n/);
+  if(lines.length<2){setStatus2('That file has no data rows.','warn');return;}
+  var hdr=lines[0].split(sep).map(function(h){return h.replace(/^﻿/,'').replace(/[ ]/g,' ').replace(/^"|"$/g,'').trim().toLowerCase().replace(/\s+/g,' ');});
+  var col=function(){for(var a=0;a<arguments.length;a++){var n=arguments[a],i=hdr.findIndex(function(h){return h===n;});if(i<0)i=hdr.findIndex(function(h){return h.includes(n);});if(i>=0)return i;}return -1;};
+  var iL=col('learner','apprentice','name','uln'),
+      iS=col('standard','apprenticeship','course','programme','qualification'),
+      iLv=col('level'),
+      iSt=col('start','on-programme start','commencement'),
+      iPe=col('planned end','expected end','planned completion','planned','target end'),
+      iAe=col('actual end','completion date','completed','date achieved','leaving date','end date','actual'),
+      iStat=col('status','state'),
+      iO=col('outcome','grade','result'),
+      iPr=col('price','negotiated price','agreed price','cost');
+  if(iL<0||iS<0){setStatus2('Could not find a "learner" and "standard" column. Found: '+hdr.filter(Boolean).join(', '),'warn');return;}
+  var rows=lines.slice(1).filter(function(l){return l.trim();}).map(function(l){return l.split(sep).map(function(c){return c.trim().replace(/^"|"$/g,'');});});
+  var out=[],skipped=0;
+  rows.forEach(function(r){
+    var learner=(r[iL]||'').trim(), standard=(r[iS]||'').trim();
+    if(!learner&&!standard){skipped++;return;}
+    var actualEnd=iAe>=0?trkDate(r[iAe]):'', outcome=iO>=0?(r[iO]||'').trim():'';
+    var level=iLv>=0?(parseInt(r[iLv])||0):0;
+    var std=(typeof matchStandardByCourse==='function')?matchStandardByCourse(standard,level):null;
+    out.push({learner:learner,standard:standard,level:level||(std?std.level:0),
+      start:iSt>=0?trkDate(r[iSt]):'',plannedEnd:iPe>=0?trkDate(r[iPe]):'',actualEnd:actualEnd,
+      status:trkStatus(iStat>=0?r[iStat]:'',actualEnd,outcome),outcome:outcome,
+      price:iPr>=0?(nv(r[iPr])||0):0,std:std?std.name:'',stdBand:std?std.band:0});
+  });
+  if(!out.length){setStatus2('No learner rows found in that report.','warn');return;}
+  delivery=out;
+  setStatus2('[OK] Synchronised '+out.length+' learner'+(out.length!==1?'s':'')+' from your tracker'+(skipped?' ('+skipped+' blank row'+(skipped!==1?'s':'')+' skipped)':'')+'.','ok');
+  renderDeliverySync();saveState&&saveState();
+}
+function renderDeliverySync(){
+  var el=document.getElementById('deliverySync'), btn=document.getElementById('clearTrackerBtn');
+  if(!el)return;
+  if(!delivery.length){el.innerHTML='';if(btn)btn.style.display='none';return;}
+  if(btn)btn.style.display='';
+  var n=delivery.length, by={in_progress:0,gateway:0,achieved:0,withdrawn:0,paused:0};
+  delivery.forEach(function(d){by[d.status]=(by[d.status]||0)+1;});
+  var todayIso=(today&&today.toISOString?today.toISOString().slice(0,10):'');
+  var overdue=delivery.filter(function(d){return (d.status==='in_progress'||d.status==='gateway')&&d.plannedEnd&&/^\d{4}-\d{2}-\d{2}$/.test(d.plannedEnd)&&d.plannedEnd<todayIso;}).length;
+  var matched=delivery.filter(function(d){return d.std;}).length;
+  var live=by.in_progress+by.gateway, leavers=by.achieved+by.withdrawn;
+  var chip=function(lb,v,c){return v?'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.10);border-radius:20px;padding:4px 11px;font-size:12px;color:var(--text2)"><b style="color:'+c+';font-family:var(--mono)">'+v+'</b> '+lb+'</span>':'';};
+  el.innerHTML='<div style="margin-top:14px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.20);border-radius:12px;padding:13px 16px">'+
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px"><span style="color:var(--teal);font-size:15px">&#10003;</span><span style="font-weight:600;color:var(--text);font-size:13.5px">Delivery synchronised &mdash; '+n+' learner'+(n!==1?'s':'')+' from your tracker</span></div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
+      chip('on programme',by.in_progress,'var(--teal)')+chip('at gateway',by.gateway,'#a78bfa')+
+      chip('achieved',by.achieved,'#2DD4B2')+chip('withdrawn',by.withdrawn,'var(--red)')+chip('paused',by.paused,'#e0a13e')+
+    '</div>'+
+    (overdue?'<div style="margin-top:10px;font-size:12px;color:var(--red)">&#9888; '+overdue+' live learner'+(overdue!==1?'s are':' is')+' past the planned end date &mdash; check progress or re-plan.</div>':'')+
+    '<div style="margin-top:10px;font-size:11.5px;color:var(--text3);line-height:1.55">'+matched+' of '+n+' matched to a known standard. '+
+      (leavers?('<strong>'+leavers+'</strong> learner'+(leavers!==1?'s have':' has')+' left ('+by.achieved+' achieved, '+by.withdrawn+' withdrawn) &mdash; ready to feed the QAR calculator (next build). '):'')+
+      'Actual outcomes stay in your browser; nothing is uploaded.</div>'+
+  '</div>';
+}
+function clearDelivery(){delivery=[];renderDeliverySync();setStatus2('','');saveState&&saveState();}
+function loadTrackerDemo(){
+  var demo=['learner,standard,level,start,planned end,actual end,status,outcome,price',
+    'A. Okafor,Team Leader,3,2024-01-15,2025-07-15,2025-07-30,achieved,Distinction,4500',
+    'B. Nguyen,Team Leader,3,2024-01-15,2025-07-15,2025-06-20,achieved,Pass,4500',
+    'C. Rossi,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
+    'D. Haddad,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
+    'E. Silva,Business Administrator,3,2023-09-10,2025-01-10,2024-11-05,withdrawn,,',
+    'F. Chen,Business Administrator,3,2023-09-10,2025-01-10,,gateway,,',
+    'G. Adeyemi,Team Leader,3,2024-06-01,2025-02-01,,on programme,,4500'].join('\n');
+  var tc=document.getElementById('trackerCard');if(tc&&!tc.open)tc.open=true;
+  parseTracker(demo);
 }
 
 function parseESFA(text){
