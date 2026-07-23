@@ -628,7 +628,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.07);padding-top:12px">
         <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128196;</span>What should the report contain? <span style="color:var(--teal)">See the format &#9662;</span></summary>
         <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.6">
-          One row per learner. Column names are matched flexibly &mdash; these are the fields the calculator reads:
+          <em style="color:var(--text3)">For reference &mdash; nothing to fill in here.</em> Your tracker just needs to export one row per learner with these columns (names are matched flexibly, so slight variations are fine):
           <div style="margin-top:9px;overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;min-width:520px">
             <tr style="color:var(--text2)"><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Column</th><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Meaning</th><th style="text-align:left;padding:4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Required</th></tr>
             <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">learner</td><td style="padding:4px 12px 4px 0">Name or reference</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
@@ -641,6 +641,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">price</td><td style="padding:4px 12px 4px 0">Negotiated price (else the band is used)</td><td style="padding:4px 0;color:var(--text3)">optional</td></tr>
           </table></div>
           <div style="margin-top:9px">Status and outcome are what a levy export can&rsquo;t give &mdash; they unlock your <strong>real achievement rate (QAR)</strong> and completion-adjusted cost. Everything stays in your browser.</div>
+          <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:9px">
+            <button class="btn-demo" onclick="downloadTrackerTemplate()">&#11015;&nbsp; Download blank template (.csv)</button>
+            <button class="btn-demo" onclick="downloadTrackerSample()" style="background:none;border:1px solid rgba(var(--wash),0.15)">&#11015;&nbsp; Download the sample</button>
+          </div>
+          <div style="margin-top:8px;font-size:11px;color:var(--text3)">Open either in Excel or Google Sheets to see the exact layout, then match your tracker&rsquo;s export to it.</div>
         </div>
       </details>
     </div>
@@ -897,7 +902,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22x</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-22y</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1543,20 +1548,55 @@ function renderDeliverySync(){
     '<div style="margin-top:10px;font-size:11.5px;color:var(--text3);line-height:1.55">'+matched+' of '+n+' matched to a known standard. '+
       (leavers?('<strong>'+leavers+'</strong> learner'+(leavers!==1?'s have':' has')+' left ('+by.achieved+' achieved, '+by.withdrawn+' withdrawn) &mdash; ready to feed the QAR calculator (next build). '):'')+
       'Actual outcomes stay in your browser; nothing is uploaded.</div>'+
-  '</div>';
+  '</div>'+deliveryTable();
+}
+// The actual synchronised report — the learner rows read from the file
+function deliveryTable(){
+  if(!delivery.length)return '';
+  var n=delivery.length;
+  var dfmt=function(s){return (s&&/^\d{4}-\d{2}-\d{2}/.test(s))?fmtD(s):'<span style="color:var(--text3)">&mdash;</span>';};
+  var smeta={in_progress:['On programme','var(--teal)'],gateway:['At gateway','#a78bfa'],achieved:['Achieved','#2DD4B2'],withdrawn:['Withdrawn','var(--red)'],paused:['Paused','#e0a13e']};
+  var trs=delivery.map(function(d){
+    var m=smeta[d.status]||['&mdash;','var(--text3)'];
+    return '<tr style="border-top:1px solid rgba(var(--wash),0.06)">'+
+      '<td style="padding:6px 12px;color:var(--text);white-space:nowrap">'+escHtml(d.learner||'')+'</td>'+
+      '<td style="padding:6px 12px;color:var(--text2)">'+escHtml(d.std||d.standard||'')+(d.std?'':' <span title="not matched to a known standard in the library" style="color:#e0a13e">&#9888;</span>')+'</td>'+
+      '<td style="padding:6px 12px;color:var(--text2);white-space:nowrap">'+dfmt(d.start)+'</td>'+
+      '<td style="padding:6px 12px;color:var(--text2);white-space:nowrap">'+dfmt(d.plannedEnd)+'</td>'+
+      '<td style="padding:6px 12px;white-space:nowrap"><span style="display:inline-block;font-size:10.5px;color:'+m[1]+';border:1px solid '+m[1]+';border-radius:20px;padding:1px 8px">'+m[0]+'</span>'+(d.outcome?' <span style="font-size:11px;color:var(--text3)">'+escHtml(d.outcome)+'</span>':'')+'</td>'+
+    '</tr>';
+  }).join('');
+  return '<div style="margin-top:12px"><div style="font-size:12px;color:var(--text3);margin-bottom:6px">The synchronised report &mdash; '+n+' learner'+(n!==1?'s':'')+' read from your file:</div>'+
+    '<div style="overflow:auto;max-height:300px;border:1px solid rgba(var(--wash),0.09);border-radius:10px">'+
+    '<table style="border-collapse:collapse;width:100%;font-size:12px">'+
+    '<thead><tr style="position:sticky;top:0;background:var(--glass);color:var(--text3);text-align:left">'+
+      '<th style="padding:8px 12px;font-weight:600">Learner</th><th style="padding:8px 12px;font-weight:600">Standard</th>'+
+      '<th style="padding:8px 12px;font-weight:600">Start</th><th style="padding:8px 12px;font-weight:600">Planned end</th>'+
+      '<th style="padding:8px 12px;font-weight:600">Status</th></tr></thead>'+
+    '<tbody>'+trs+'</tbody></table></div></div>';
 }
 function clearDelivery(){delivery=[];renderDeliverySync();setStatus2('','');saveState&&saveState();}
+var TRK_SAMPLE_CSV=['learner,standard,level,start,planned end,actual end,status,outcome,price',
+  'A. Okafor,Team Leader,3,2024-01-15,2025-07-15,2025-07-30,achieved,Distinction,4500',
+  'B. Nguyen,Team Leader,3,2024-01-15,2025-07-15,2025-06-20,achieved,Pass,4500',
+  'C. Rossi,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
+  'D. Haddad,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
+  'E. Silva,Business Administrator,3,2023-09-10,2025-01-10,2024-11-05,withdrawn,,',
+  'F. Chen,Business Administrator,3,2023-09-10,2025-01-10,,gateway,,',
+  'G. Adeyemi,Team Leader,3,2024-06-01,2025-02-01,,on programme,,4500'].join('\n');
+var TRK_TEMPLATE_CSV=['learner,standard,level,start,planned end,actual end,status,outcome,price',
+  'Jane Smith,Team Leader,3,2025-01-06,2026-07-06,,on programme,,4500',
+  'John Doe,Data Analyst,4,2024-09-02,2026-03-02,2026-02-20,achieved,Merit,'].join('\n');
+function dlCSV(name,text){
+  try{var blob=new Blob([text],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1500);
+  }catch(e){alert('Could not generate the file: '+e.message);}
+}
+function downloadTrackerTemplate(){dlCSV('AC-tracker-template.csv',TRK_TEMPLATE_CSV);}
+function downloadTrackerSample(){dlCSV('AC-tracker-sample.csv',TRK_SAMPLE_CSV);}
 function loadTrackerDemo(){
-  var demo=['learner,standard,level,start,planned end,actual end,status,outcome,price',
-    'A. Okafor,Team Leader,3,2024-01-15,2025-07-15,2025-07-30,achieved,Distinction,4500',
-    'B. Nguyen,Team Leader,3,2024-01-15,2025-07-15,2025-06-20,achieved,Pass,4500',
-    'C. Rossi,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
-    'D. Haddad,Data Analyst,4,2024-03-01,2025-11-01,,on programme,,',
-    'E. Silva,Business Administrator,3,2023-09-10,2025-01-10,2024-11-05,withdrawn,,',
-    'F. Chen,Business Administrator,3,2023-09-10,2025-01-10,,gateway,,',
-    'G. Adeyemi,Team Leader,3,2024-06-01,2025-02-01,,on programme,,4500'].join('\n');
   var tc=document.getElementById('trackerCard');if(tc&&!tc.open)tc.open=true;
-  parseTracker(demo);
+  parseTracker(TRK_SAMPLE_CSV);
 }
 
 function parseESFA(text){
