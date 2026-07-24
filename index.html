@@ -929,7 +929,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       </div>
     </div>
 
-    <div id="sec-reports" class="levy-only">
+    <div id="sec-reports">
       <div class="divider"></div>
       <div class="step-row"><span class="step-chip">STEP 04</span><span class="step-title">Reports <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; build a master report or just the board cover</span></span></div>
       <details class="card" id="reportsCard">
@@ -944,7 +944,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)">
-          <div style="display:flex;align-items:center;gap:9px">
+          <div class="levy-only" style="display:flex;align-items:center;gap:9px">
             <span style="font-size:12px;color:var(--text3)">Framing</span>
             <div id="reportFraming" style="display:inline-flex;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.12);border-radius:8px;padding:2px">
               <button type="button" data-f="finance" onclick="setReportFraming('finance')" style="font-family:inherit;font-size:12px;border:none;background:var(--teal);color:#04121f;border-radius:6px;padding:5px 12px;cursor:pointer">Finance / SLT</button>
@@ -952,7 +952,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:10px;margin-left:auto;flex-wrap:wrap">
-            <button class="btn-demo" onclick="openBoardCover(this)" style="background:none;border:1px solid rgba(var(--wash),0.15)">&#128203;&nbsp; Board cover only</button>
+            <button class="btn-demo levy-only" onclick="openBoardCover(this)" style="background:none;border:1px solid rgba(var(--wash),0.15)">&#128203;&nbsp; Board cover only</button>
             <button class="btn-demo" onclick="openMasterReport(this)" style="background:var(--teal);color:#04121f;border:none">&#128196;&nbsp; Build master report &#8599;</button>
           </div>
         </div>
@@ -985,7 +985,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23p</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2657,7 +2657,7 @@ function openLevyReport(framing, btn){ // projection buttons — always the full
 }
 function openMasterReport(btn){
   syncReportSel();
-  var any=['cover','p1','p2','p3','delivery','qar'].some(function(k){return reportSel[k]&&(k!=='delivery'||(delivery&&delivery.length))&&(k!=='qar'||(typeof computeQAR==='function'&&computeQAR().leavers>0));});
+  var any=['cover','p1','p2','p3','nonlevy','delivery','qar'].some(function(k){return reportSel[k]&&(k!=='delivery'||(delivery&&delivery.length))&&(k!=='qar'||(typeof computeQAR==='function'&&computeQAR().leavers>0))&&(k!=='nonlevy'||(typeof nonLevyFunding==='function'&&nonLevyFunding().totalCount>0));});
   if(!any){alert('Tick at least one report to include.');return;}
   _openReportTab(btn,'Master report'); // uses the picker's reportSel
 }
@@ -2752,6 +2752,7 @@ function setFundingMode(m,userChose){
     if(ls&&!hasData)ls.classList.add('hidden');
   }
   updateFmodeHint();
+  if(typeof renderReportPicker==='function')renderReportPicker();
   if(userChose&&typeof persistScenario==='function'){try{persistScenario(true);}catch(e){}}
 }
 function nonLevyFunding(){
@@ -2928,33 +2929,37 @@ function levyBoardCover(d){
     '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Indicative only &mdash; based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'.'+dataAckNote()+' Full analysis follows in the Affordability Report.</div>'+
     '</div></div>';
 }
-var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false,qar:false}; // nothing pre-selected — the user ticks what they want
+var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false,qar:false,nonlevy:false}; // nothing pre-selected — the user ticks what they want
 function renderLevyReport(sel){
-  var s=sel||reportSel, d=levyReportData();
+  var s=sel||reportSel, d=levyReportData(), levyM=(fundingMode!=='nonlevy');
   var html='';
-  if(s.cover)html+=levyBoardCover(d);
-  if(s.p1)html+=levyPage1(d,LEVY_FRAMING);
-  if(s.p2)html+=levyPage2(d,LEVY_FRAMING);
-  if(s.p3)html+=levyPage3(d,LEVY_FRAMING);
+  if(s.cover&&levyM)html+=levyBoardCover(d);
+  if(s.p1&&levyM)html+=levyPage1(d,LEVY_FRAMING);
+  if(s.p2&&levyM)html+=levyPage2(d,LEVY_FRAMING);
+  if(s.p3&&levyM)html+=levyPage3(d,LEVY_FRAMING);
+  if(s.nonlevy&&!levyM&&typeof levyNonLevyPage==='function')html+=levyNonLevyPage(d);
   if(s.delivery&&typeof delivery!=='undefined'&&delivery&&delivery.length)html+=levyDeliveryPage(d);
   if(s.qar&&typeof computeQAR==='function'&&computeQAR().leavers>0)html+=levyQarPage(d);
-  if(!html)html=levyBoardCover(d);
+  if(!html)html=(fundingMode==='nonlevy'&&typeof levyNonLevyPage==='function')?(levyNonLevyPage(d)||levyBoardCover(d)):levyBoardCover(d);
   document.getElementById('levyReportPages').innerHTML=html;
 }
-// ── Reports hub: pick which pages assemble into the master report ──
+// ── Reports hub: pick which pages assemble into the master report (mode-aware) ──
 var REPORT_PARTS=[
-  {k:'cover',lb:'Board cover',sb:'One-page governance summary &mdash; the ask, numbers, risk, recommendation'},
-  {k:'p1',lb:'Affordability &mdash; executive summary',sb:'Verdict, RAG rating, key figures'},
-  {k:'p2',lb:'Programme detail',sb:'Per-programme table, movement forward, staying on track'},
-  {k:'p3',lb:'Cost &amp; true-cost of ownership',sb:'Levy fee + off-the-job time + NI relief'},
-  {k:'delivery',lb:'Delivery / tracker report',sb:'Synchronised learners &mdash; status, on-track / behind, outcomes',
+  {k:'cover',lb:'Board cover',sb:'One-page governance summary &mdash; the ask, numbers, risk, recommendation',modes:['levy']},
+  {k:'p1',lb:'Affordability &mdash; executive summary',sb:'Verdict, RAG rating, key figures',modes:['levy']},
+  {k:'p2',lb:'Programme detail',sb:'Per-programme table, movement forward, staying on track',modes:['levy']},
+  {k:'p3',lb:'Cost &amp; true-cost of ownership',sb:'Levy fee + off-the-job time + NI relief',modes:['levy']},
+  {k:'nonlevy',lb:'Funding report',sb:'How this plan is paid for &mdash; government + transfers + your investment; board-ready',modes:['nonlevy'],
+    avail:function(){return typeof nonLevyFunding==='function'&&nonLevyFunding().totalCount>0;},disabledMsg:'add programmes to include'},
+  {k:'delivery',lb:'Delivery / tracker report',sb:'Synchronised learners &mdash; status, on-track / behind, outcomes',modes:['levy','nonlevy'],
     avail:function(){return typeof delivery!=='undefined'&&delivery&&delivery.length;},disabledMsg:'sync a tracker report to include'},
-  {k:'qar',lb:'Achievement rate (QAR)',sb:'Your cohort&rsquo;s achievement rate vs national, retention &times; pass, at-risk &pound;',
+  {k:'qar',lb:'Achievement rate (QAR)',sb:'Your cohort&rsquo;s achievement rate vs national, retention &times; pass, at-risk &pound;',modes:['levy','nonlevy'],
     avail:function(){return typeof computeQAR==='function'&&computeQAR().leavers>0;},disabledMsg:'needs learners who have completed or left'}
 ];
 function renderReportPicker(){
   var el=document.getElementById('reportPicker');if(!el)return;
-  el.innerHTML=REPORT_PARTS.map(function(p){
+  REPORT_PARTS.forEach(function(p){if(p.modes&&p.modes.indexOf(fundingMode)<0)reportSel[p.k]=false;}); // drop selections not applicable to the current mode
+  el.innerHTML=REPORT_PARTS.filter(function(p){return !p.modes||p.modes.indexOf(fundingMode)>=0;}).map(function(p){
     var ok=p.avail?!!p.avail():true; if(!ok)reportSel[p.k]=false;
     var disabled=!ok, checked=reportSel[p.k]&&!disabled;
     return '<label style="display:flex;align-items:flex-start;gap:11px;padding:9px 4px;border-radius:8px;cursor:'+(disabled?'default':'pointer')+';opacity:'+(disabled?'0.5':'1')+'">'+
@@ -2981,7 +2986,7 @@ function updateSelectAllLabel(){
 }
 function updateReportNote(){
   var el=document.getElementById('reportPickerNote');if(!el)return;
-  var n=['cover','p1','p2','p3','delivery','qar'].filter(function(k){return reportSel[k];}).length;
+  var n=['cover','p1','p2','p3','nonlevy','delivery','qar'].filter(function(k){return reportSel[k];}).length;
   el.innerHTML=n?('Master report will be <strong>'+n+' page'+(n!==1?'s':'')+'</strong>, assembled top-to-bottom in the order above, and open in a new tab as a PDF.'):'Tick at least one section to build a report.';
 }
 function setReportFraming(f){
@@ -2989,6 +2994,39 @@ function setReportFraming(f){
   document.querySelectorAll('#reportFraming button').forEach(function(b){var on=b.getAttribute('data-f')===f;b.style.background=on?'var(--teal)':'transparent';b.style.color=on?'#04121f':'var(--text2)';});
 }
 // A4 report page for the synchronised delivery data (dark report styling, 794px budget).
+// A4 non-levy funding report — board-ready funding story (government + transfers + your investment). Dark report styling, 794px budget.
+function levyNonLevyPage(d){
+  var f=(typeof nonLevyFunding==='function')?nonLevyFunding():null; if(!f||!f.totalCount)return '';
+  var s=nlState(f), fmt=lvK, BLUE='#4aa3e8', rate=f.has25?'25%':'5%';
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:116px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var figs=fig('Total training investment',fmt(f.totalBand))+fig('Government funds',fmt(s.gov),BLUE)+fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':'#7e95ab')+fig('Your investment',fmt(s.residual),s.residual>0.5?'#E0A43B':'#2DD4B2')+fig('Off-the-job time',fmt(f.otj));
+  var ask='Approve <b style="color:#fff">'+fmt(s.residual)+'</b> of employer investment to train <b style="color:#fff">'+f.totalCount+' apprentice'+(f.totalCount!==1?'s':'')+'</b>. The government funds <b style="color:'+BLUE+'">'+fmt(s.gov)+'</b> (95%, and 100% of '+f.fullyFunded+' aged 16&ndash;21)'+(s.transfers>0.5?('; <b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured via levy transfer'):'')+(f.otj?('; plus <b style="color:#fff">'+fmt(f.otj)+'</b> of off-the-job staff time'):'')+'.';
+  var apprs=(programmes||[]).filter(function(p){return p.type!=='unit';}), CAP=5, shown=apprs.slice(0,CAP), moreP=apprs.length-shown.length;
+  var rows=shown.map(function(p){
+    var count=+p.count||0,cost=+p.cost||0,r=coInvRate(mKey(p.start)),ff=p.age?Math.min(+p.age.y||0,count):0,coC=Math.max(0,count-ff),inv=cost*r*coC;
+    return '<tr style="border-top:1px solid rgba(255,255,255,0.07)">'+
+      '<td style="padding:5px 10px;color:#eaf1f7">'+escHtml(p.name||'')+'</td>'+
+      '<td style="padding:5px 10px;text-align:right;color:#c7d6e2">'+count+(ff?(' <span style="color:'+BLUE+';font-size:10px">('+ff+'&times;16–21)</span>'):'')+'</td>'+
+      '<td style="padding:5px 10px;text-align:right;color:#9fb2c6">'+fmt(cost)+'</td>'+
+      '<td style="padding:5px 10px;text-align:right;color:'+(inv>0?'#E0A43B':'#2DD4B2')+';font-weight:600">'+(inv>0?fmt(inv):'£0')+'</td></tr>';
+  }).join('');
+  var frLine=s.target<0.5?'All learners are 16&ndash;21 &mdash; 100% government-funded; no employer investment.':
+    (s.transfers>0.5?('<b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured of '+fmt(s.target)+' &mdash; your investment '+fmt(f.employer)+' &rarr; <b style="color:'+(s.residual>0.5?'#E0A43B':'#2DD4B2')+'">'+fmt(s.residual)+'</b>. A further '+fmt(Math.max(0,s.target-s.raised))+' in transfers would take it to £0.'):
+      ('No transfers secured yet. Raising up to '+fmt(s.target)+' in levy transfers would reduce your '+fmt(f.employer)+' investment toward £0.'));
+  return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
+    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
+      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
+    '<div style="background:rgba(74,163,232,0.07);border:1px solid rgba(74,163,232,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
+    '<div class="lvy-sec">How this plan is paid for</div><div class="lvy-figs" style="margin-bottom:15px">'+figs+'</div>'+
+    '<div class="lvy-sec">Fundraising &mdash; levy transfers</div><div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin:6px 0 15px">'+frLine+'</div>'+
+    '<div class="lvy-sec">Programmes</div>'+
+    '<div style="border:1px solid rgba(255,255,255,0.09);border-radius:9px;overflow:hidden;margin-top:6px"><table style="border-collapse:collapse;width:100%;font-size:11.5px">'+
+      '<thead><tr style="background:rgba(255,255,255,0.04);color:#8ba0b6;text-align:left"><th style="padding:7px 10px;font-weight:600">Programme</th><th style="padding:7px 10px;font-weight:600;text-align:right">Learners</th><th style="padding:7px 10px;font-weight:600;text-align:right">Band</th><th style="padding:7px 10px;font-weight:600;text-align:right">Your investment</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>'+
+    (moreP>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+moreP+' more programme'+(moreP!==1?'s':'')+' &mdash; full list in the app.</div>':'')+
+    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">Government funds 95% of training &amp; assessment (100% for 16&ndash;21s; 22&ndash;24 EHCP/care); you co-invest '+rate+' (25% from Aug 2026); a levy transfer covers 100%. Table shows your investment before transfers; the figures above are net. Rules '+RULEBOOK.version+' (gov.uk). Indicative &mdash; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
+    '</div></div>';
+}
 function levyDeliveryPage(d){
   var fmt=lvK, iso=/^\d{4}-\d{2}-\d{2}$/, todayIso=(today&&today.toISOString?today.toISOString().slice(0,10):'');
   var by={in_progress:0,gateway:0,achieved:0,withdrawn:0,paused:0};
