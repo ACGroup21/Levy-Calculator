@@ -990,7 +990,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23w</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2823,7 +2823,7 @@ function renderNonLevy(){
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
-  var fig=function(lab,val,c,sub,id){return '<div class="metric" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-end">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var fig=function(lab,val,c,sub,id){return '<div class="metric" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
     fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
     fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov')+
