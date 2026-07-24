@@ -992,7 +992,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-24b</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1518,7 +1518,9 @@ function clearSavedData(){
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
+  document.getElementById('planSection').classList.add('hidden');
   renderProgrammes();toggleClearBtn(false);
+  if(typeof resetPlan==='function')resetPlan(); // reset the OTJ planner + calendar and re-render (hides the plan card when no programmes)
   if(fundingMode==='nonlevy'){document.getElementById('levySummary').classList.remove('hidden');renderNonLevy();} // non-levy keeps its plan sections visible (no levy upload to reveal)
   if(typeof renderGoalGrid==='function')renderGoalGrid();
   setStatus(fundingMode==='nonlevy'?'Data cleared. Add programmes to start again.':'Saved data cleared. Upload your ESFA file to start again.','ok');
@@ -3526,7 +3528,7 @@ function syncPlanInputs(){
 }
 function renderPlan(){
   const sec=document.getElementById('planSection');if(!sec)return;
-  if(!programmes.length){sec.classList.add('hidden');return;}
+  if(!programmes.length){sec.classList.add('hidden');var _pr=document.getElementById('planResults');if(_pr)_pr.innerHTML='';return;}
   sec.classList.remove('hidden');
   planCfg.headcount=parseFloat(document.getElementById('plan-headcount').value)||1;
   planCfg.hours=parseFloat(document.getElementById('plan-hours').value)||37.5;
