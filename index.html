@@ -727,9 +727,9 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
   <!-- SUMMARY -->
   <div id="levySummary" class="hidden">
-    <div class="metrics" id="metricCards"></div>
-    <div id="dataQuality"></div>
-    <details style="margin-bottom:1.5rem">
+    <div class="metrics levy-only" id="metricCards"></div>
+    <div id="dataQuality" class="levy-only"></div>
+    <details class="levy-only" style="margin-bottom:1.5rem">
       <summary style="cursor:pointer;font-weight:600;color:#39FF9E;letter-spacing:.01em;user-select:none;list-style:none">&#9654;&nbsp; Monthly levy breakdown</summary>
       <div class="sw" style="margin-top:10px">
         <table style="min-width:580px">
@@ -985,7 +985,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23n</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2085,6 +2085,20 @@ function loadDemo(){
   renderProgrammes();renderProjection();saveState();
   setStatus('[DEMO] Sample data loaded — scroll down to view the 36-month projection.','ok');
 }
+// Non-levy sample — no levy pot; funding is government + a fundraised levy transfer (gifting received)
+function loadNonLevyDemo(){
+  const d=o=>{const x=new Date(today);x.setMonth(x.getMonth()+o);return x.toISOString().slice(0,10);};
+  levyData={monthlyAvg:0,balance:0,byMonth:[]}; // non-levy has no pot
+  programmes=[
+    {name:'L3 Team leader',cost:5000,count:4,start:d(0),epa:d(18),age:{y:2,m:1,o:1}},
+    {name:'L4 Data analyst',cost:14000,count:2,start:d(1),epa:d(21)}
+  ];
+  transfersRaised=19000; // a levy employer has pledged a transfer — demonstrates fundraising covering ~half
+  if(typeof renderProgrammes==='function')renderProgrammes();
+  if(typeof renderProjection==='function')renderProjection();
+  renderNonLevy();
+  if(typeof saveState==='function')saveState();
+}
 
 function setStatus(msg,type){const el=document.getElementById('csvStatus');el.style.display='block';el.className='status '+type;el.textContent=(type==='ok'?'> ':'/!\\ ')+msg;}
 
@@ -2723,6 +2737,13 @@ function setFundingMode(m,userChose){
   document.querySelectorAll('#fmodeToggle button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===fundingMode);});
   var ls=document.getElementById('levySummary');
   if(fundingMode==='nonlevy'){
+    // user switching in: everything loaded so far assumes a levy pot (the samples are levy-based) → clear the form for a clean non-levy start
+    if(userChose && levyData && levyData.byMonth && levyData.byMonth.length){
+      levyData={monthlyAvg:0,balance:0,byMonth:[]}; programmes=[]; transfersRaised=0;
+      var mc=document.getElementById('metricCards'); if(mc)mc.innerHTML='';
+      var dq=document.getElementById('dataQuality'); if(dq)dq.innerHTML='';
+      if(typeof toggleClearBtn==='function')toggleClearBtn(false);
+    }
     if(ls)ls.classList.remove('hidden');
     if(typeof renderProgrammes==='function')renderProgrammes();
     renderNonLevy();
@@ -2782,7 +2803,7 @@ function renderNonLevy(){
   if(fundingMode!=='nonlevy'){el.innerHTML='';return;}
   var f=nonLevyFunding(), BLUE='#3E86E0';
   if(!f.totalCount){
-    el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text)">Funding</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes above to see how this plan is paid for. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest &mdash; and you can <b style="color:'+BLUE+'">fundraise a levy transfer</b> to cover it.</div></div>';
+    el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text)">Funding</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes above to see how this plan is paid for. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest &mdash; and you can <b style="color:'+BLUE+'">fundraise a levy transfer</b> to cover it.</div><div style="margin-top:13px"><button class="btn-demo" onclick="loadNonLevyDemo()" style="background:'+BLUE+';color:#fff;border:none">&#9654;&nbsp; Load a non-levy example</button> <span style="font-size:12px;color:var(--text3)">programmes + a sample transfer pledge</span></div></div>';
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
