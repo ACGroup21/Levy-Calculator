@@ -100,6 +100,7 @@ body[data-goal="expiry"]{--goal-accent:#E0A43B}
 body[data-goal="capability"]{--goal-accent:#a78bfa}
 body[data-goal="headcount"]{--goal-accent:#39A0D4}
 body[data-goal="social"]{--goal-accent:#3aa76a}
+body[data-goal="transfers"]{--goal-accent:#3E86E0}
 body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:10px}
 .goal-tile{min-width:0;display:flex;flex-direction:column;text-align:left;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.10);border-radius:12px;padding:13px 15px;cursor:pointer;transition:all .15s;color:var(--text);font-family:inherit}
@@ -990,7 +991,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23r</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -2454,13 +2455,14 @@ function renderBestMoves(income,tot,ev,labels,pmk,uTot,best,d){
       title:'Stagger your starts into waves',
       why:'Spacing cohorts out lowers the concurrent monthly training draw, so more of it stays under your levy income. Splitting each cohort into two waves ~12 months apart cuts co-investment'+((base-phCo)>=base-1?' to nil':' to '+fmt(phCo))+' &mdash; the trade-off is a later start for the second wave.'});
   }
-  // 4. gift / transfer-in when over-committed (ring-fence-aware)
+  // 4. fund via a levy transfer-in — a transfer funds an apprenticeship 100%, removing the cash you'd otherwise co-invest (ring-fence-aware)
   var rfTotal=(typeof ringfenceApply!=='undefined'&&ringfenceApply&&typeof ringfences!=='undefined'&&ringfences.length)?ringfences.reduce(function(a,b){return a+(+b.amount||0);},0):0;
   var avail=d?Math.max(0,d.levyAvail-rfTotal):0, plan=d?(d.levyPlanCost||d.planCost):0;
-  if(d&&plan>avail+0.5){var gap=plan-avail;
-    moves.push({save:gap,soft:true,goal:'headcount',
-      title:'Apply for a levy transfer to cover the ~'+fmt(Math.round(gap))+' shortfall',
-      why:'Your plan commits more than your levy holds'+(rfTotal>0?' after ring-fencing '+fmt(Math.round(rfTotal)):'')+'. Another employer can gift up to 50% of their levy (≈'+fmt(Math.round(d.transferCap))+'/yr) to fully fund the excess.'});}
+  var overGap=(d&&plan>avail+0.5)?(plan-avail):0, cash=Math.max(base,overGap);
+  if(cash>1){
+    moves.push({save:cash,soft:true,goal:'cash',
+      title:'Fund via a levy transfer &mdash; cover ~'+fmt(Math.round(cash))+' of employer cash',
+      why:(overGap>0?('Your plan commits more than your levy holds'+(rfTotal>0?' after ring-fencing '+fmt(Math.round(rfTotal)):'')+'. '):'')+'Another employer can transfer up to 50% of their levy'+(d?(' (≈'+fmt(Math.round(d.transferCap))+'/yr)'):'')+' to you, funding an apprenticeship 100% &mdash; each transfer-funded start removes its co-investment, cutting your cash toward £0. New starts only; you still provide the off-the-job time.'});}
   // 5. put idle levy to work (expiry) — only when NOT co-investing
   if(base<1&&d&&d.expiry>1){
     moves.push({save:d.expiry,soft:true,goal:'expiry',
@@ -2765,6 +2767,7 @@ function setFundingMode(m,userChose){
   }
   updateFmodeHint();
   if(typeof syncLevyFundingNav==='function')syncLevyFundingNav();
+  if(typeof renderGoalGrid==='function')renderGoalGrid();
   if(typeof renderReportPicker==='function')renderReportPicker();
   if(userChose&&typeof persistScenario==='function'){try{persistScenario(true);}catch(e){}}
 }
@@ -2834,6 +2837,7 @@ function renderNonLevy(){
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><b>&#129309; Fundraising</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded. No transfer needed.</div>';
   } else {
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:15px 17px">'+
+      ((typeof goalTag==='function')?goalTag('transfers','Fundraising serves your goal &mdash; every transfer cuts your investment'):'')+
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:16px">&#129309;</span><span style="font-weight:700;color:var(--text);font-size:14px">Fundraising &mdash; cover your investment with a levy transfer</span></div>'+
       '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">A levy-paying employer can transfer up to <b>50%</b> of their levy to you. A transfer covers an apprentice&rsquo;s training <b>100%</b> (up to the band) &mdash; removing your co-investment for them. New starts only; you still provide the off-the-job time.</div>'+
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><label style="font-size:12px;color:var(--text3)">Transfer funding secured / pledged (&pound;)</label><input id="nlTransferInput" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>'+
@@ -4610,15 +4614,16 @@ if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudfl
    NOTE: this only CAPTURES the goal. Re-weighting outputs by it is the
    separate (costlier) consuming work, deliberately deferred. ── */
 const GOALS=[
-  {key:'expiry',ic:'&#9203;',lb:'Use levy before it expires',sb:'Avoid losing unspent funds to the 12/24-month window'},
+  {key:'expiry',ic:'&#9203;',lb:'Use levy before it expires',sb:'Avoid losing unspent funds to the 12/24-month window',modes:['levy']},
   {key:'cash',ic:'&pound;',lb:'Minimise cash outlay',sb:'Find the lowest co-investment path'},
   {key:'capability',ic:'&#9678;',lb:'Build a specific capability',sb:'Target a role, skill or succession need'},
   {key:'headcount',ic:'&#10138;',lb:'Maximise people upskilled',sb:'Most apprentices or units per &pound; of levy'},
-  {key:'social',ic:'&#129309;',lb:'Maximise social value',sb:'Gift surplus levy &mdash; fund apprenticeships elsewhere'},
+  {key:'transfers',ic:'&#129309;',lb:'Fund via transfers',sb:'Raise gifted levy to cover your investment',modes:['nonlevy']},
+  {key:'social',ic:'&#129309;',lb:'Maximise social value',sb:'Gift surplus levy &mdash; fund apprenticeships elsewhere',modes:['levy']},
   {key:'other',ic:'&#10067;',lb:'Not sure yet',sb:'Describe it &mdash; we&rsquo;ll suggest a goal if it fits'}
 ];
 // What each goal will do — shown at selection so the effect is understood even before data exists
-const GOAL_FX={expiry:'lead with funds at risk of expiry',cash:'lead with employer co-investment',capability:'lead with what your levy commits to capability',headcount:'lead with people upskilled per &pound;',social:'lead with giftable levy &mdash; apprenticeships funded elsewhere',other:'lead with your projected balance'};
+const GOAL_FX={expiry:'lead with funds at risk of expiry',cash:'lead with employer co-investment',capability:'lead with what your levy commits to capability',headcount:'lead with people upskilled per &pound;',transfers:'lead with the transfer to raise &mdash; cover your investment toward £0',social:'lead with giftable levy &mdash; apprenticeships funded elsewhere',other:'lead with your projected balance'};
 function applyGoalAccent(){
   const k=scnGoal&&scnGoal.key;
   if(k)document.body.setAttribute('data-goal',k);else document.body.removeAttribute('data-goal');
@@ -4630,8 +4635,10 @@ function goalTag(forKey,msg){
 }
 function renderGoalGrid(){
   const g=document.getElementById('goalGrid');if(!g)return;
+  const avail=GOALS.filter(o=>!o.modes||o.modes.indexOf(fundingMode)>=0);
+  if(scnGoal&&scnGoal.key&&!avail.some(o=>o.key===scnGoal.key)){scnGoal=null;} // drop a goal that doesn't apply to the current funding route
   const sel=scnGoal&&scnGoal.key;
-  g.innerHTML=GOALS.map(o=>`<button type="button" class="goal-tile${o.key===sel?' sel':''}" onclick="setGoal('${o.key}')"><div class="gt-ic">${o.ic}</div><div class="gt-lb">${o.lb}</div><div class="gt-sb">${o.sb}</div></button>`).join('');
+  g.innerHTML=avail.map(o=>`<button type="button" class="goal-tile${o.key===sel?' sel':''}" onclick="setGoal('${o.key}')"><div class="gt-ic">${o.ic}</div><div class="gt-lb">${o.lb}</div><div class="gt-sb">${o.sb}</div></button>`).join('');
   const nw=document.getElementById('goalNoteWrap'),ni=document.getElementById('goalNote'),sv=document.getElementById('goalNoteSaved');
   if(nw)nw.style.display=sel?'block':'none';
   if(ni&&scnGoal)ni.value=scnGoal.note||'';
