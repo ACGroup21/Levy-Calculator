@@ -990,7 +990,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23x</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1510,14 +1510,16 @@ function loadState(){
   }catch(e){return false;}
 }
 function clearSavedData(){
-  if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
+  if(!confirm('Clear ALL saved data and programmes from this browser? This resets both levy and non-levy.'))return;
   try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
   levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];transfersRaised=0;if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();if(typeof renderNonLevy==='function')renderNonLevy();
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
   renderProgrammes();toggleClearBtn(false);
-  setStatus('Saved data cleared. Upload your ESFA file to start again.','ok');
+  if(fundingMode==='nonlevy'){document.getElementById('levySummary').classList.remove('hidden');renderNonLevy();} // non-levy keeps its plan sections visible (no levy upload to reveal)
+  if(typeof renderGoalGrid==='function')renderGoalGrid();
+  setStatus(fundingMode==='nonlevy'?'Data cleared. Add programmes to start again.':'Saved data cleared. Upload your ESFA file to start again.','ok');
 }
 
 const fmt=v=>'£'+Math.round(v).toLocaleString('en-GB');
@@ -2696,7 +2698,9 @@ function buildNavDrawer(){
     return '<div class="nav-grp">'+g.sec+'</div>'+g.items.map(function(it){
       return '<button type="button" class="nav-item" onclick="navJump(\''+it.id+'\')"><span class="nd"></span>'+it.lb+'</button>';
     }).join('');
-  }).join('');
+  }).join('')+
+  '<div class="nav-grp" style="margin-top:20px">Data</div>'+
+  '<button type="button" class="nav-item" onclick="closeNav();clearSavedData();" style="color:var(--red)"><span class="nd" style="background:var(--red)"></span>Clear all data</button>';
 }
 function openNav(){document.getElementById('navBack').classList.add('open');document.getElementById('navDrawer').classList.add('open');document.getElementById('navDrawer').setAttribute('aria-hidden','false');}
 function closeNav(){document.getElementById('navBack').classList.remove('open');document.getElementById('navDrawer').classList.remove('open');document.getElementById('navDrawer').setAttribute('aria-hidden','true');}
@@ -2750,13 +2754,8 @@ function setFundingMode(m,userChose){
   document.querySelectorAll('#fmodeToggle button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-m')===fundingMode);});
   var ls=document.getElementById('levySummary');
   if(fundingMode==='nonlevy'){
-    // user switching in: everything loaded so far assumes a levy pot (the samples are levy-based) → clear the form for a clean non-levy start
-    if(userChose && levyData && levyData.byMonth && levyData.byMonth.length){
-      levyData={monthlyAvg:0,balance:0,byMonth:[]}; programmes=[]; transfersRaised=0;
-      var mc=document.getElementById('metricCards'); if(mc)mc.innerHTML='';
-      var dq=document.getElementById('dataQuality'); if(dq)dq.innerHTML='';
-      if(typeof toggleClearBtn==='function')toggleClearBtn(false);
-    }
+    // NON-DESTRUCTIVE: switching modes never deletes data — the programmes are the plan, re-costed as levy or non-levy.
+    // The levy-pot data just hides (levy-only). Clear only ever happens via an explicit Clear button.
     if(ls)ls.classList.remove('hidden');
     if(typeof renderProgrammes==='function')renderProgrammes();
     renderNonLevy();
@@ -2861,7 +2860,9 @@ function renderNonLevy(){
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:0.75rem;border-color:rgba(62,134,224,0.3)">'+
     '<div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(var(--wash),0.08)"><span style="font-size:16px;margin-right:8px">&#127963;&#65039;</span><span style="font-size:12.5px;color:var(--text3)">Your funding position</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:20px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
-    figs+fr+notes+working+'</div>';
+    figs+fr+notes+working+
+    '<div style="display:flex;justify-content:flex-end;margin-top:13px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><button onclick="clearSavedData()" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 12px;cursor:pointer">Clear plan</button></div>'+
+    '</div>';
 }
 (function(){var rc=document.getElementById('reportsCard');if(rc)rc.addEventListener('toggle',function(){var c=document.getElementById('reportsChev');if(c)c.innerHTML=rc.open?'&#9652;':'&#9662;';});})();
 function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
