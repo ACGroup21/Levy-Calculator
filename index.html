@@ -154,7 +154,7 @@ body[data-fmode="nonlevy"] .levy-only{display:none!important}
 .nonlevy-only{display:none}
 body[data-fmode="nonlevy"] .nonlevy-only{display:block}
 body[data-fmode="nonlevy"] .fmode-bar{border-color:rgba(62,134,224,0.45);box-shadow:inset 3px 0 0 #3E86E0}
-#clearAllBtn:hover{border-color:var(--red)!important;color:var(--red)!important}
+#clearAllBtn:hover{background:var(--red)!important;color:#fff!important;box-shadow:0 0 15px rgba(255,76,106,0.6)!important}
 @media(max-width:560px){.logo-sub{display:none}}
 .rule-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.2);border-left:3px solid var(--teal);border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:1.5rem;font-size:13px;color:var(--text2);backdrop-filter:blur(8px)}
 .rule-banner strong{color:var(--teal)}
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
-    <button id="clearAllBtn" onclick="clearSavedData()" title="Clear all data (levy + non-levy)" aria-label="Clear all data" style="background:var(--glass);border:1px solid var(--border);color:var(--text3);border-radius:99px;height:34px;padding:0 13px;cursor:pointer;font-size:12px;font-family:inherit;line-height:1;display:flex;align-items:center;gap:6px;flex:0 0 auto;transition:all .15s"><span style="font-size:13px">&#8635;</span>Clear</button>
+    <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.14);border:1px solid var(--red);color:var(--red);border-radius:99px;height:34px;padding:0 14px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;line-height:1;display:flex;align-items:center;gap:6px;flex:0 0 auto;box-shadow:0 0 11px rgba(255,76,106,0.45);transition:all .15s"><span style="font-size:13px">&#8635;</span>Reset all</button>
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
     <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
     <span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span>
@@ -992,7 +992,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23z</div>
 </footer>
 
 <!-- copilot FAB -->
