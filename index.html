@@ -985,7 +985,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-23m</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1446,7 +1446,7 @@ function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.random
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
-          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode};
+          levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode, transfersRaised:transfersRaised};
 }
 function applyScenario(s){
   if(!s)return;
@@ -1461,6 +1461,7 @@ function applyScenario(s){
   if(Array.isArray(s.ringfences))ringfences=s.ringfences;
   if(s.ringfenceApply!==undefined)ringfenceApply=!!s.ringfenceApply;
   if(Array.isArray(s.delivery)){delivery=s.delivery;if(typeof renderDeliverySync==='function')renderDeliverySync();}
+  if(typeof s.transfersRaised==='number')transfersRaised=s.transfersRaised;
   if(s.fundingMode&&typeof setFundingMode==='function')setFundingMode(s.fundingMode,false);
 }
 function readScenario(){try{const r=localStorage.getItem(SCEN_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
@@ -1506,7 +1507,7 @@ function loadState(){
 function clearSavedData(){
   if(!confirm('Clear all saved levy data and programmes from this browser?'))return;
   try{localStorage.removeItem(SCEN_KEY);localStorage.removeItem(STORE_KEY);localStorage.removeItem(PLAN_KEY_LEGACY);}catch(e){}
-  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();if(typeof renderNonLevy==='function')renderNonLevy();
+  levyData={monthlyAvg:0,balance:0,byMonth:[]};programmes=[];scnGoal=null;scnTalent=null;ringfences=[];ringfenceApply=false;delivery=[];transfersRaised=0;if(typeof renderRingfences==='function')renderRingfences();if(typeof renderDeliverySync==='function')renderDeliverySync();if(typeof renderNonLevy==='function')renderNonLevy();
   document.getElementById('levySummary').classList.add('hidden');
   document.getElementById('projectionSection').classList.add('hidden');
   document.getElementById('progTable').classList.add('hidden');
@@ -2735,52 +2736,94 @@ function setFundingMode(m,userChose){
 function nonLevyFunding(){
   var appr=(programmes||[]).filter(function(p){return p.type!=='unit';});
   var units=(programmes||[]).filter(function(p){return p.type==='unit';});
-  var band=0,emp=0,ff=0,co=0,tot=0,has25=false,anyAge=false;
+  var band=0,emp=0,ff=0,co=0,tot=0,has25=false,anyAge=false,coBand=0;
   appr.forEach(function(p){
     var count=+p.count||0,cost=+p.cost||0,rate=coInvRate(mKey(p.start));
     var f100=p.age?Math.min(+p.age.y||0,count):0; if(p.age)anyAge=true;
     var coC=Math.max(0,count-f100);
-    band+=cost*count; emp+=cost*rate*coC; ff+=f100; co+=coC; tot+=count;
+    band+=cost*count; emp+=cost*rate*coC; ff+=f100; co+=coC; tot+=count; coBand+=cost*coC;
     if(rate>=0.25)has25=true;
   });
   var uBand=0,uEmp=0;
-  units.forEach(function(u){var count=+u.count||0,cost=+u.cost||0,rate=(RULEBOOK.unit&&RULEBOOK.unit.coInvest)||0.05;uBand+=cost*count;uEmp+=cost*rate*count;tot+=count;});
+  units.forEach(function(u){var count=+u.count||0,cost=+u.cost||0,rate=(RULEBOOK.unit&&RULEBOOK.unit.coInvest)||0.05;uBand+=cost*count;uEmp+=cost*rate*count;tot+=count;coBand+=cost*count;});
   var totalBand=band+uBand, employer=emp+uEmp, gov=Math.max(0,totalBand-employer);
   var otj=0; try{if(typeof levyReportData==='function')otj=levyReportData().otjCost||0;}catch(e){}
-  return {totalBand:totalBand,employer:employer,gov:gov,fullyFunded:ff,coCount:co,totalCount:tot,otj:otj,has25:has25,anyAge:anyAge};
+  // coFundedBands = the band value that carries co-investment (22+ apprentices + units) — the transfer-fundraising target
+  return {totalBand:totalBand,employer:employer,gov:gov,fullyFunded:ff,coCount:co,totalCount:tot,otj:otj,has25:has25,anyAge:anyAge,coFundedBands:coBand};
+}
+var transfersRaised=0;
+// funding split after applying fundraised transfers: transfers cover co-funded bands 100% (removing your co-investment on them)
+function nlState(f){
+  var raised=Math.max(0,+transfersRaised||0), target=f.coFundedBands||0;
+  var cov=target>0?Math.min(1,raised/target):0;
+  return {raised:raised,target:target,cov:cov,transfers:cov*target,residual:f.employer*(1-cov),gov:Math.max(0,f.gov-cov*(f.coFundedBands-f.employer)),apprCovered:Math.round(cov*f.coCount)};
+}
+function nlImpactText(f,s){
+  if(s.target<0.5)return 'All your learners are 16&ndash;21 &mdash; already 100% funded, nothing to fundraise.';
+  if(s.residual<0.5)return '<b style="color:#2DD4B2">&#127881; Fully funded by transfer</b> &mdash; your investment is <b>£0</b>.';
+  return 'Covers ~<b>'+s.apprCovered+'</b> apprentice'+(s.apprCovered!==1?'s':'')+' &mdash; your investment <b>'+fmt(f.employer)+'</b> &rarr; <b style="color:#3E86E0">'+fmt(s.residual)+'</b>.';
+}
+function updateNonLevyLive(){
+  var f=nonLevyFunding(); if(!f.totalCount)return; var s=nlState(f), BLUE='#3E86E0';
+  var setT=function(id,v,col){var e=document.getElementById(id);if(e){e.innerHTML=v;if(col)e.style.color=col;}};
+  setT('nlYourInv', s.residual<0.5?'£0':fmt(s.residual), s.residual<0.5?BLUE:'var(--money)');
+  setT('nlTransfers', fmt(s.transfers), s.transfers>0.5?'#2DD4B2':BLUE);
+  setT('nlGov', fmt(s.gov));
+  var bar=document.getElementById('nlBar'); if(bar)bar.style.width=(s.cov*100).toFixed(0)+'%';
+  var imp=document.getElementById('nlImpact'); if(imp)imp.innerHTML=nlImpactText(f,s);
+}
+function setTransfersRaised(v){
+  transfersRaised=Math.max(0,parseFloat((v||'').toString().replace(/[£,\s]/g,''))||0);
+  updateNonLevyLive();
+  if(typeof persistScenario==='function'){try{persistScenario(true);}catch(e){}}
 }
 function renderNonLevy(){
   var el=document.getElementById('nonLevyPanel');if(!el)return;
   if(fundingMode!=='nonlevy'){el.innerHTML='';return;}
   var f=nonLevyFunding(), BLUE='#3E86E0';
   if(!f.totalCount){
-    el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text)">Non-levy funding</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes above to see your investment. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest.</div></div>';
+    el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)"><div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text)">Funding</span></div><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes above to see how this plan is paid for. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest &mdash; and you can <b style="color:'+BLUE+'">fundraise a levy transfer</b> to cover it.</div></div>';
     return;
   }
-  var fig=function(lab,val,c,sub){return '<div class="metric" style="padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">'+lab+'</div><div style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
-  var rate=f.has25?'25%':'5%';
+  var s=nlState(f), rate=f.has25?'25%':'5%';
+  var fig=function(lab,val,c,sub,id){return '<div class="metric" style="padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs='<div class="metrics" style="margin-top:0">'+
     fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
-    fig('Government funds',fmt(f.gov),BLUE,'95% + 100% of 16–21s')+
-    fig('Your co-investment',fmt(f.employer),f.employer>0?'var(--money)':BLUE,rate+' of the co-funded bands')+
-    fig('Fully funded (16–21)',String(f.fullyFunded),BLUE,f.fullyFunded?'£0 to you':'enter ages to apply')+
+    fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov')+
+    fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers')+
+    fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv')+
     (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time'):'')+
   '</div>';
+  var fr;
+  if(s.target<0.5){
+    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><b>&#129309; Fundraising</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded. No transfer needed.</div>';
+  } else {
+    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:15px 17px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:16px">&#129309;</span><span style="font-weight:700;color:var(--text);font-size:14px">Fundraising &mdash; cover your investment with a levy transfer</span></div>'+
+      '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">A levy-paying employer can transfer up to <b>50%</b> of their levy to you. A transfer covers an apprentice&rsquo;s training <b>100%</b> (up to the band) &mdash; removing your co-investment for them. New starts only; you still provide the off-the-job time.</div>'+
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><label style="font-size:12px;color:var(--text3)">Transfer funding secured / pledged (&pound;)</label><input id="nlTransferInput" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>'+
+      '<div style="height:9px;border-radius:6px;background:rgba(var(--wash),0.08);overflow:hidden;margin-bottom:6px"><div id="nlBar" style="height:100%;width:'+(s.cov*100).toFixed(0)+'%;background:'+BLUE+';transition:width .25s"></div></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text3);margin-bottom:10px"><span>Raised '+fmt(s.raised)+'</span><span>Target '+fmt(s.target)+' &rarr; your investment £0</span></div>'+
+      '<div id="nlImpact" style="font-size:12.5px;color:var(--text2);line-height:1.55">'+nlImpactText(f,s)+'</div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-top:10px">Find pledges via the apprenticeship service &ldquo;find funding&rdquo; tool. <span style="color:'+BLUE+'">Arthur Curtis can help you source &amp; secure transfer pledges.</span></div>'+
+    '</div>';
+  }
   var notes='<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:13px">'+
     (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is counted at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;21 full funding</b>.</div>':'')+
     '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;21</b> at the start (from 1 Apr 2024), and 22&ndash;24 with an EHC plan or care experience (enter as 16&ndash;21 to apply, or verify eligibility).</div>'+
     (f.has25?'<div>Co-investment is <b>25%</b> for starts from Aug 2026 (applied by start date).</div>':'<div>Co-investment is <b>5%</b> now, rising to <b>25%</b> for starts from Aug 2026.</div>')+
     '<div>Non-levy employers reserve funding through the apprenticeship service; each reservation expires if unused in its window.</div>'+
   '</div>';
-  var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; source</summary>'+
+  var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; sources</summary>'+
     '<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:9px">'+
-    '<div><b style="color:var(--text2)">Your co-investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–21s) = <b>'+fmt(f.employer)+'</b>.</div>'+
-    '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–21 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the '+f.coCount+' co-funded place'+(f.coCount!==1?'s':'')+' = <b>'+fmt(f.gov)+'</b>.</div>'+
-    '<div style="margin-top:6px">Source: <a href="https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding-for-employers-who-do-not-pay-the-apprenticeship-levy" target="_blank" rel="noopener" style="color:'+BLUE+'">gov.uk &mdash; apprenticeship funding for non-levy employers</a> · rules '+RULEBOOK.version+'. Indicative; confirm reservations and eligibility on your apprenticeship service account.</div>'+
+    '<div><b style="color:var(--text2)">Your investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–21s) = '+fmt(f.employer)+(s.transfers>0.5?(', less transfers covering '+fmt(s.transfers)+' of bands &rarr; <b>'+fmt(s.residual)+'</b>'):' = <b>'+fmt(f.employer)+'</b>')+'.</div>'+
+    '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–21 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the co-funded places = <b>'+fmt(s.gov)+'</b>.</div>'+
+    '<div><b style="color:var(--text2)">Transfers</b> = full-band funding gifted by a levy employer (100% up to the band, sender caps at 50% of their levy, new starts only).</div>'+
+    '<div style="margin-top:6px">Sources: <a href="https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding-for-employers-who-do-not-pay-the-apprenticeship-levy" target="_blank" rel="noopener" style="color:'+BLUE+'">non-levy funding</a> · <a href="https://www.gov.uk/guidance/receive-a-levy-transfer-from-another-business-to-fund-an-apprenticeship" target="_blank" rel="noopener" style="color:'+BLUE+'">receive a transfer</a> (gov.uk) · rules '+RULEBOOK.version+'. Indicative; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:1.25rem;border-color:rgba(62,134,224,0.3)">'+
-    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text);font-size:15px">Non-levy funding &mdash; your co-investment</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:20px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
-    figs+notes+working+'</div>';
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:12px"><span style="font-size:17px">&#127963;&#65039;</span><span style="font-weight:700;color:var(--text);font-size:15px">Funding &mdash; how this plan is paid for</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:20px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
+    figs+fr+notes+working+'</div>';
 }
 (function(){var rc=document.getElementById('reportsCard');if(rc)rc.addEventListener('toggle',function(){var c=document.getElementById('reportsChev');if(c)c.innerHTML=rc.open?'&#9652;':'&#9662;';});})();
 function setCohortMin(v){var n=parseInt(v,10);scnCohortMin=(n&&n>0)?n:null;persistScenario(true);}
