@@ -572,11 +572,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div style="display:flex;align-items:center;gap:8px">
-    <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.14);border:1px solid var(--red);color:var(--red);border-radius:99px;height:34px;padding:0 14px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;line-height:1;display:flex;align-items:center;gap:6px;flex:0 0 auto;box-shadow:0 0 11px rgba(255,76,106,0.45);transition:all .15s"><span style="font-size:13px">&#8635;</span>Reset all</button>
+    <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.32);transition:all .15s">&#8635;</button>
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
     <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
     <span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span>
-    <div class="header-badge"><span class="pulse-dot"></span>UK ESFA &middot; 2026 Rules</div>
+    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font:inherit"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
   </div>
 </header>
 
@@ -586,7 +586,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
       <span><strong>Rule change — August 2026:</strong> Levy funds declared before August 2026 expire after <strong>24 months</strong>. From August 2026 onwards, funds expire after <strong>12 months</strong>. This tool applies the correct window per declaration date automatically.</span>
     </div>
-    <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
+    <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
   <!-- FUNDING ROUTE: levy vs non-levy -->
@@ -992,7 +992,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-24b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">arthur curtis education &middot; build 2026-07-24c</div>
 </footer>
 
 <!-- copilot FAB -->
@@ -1131,6 +1131,15 @@ const STANDARDS_BASE=[
 // KSB store — populated when JSON uploaded
 let KSB_DATA=null; // full parsed JSON
 let STANDARDS=JSON.parse(JSON.stringify(STANDARDS_BASE));
+// Header KSB badge: how many KSBs are accounted for across the standards library — updates as standards are backfilled.
+function updateKsbBadge(){
+  var b=document.getElementById('ksbBadge'); if(!b||typeof STANDARDS==='undefined')return;
+  var n=0, stds=0, tot=0;
+  STANDARDS.forEach(function(s){ if(!s||s.name==='Other / custom')return; tot++;
+    if(s.ksbs){ var k=(s.ksbs.knowledge||[]).length+(s.ksbs.skills||[]).length+(s.ksbs.behaviours||[]).length; if(k>0){n+=k;stds++;} } });
+  if(n>0){ b.innerHTML='&#10024; '+n.toLocaleString('en-GB')+' KSBs mapped'; b.title=stds+' of '+tot+' standards carry full KSBs'; b.classList.add('loaded'); }
+  else { b.classList.remove('loaded'); }
+}
 
 // ── KSB JSON upload ──
 document.getElementById('ksbFile').addEventListener('change',e=>{if(e.target.files[0])loadKSBFile(e.target.files[0]);});
@@ -1178,7 +1187,7 @@ function processKSBData(data){
   rebuildSelect();buildJdSelect();
   const withKSB=scraped.filter(s=>s.ksbs&&(s.ksbs.knowledge||s.ksbs.skills)).length;
   setKSBStatus(`[OK] ${scraped.length} standards loaded &middot; ${withKSB} with full KSBs &middot; scraped ${data.scraped_at||'recently'}`, 'purple');
-  document.getElementById('ksbBadge').classList.add('loaded');
+  updateKsbBadge();
   document.getElementById('ksbIndicator').classList.add('on');
   const tl=document.getElementById('ksbTagList');
   tl.innerHTML=scraped.map(s=>`<span class="ksb-tag">L${s.level||'?'} ${s.name.replace(/^L\d\+?\s/,'')}</span>`).join('');
@@ -2685,6 +2694,7 @@ function syncLevyFundingNav(){
   b.setAttribute('data-target',nonlevy?'sec-funding':'sec-levy');
 }
 function goReports(){var rc=document.getElementById('reportsCard');if(rc)rc.open=true;goSection('sec-reports');}
+function goRules(){var d=document.getElementById('rulesDetails');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'});}}
 // ── Burger function menu: jump to any function + fade an arrow in from the left margin ──
 var NAV_INDEX=[
   {sec:'Goal',items:[{lb:'Choose your goal',id:'goalGrid'},{lb:'Goal emphasis',id:'goalEmphasis'}]},
@@ -4775,6 +4785,7 @@ renderRulesRef();
 renderReportPicker();
 renderQAR();
 buildNavDrawer();
+updateKsbBadge();
 setFundingMode(fundingMode,false);
 </script>
 <div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
