@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="sec-goal" onclick="goSection('sec-goal')"><span class="led-badge">START</span><span class="lbl">Goal</span></button>
     <button id="led-levy" data-target="sec-levy" onclick="goLevyOrFunding()"><span class="led-badge">01</span><span class="lbl">Levy</span></button>
     <button data-target="trackerCard" onclick="goDelivery()"><span class="dot"></span><span class="lbl">Delivery</span></button>
-    <button data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="led-badge">02</span><span class="lbl">Programmes</span></button>
+    <button id="led-programmes" data-target="sec-programmes" onclick="goSection('sec-programmes')"><span class="led-badge">02</span><span class="lbl">Programmes</span></button>
     <button id="led-forecast" data-target="projectionSection" onclick="goSection('projectionSection')"><span class="led-badge">03</span><span class="lbl">Forecast</span></button>
     <button id="led-plan" data-target="planSection" onclick="goSection('planSection')"><span class="dot"></span><span class="lbl">Plan</span></button>
     <button id="led-reports" data-target="sec-reports" onclick="goReports()"><span class="led-badge">04</span><span class="lbl">Reports</span></button>
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2699,6 +2699,38 @@ function syncLevyFundingNav(){
   if(lbl)lbl.textContent=nonlevy?'Funding':'Levy';
   b.setAttribute('data-target',nonlevy?'sec-funding':'sec-levy');
 }
+// Non-levy is PLAN-FIRST: a non-levy employer decides what to run, sees the honest cost,
+// then seeks funding. So in non-levy the flow is Programmes (01) -> Funding (02); levy stays
+// funding-first (Funding 01 -> Programmes 02). Reorders the section + LED nav + step numbers by mode.
+function applyFundingFlow(){
+  var nl=(fundingMode==='nonlevy');
+  var sf=document.getElementById('sec-funding'),
+      proj=document.getElementById('projectionSection'),
+      tracker=document.getElementById('trackerCard');
+  // 1. Section order: non-levy places Funding after the Programmes content (before the hidden
+  //    projection); levy restores it to its original slot (before Delivery).
+  if(sf){
+    if(nl){ if(proj && sf.nextElementSibling!==proj) proj.parentElement.insertBefore(sf,proj); }
+    else  { if(tracker && sf.nextElementSibling!==tracker) tracker.parentElement.insertBefore(sf,tracker); }
+  }
+  // 2. Step-chip numbers
+  var pc=document.querySelector('#sec-programmes .step-chip'); if(pc)pc.textContent='STEP '+(nl?'01':'02');
+  var fc=document.querySelector('#sec-funding .step-chip');    if(fc)fc.textContent='STEP '+(nl?'02':'01');
+  // 3. LED nav order + numbers
+  var nav=document.getElementById('ledNav'),
+      lv=document.getElementById('led-levy'),
+      pr=document.getElementById('led-programmes'),
+      fo=document.getElementById('led-forecast');
+  if(nav&&lv&&pr){
+    if(nl){ if(pr.nextElementSibling!==lv) nav.insertBefore(pr,lv); }
+    else  { if(fo && pr.nextElementSibling!==fo) nav.insertBefore(pr,fo); }
+    var prb=pr.querySelector('.led-badge'), lvb=lv.querySelector('.led-badge');
+    if(prb)prb.textContent=nl?'01':'02';
+    if(lvb)lvb.textContent=nl?'02':'01';
+  }
+  // 4. Forecast/projection is levy-only — hide its nav item in non-levy
+  if(fo)fo.style.display=nl?'none':'';
+}
 function goReports(){var rc=document.getElementById('reportsCard');if(rc)rc.open=true;goSection('sec-reports');}
 function goRules(){var d=document.getElementById('rulesDetails');if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'});}}
 // ── Burger function menu: jump to any function + fade an arrow in from the left margin ──
@@ -2783,6 +2815,7 @@ function setFundingMode(m,userChose){
   }
   updateFmodeHint();
   if(typeof syncLevyFundingNav==='function')syncLevyFundingNav();
+  if(typeof applyFundingFlow==='function')applyFundingFlow();
   if(typeof renderGoalGrid==='function')renderGoalGrid();
   if(typeof renderReportPicker==='function')renderReportPicker();
   if(userChose&&typeof persistScenario==='function'){try{persistScenario(true);}catch(e){}}
@@ -2836,7 +2869,7 @@ function renderNonLevy(){
   if(fundingMode!=='nonlevy'){el.innerHTML='';return;}
   var f=nonLevyFunding(), BLUE='#3E86E0';
   if(!f.totalCount){
-    el.innerHTML='<div class="card" style="margin-top:0.75rem;border-color:rgba(62,134,224,0.3)"><div style="font-size:13px;color:var(--text2);line-height:1.6">Add apprenticeship programmes below to see how this plan is paid for. As a non-levy employer the government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest &mdash; and you can <b style="color:'+BLUE+'">fundraise a levy transfer</b> to cover it.</div><div style="margin-top:13px"><button class="btn-demo" onclick="loadNonLevyDemo()" style="background:'+BLUE+';color:#fff;border:none">&#9654;&nbsp; Load a non-levy example</button> <span style="font-size:12px;color:var(--text3)">programmes + a sample transfer pledge</span></div></div>';
+    el.innerHTML='<div class="card" style="margin-top:0.75rem;border-color:rgba(62,134,224,0.3)"><div style="font-size:13px;color:var(--text2);line-height:1.6">Add your apprenticeship programmes in <b>Step 01</b> first &mdash; then this shows how the plan is paid for. Your cost starts as <b style="color:'+BLUE+'">co-investment + off-the-job time</b> (nothing is assumed levy-funded). The government funds <b style="color:'+BLUE+'">95%</b> of each apprenticeship (<b style="color:'+BLUE+'">100%</b> for 16&ndash;21s); you co-invest the rest &mdash; and a <b style="color:'+BLUE+'">levy gift / transfer</b> can cover that down toward £0.</div><div style="margin-top:13px"><button class="btn-demo" onclick="loadNonLevyDemo()" style="background:'+BLUE+';color:#fff;border:none">&#9654;&nbsp; Load a non-levy example</button> <span style="font-size:12px;color:var(--text3)">programmes + a sample transfer pledge</span></div></div>';
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
@@ -2848,17 +2881,18 @@ function renderNonLevy(){
     fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv')+
     (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time'):'')+
   '</div>';
+  var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
   if(s.target<0.5){
-    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><b>&#129309; Fundraising</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded. No transfer needed.</div>';
+    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
   } else {
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:15px 17px">'+
-      ((typeof goalTag==='function')?goalTag('funding','Fundraising serves your goal &mdash; every transfer cuts your investment'):'')+
-      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:16px">&#129309;</span><span style="font-weight:700;color:var(--text);font-size:14px">Fundraising &mdash; cover your investment with a levy transfer</span></div>'+
-      '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">A levy-paying employer can transfer up to <b>50%</b> of their levy to you. A transfer covers an apprentice&rsquo;s training <b>100%</b> (up to the band) &mdash; removing your co-investment for them. New starts only; you still provide the off-the-job time.</div>'+
-      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px"><label style="font-size:12px;color:var(--text3)">Transfer funding secured / pledged (&pound;)</label><input id="nlTransferInput" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>'+
+      ((typeof goalTag==='function')?goalTag('funding','A levy gift serves your goal &mdash; every transfer cuts your investment'):'')+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:16px">&#129309;</span><span style="font-weight:700;color:var(--text);font-size:14px">Levy gift / transfer &mdash; cover your investment</span></div>'+
+      '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"><b>Already secured a levy gift, or still fundraising one?</b> A levy-paying employer can transfer up to <b>50%</b> of their levy to you. It covers an apprentice&rsquo;s training <b>100%</b> (up to the band) &mdash; removing your co-investment for them. New starts only; you still provide the off-the-job time.</div>'+
+      giftInput+
       '<div style="height:9px;border-radius:6px;background:rgba(var(--wash),0.08);overflow:hidden;margin-bottom:6px"><div id="nlBar" style="height:100%;width:'+(s.cov*100).toFixed(0)+'%;background:'+BLUE+';transition:width .25s"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text3);margin-bottom:10px"><span>Raised '+fmt(s.raised)+'</span><span>Target '+fmt(s.target)+' &rarr; your investment £0</span></div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text3);margin-bottom:10px"><span>Secured '+fmt(s.raised)+'</span><span>Target '+fmt(s.target)+' &rarr; your investment £0</span></div>'+
       '<div id="nlImpact" style="font-size:12.5px;color:var(--text2);line-height:1.55">'+nlImpactText(f,s)+'</div>'+
       '<div style="font-size:11px;color:var(--text3);margin-top:10px">Find pledges via the apprenticeship service &ldquo;find funding&rdquo; tool. <span style="color:'+BLUE+'">Arthur Curtis can help you source &amp; secure transfer pledges.</span></div>'+
     '</div>';
