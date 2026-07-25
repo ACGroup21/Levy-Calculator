@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Fundable — turn England's apprenticeship funding rules into numbers you can trust. Levy or non-levy, costed honestly, with inline affordability. Built by AC Digital.">
+<title>Fundable — Apprenticeship funding, costed honestly</title>
+<style>
+  :root{
+    --bg:#050c18; --bg2:#071528; --panel:#0a1830; --panel2:#0e2038;
+    --line:rgba(150,190,225,.11); --line2:rgba(150,190,225,.2);
+    --teal:#2dd4b2; --cobalt:#4d94ea; --gold:#e6ad4b; --red:#ff6a80;
+    --text:#eaf3fb; --text2:#a7c3d8; --text3:#6f8ba3;
+    --mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    --maxw:1120px;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0; background:#050c18; color:var(--text)}
+  .page{
+    min-height:100vh;
+    background:
+      radial-gradient(1100px 620px at 78% -8%, rgba(77,148,234,.16), transparent 60%),
+      radial-gradient(900px 560px at 10% 4%, rgba(45,212,178,.12), transparent 58%),
+      linear-gradient(180deg,#050c18 0%,#06101f 40%,#050c18 100%);
+    color:var(--text); font-family:var(--sans); line-height:1.55;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden; position:relative;
+  }
+  #sky{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.9}
+  .shell{position:relative; z-index:1; max-width:var(--maxw); margin:0 auto; padding:0 clamp(20px,5vw,40px)}
+  a{color:inherit}
+  .eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--text3)}
+  .mono{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  .fig{font-family:var(--mono); font-variant-numeric:tabular-nums; color:var(--gold)}
+
+  /* ---- top bar ---- */
+  header.bar{position:relative; z-index:2; display:flex; align-items:center; gap:14px; max-width:var(--maxw); margin:0 auto; padding:20px clamp(20px,5vw,40px)}
+  .brand{display:flex; align-items:baseline; gap:10px; font-weight:800; font-size:20px; letter-spacing:-.01em}
+  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--teal); box-shadow:0 0 12px var(--teal); align-self:center}
+  .brand small{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--text3); font-weight:500}
+  header.bar .spacer{flex:1}
+  .pill{font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); border:1px solid var(--line2); border-radius:99px; padding:6px 13px; white-space:nowrap}
+  @media(max-width:620px){ header.bar .pill{display:none} }
+
+  /* ---- buttons ---- */
+  .btn{display:inline-flex; align-items:center; gap:9px; font-family:var(--sans); font-size:15px; font-weight:650; text-decoration:none; border-radius:12px; padding:13px 22px; cursor:pointer; transition:transform .12s ease, box-shadow .2s ease, background .2s ease, border-color .2s}
+  .btn:focus-visible{outline:2px solid var(--teal); outline-offset:3px}
+  .btn-primary{background:linear-gradient(180deg,#33e0bd,#20b898); color:#03251d; box-shadow:0 10px 30px -10px rgba(45,212,178,.6)}
+  .btn-primary:hover{transform:translateY(-2px); box-shadow:0 16px 38px -12px rgba(45,212,178,.7)}
+  .btn-ghost{background:rgba(150,190,225,.05); color:var(--text); border:1px solid var(--line2)}
+  .btn-ghost:hover{border-color:var(--cobalt); color:#fff; transform:translateY(-2px)}
+  .btn .arw{transition:transform .15s} .btn:hover .arw{transform:translateX(3px)}
+
+  /* ---- hero ---- */
+  .hero{display:grid; grid-template-columns:1.05fr .95fr; gap:clamp(28px,5vw,64px); align-items:center; padding:clamp(28px,6vw,64px) 0 clamp(40px,7vw,88px)}
+  @media(max-width:900px){ .hero{grid-template-columns:1fr; gap:36px} }
+  h1{font-size:clamp(34px,5.6vw,60px); line-height:1.03; letter-spacing:-.025em; margin:16px 0 0; font-weight:800; text-wrap:balance}
+  h1 .u{color:var(--teal); position:relative}
+  .lede{font-size:clamp(16px,1.9vw,19px); color:var(--text2); max-width:34em; margin:20px 0 0}
+  .cta-row{display:flex; flex-wrap:wrap; gap:13px; margin-top:30px}
+  .trust-line{margin-top:20px; font-size:13px; color:var(--text3); display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+  .check{color:var(--teal); font-weight:800}
+
+  /* ---- hero card (the product's signature) ---- */
+  .card{background:linear-gradient(180deg,rgba(14,32,56,.92),rgba(9,22,42,.92)); border:1px solid var(--line2); border-radius:18px; padding:20px; box-shadow:0 40px 80px -40px rgba(0,0,0,.8); backdrop-filter:blur(6px)}
+  .card .hd{display:flex; align-items:center; gap:9px; padding-bottom:13px; border-bottom:1px solid var(--line); margin-bottom:15px}
+  .card .hd .t{font-size:12.5px; color:var(--text3)} .card .hd .badge{margin-left:auto; font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--cobalt); border:1px solid rgba(77,148,234,.4); border-radius:20px; padding:2px 9px}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:9px}
+  @media(max-width:480px){ .grid4{grid-template-columns:repeat(2,1fr)} }
+  .cell{background:rgba(150,190,225,.03); border:1px solid var(--line); border-radius:10px; padding:10px 11px}
+  .cell .k{font-family:var(--mono); font-size:9px; letter-spacing:.09em; text-transform:uppercase; color:var(--text3); margin-bottom:5px; line-height:1.4; min-height:2.5em}
+  .cell .v{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:17px; font-weight:600}
+  .cell .s{font-size:9.5px; color:var(--text3); margin-top:3px}
+  .accum{margin-top:14px; background:rgba(150,190,225,.03); border:1px solid var(--line); border-radius:12px; padding:13px 15px}
+  .accum .row{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:9px}
+  .accum .lbl{font-family:var(--mono); font-size:9.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--text3); margin-right:8px}
+  .accum .txt{font-size:12.5px; color:var(--text2)}
+  .rag{font-size:11px; font-weight:700; color:var(--teal); border:1px solid var(--teal); border-radius:20px; padding:2px 11px; white-space:nowrap}
+  .bar{height:8px; border-radius:5px; background:rgba(150,190,225,.1); overflow:hidden}
+  .bar>i{display:block; height:100%; width:47%; background:var(--teal); border-radius:5px}
+  .foot{font-size:10.5px; color:var(--text3); margin-top:7px}
+
+  /* ---- generic section ---- */
+  section{padding:clamp(46px,7vw,86px) 0; position:relative; z-index:1}
+  .sec-head{max-width:40em}
+  .sec-head h2{font-size:clamp(26px,3.6vw,38px); letter-spacing:-.02em; line-height:1.1; margin:12px 0 0; font-weight:800; text-wrap:balance}
+  .sec-head p{color:var(--text2); font-size:clamp(15px,1.7vw,17px); margin:14px 0 0}
+  .rule{height:1px; background:linear-gradient(90deg,var(--line2),transparent); border:0; margin:0}
+
+  /* ---- two questions ---- */
+  .twoq{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:34px}
+  @media(max-width:760px){ .twoq{grid-template-columns:1fr} }
+  .qc{border:1px solid var(--line); border-radius:16px; padding:24px; background:rgba(10,24,44,.5)}
+  .qc .tag{font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; padding:4px 10px; border-radius:20px; display:inline-block}
+  .qc.levy .tag{color:var(--teal); border:1px solid rgba(45,212,178,.4)}
+  .qc.non .tag{color:var(--cobalt); border:1px solid rgba(77,148,234,.4)}
+  .qc h3{font-size:21px; margin:15px 0 0; letter-spacing:-.01em}
+  .qc p{color:var(--text2); font-size:14.5px; margin:10px 0 0}
+  .qc .flow{font-family:var(--mono); font-size:11.5px; color:var(--text3); margin-top:16px; letter-spacing:.02em}
+  .qc .flow b{color:var(--text)}
+
+  /* ---- loop steps ---- */
+  .steps{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-top:38px; counter-reset:s}
+  @media(max-width:960px){ .steps{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:520px){ .steps{grid-template-columns:1fr} }
+  .step{border:1px solid var(--line); border-radius:14px; padding:20px 18px; background:rgba(10,24,44,.4); position:relative}
+  .step .n{font-family:var(--mono); font-size:11px; color:var(--teal); letter-spacing:.1em}
+  .step h4{margin:12px 0 0; font-size:15.5px; letter-spacing:-.01em}
+  .step p{color:var(--text2); font-size:13px; margin:8px 0 0; line-height:1.5}
+
+  /* ---- capabilities ---- */
+  .caps{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:36px}
+  @media(max-width:860px){ .caps{grid-template-columns:repeat(2,1fr)} }
+  @media(max-width:540px){ .caps{grid-template-columns:1fr} }
+  .cap{border:1px solid var(--line); border-radius:14px; padding:22px; background:rgba(10,24,44,.45); transition:border-color .2s, transform .15s}
+  .cap:hover{border-color:var(--line2); transform:translateY(-3px)}
+  .cap .ic{width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; background:rgba(45,212,178,.1); border:1px solid rgba(45,212,178,.28)}
+  .cap.b .ic{background:rgba(77,148,234,.1); border-color:rgba(77,148,234,.3)}
+  .cap.g .ic{background:rgba(230,173,75,.1); border-color:rgba(230,173,75,.3)}
+  .cap h4{margin:15px 0 0; font-size:16.5px; letter-spacing:-.01em}
+  .cap p{color:var(--text2); font-size:13.5px; margin:9px 0 0; line-height:1.55}
+
+  /* ---- trust strip ---- */
+  .trust{border:1px solid var(--line2); border-radius:18px; padding:clamp(24px,4vw,40px); background:linear-gradient(180deg,rgba(14,32,56,.6),rgba(9,22,42,.4)); display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:26px}
+  @media(max-width:760px){ .trust{grid-template-columns:1fr; gap:20px} }
+  .trust .big{font-family:var(--mono); font-variant-numeric:tabular-nums; font-size:clamp(30px,4.4vw,44px); font-weight:700; color:var(--teal); letter-spacing:-.02em; line-height:1}
+  .trust h4{font-size:15px; margin:0 0 6px; letter-spacing:-.01em}
+  .trust p{color:var(--text2); font-size:13px; margin:0}
+  .trust .col small{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--text3)}
+
+  /* ---- final CTA ---- */
+  .final{text-align:center; border:1px solid var(--line2); border-radius:22px; padding:clamp(36px,6vw,64px); background:radial-gradient(700px 300px at 50% -20%, rgba(45,212,178,.14), transparent 60%), rgba(9,20,38,.6)}
+  .final h2{font-size:clamp(27px,4vw,42px); letter-spacing:-.02em; margin:0; font-weight:800; text-wrap:balance}
+  .final p{color:var(--text2); margin:16px auto 0; max-width:32em; font-size:16px}
+  .final .cta-row{justify-content:center}
+
+  /* ---- footer ---- */
+  footer{border-top:1px solid var(--line); margin-top:20px}
+  .foot-in{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:28px 0 40px; color:var(--text3); font-size:12.5px}
+  .foot-in .made{font-family:var(--mono); font-size:11px; letter-spacing:.06em}
+  .foot-in .made b{color:var(--text2); font-weight:600}
+  .foot-in .disc{flex:1; min-width:240px; line-height:1.5}
+  @media(max-width:640px){ .foot-in{flex-direction:column; align-items:flex-start; gap:10px} }
+</style>
+</head>
+<body>
+
+<canvas id="sky"></canvas>
+
+<div class="page">
+  <header class="bar">
+    <div class="brand"><span class="dot"></span>Fundable <small>by AC Digital</small></div>
+    <div class="spacer"></div>
+    <span class="pill">England · ESFA 2026</span>
+  </header>
+
+  <div class="shell">
+    <!-- HERO -->
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Apprenticeship levy &amp; funding · employer-side</span>
+        <h1>Know what your apprenticeship plan really costs — <span class="u">before you commit a penny.</span></h1>
+        <p class="lede">Fundable turns England's apprenticeship funding rules into numbers you can put in front of your CFO. Levy or non-levy, it costs your plan honestly, shows exactly what the government covers, and tells you inline whether you can afford it.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="./?demo=1" target="_blank" rel="noopener">Try the live demo <span class="arw">→</span></a>
+          <a class="btn btn-ghost" href="./?demo=nonlevy" target="_blank" rel="noopener">See the non-levy demo</a>
+        </div>
+        <div class="trust-line"><span class="check">✓</span> Reproduces gov.uk worked examples <b style="color:var(--text2)">to the penny — 31 / 31 checks.</b></div>
+      </div>
+
+      <!-- signature product card -->
+      <div class="card" aria-label="Example of the tool's cost and affordability read-out">
+        <div class="hd"><span style="font-size:15px">🏛️</span><span class="t">Your funding position</span><span class="badge">England · ESFA</span></div>
+        <div class="grid4">
+          <div class="cell"><div class="k">Total training</div><div class="v" style="color:#fff">£58,000</div><div class="s">6 apprentices</div></div>
+          <div class="cell"><div class="k">Levy / gov funds</div><div class="v" style="color:var(--cobalt)">£47,700</div><div class="s">95% + 100% of 16–21s</div></div>
+          <div class="cell"><div class="k">Off-the-job time</div><div class="v" style="color:var(--gold)">£61,776</div><div class="s">your staff time</div></div>
+          <div class="cell"><div class="k">Your co-invest</div><div class="v" style="color:var(--gold)">£10,300</div><div class="s">before any gift</div></div>
+        </div>
+        <div class="accum">
+          <div class="row">
+            <div class="txt"><span class="lbl">Your plan so far</span><b>6</b> learners · draws <b>£58,000</b> · your cash ≈ <b style="color:var(--gold)">£61,776</b></div>
+            <span class="rag">✓ Within your levy</span>
+          </div>
+          <div class="bar"><i></i></div>
+          <div class="foot">Bar = levy utilisation (47%). Sourced from the same engine as the affordability projection — the plan fits your levy.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- TWO QUESTIONS -->
+  <section>
+    <div class="shell">
+      <div class="sec-head">
+        <span class="eyebrow">Two employers, two questions</span>
+        <h2>It answers the question you actually have — not the one the funding rules assume.</h2>
+        <p>Levy payers and non-levy employers think about money in opposite orders. Fundable flips its whole flow to match.</p>
+      </div>
+      <div class="twoq">
+        <div class="qc levy">
+          <span class="tag">Levy payer</span>
+          <h3>“What can we afford?”</h3>
+          <p>You already hold a levy pot, so you start from the money and see what it buys. Fundable tracks drawdown, expiry, and the exact point your pot runs short into co-investment.</p>
+          <div class="flow">Funding&nbsp;<b>01</b> → Programmes <b>02</b> → Forecast <b>03</b></div>
+        </div>
+        <div class="qc non">
+          <span class="tag">Non-levy employer</span>
+          <h3>“What will it cost us?”</h3>
+          <p>Funding isn't assured, so you start from the plan. Nothing is assumed levy-funded — you see co-investment + off-the-job first, then fund it down with government money or a levy gift.</p>
+          <div class="flow">Programmes&nbsp;<b>01</b> → Funding <b>02</b> → Invest <b>03</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE LOOP -->
+  <section style="padding-top:0">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="eyebrow">One honest loop</span>
+        <h2>Build the plan. See the true cost. Fund it down. Know if you can afford it.</h2>
+      </div>
+      <div class="steps">
+        <div class="step"><div class="n">01</div><h4>Choose programmes</h4><p>Pick standards, set learner numbers, adjust with a tap. 300+ funded standards, live from gov data.</p></div>
+        <div class="step"><div class="n">02</div><h4>See the true cost</h4><p>Cost per learner = co-investment + off-the-job time. Nothing assumed free — the honest number.</p></div>
+        <div class="step"><div class="n">03</div><h4>Watch it accumulate</h4><p>A running “your plan so far” total updates as you add or remove — cost, cash, learners.</p></div>
+        <div class="step"><div class="n">04</div><h4>Fund it down</h4><p>Levy pot, the government's 95% / 100%, or a levy gift — each visibly cuts your investment toward £0.</p></div>
+        <div class="step"><div class="n">05</div><h4>Know &amp; report it</h4><p>A red/amber/green affordability read, then board-ready PDF reports in a click.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section style="padding-top:0">
+    <div class="shell">
+      <div class="sec-head">
+        <span class="eyebrow">What's inside</span>
+        <h2>A funding answer-engine, not a spreadsheet.</h2>
+      </div>
+      <div class="caps">
+        <div class="cap"><div class="ic">⇄</div><h4>Levy &amp; non-levy in one</h4><p>One plan, costed two ways. Switch modes without losing your work; every section reframes to match.</p></div>
+        <div class="cap g"><div class="ic">£</div><h4>Honest cost per learner</h4><p>Band, off-the-job time, co-investment and full cost of ownership — with the working shown on every figure.</p></div>
+        <div class="cap"><div class="ic">▤</div><h4>Live plan accumulator</h4><p>Add, remove or step learner counts and the whole-plan cost recomputes instantly. No stale numbers.</p></div>
+        <div class="cap b"><div class="ic">◉</div><h4>Affordability, inline</h4><p>A RAG verdict + bar read straight from the projection engine, so it can never disagree with the forecast.</p></div>
+        <div class="cap b"><div class="ic">▦</div><h4>Board-ready reports</h4><p>Affordability, delivery, achievement-rate (QAR) and cost — assembled into a master report or a board cover.</p></div>
+        <div class="cap g"><div class="ic">◎</div><h4>JD Matcher</h4><p>Drop in a job description and see how it maps to a standard's knowledge, skills &amp; behaviours.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <section style="padding-top:0">
+    <div class="shell">
+      <div class="trust">
+        <div class="col">
+          <div class="big">31 / 31</div>
+          <p style="margin-top:10px">gov.uk worked examples reproduced <b style="color:var(--text2)">to the penny</b> by the calculation core — checked on every change.</p>
+        </div>
+        <div class="col">
+          <small>One source of truth</small>
+          <h4 style="margin-top:8px">No parallel maths</h4>
+          <p>Every figure — cost, affordability, reports — comes from a single engine. Change one input and the whole picture stays consistent.</p>
+        </div>
+        <div class="col">
+          <small>Scope, stated plainly</small>
+          <h4 style="margin-top:8px">England · ESFA 2026</h4>
+          <p>The rules applied are England's, today. Scotland (SDS) &amp; Wales are on the roadmap — the tool says so, rather than pretending otherwise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section style="padding-top:0">
+    <div class="shell">
+      <div class="final">
+        <span class="eyebrow">See it with your own numbers</span>
+        <h2>The fastest way to trust a funding figure is to watch it add up.</h2>
+        <p>Open the live demo — it's pre-loaded, so you're looking at a working plan in seconds. Then clear it and try your own.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="./?demo=1" target="_blank" rel="noopener">Open the live demo <span class="arw">→</span></a>
+          <a class="btn btn-ghost" href="./" target="_blank" rel="noopener">Start from scratch</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="shell">
+      <div class="foot-in">
+        <span class="made"><span style="color:var(--teal)">●</span> Fundable — built by <b>AC Digital</b> · Arthur Curtis Education</span>
+        <span class="disc">Indicative planning tool based on published England apprenticeship funding rules (ESFA 2026) — not financial advice. Confirm figures against your apprenticeship service account.</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var c=document.getElementById('sky'); if(!c) return;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ctx=c.getContext('2d'), stars=[], W,H, DPR=Math.min(2, window.devicePixelRatio||1);
+  function size(){ W=c.width=innerWidth*DPR; H=c.height=innerHeight*DPR; c.style.width=innerWidth+'px'; c.style.height=innerHeight+'px'; }
+  function seed(){ stars=[]; var n=Math.round((innerWidth*innerHeight)/26000); n=Math.max(26,Math.min(90,n));
+    for(var i=0;i<n;i++){ stars.push({ x:Math.random()*W, y:Math.random()*H, r:(Math.random()*1.5+.5)*DPR, vx:(Math.random()-.5)*.06*DPR, vy:(Math.random()-.5)*.06*DPR, t:Math.random()>.5 }); } }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<stars.length;i++){ var a=stars[i];
+      for(var j=i+1;j<stars.length;j++){ var b=stars[j], dx=a.x-b.x, dy=a.y-b.y, d=dx*dx+dy*dy, lim=(140*DPR)*(140*DPR);
+        if(d<lim){ var o=(1-d/lim)*.18; ctx.strokeStyle='rgba(120,190,220,'+o+')'; ctx.lineWidth=DPR*.6; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } }
+    }
+    for(var k=0;k<stars.length;k++){ var s=stars[k];
+      ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,7); ctx.fillStyle=s.t?'rgba(45,212,178,.85)':'rgba(120,170,220,.7)'; ctx.fill();
+      if(!reduce){ s.x+=s.vx; s.y+=s.vy; if(s.x<0||s.x>W)s.vx*=-1; if(s.y<0||s.y>H)s.vy*=-1; }
+    }
+    if(!reduce) raf=requestAnimationFrame(draw);
+  }
+  var raf; function start(){ if(raf)cancelAnimationFrame(raf); size(); seed(); draw(); }
+  addEventListener('resize', start); start();
+})();
+</script>
+
+</body>
+</html>
