@@ -1003,7 +1003,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24m</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -4920,6 +4920,11 @@ updateKsbBadge();
   if(dr)dr.addEventListener('click',function(e){if(e.target.closest('button,a'))spin();});
 })();
 setFundingMode(fundingMode,false);
+// ?demo= opens a pre-populated tool for external sharing — demo=nonlevy for the non-levy sample, otherwise the levy sample.
+(function(){try{var dm=(location.search.match(/[?&]demo=([^&#]+)/)||[])[1];if(!dm)return;
+  if(/nonlevy|non-levy/i.test(dm)){setFundingMode('nonlevy',false);if(typeof loadNonLevyDemo==='function')loadNonLevyDemo();}
+  else{setFundingMode('levy',false);if(typeof loadDemo==='function')loadDemo();}
+}catch(e){}})();
 </script>
 <div class="lvy-overlay" id="levyReportOverlay"><div id="levyReportPages"></div></div>
 </body>
