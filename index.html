@@ -88,6 +88,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 /* LED scroll-spy nav inside the fixed banner */
 .led-nav{display:flex;align-items:center;gap:2px;flex:0 1 auto;justify-content:center;margin:0 10px;flex-wrap:nowrap}
 .hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:0}
+.cnt-step{display:inline-flex;align-items:center;gap:5px;justify-content:flex-end}
+.cnt-step .cnt-n{min-width:16px;text-align:center;display:inline-block}
+.cnt-btn{width:19px;height:19px;border-radius:5px;border:1px solid var(--border);background:rgba(var(--wash),0.05);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:border-color .12s,color .12s}
+.cnt-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
+.cnt-btn:disabled{opacity:.3;cursor:default}
 .led-nav button{flex:0 0 auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:6px 9px;border-radius:99px;white-space:nowrap;transition:all .15s}
 .led-nav .dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--text3);flex-shrink:0;transition:all .15s}
 .led-nav button:hover{color:var(--text)}
@@ -862,6 +867,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
 
     <div id="progTable" class="card hidden">
+      <div style="display:flex;align-items:center;margin-bottom:11px"><span style="font-size:12.5px;color:var(--text3)">Your programmes</span><button type="button" onclick="clearProgrammes()" style="margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='rgba(var(--wash),0.15)';this.style.color='var(--text3)'">Clear programmes</button></div>
       <div class="sw">
         <table style="min-width:700px">
           <thead><tr><th>Programme</th><th class="r">Idv cost</th><th class="r">Total levy</th><th class="r">80% training</th><th class="r">20% EPA</th><th class="r">Learners</th><th>Start</th><th>EPA date</th><th class="r">Monthly draw</th><th></th></tr></thead>
@@ -997,7 +1003,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-24l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2283,6 +2289,25 @@ function clearProgForm(){
 }
 
 function removeProg(i){programmes.splice(i,1);renderProgrammes();saveState();if(programmes.length)renderProjection();else{document.getElementById('projectionSection').classList.add('hidden');document.getElementById('progTable').classList.add('hidden');document.getElementById('planSection').classList.add('hidden');updateSectionNav();}}
+// Adjust the learner count on an already-added programme (both modes). Recomputes the plan,
+// projection and the cost-per-learner accumulator; min 1 (use the × to remove entirely).
+function changeProgCount(i,delta){
+  var p=programmes[i]; if(!p)return;
+  var n=Math.max(1,(+p.count||1)+(delta||0));
+  if(n===p.count)return;
+  p.count=n;
+  renderProgrammes();renderProjection();saveState();
+}
+// Clear every programme from the plan (both modes) — keeps your levy / funding data.
+function clearProgrammes(){
+  if(!programmes.length)return;
+  if(!confirm('Remove all '+programmes.length+' programme'+(programmes.length!==1?'s':'')+' from your plan? Your levy / funding data stays.'))return;
+  programmes=[];
+  renderProgrammes();saveState();
+  ['projectionSection','progTable','planSection'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.add('hidden');});
+  if(typeof updateSectionNav==='function')updateSectionNav();
+  if(typeof renderNonLevy==='function')renderNonLevy();
+}
 
 // ── Department budget planner (#B): plan one team's slice against a fixed levy cap ──
 function ringfenceTotal(){return (typeof ringfences!=='undefined'&&ringfences?ringfences:[]).reduce(function(a,b){return a+(+b.amount||0);},0);}
@@ -2351,13 +2376,13 @@ function renderProgrammes(){
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono">${p.count}</td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
