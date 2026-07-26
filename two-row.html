@@ -151,7 +151,16 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;flex-directi
   border-bottom:1px solid var(--border)}
 .hdr-main{display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 1.5rem}
 .hdr-steps{display:flex;align-items:center;gap:2px;height:42px;padding:0 1.5rem;
-  border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+  border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none;
+  justify-content:flex-start}
+/* Centre the steps with auto margins rather than justify-content:center — when the
+   row overflows, centring pushes the first item off the left edge where it can't be
+   scrolled to. Auto margins collapse to 0 once the free space is gone, so the row
+   centres when it fits and scrolls from the start when it doesn't. (justify-content:
+   safe center would do this natively but isn't supported here — it invalidated the
+   property outright, which is why the row stayed left-aligned.) */
+.hdr-steps>button:first-child{margin-left:auto}
+.hdr-steps>button:last-child{margin-right:auto}
 .hdr-steps::-webkit-scrollbar{display:none}
 .logo-row{display:flex;align-items:center;gap:12px}
 .logo-mark-img{width:42px;height:42px;display:block;filter:drop-shadow(0 0 10px rgba(45,212,178,0.25))}
