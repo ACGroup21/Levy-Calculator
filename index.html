@@ -860,6 +860,22 @@ td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0
    only - checkboxes/radios keep their native size and take their hit area from
    the surrounding label. Pre-existing gap, not caused by the padding pass. */
 button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-height:24px}
+
+/* B1 — funded vs your-cash tinting. Cool = someone else pays (levy, government,
+   a transfer). Warm = the employer's real money (co-investment, off-the-job).
+   Tone is set by the render functions from what a figure IS, never per card. */
+.tone-fund{background:var(--fund-bg)!important;border-color:var(--fund-line)!important}
+.tone-cash{background:var(--cash-bg)!important;border-color:var(--cash-line)!important}
+/* dark theme needs the same meaning at much lower intensity */
+:root[data-theme="dark"] .tone-fund{background:rgba(62,134,224,.10)!important;border-color:rgba(62,134,224,.26)!important}
+:root[data-theme="dark"] .tone-cash{background:rgba(224,164,59,.09)!important;border-color:rgba(224,164,59,.24)!important}
+/* a quiet key so the tinting is explained rather than decorative */
+.tone-key{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:10.5px;color:var(--text3)}
+.tone-key i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid}
+.tone-key .kf{background:var(--fund-bg);border-color:var(--fund-line)}
+.tone-key .kc{background:var(--cash-bg);border-color:var(--cash-line)}
+:root[data-theme="dark"] .tone-key .kf{background:rgba(62,134,224,.10);border-color:rgba(62,134,224,.26)}
+:root[data-theme="dark"] .tone-key .kc{background:rgba(224,164,59,.09);border-color:rgba(224,164,59,.24)}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1381,7 +1397,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27p</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2174,8 +2190,8 @@ function onStandardChange(){
   renderLearnerCost();
 }
 
-function lcCell(lab,val,sub,col){
-  return '<div style="background:rgba(var(--wash),0.025);border:1px solid rgba(var(--wash),0.07);border-radius:10px;padding:9px 11px;min-width:0">'+
+function lcCell(lab,val,sub,col,tone){
+  return '<div class="'+(tone?'tone-'+tone:'')+'" style="background:rgba(var(--wash),0.025);border:1px solid rgba(var(--wash),0.07);border-radius:10px;padding:9px 11px;min-width:0">'+
     '<div style="font-size:10.5px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
     '<div style="font-family:\'JetBrains Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
     '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4">'+sub+'</div></div>';
@@ -2206,15 +2222,15 @@ function renderLearnerCost(){
     var rows;
     if(nl){
       // NON-LEVY: nothing assumed levy-funded — government funds most of the band, you co-invest the rest (£0 for 16-21s), your cash = co-invest + off-the-job
-      rows=lcCell('Government funds <span style="color:'+BLUE+'">'+(100-pct)+'%</span>',fmt(band-coInv),'up to band max &middot; 100% for 16&ndash;21s',BLUE)+
-        lcCell('Your co-investment <span style="color:'+MONEY+'">'+pct+'%</span>',fmt(coInv),'22+ learners &middot; £0 for 16&ndash;21s'+(pct<25?' &middot; 25% from Aug 2026':''),MONEY)+
-        lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage/plan rate':' &times; £'+rate+'/hr'),AMBER)+
-        lcCell('Your direct cash',noRate?'co-invest '+fmt(coInv):'&asymp;'+fmt(directCash),'co-investment + off-the-job &middot; a levy gift can cover the co-invest',MONEY);
+      rows=lcCell('Government funds <span style="color:'+BLUE+'">'+(100-pct)+'%</span>',fmt(band-coInv),'up to band max &middot; 100% for 16&ndash;21s',BLUE,'fund')+
+        lcCell('Your co-investment <span style="color:'+MONEY+'">'+pct+'%</span>',fmt(coInv),'22+ learners &middot; £0 for 16&ndash;21s'+(pct<25?' &middot; 25% from Aug 2026':''),MONEY,'cash')+
+        lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage/plan rate':' &times; £'+rate+'/hr'),AMBER,'cash')+
+        lcCell('Your direct cash',noRate?'co-invest '+fmt(coInv):'&asymp;'+fmt(directCash),'co-investment + off-the-job &middot; a levy gift can cover the co-invest',MONEY,'cash');
     }else{
-      rows=lcCell('Funding band <span style="color:'+GREEN+'">levy-funded</span>',fmt(band),T+'% '+fmt(training)+' over '+dur+'mo + '+E+'% '+fmt(epaAmt)+' at EPA',GREEN)+
-        lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),AMBER)+
+      rows=lcCell('Funding band <span style="color:'+GREEN+'">levy-funded</span>',fmt(band),T+'% '+fmt(training)+' over '+dur+'mo + '+E+'% '+fmt(epaAmt)+' at EPA',GREEN,'fund')+
+        lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage or the plan rate':' &times; £'+rate+'/hr ('+rateSrc+')'),AMBER,'cash')+
         lcCell('Full cost of ownership',noRate?fmt(band)+'+':'&asymp;'+fmt(fullCost),'band + off-the-job time','#fff')+
-        lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it',AMBER);
+        lcCell('Your direct cash',noRate?'set £/hr':'&asymp;'+fmt(otjCost),'off-the-job · co-invest £0 if your levy covers it',AMBER,'cash');
     }
     // How many of THIS standard could the levy fund? (levy only — uses the standard's real band, no fabrication)
     var capHtml='', M=(typeof projYears==='number'?projYears:3)*12;
@@ -3910,14 +3926,14 @@ function renderNonLevy(){
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
-  var fig=function(lab,val,c,sub,id){return '<div class="metric" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
     fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
-    fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov')+
-    fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers')+
-    fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv')+
-    (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time'):'')+
-  '</div>';
+    fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
+    fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers','fund')+
+    fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv','cash')+
+    (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time','','cash'):'')+
+  '</div>'+'<div class="tone-key"><span><i class="kf"></i>funded for you</span><span><i class="kc"></i>your cash</span></div>';
   var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
   if(s.target<0.5){
