@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Fundable</title>
+<meta name="description" content="Fundable — apprenticeship funding, costed honestly. Levy or non-levy: what your plan really costs, what the government covers, and whether you can afford it.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-6 -6 98 97'%3E%3Crect x='29.5' y='39.7' width='32' height='5.6' rx='2.8' fill='%231464A6'/%3E%3Crect width='26' height='26' rx='5.3' fill='%23eaf3fb'/%3E%3Crect x='29.5' width='26' height='26' rx='5.3' fill='%23eaf3fb'/%3E%3Crect y='29.5' width='26' height='26' rx='5.3' fill='%23eaf3fb'/%3E%3Crect y='59' width='26' height='26' rx='5.3' fill='%23eaf3fb'/%3E%3Crect x='60' y='29.5' width='26' height='26' rx='5.3' fill='%2300C3DD'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&family=League+Spartan:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -451,6 +453,10 @@ th{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--text3);let
 td{padding:10px 12px;border-bottom:1px solid rgba(var(--wash),0.04);font-size:13px;white-space:nowrap;color:var(--text2);vertical-align:middle}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:rgba(45,212,178,0.02)}
+/* Laptop: tighten cell padding so wide tables stop hiding columns behind the scroller.
+   ~10px reclaimed per column clears the clip without dropping any data.
+   Must sit AFTER the base th/td rules — media queries add no specificity. */
+@media(max-width:1400px){th{padding:8px 6px}td{padding:10px 6px}}
 th.r,td.r{text-align:right}
 .mono{font-family:var(--mono)}.td-name{color:var(--text);font-weight:500}
 
@@ -1033,7 +1039,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26i</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
