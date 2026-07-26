@@ -22,14 +22,14 @@
   /* Light theme — every value contrast-verified against white before use.
      Derived from the shared Fundable / Arthur Curtis cyan identity.
      HARD RULE: brand cyan #00C3DD is 2.13:1 on white — FILLS ONLY, never text. */
-  --bg:#ffffff;                  /* page */
+  --bg:#eaf2fb;                  /* pale sky — clouds drift on this */
   --surface:#eef4fb;             /* app ground (base 2) — cards sit on this */
   --wash:14,32,51;               /* ink for translucent overlays */
   --glass:#ffffff;
   --border:#e0e9f3;--border2:#1464A6;
   --text:#0E2033;                /* 16.50:1 */
   --text2:#3A4E63;               /*  8.57:1 */
-  --text3:#5C7186;               /*  5.05:1 — was #8fa0b7 and failed */
+  --text3:#57697D;               /*  5.00:1 on the SKY (5.64 on white) — #5C7186 was 4.47 on sky */
   --teal:#0A6E86;                /*  5.85:1 — darkened cyan, keeps the brand family */
   --cyan:#00C3DD;                /* FILL ONLY — spine nodes, logo, rules */
   --navy:#1464A6;                /*  6.17:1 — straight from the logo */
@@ -64,7 +64,7 @@
 
 /* ── Base 2: the app ground ─────────────────────────────────────────────── */
 :root[data-theme="light"] body{background:var(--bg)}
-:root[data-theme="light"] .page{background:var(--surface);border-radius:16px;padding-left:1.9rem;padding-right:1.9rem}
+:root[data-theme="light"] .page{background:transparent;padding-left:1.9rem;padding-right:1.9rem}
 :root[data-theme="light"] .card{background:#fff;border:1px solid var(--border);box-shadow:0 1px 3px rgba(14,32,51,.06)}
 
 /* ── C2: elevation on the section being worked in ───────────────────────── */
@@ -830,15 +830,13 @@ td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0
    Dark mode has stars; light mode gets weather. Reuses the aurora blobs rather
    than adding markup - in light they are re-tinted as soft cloud banks, blurred
    harder and drifting slower so the page feels airy rather than starry. */
-:root[data-theme="light"] .aurora{display:block;opacity:.85}
+:root[data-theme="light"] .aurora{display:block;opacity:1}
 :root[data-theme="light"] .aurora-blob{
-  filter:blur(75px);opacity:.5;border-radius:48% 52% 55% 45%/58% 46% 54% 42%;
-  animation-duration:70s}
-:root[data-theme="light"] .blob1{background:#dbe7f6}
-:root[data-theme="light"] .blob2{background:#e6eef8}
-:root[data-theme="light"] .blob3{background:#d8e9f2}
-:root[data-theme="light"] .blob4{background:#e9eef7}
-:root[data-theme="light"] .blob5{background:#dfeaf7}
+  background:#ffffff;filter:blur(58px);opacity:.75;
+  border-radius:48% 52% 55% 45%/58% 46% 54% 42%;animation-duration:70s}
+:root[data-theme="light"] .blob2{opacity:.68}
+:root[data-theme="light"] .blob4{opacity:.6}
+:root[data-theme="light"] .blob5{opacity:.55}
 @media(prefers-reduced-motion:reduce){:root[data-theme="light"] .aurora-blob{animation:none}}
 </style>
 <script>
@@ -1361,7 +1359,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27b</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
