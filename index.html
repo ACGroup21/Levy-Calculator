@@ -97,6 +97,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 /* flex-basis 0 keeps both sides equal so the nav sits centred, but min-width:max-content
    stops a side ever shrinking below its content and spilling over the nav. */
 .hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:max-content}
+#brandDrop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:1px dashed rgba(var(--wash),0.2);border-radius:11px;padding:12px 14px;cursor:pointer;transition:all .15s;background:rgba(var(--wash),0.02)}
+#brandDrop:hover,#brandDrop.over{border-color:var(--teal);background:rgba(45,212,178,0.05)}
 .cnt-step{display:inline-flex;align-items:center;gap:5px;justify-content:flex-end}
 .cnt-step .cnt-n{min-width:16px;text-align:center;display:inline-block}
 .cnt-btn{width:19px;height:19px;border-radius:5px;border:1px solid var(--border);background:rgba(var(--wash),0.05);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:border-color .12s,color .12s}
@@ -1035,6 +1037,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           <button type="button" id="reportSelectAll" onclick="toggleSelectAllReports()" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.3);border-radius:7px;padding:4px 11px;cursor:pointer">Select all</button>
         </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
+        <div id="brandPack" style="margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)"></div>
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)">
           <div class="levy-only" style="display:flex;align-items:center;gap:9px">
             <span style="font-size:12px;color:var(--text3)">Framing</span>
@@ -1077,7 +1080,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3144,15 +3147,125 @@ function levyBoardCover(d){
   // ── ask ──
   var ask='Approve <b style="color:#fff">'+fmt(d.planCost)+'</b> to train <b style="color:#fff">'+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</b>'+(teams>1?(' across <b style="color:#fff">'+teams+' teams</b>'):'')+' over <b style="color:#fff">'+d.years+' year'+(d.years!==1?'s':'')+'</b>. <b style="color:#2DD4B2">'+fmt(d.levyCovered)+'</b> is levy-funded; employer cash exposure is <b style="color:'+(empCash?'#E0A43B':'#2DD4B2')+'">'+fmt(empCash)+'</b>'+(d.otjCost?(', plus <b style="color:#fff">'+fmt(d.otjCost)+'</b> of off-the-job staff time'):'')+'.';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
       '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
     '<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">The numbers</div><div class="lvy-figs" style="margin-bottom:16px">'+figs+'</div>'+
     '<div class="lvy-sec">Risk assessment</div><div class="lvy-risk" style="margin-bottom:16px">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div>'+
     alloc+
     '<div class="lvy-decide" style="margin-top:16px;border-color:'+dec.col+'55"><div class="lvy-decide-rec"><span class="lvy-decide-t" style="color:'+dec.col+'">RECOMMENDATION &middot; '+dec.word.toUpperCase()+'</span>'+dec.note+'</div></div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Indicative only &mdash; based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'.'+dataAckNote()+' Full analysis follows in the Affordability Report.</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Indicative only &mdash; based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'.'+dataAckNote()+' Full analysis follows in the Affordability Report.</div>'+
     '</div></div>';
+}
+// ── Client brand pack ────────────────────────────────────────────────────────
+// Drop a client's logo (or a brand .json) and every report re-skins to their identity,
+// always keeping a "Powered by Fundable" credit. Nothing leaves the browser.
+var BRAND={name:'',logo:'',primary:'',accent:''};
+try{var _sb=JSON.parse(localStorage.getItem('ac_brand')||'null'); if(_sb&&typeof _sb==='object')BRAND=_sb;}catch(e){}
+function brandOn(){return !!(BRAND.logo||BRAND.primary||BRAND.name);}
+function brandLogo(){return BRAND.logo||window.AC_LOGO_WHITE;}
+function brandPrimary(){return BRAND.primary||'#2DD4B2';}
+function brandAccent(){return BRAND.accent||'#3E86E0';}
+function hexA(h,a){
+  var m=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec((h||'').trim());
+  if(!m)return 'rgba(45,212,178,'+a+')';
+  return 'rgba('+parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16)+','+a+')';
+}
+// The credit line: branded reports read "Powered by Fundable"; unbranded keep the AC mark.
+function brandCredit(){
+  var t = brandOn()
+    ? ((BRAND.name?escHtml(BRAND.name)+' &nbsp;&middot;&nbsp; ':'')+'Powered by Fundable')
+    : 'Fundable &middot; built by AC Digital';
+  return '<strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">'+t+' &nbsp;&mdash;&nbsp;</strong>';
+}
+// Re-skin the report pages via a single injected stylesheet (kept out of the engine).
+function applyBrandStyle(){
+  var s=document.getElementById('brandStyle');
+  if(!s){s=document.createElement('style');s.id='brandStyle';document.head.appendChild(s);}
+  if(!brandOn()){s.textContent='';return;}
+  var p=brandPrimary(),a=brandAccent();
+  s.textContent=
+    '.lvy-page{background:radial-gradient(900px 520px at 80% -10%,'+hexA(p,0.15)+',transparent 60%),'+
+      'radial-gradient(760px 520px at -8% 112%,'+hexA(a,0.11)+',transparent 55%),'+
+      'linear-gradient(150deg,#0a1727 0%,#11223a 62%,#0a1727 100%)!important}'+
+    '.lvy-title{color:'+p+'!important}'+
+    '.lvy-sec{color:'+p+'!important;border-color:'+hexA(p,0.35)+'!important}';
+}
+// Pull the dominant brand colours straight out of a dropped logo (ignores greys/near-black/white).
+function extractBrandColours(uri,cb){
+  var img=new Image();
+  img.onload=function(){
+    try{
+      var n=48,c=document.createElement('canvas');c.width=n;c.height=n;
+      var x=c.getContext('2d');x.drawImage(img,0,0,n,n);
+      var d=x.getImageData(0,0,n,n).data,buck={};
+      for(var i=0;i<d.length;i+=4){
+        var r=d[i],g=d[i+1],b=d[i+2];
+        if(d[i+3]<128)continue;
+        var mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+        var sat=mx===0?0:(mx-mn)/mx, lum=(0.299*r+0.587*g+0.114*b)/255;
+        if(sat<0.25||lum<0.12||lum>0.95)continue;
+        var k=(Math.round(r/24)*24)+','+(Math.round(g/24)*24)+','+(Math.round(b/24)*24);
+        buck[k]=(buck[k]||0)+1;
+      }
+      cb(Object.keys(buck).sort(function(u,v){return buck[v]-buck[u];}).slice(0,2).map(function(k){
+        return '#'+k.split(',').map(function(v){return ('0'+Math.min(255,+v).toString(16)).slice(-2);}).join('');
+      }));
+    }catch(e){cb([]);}
+  };
+  img.onerror=function(){cb([]);};
+  img.src=uri;
+}
+function saveBrand(){try{localStorage.setItem('ac_brand',JSON.stringify(BRAND));}catch(e){}applyBrandStyle();renderBrandPack();}
+function setBrandField(k,v){BRAND[k]=v;saveBrand();}
+function clearBrand(){BRAND={name:'',logo:'',primary:'',accent:''};saveBrand();}
+function handleBrandFile(f){
+  if(!f)return;
+  if(/\.json$/i.test(f.name)||f.type==='application/json'){
+    var jr=new FileReader();
+    jr.onload=function(){
+      try{
+        var j=JSON.parse(jr.result);
+        ['name','logo','primary','accent'].forEach(function(k){if(j[k])BRAND[k]=j[k];});
+        saveBrand();
+      }catch(e){alert('That brand file could not be read. Expected JSON with name / logo / primary / accent.');}
+    };
+    jr.readAsText(f);return;
+  }
+  if(!/^image\//.test(f.type)){alert('Drop a logo image (PNG, SVG or JPG) or a brand .json file.');return;}
+  var fr=new FileReader();
+  fr.onload=function(){
+    BRAND.logo=fr.result;
+    if(!BRAND.name)BRAND.name=f.name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ').trim();
+    saveBrand();
+    extractBrandColours(fr.result,function(cols){         // suggest colours from the logo
+      if(cols[0])BRAND.primary=BRAND.primary||cols[0];
+      if(cols[1])BRAND.accent=BRAND.accent||cols[1];
+      saveBrand();
+    });
+  };
+  fr.readAsDataURL(f);
+}
+function renderBrandPack(){
+  var el=document.getElementById('brandPack');if(!el)return;
+  var on=brandOn();
+  el.innerHTML=
+    '<div id="brandDrop" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" '+
+      'ondrop="event.preventDefault();this.classList.remove(\'over\');handleBrandFile(event.dataTransfer.files[0])" '+
+      'onclick="document.getElementById(\'brandFile\').click()">'+
+      (on&&BRAND.logo?'<img src="'+BRAND.logo+'" alt="Client logo" style="max-height:34px;max-width:130px;object-fit:contain">':'<span style="font-size:17px">&#127912;</span>')+
+      '<div style="flex:1;min-width:150px">'+
+        '<div style="font-size:12.5px;color:var(--text2)"><b>'+(on?(BRAND.name?escHtml(BRAND.name):'Brand applied'):'Drop your brand pack here')+'</b></div>'+
+        '<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(on?'Reports carry this identity &middot; footer keeps &ldquo;Powered by Fundable&rdquo;':'A logo (PNG/SVG/JPG) or a brand .json &mdash; colours are read from the logo')+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<input type="file" id="brandFile" accept="image/*,.json,application/json" style="display:none" onchange="handleBrandFile(this.files[0]);this.value=\'\'">'+
+    '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:9px">'+
+      '<label style="font-size:11.5px;color:var(--text3);display:flex;align-items:center;gap:6px">Primary <input type="color" value="'+brandPrimary()+'" onchange="setBrandField(\'primary\',this.value)" style="width:30px;height:22px;padding:0;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer"></label>'+
+      '<label style="font-size:11.5px;color:var(--text3);display:flex;align-items:center;gap:6px">Accent <input type="color" value="'+brandAccent()+'" onchange="setBrandField(\'accent\',this.value)" style="width:30px;height:22px;padding:0;border:1px solid var(--border);border-radius:5px;background:none;cursor:pointer"></label>'+
+      '<input placeholder="Client name" value="'+(BRAND.name?escHtml(BRAND.name):'')+'" onchange="setBrandField(\'name\',this.value)" style="flex:1;min-width:130px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:6px 9px;color:var(--text);font-size:12px;font-family:inherit">'+
+      (on?'<button type="button" onclick="clearBrand()" style="font-family:inherit;font-size:11.5px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 11px;cursor:pointer">Remove branding</button>':'')+
+    '</div>';
 }
 var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false,qar:false,nonlevy:false}; // nothing pre-selected — the user ticks what they want
 function renderLevyReport(sel){
@@ -3239,7 +3352,7 @@ function levyNonLevyPage(d){
     (s.transfers>0.5?('<b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured of '+fmt(s.target)+' &mdash; your investment '+fmt(f.employer)+' &rarr; <b style="color:'+(s.residual>0.5?'#E0A43B':'#2DD4B2')+'">'+fmt(s.residual)+'</b>. A further '+fmt(Math.max(0,s.target-s.raised))+' in transfers would take it to £0.'):
       ('No transfers secured yet. Raising up to '+fmt(s.target)+' in levy transfers would reduce your '+fmt(f.employer)+' investment toward £0.'));
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
       '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
     '<div style="background:rgba(74,163,232,0.07);border:1px solid rgba(74,163,232,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">How this plan is paid for</div><div class="lvy-figs" style="margin-bottom:15px">'+figs+'</div>'+
@@ -3249,7 +3362,7 @@ function levyNonLevyPage(d){
       '<thead><tr style="background:rgba(255,255,255,0.04);color:#8ba0b6;text-align:left"><th style="padding:7px 10px;font-weight:600">Programme</th><th style="padding:7px 10px;font-weight:600;text-align:right">Learners</th><th style="padding:7px 10px;font-weight:600;text-align:right">Band</th><th style="padding:7px 10px;font-weight:600;text-align:right">Your investment</th></tr></thead>'+
       '<tbody>'+rows+'</tbody></table></div>'+
     (moreP>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+moreP+' more programme'+(moreP!==1?'s':'')+' &mdash; full list in the app.</div>':'')+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Government funds 95% of training &amp; assessment (100% for 16&ndash;21s; 22&ndash;24 EHCP/care); you co-invest '+rate+' (25% from Aug 2026); a levy transfer covers 100%. Table shows your investment before transfers; the figures above are net. Rules '+RULEBOOK.version+' (gov.uk). Indicative &mdash; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Government funds 95% of training &amp; assessment (100% for 16&ndash;21s; 22&ndash;24 EHCP/care); you co-invest '+rate+' (25% from Aug 2026); a levy transfer covers 100%. Table shows your investment before transfers; the figures above are net. Rules '+RULEBOOK.version+' (gov.uk). Indicative &mdash; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
     '</div></div>';
 }
 function levyDeliveryPage(d){
@@ -3281,7 +3394,7 @@ function levyDeliveryPage(d){
     achLine='No learners have left yet &mdash; an achievement rate (QAR) becomes available once cohorts complete.';
   }
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Delivery Report &mdash; Apprenticeship Progress</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Delivery Report &mdash; Apprenticeship Progress</div></div>'+
       '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">SYNCHRONISED FROM YOUR TRACKER</div></div></div>'+
     '<div class="lvy-sec">Snapshot</div><div class="lvy-figs" style="margin-bottom:14px">'+figs+'</div>'+
     '<div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin-bottom:15px">'+achLine+(overdue?(' <b style="color:#e0607a">'+overdue+'</b> live learner'+(overdue!==1?'s are':' is')+' past the planned end date.'):'')+'</div>'+
@@ -3293,7 +3406,7 @@ function levyDeliveryPage(d){
         '<th style="padding:7px 10px;font-weight:600">Status</th><th style="padding:7px 10px;font-weight:600;text-align:right">Progress / outcome</th></tr></thead>'+
       '<tbody>'+body+'</tbody></table></div>'+
     (more>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+more+' more learner'+(more!==1?'s':'')+' &mdash; full list in the app.</div>':'')+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Delivery data as provided in your tracker export &mdash; on-track / behind reflects progress against elapsed time. Rules as of '+RULEBOOK.version+'.</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Delivery data as provided in your tracker export &mdash; on-track / behind reflects progress against elapsed time. Rules as of '+RULEBOOK.version+'.</div>'+
     '</div></div>';
 }
 // A4 report page for the achievement rate (QAR) analysis (dark report styling, 794px budget).
@@ -3315,7 +3428,7 @@ function levyQarPage(d){
       '<td style="padding:5px 10px;text-align:right;color:#9fb2c6;white-space:nowrap">'+r.bench.toFixed(1)+'%'+(r.benchIsLevel?'':' *')+'</td></tr>';
   }).join('');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
       '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
     '<div style="display:flex;align-items:center;gap:26px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.25);border-radius:12px;padding:16px 22px;margin-bottom:16px">'+
       '<div><div style="font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;color:'+col+';line-height:1">'+q.qar.toFixed(1)+'%</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+q.achieved+' achieved of '+q.leavers+' leaver'+(q.leavers!==1?'s':'')+'</div></div>'+
@@ -3328,7 +3441,7 @@ function levyQarPage(d){
         '<th style="padding:7px 10px;font-weight:600;text-align:right">Achieved / leavers</th><th style="padding:7px 10px;font-weight:600;text-align:right">Rate</th>'+
         '<th style="padding:7px 10px;font-weight:600;text-align:right">National</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     (moreS>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+moreS+' more standard'+(moreS!==1?'s':'')+' &mdash; full breakdown in the app.</div>':'')+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Achievement rate = achievements &divide; leavers (leavers = achieved + withdrawn + completed-but-failed; still-in-learning excluded). National 2024/25 = '+N.overall+'% (target '+N.target+'%); by level L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (* L2/L7 vs overall). Source: gov.uk Explore Education Statistics. <b>Indicative rate on your own learners &mdash; not the official ESFA provider QAR</b> (ILR, hybrid-end-year basis).</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Achievement rate = achievements &divide; leavers (leavers = achieved + withdrawn + completed-but-failed; still-in-learning excluded). National 2024/25 = '+N.overall+'% (target '+N.target+'%); by level L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (* L2/L7 vs overall). Source: gov.uk Explore Education Statistics. <b>Indicative rate on your own learners &mdash; not the official ESFA provider QAR</b> (ILR, hybrid-end-year basis).</div>'+
     '</div></div>';
 }
 function levyPage1(d,framing){
@@ -3381,7 +3494,7 @@ function levyPage1(d,framing){
   var decideStrip='<div class="lvy-decide"><div class="lvy-decide-rec"><span class="lvy-decide-t">RECOMMENDATION</span>'+rec+'</div><div class="lvy-risk">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div></div>';
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
-      '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
+      '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
         '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
@@ -3389,7 +3502,7 @@ function levyPage1(d,framing){
       '<div class="lvy-figs">'+figures+'</div>'+
       utilSection+
       '<div class="lvy-interp"><div class="lvy-sec">'+interpHead+'</div><div class="lvy-lead">'+interpLead+'</div><div class="lvy-cards">'+cardsHtml+'</div></div>'+
-      '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.'+dataAckNote()+'</div>'+
+      '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+'. Verify against your ESFA apprenticeship service account.'+dataAckNote()+'</div>'+
     '</div></div>';
 }
 function levyPage2(d,framing){
@@ -3447,7 +3560,7 @@ function levyPage2(d,framing){
   }
   var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">Programme breakdown</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Learners</th><th class="r">Band</th><th class="r">Training (80%)</th><th class="r">EPA (20%)</th><th class="r">Start &rarr; EPA</th></tr></thead><tbody>'+rows+'</tbody></table>'+
@@ -3457,7 +3570,7 @@ function levyPage2(d,framing){
       '<div class="lvy-col"><div class="lvy-sec">'+rightTitle+'</div><div class="lvy-body">'+rightBody+'</div></div>'+
       '<div class="lvy-col"><div class="lvy-sec">Staying on track — completion</div><div class="lvy-body">'+passBody+'</div></div>'+
     '</div>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+methodNote()+cohortNote+' Generated '+fmtDMY(new Date())+'.</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Indicative only — based on the data you provided, not financial advice. Rules as of '+RULEBOOK.version+' (gov.uk). Verify against your ESFA apprenticeship service account.'+dataAckNote()+methodNote()+cohortNote+' Generated '+fmtDMY(new Date())+'.</div>'+
   '</div></div>';
 }
 function levyPage3(d,framing){
@@ -3487,13 +3600,13 @@ function levyPage3(d,framing){
     ? 'The levy covers the training fee. The larger commitment is usually the paid time apprentices spend off the job ('+Math.round(d.otjHrsWk)+' hrs/week &middot; '+d.otjFTE.toFixed(1)+' FTE) — set an hourly rate in the Plan section to cost it.'
     : 'The levy covers the training fee; the larger commitment is often the <strong style="color:#fff">'+Math.round(d.otjHrsWk)+' hours a week</strong> of paid time apprentices spend off the job ('+d.otjFTE.toFixed(1)+' FTE of capacity). '+(fin?'It is real cost, not just levy spend — factor it into the business case.':'Plan release and backfill so delivery does not strain the team.');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+window.AC_LOGO_WHITE+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
+    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+selfFundNote+niNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th>Off-the-job</th><th>Duration</th><th class="r">Learners</th><th class="r">Time cost</th><th class="r">Full / learner</th></tr></thead><tbody>'+otjRows+'</tbody></table>'+
-    '<div class="lvy-note"><img src="'+window.AC_LOGO_WHITE+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px"><strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">Fundable &middot; built by AC Digital &nbsp;&mdash;&nbsp;</strong>Off-the-job time valued at &pound;'+(d.payRate||0)+'/hr (set in the Plan section). Off-the-job training is a statutory minimum of 6 hours/week, averaged over the practical period — paid working time, not the apprentice&rsquo;s own. Indicative only.</div>'+
+    '<div class="lvy-note"><img src="'+brandLogo()+'" style="height:13px;opacity:.8;vertical-align:middle;margin-right:9px">'+brandCredit()+'Off-the-job time valued at &pound;'+(d.payRate||0)+'/hr (set in the Plan section). Off-the-job training is a statutory minimum of 6 hours/week, averaged over the practical period — paid working time, not the apprentice&rsquo;s own. Indicative only.</div>'+
   '</div></div>';
 }
 function buildLevyPdf(){
@@ -4029,7 +4142,7 @@ function jdBuildReport(){
   el.style.cssText='position:absolute;left:-20000px;top:0;width:1040px;min-height:1471px;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(160deg,#06172E 0%,#0F2A4A 60%,#06172E 100%);font-family:Inter,Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact';
   var P='rgba(15,42,74,0.92)';
   el.innerHTML=jdReportDecor()+'<div style="position:relative;z-index:2;flex:1 0 auto;padding:46px 46px 0">'+
-    '<img src="'+window.AC_LOGO_WHITE+'" style="height:50px;margin-bottom:28px">'+
+    '<img src="'+brandLogo()+'" style="height:50px;margin-bottom:28px">'+
     '<div style="font-family:'+JD_HF+';font-size:54px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.0">JD Matcher Report</div>'+
     '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Fundable</span><span style="color:#7e93a8"> · '+fmtDMY(new Date())+'</span></div>'+
     '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12.5px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
@@ -4064,7 +4177,7 @@ function jdBuildReport(){
       '</div>'+
     '</div>'+
   '</div>'+
-  '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Fundable · JD Matcher · built by AC Digital · indicative keyword analysis, not a compliance verdict</span></div>';
+  '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Fundable · JD Matcher · built by AC Digital · indicative keyword analysis, not a compliance verdict</span></div>';
   return el;
 }
 var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,j,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.8,0,7);ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
@@ -4090,7 +4203,7 @@ function jdPageDecor(W,H,cid){
 }
 /* draws network + dotted border frame straight onto the canvas (fast for html2canvas, unlike thousands of SVG circles) */
 function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}var m=20,T=46,s=18;ctx.fillStyle='rgba(54,194,224,0.55)';for(var gx=m;gx<=W-m;gx+=s)for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T){ctx.beginPath();ctx.arc(gx,gy,1.05,0,7);ctx.fill();}}}catch(e){}}
-function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+window.AC_LOGO_WHITE+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Fundable &middot; JD Matcher &middot; built by AC Digital &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
+function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Fundable &middot; JD Matcher &middot; built by AC Digital &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
 var JD_PG_W=1123, JD_PG_H=794;
 /* large-text mode: content pages render onto a small virtual page (468px) so reading text scales to ~18pt large print when fit to A4 (the summary stays full-size, handled in jdBuildPdfPages) */
 var JD_LARGE=false;
@@ -4254,7 +4367,7 @@ function jdBuildPdfPages(){
     '</div>'+
   '</div>';
   var p1='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px">'+
-      '<img src="'+window.AC_LOGO_WHITE+'" style="height:46px;display:block">'+
+      '<img src="'+brandLogo()+'" style="height:46px;display:block">'+
       '<div style="font-family:'+JD_HF+';font-size:40px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;text-align:right">JD Matcher Report</div>'+
     '</div>'+
     '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;margin-top:11px">'+
@@ -4979,6 +5092,7 @@ renderGoalGrid();
 (function(){var ci=document.getElementById('cohortMin');if(ci&&scnCohortMin)ci.value=scnCohortMin;})();
 renderRulesRef();
 renderReportPicker();
+applyBrandStyle();renderBrandPack();
 renderQAR();
 buildNavDrawer();
 updateKsbBadge();
