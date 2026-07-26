@@ -18,14 +18,76 @@
   --amber:#f5a623;--red:#ff4c6a;--purple:#a78bfa;--money:var(--teal);
   --mono:'JetBrains Mono',ui-monospace,'Cascadia Mono','Segoe UI Mono',Consolas,monospace;--sans:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
 }
-:root[data-theme="light"]{                       /* Scheme A — Cobalt & Slate + terracotta */
-  --bg:#ffffff;                 /* pure white page (user pick) — loose interchanging stars show in the margins */
-  --wash:15,27,46;              /* ink-slate overlays */
+:root[data-theme="light"]{
+  /* Light theme — every value contrast-verified against white before use.
+     Derived from the shared Fundable / Arthur Curtis cyan identity.
+     HARD RULE: brand cyan #00C3DD is 2.13:1 on white — FILLS ONLY, never text. */
+  --bg:#ffffff;                  /* page */
+  --surface:#eef4fb;             /* app ground (base 2) — cards sit on this */
+  --wash:14,32,51;               /* ink for translucent overlays */
   --glass:#ffffff;
-  --border:#e4eaf3;--border2:#2563eb;
-  --text:#0f1b2e;--text2:#4a5a70;--text3:#8fa0b7;
-  --teal:#2563eb;--navy:#5a7290;--purple:#5b6b9e;--amber:#c2603c;--red:#d61f45;--money:#c2603c;
+  --border:#e0e9f3;--border2:#1464A6;
+  --text:#0E2033;                /* 16.50:1 */
+  --text2:#3A4E63;               /*  8.57:1 */
+  --text3:#5C7186;               /*  5.05:1 — was #8fa0b7 and failed */
+  --teal:#0A6E86;                /*  5.85:1 — darkened cyan, keeps the brand family */
+  --cyan:#00C3DD;                /* FILL ONLY — spine nodes, logo, rules */
+  --navy:#1464A6;                /*  6.17:1 — straight from the logo */
+  --purple:#4B5A99;
+  --amber:#8A5A00;               /*  5.93:1 */
+  --red:#B3123C;                 /*  6.84:1 */
+  --green:#0F7A52;               /*  5.35:1 */
+  --money:#9C4416;               /*  6.46:1 */
+  /* B1 — funded vs your-cash tinting (engine-driven, never hand-applied) */
+  --fund-bg:#f2f8fb;--fund-line:#dbeaf2;
+  --cash-bg:#fdf6f1;--cash-line:#f2e0d4;
+  /* goal accents — the dark values fail on white, so each is darkened to pass */
+  --goal-capability:#5B4BB8;
+  --goal-upskill:#1464A6;
+  --goal-recruit:#0F7A52;
+  --goal-funding:#8A5A00;
+  --goal-cash:#0A6E86;
+  --goal-other:#3A4E63;
 }
+/* Goal accents must be re-pointed in light mode, otherwise .gt-lb keeps a
+   dark-theme colour (this was the 1.13:1 near-invisible failure). */
+:root[data-theme="light"] body[data-goal="capability"]{--goal-accent:var(--goal-capability)}
+:root[data-theme="light"] body[data-goal="upskill"]{--goal-accent:var(--goal-upskill)}
+:root[data-theme="light"] body[data-goal="recruit"]{--goal-accent:var(--goal-recruit)}
+:root[data-theme="light"] body[data-goal="funding"]{--goal-accent:var(--goal-funding)}
+:root[data-theme="light"] body[data-goal="cash"]{--goal-accent:var(--goal-cash)}
+:root[data-theme="light"] body[data-goal="other"]{--goal-accent:var(--goal-other)}
+/* .gt-lb reads var(--goal-accent); with no goal chosen it was inheriting a light
+   colour, so give it a safe fallback. */
+:root[data-theme="light"] .gt-lb{color:var(--goal-accent,var(--text))}
+
+/* ── Base 2: the app ground ─────────────────────────────────────────────── */
+:root[data-theme="light"] body{background:var(--bg)}
+:root[data-theme="light"] .page{background:var(--surface);border-radius:16px;padding-left:1.9rem;padding-right:1.9rem}
+:root[data-theme="light"] .card{background:#fff;border:1px solid var(--border);box-shadow:0 1px 3px rgba(14,32,51,.06)}
+
+/* ── C2: elevation on the section being worked in ───────────────────────── */
+:root[data-theme="light"] .card:focus-within{box-shadow:0 6px 18px rgba(14,32,51,.10);border-color:#cfe0ec}
+
+/* ── C1: zebra rows ─────────────────────────────────────────────────────── */
+:root[data-theme="light"] tbody tr:nth-child(odd) td{background:rgba(14,32,51,.022)}
+
+/* ── B2: cyan as state only ─────────────────────────────────────────────── */
+:root[data-theme="light"] .led-nav button.active .lbl{color:var(--text)}
+:root[data-theme="light"] .step-chip{background:#fff;border:1px solid rgba(0,195,221,.55);color:var(--teal)}
+
+/* ── A2: step spine — a hairline with a cyan node at each numbered step ──── */
+:root[data-theme="light"] .page{position:relative}
+:root[data-theme="light"] .page:before{content:'';position:absolute;left:.85rem;top:5.2rem;bottom:5rem;width:1px;
+  background:linear-gradient(180deg,rgba(0,195,221,.45),rgba(20,100,166,.10));pointer-events:none}
+:root[data-theme="light"] .step-row{position:relative}
+:root[data-theme="light"] .step-row:before{content:'';position:absolute;left:-1.32rem;top:50%;width:7px;height:7px;border-radius:50%;
+  background:var(--cyan);transform:translateY(-50%);box-shadow:0 0 0 3px var(--surface)}
+
+/* ── the 6 dark panels that survived into light mode ────────────────────── */
+:root[data-theme="light"] .lvl-pill{background:#eef2f7;color:var(--text2);border-color:var(--border)}
+:root[data-theme="light"] .nd,:root[data-theme="light"] .fab-ping{background:var(--teal)}
+:root[data-theme="light"] .ld{background:var(--red)}
 :root[data-theme="light"] .aurora{display:none}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
@@ -1154,7 +1216,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
