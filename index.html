@@ -97,6 +97,18 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 /* flex-basis 0 keeps both sides equal so the nav sits centred, but min-width:max-content
    stops a side ever shrinking below its content and spilling over the nav. */
 .hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:max-content}
+/* ── Accessibility (WCAG 2.2 AA) ──────────────────────────────────────────────
+   The app had NO focus indicator anywhere (outline:none, no :focus-visible rule),
+   which made keyboard navigation impossible to follow. */
+:where(button,a[href],input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+.lvy-page :where(button,a):focus-visible{outline-color:#fff}
+/* 2.5.8 Target Size (min 24x24) — steppers, remove buttons and checkboxes were 13-23px */
+.cnt-btn{width:24px;height:24px}
+.btn-rm{min-width:24px;min-height:24px}
+input[type=checkbox]{width:18px;height:18px;cursor:pointer}
+#clearAllBtn{min-height:26px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 .brand-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border2);border-radius:99px;padding:6px 14px;background:rgba(var(--wash),0.04);font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text2);white-space:nowrap}
 .cnt-step{display:inline-flex;align-items:center;gap:5px;justify-content:flex-end}
 .cnt-step .cnt-n{min-width:16px;text-align:center;display:inline-block}
@@ -596,6 +608,14 @@ details summary:hover,details[open] summary{color:var(--teal)}
 footer{position:relative;z-index:1;text-align:center;padding:2rem;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;border-top:1px solid var(--border)}
 footer span{color:var(--teal)}
 .hidden{display:none!important}
+
+/* A11y target-size overrides — MUST be last: media queries and later base rules
+   otherwise win on equal specificity (this bit me twice). */
+.cnt-btn{width:24px!important;height:24px!important}
+.btn-rm{min-width:24px!important;min-height:24px!important}
+input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
+#clearAllBtn{min-height:26px!important}
+.btn-clear,.btn-demo,.btn-add,#reportSelectAll,button.exp-yr{min-height:24px}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -720,8 +740,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <details style="margin-top:14px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
       <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128200;</span>Don&rsquo;t have your ESFA export? <span style="color:var(--teal)">Estimate from payroll &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-        <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
-        <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" aria-label="Annual pay bill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromPayroll()" style="white-space:nowrap">Estimate my levy</button>
       </div>
       <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
@@ -729,9 +749,9 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <details style="margin-top:10px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
       <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
-        <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
-        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" aria-label="Declared levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" aria-label="Levy period (per month or per year)" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromContributions()" style="white-space:nowrap">Work back my pay bill</button>
       </div>
       <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
@@ -842,8 +862,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#127919;</span>Ringfence My Levy <span style="color:var(--text3);font-size:12.5px">&mdash; optional: reserve part of the pot, no plan needed &#9662;</span></summary>
         <p class="step-sub" style="margin-top:11px">Set aside part of your company levy for a team or project &mdash; even one that isn&rsquo;t planned yet. The calculator checks each reservation against what the pot actually holds and shows its share. Tick <b>Apply to my projection</b> to reserve it, so the plan below flags any overspend.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
-          <div class="field" style="flex:2;min-width:160px;margin:0"><label>Department / project <span style="color:var(--text3)">(optional)</span></label><input id="rf-name" placeholder="e.g. Finance, or Project Atlas" onkeydown="if(event.key==='Enter')addRingfence()"></div>
-          <div class="field" style="flex:1;min-width:130px;margin:0"><label>Amount to reserve (&pound;)</label><input id="rf-amount" type="number" min="0" placeholder="e.g. 40000" onkeydown="if(event.key==='Enter')addRingfence()"></div>
+          <div class="field" style="flex:2;min-width:160px;margin:0"><label>Department / project <span style="color:var(--text3)">(optional)</span></label><input id="rf-name" aria-label="Ring-fence name" placeholder="e.g. Finance, or Project Atlas" onkeydown="if(event.key==='Enter')addRingfence()"></div>
+          <div class="field" style="flex:1;min-width:130px;margin:0"><label>Amount to reserve (&pound;)</label><input id="rf-amount" aria-label="Amount to reserve" type="number" min="0" placeholder="e.g. 40000" onkeydown="if(event.key==='Enter')addRingfence()"></div>
           <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;padding-bottom:9px" title="Earmark this to gift / transfer to another employer as social value (capped at 50% of your annual levy)"><input type="checkbox" id="rf-gift" style="width:15px;height:15px;cursor:pointer;accent-color:#3aa76a">&#129309; Gift it</label>
           <button class="btn-add" style="width:auto;padding:10px 20px" onclick="addRingfence()">+ Ring-fence</button>
         </div>
@@ -866,7 +886,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           </div>
           <div id="l7PolicyBox" style="display:none;margin-bottom:9px;font-size:12.5px;line-height:1.55;padding:11px 13px;border-radius:8px;background:rgba(245,166,35,0.09);border:1px solid rgba(245,166,35,0.4);color:#f5c87a"></div>
           <input type="text" id="standardSearch" class="standard-search" placeholder="🔍  Type to filter standards (e.g. data, nurse, project)…" oninput="renderStandardOptions()">
-          <select id="inp-standard" onchange="onStandardChange()"></select>
+          <select id="inp-standard" aria-label="Apprenticeship standard" onchange="onStandardChange()"></select>
           <div id="standardCount" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
           <div id="standardWarn" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;padding:9px 12px;border-radius:8px"></div>
           <div id="standardLink" style="margin-top:7px"></div>
@@ -877,7 +897,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         </div>
         <div class="field">
           <label>Negotiated price (£)</label>
-          <input type="number" id="inp-cost" placeholder="8000" min="0" oninput="renderLearnerCost()">
+          <input type="number" id="inp-cost" aria-label="Negotiated price" placeholder="8000" min="0" oninput="renderLearnerCost()">
         </div>
         <div class="field">
           <label>Learners</label>
@@ -886,20 +906,20 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div class="date-pair">
           <div class="date-pair-field">
             <label>Training start date</label>
-            <input type="date" id="inp-start" oninput="updateDurReadout();renderLearnerCost()">
+            <input type="date" id="inp-start" aria-label="Programme start date" oninput="updateDurReadout();renderLearnerCost()">
           </div>
           <div class="date-pair-field">
             <label>EPA date <span class="epa-chip">20% due here</span></label>
-            <input type="date" id="inp-epa" oninput="updateDurReadout();renderLearnerCost()">
+            <input type="date" id="inp-epa" aria-label="End-point assessment date" oninput="updateDurReadout();renderLearnerCost()">
           </div>
         </div>
         <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
         <details style="margin:9px 0 2px;grid-column:1/-1">
           <summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" aria-label="Learners aged 16 to 21" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" aria-label="Learners aged 22 to 24" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" aria-label="Learners aged 25 or over" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
           </div>
           <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5">Under-25 apprentices carry <strong>0% employer NIC</strong> up to &pound;50,270 (a real saving); at Level&nbsp;7, only 16&ndash;21 stay levy-funded from Jan 2026. Leave blank to skip &mdash; the plan just uses the total learner count.</div>
         </details>
@@ -911,11 +931,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
             <div>
               <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Learner&rsquo;s hourly wage <span style="opacity:.7">— optional</span></label>
-              <input id="lc-wage" type="number" min="0" step="0.5" placeholder="defaults to plan rate" oninput="renderLearnerCost()" style="width:180px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
+              <input id="lc-wage" aria-label="Learner hourly wage" type="number" min="0" step="0.5" placeholder="defaults to plan rate" oninput="renderLearnerCost()" style="width:180px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
             </div>
             <div>
               <label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Off-the-job hrs / week <span style="opacity:.7">— statutory min 6</span></label>
-              <input id="lc-otj" type="number" min="0" step="0.5" value="6" oninput="renderLearnerCost()" style="width:160px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
+              <input id="lc-otj" aria-label="Off-the-job hours per week" type="number" min="0" step="0.5" value="6" oninput="renderLearnerCost()" style="width:160px;max-width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit">
             </div>
           </div>
         </div>
@@ -928,14 +948,14 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div class="form-grid">
         <div class="field" style="grid-column:span 2">
           <label>Unit</label>
-          <select id="inp-unit" onchange="onUnitChange()"></select>
+          <select id="inp-unit" aria-label="Apprenticeship unit" onchange="onUnitChange()"></select>
           <div id="unitInfo" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.04em"></div>
         </div>
-        <div class="field"><label>Funding rate (£)</label><input type="number" id="inp-unit-rate" min="0"></div>
-        <div class="field"><label>Learners</label><input type="number" id="inp-unit-count" min="1" value="1"></div>
+        <div class="field"><label>Funding rate (£)</label><input type="number" id="inp-unit-rate" aria-label="Unit price" min="0"></div>
+        <div class="field"><label>Learners</label><input type="number" id="inp-unit-count" aria-label="Number of learners on the unit" min="1" value="1"></div>
         <div class="date-pair">
-          <div class="date-pair-field"><label>Start date</label><input type="date" id="inp-unit-start"></div>
-          <div class="date-pair-field"><label>Delivery weeks <span class="epa-chip">1&ndash;16</span></label><input type="number" id="inp-unit-weeks" min="1" max="16"></div>
+          <div class="date-pair-field"><label>Start date</label><input type="date" id="inp-unit-start" aria-label="Unit start date"></div>
+          <div class="date-pair-field"><label>Delivery weeks <span class="epa-chip">1&ndash;16</span></label><input type="number" id="inp-unit-weeks" aria-label="Unit delivery weeks" min="1" max="16"></div>
         </div>
         <div style="display:flex;align-items:flex-end"><button class="btn-add" onclick="addUnit()" style="flex:1;background:rgba(123,97,255,0.12);color:#a78bfa;border-color:rgba(123,97,255,0.4)">+ Add unit</button></div>
       </div>
@@ -972,7 +992,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <button class="btn-demo" onclick="openLevyReport('finance',this)">&#128196;&nbsp; Finance / SLT &#8599;</button>
         <button class="btn-demo" onclick="openLevyReport('hr',this)">&#128196;&nbsp; HR / L&amp;D &#8599;</button>
       </div>
-      <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
+      <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" aria-label="Minimum cohort size" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
       <div id="bestMoves"></div>
       <details id="whatIfCard" style="margin-top:12px">
         <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#9878;&#65039;</span>Compare your options <span style="color:var(--text3);font-size:12.5px">&mdash; the same people, planned differently</span></summary>
@@ -1004,10 +1024,10 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <p class="step-sub">The levy pays the training fee. Your business absorbs the <strong>time</strong> — off-the-job (OTJ) hours pull people off the floor. This estimates that overlay cost, checks it against your team's capacity, and suggests when to start around your peak seasons.</p>
       <div class="card">
         <div class="plan-inputs">
-          <div class="field"><label>Department headcount</label><input type="number" min="1" id="plan-headcount" value="10" oninput="renderPlan()"></div>
-          <div class="field"><label>Contracted hrs / week</label><input type="number" min="1" step="0.5" id="plan-hours" value="37.5" oninput="renderPlan()"></div>
-          <div class="field"><label>Acceptable capacity dip %</label><input type="number" min="1" max="100" id="plan-dip" value="10" oninput="renderPlan()"></div>
-          <div class="field"><label>Blended cost £/hour</label><input type="number" min="0" step="0.5" id="plan-rate" value="18" oninput="renderPlan()"></div>
+          <div class="field"><label>Department headcount</label><input type="number" min="1" id="plan-headcount" aria-label="Headcount" value="10" oninput="renderPlan()"></div>
+          <div class="field"><label>Contracted hrs / week</label><input type="number" min="1" step="0.5" id="plan-hours" aria-label="Weekly working hours" value="37.5" oninput="renderPlan()"></div>
+          <div class="field"><label>Acceptable capacity dip %</label><input type="number" min="1" max="100" id="plan-dip" aria-label="Expected productivity dip (%)" value="10" oninput="renderPlan()"></div>
+          <div class="field"><label>Blended cost £/hour</label><input type="number" min="0" step="0.5" id="plan-rate" aria-label="Blended hourly pay rate" value="18" oninput="renderPlan()"></div>
         </div>
         <div style="font-size:11.5px;color:var(--text3);line-height:1.55;margin:2px 0 14px"><strong style="color:var(--text2)">Blended cost £/hour</strong> = the average <em>fully-loaded</em> hourly cost of the people coming off the floor — gross salary + employer on-costs (NI, pension, etc.) &divide; working hours, averaged across the roles involved. <strong>£18/hr &asymp; a ~£30k salary fully loaded.</strong> One average keeps the plan simple; to cost a single learner at their actual wage, use the wage field on the cost-per-learner card (Programmes).</div>
         <label class="plan-label">Your business calendar — click a month to cycle: Normal → <span style="color:var(--red)">Peak (avoid)</span> → <span style="color:var(--teal)">Quiet (good to start)</span></label>
@@ -1070,7 +1090,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span id="jdDropText">&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop</span>
       <input type="file" id="jdFile" accept=".txt,.pdf,.docx,text/plain" style="display:none">
     </div>
-    <div class="field"><label>Job description</label><textarea id="jd-text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(var(--wash),0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
+    <div class="field"><label>Job description</label><textarea id="jd-text" aria-label="Job description text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(var(--wash),0.03);border:1px solid rgba(167,139,250,0.25);border-radius:8px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn-demo" onclick="jdDemo()">&#9654;&nbsp; See a sample report</button><span style="font-size:12px;color:var(--text3)">Loads a sample standard + JD and opens the report</span></div>
     <div id="jd-results"></div>
@@ -1079,7 +1099,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26p</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -1112,7 +1132,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <div class="copilot-msgs" id="copilotMsgs"></div>
   <div class="copilot-input-row">
     <textarea id="copilot-input" placeholder="e.g. I want to develop coaching skills in my managers…" rows="1" oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
-    <button class="copilot-send" onclick="sendCopilot()">&#10148;</button>
+    <button class="copilot-send" aria-label="Send message to the funding co-pilot" title="Send" onclick="sendCopilot()">&#10148;</button>
   </div>
 </div>
 
@@ -2909,13 +2929,13 @@ function renderProgrammes(){
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
@@ -3496,7 +3516,7 @@ function renderNonLevy(){
     fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv')+
     (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time'):'')+
   '</div>';
-  var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
+  var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
   if(s.target<0.5){
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:12px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
