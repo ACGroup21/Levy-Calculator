@@ -82,8 +82,8 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase}
 .pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);display:inline-block;margin-right:5px;animation:pulse-glow 2.5s ease-in-out infinite}
 @keyframes pulse-glow{0%,100%{opacity:1;box-shadow:0 0 8px var(--teal)}50%{opacity:0.35;box-shadow:none}}
-.header-badge{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border:1px solid rgba(55,77,106,0.45);padding:4px 12px;border-radius:99px}
-.ksb-badge{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:0.08em;border:1px solid rgba(167,139,250,0.35);padding:4px 12px;border-radius:99px;display:none}
+.header-badge{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;border:1px solid rgba(55,77,106,0.45);padding:4px 12px;border-radius:99px;white-space:nowrap;flex:0 0 auto}
+.ksb-badge{font-family:var(--mono);font-size:10px;color:var(--purple);letter-spacing:0.08em;border:1px solid rgba(167,139,250,0.35);padding:4px 12px;border-radius:99px;display:none;white-space:nowrap;flex:0 0 auto}
 .ksb-badge.loaded{display:inline}
 
 .card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1rem;backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:border-color .25s,box-shadow .25s}
@@ -92,7 +92,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 
 /* LED scroll-spy nav inside the fixed banner */
 .led-nav{display:flex;align-items:center;gap:2px;flex:0 1 auto;justify-content:center;margin:0 10px;flex-wrap:nowrap}
-.hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:0}
+/* flex-basis 0 keeps both sides equal so the nav sits centred, but min-width:max-content
+   stops a side ever shrinking below its content and spilling over the nav. */
+.hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:max-content}
 .cnt-step{display:inline-flex;align-items:center;gap:5px;justify-content:flex-end}
 .cnt-step .cnt-n{min-width:16px;text-align:center;display:inline-block}
 .cnt-btn{width:19px;height:19px;border-radius:5px;border:1px solid var(--border);background:rgba(var(--wash),0.05);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:border-color .12s,color .12s}
@@ -135,6 +137,13 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-emph .ge-lab{font-size:11px;color:var(--text3)}
 .goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
+/* Header crowding: drop the lowest-value items first so nothing ever wraps or overlaps.
+   These elements wrap/collide rather than overflow, so they need explicit breakpoints. */
+/* Thresholds are measured, not guessed: at 1280px the header has 1217px of room and
+   needs 1465px for everything, 1282px without the KSB badge, 1136px without both badges. */
+@media(max-width:1550px){.ksb-badge,.ksb-badge.loaded{display:none}}
+@media(max-width:1370px){header .header-badge{display:none}}
+@media(max-width:1220px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 @media(max-width:760px){header .header-badge{display:none}}
 /* burger function menu + pointing arrow */
@@ -588,7 +597,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
   <div class="hdr-side" style="gap:8px;justify-content:flex-end">
-    <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.28);transition:all .15s;margin-right:14px"><span style="font-size:12px">&#8635;</span>Reset all</button>
+    <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.28);transition:all .15s;margin-right:14px;white-space:nowrap;flex:0 0 auto"><span style="font-size:12px">&#8635;</span><span class="lbl">Reset all</span></button>
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
     <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
     <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
@@ -1008,7 +1017,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26f</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
