@@ -142,7 +142,7 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 @keyframes logo-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.logo-mark-img.spin{animation:none}}
 .logo-mark{width:36px;height:36px;background:linear-gradient(135deg,rgba(13,74,66,0.8) 0%,rgba(26,58,88,0.8) 100%);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--teal);box-shadow:0 0 16px rgba(45,212,178,0.12)}
-.logo-text{font-family:var(--sans);font-size:14px;font-weight:300;color:var(--text);letter-spacing:0.24em;text-transform:uppercase;line-height:1.3;white-space:nowrap}
+.logo-text{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text);letter-spacing:0.24em;text-transform:uppercase;line-height:1.3;white-space:nowrap}
 .logo-text span{color:var(--teal)}
 .logo-sub{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.14em;text-transform:uppercase}
 .pulse-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);display:inline-block;margin-right:5px;animation:pulse-glow 2.5s ease-in-out infinite}
@@ -820,6 +820,11 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
 :root[data-theme="light"] #navBurger,:root[data-theme="light"] #themeToggle{color:var(--text2);border-color:var(--border)}
 :root[data-theme="light"] .header-badge{color:var(--text3);border-color:var(--border)}
 :root[data-theme="light"] .pulse-dot{background:var(--navy);box-shadow:0 0 8px rgba(20,100,166,.5)}
+
+/* Date columns: months are 3 letters but proportional widths differ (Jul vs May),
+   so the years drifted. Mono + tabular figures makes every month the same width,
+   which lines the years up vertically regardless of the month. */
+td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1341,7 +1346,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26z</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3291,13 +3296,13 @@ function renderProgrammes(){
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:var(--purple);border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td class="dt">${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:8px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
