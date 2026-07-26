@@ -22,8 +22,8 @@
   /* Light theme — every value contrast-verified against white before use.
      Derived from the shared Fundable / Arthur Curtis cyan identity.
      HARD RULE: brand cyan #00C3DD is 2.13:1 on white — FILLS ONLY, never text. */
-  --bg:#eaf2fb;                  /* pale sky — clouds drift on this */
-  --surface:#eef4fb;             /* app ground (base 2) — cards sit on this */
+  --bg:#ffffff;                  /* page ground */
+  --surface:#eaf2fb;             /* the blue app panel — white cards sit on this */
   --wash:14,32,51;               /* ink for translucent overlays */
   --glass:#ffffff;
   --border:#e0e9f3;--border2:#1464A6;
@@ -64,7 +64,7 @@
 
 /* ── Base 2: the app ground ─────────────────────────────────────────────── */
 :root[data-theme="light"] body{background:var(--bg)}
-:root[data-theme="light"] .page{background:transparent}
+:root[data-theme="light"] .page{background:var(--surface);border-radius:16px}
 :root[data-theme="light"] .card{background:#fff;border:1px solid var(--border);box-shadow:0 1px 3px rgba(14,32,51,.06)}
 
 /* ── C2: elevation on the section being worked in ───────────────────────── */
@@ -1360,7 +1360,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27e</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
