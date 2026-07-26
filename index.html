@@ -845,6 +845,16 @@ td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0
    The pale sky alone is the background. */
 /* (light aurora visibility is set in the token block above) */
 @media(prefers-reduced-motion:reduce){:root[data-theme="light"] .aurora-blob{animation:none}}
+
+/* Light mode: drop the accent rails on the top boxes — the rule banner's 3px teal
+   left border and tinted fill, and the funding-mode bar's inset rail. Kept in dark,
+   where a coloured edge reads as emphasis rather than clutter on a white column. */
+:root[data-theme="light"] .rule-banner{
+  background:#fff;border:1px solid var(--border);border-left:1px solid var(--border);
+  border-radius:10px;box-shadow:0 1px 2px rgba(20,45,80,.05)}
+:root[data-theme="light"] .rule-banner strong{color:var(--text)}
+:root[data-theme="light"] .fmode-bar{
+  background:#fff;border:1px solid var(--border)!important;box-shadow:0 1px 2px rgba(20,45,80,.05)!important}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1366,7 +1376,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
