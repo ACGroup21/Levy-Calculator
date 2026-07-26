@@ -64,7 +64,7 @@
 
 /* ── Base 2: the app ground ─────────────────────────────────────────────── */
 :root[data-theme="light"] body{background:var(--bg)}
-:root[data-theme="light"] .page{background:transparent;padding-left:1.9rem;padding-right:1.9rem}
+:root[data-theme="light"] .page{background:transparent}
 :root[data-theme="light"] .card{background:#fff;border:1px solid var(--border);box-shadow:0 1px 3px rgba(14,32,51,.06)}
 
 /* ── C2: elevation on the section being worked in ───────────────────────── */
@@ -78,12 +78,15 @@
 :root[data-theme="light"] .step-chip{background:#fff;border:1px solid rgba(0,195,221,.55);color:var(--teal)}
 
 /* ── A2: step spine — a hairline with a cyan node at each numbered step ──── */
-:root[data-theme="light"] .page{position:relative}
-:root[data-theme="light"] .page:before{content:'';position:absolute;left:.85rem;top:5.2rem;bottom:5rem;width:1px;
+/* Step spine — a hairline with a node at each numbered step. Present in BOTH
+   themes; the ring colour follows the page ground so it reads on either. */
+.page{position:relative}
+.page:before{content:'';position:absolute;left:.85rem;top:5.2rem;bottom:5rem;width:1px;
   background:linear-gradient(180deg,rgba(0,195,221,.45),rgba(20,100,166,.10));pointer-events:none}
-:root[data-theme="light"] .step-row{position:relative}
-:root[data-theme="light"] .step-row:before{content:'';position:absolute;left:-1.32rem;top:50%;width:7px;height:7px;border-radius:50%;
-  background:var(--cyan);transform:translateY(-50%);box-shadow:0 0 0 3px var(--surface)}
+.step-row{position:relative}
+.step-row:before{content:'';position:absolute;left:-1.32rem;top:50%;width:7px;height:7px;border-radius:50%;
+  background:#00C3DD;transform:translateY(-50%);box-shadow:0 0 0 3px var(--bg)}
+:root[data-theme="light"] .page{padding-left:1.9rem;padding-right:1.9rem}
 
 /* ── the 6 dark panels that survived into light mode ────────────────────── */
 :root[data-theme="light"] .lvl-pill{background:#eef2f7;color:var(--text2);border-color:var(--border)}
@@ -830,13 +833,11 @@ td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0
    Dark mode has stars; light mode gets weather. Reuses the aurora blobs rather
    than adding markup - in light they are re-tinted as soft cloud banks, blurred
    harder and drifting slower so the page feels airy rather than starry. */
-:root[data-theme="light"] .aurora{display:block;opacity:1}
-:root[data-theme="light"] .aurora-blob{
-  background:#ffffff;filter:blur(58px);opacity:.75;
-  border-radius:48% 52% 55% 45%/58% 46% 54% 42%;animation-duration:70s}
-:root[data-theme="light"] .blob2{opacity:.68}
-:root[data-theme="light"] .blob4{opacity:.6}
-:root[data-theme="light"] .blob5{opacity:.55}
+/* Light mode carries NO ambient layer (decision 2026-07-27). Dark surfaces look
+   dead without texture, which is why the constellation earns its place there;
+   white already reads as paper, so anything added only competes with the numbers.
+   The pale sky alone is the background. */
+:root[data-theme="light"] .aurora{display:none}
 @media(prefers-reduced-motion:reduce){:root[data-theme="light"] .aurora-blob{animation:none}}
 </style>
 <script>
@@ -1359,7 +1360,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27d</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
