@@ -753,8 +753,8 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
    brand from control and the switch read as part of the wordmark. Now: 8px inside
    a group, 24px between groups. Left = who this is · the menu. Right = what you can
    do to the plan · what mode you're in · where the rules come from. */
-header .hdr-side>.header-badge,
-header .hdr-side>#navBurger{margin-left:16px}
+header .hdr-side>#themeToggle{margin-left:24px}   /* 8+24 = 32 clear of the brand */
+header .hdr-side>#navBurger{margin-left:16px}     /* 8+16 = 24 clear of the actions */
 /* Function menu: 28 items in 8 groups sat flush at 0px apart, so the eye had to
    parse a solid block. Same grouping rule as the header — a little air inside a
    group, more between groups — plus a taller tap target. */
@@ -1067,7 +1067,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 <div class="dot-grid"></div><div class="vignette"></div>
 
 <header>
-  <div class="hdr-side" style="gap:32px">
+  <div class="hdr-side" style="gap:8px">
   <div class="logo-row">
     <svg class="logo-mark-img" viewBox="-10 -10 106 105" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:46px" role="img" aria-label="Fundable"><defs><filter id="lgGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter><linearGradient id="lgLink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect class="lg-halo" x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD" filter="url(#lgGlow)"/><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#lgLink)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="var(--text)"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="var(--text)"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="var(--text)"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="var(--text)"/><rect class="lg-live" x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
     <div>
@@ -1077,6 +1077,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   
   
   <button id="themeToggle" class="theme-switch" role="switch" aria-checked="true" onclick="toggleTheme()" title="Dark mode" aria-label="Dark mode"><span class="ts-thumb" aria-hidden="true"><svg class="ts-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 9.8A5.6 5.6 0 0 1 6.2 2.8a5.6 5.6 0 1 0 7 7z"/></svg><svg class="ts-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.4v1.5M8 13.1v1.5M1.4 8h1.5M13.1 8h1.5M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1"/></svg></span></button>
+  <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:8px;letter-spacing:.05em;padding:5px 10px"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
   </div>
   <nav class="led-nav" id="ledNav" aria-label="Section navigation">
     <button data-target="sec-goal" onclick="goSection('sec-goal')"><span class="led-badge">START</span><span class="lbl">Goal</span></button>
@@ -1092,7 +1093,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <div class="hdr-side" style="gap:8px;justify-content:flex-end">
     <button class="hdr-save" id="hdrSaveBtn" onclick="goPlans()" title="Save this plan, or switch between client plans" aria-label="Save or switch client plans"><svg class="ico-floppy" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" aria-hidden="true"><path d="M2.9 2h8.2L14 4.9v8.2a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.9A.9.9 0 0 1 2.9 2z"/><path d="M5 2v3.4h5.2V2"/><rect x="4.3" y="8.6" width="7.4" height="5.4" rx=".5"/></svg><span class="lbl">Save plan</span></button>
     <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.28);transition:all .15s;white-space:nowrap;flex:0 0 auto"><span style="font-size:12px">&#8635;</span><span class="lbl">Reset all</span></button>
-    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:8px;letter-spacing:.05em;padding:5px 10px"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
+    
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
   </div>
 </header>
@@ -1531,7 +1532,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28a</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
