@@ -245,12 +245,15 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 }
 /* Header crowding: drop the lowest-value items first so nothing ever wraps or overlaps.
    These elements wrap/collide rather than overflow, so they need explicit breakpoints. */
-/* Thresholds are measured, not guessed: at 1280px the header has 1217px of room and
-   needs 1465px for everything, 1282px without the KSB badge, 1136px without both badges. */
-@media(max-width:1550px){.ksb-badge,.ksb-badge.loaded{display:none}}
+/* Thresholds are measured, not guessed. Re-measured after the KSB badge became a
+   Save button and the theme toggle became a 46px switch: at 1280px the header has
+   1265px of room and needs 1197px with everything; nav labels alone cost ~540px,
+   so they drop first below 1220 (with labels the header still needed ~1165px at
+   1150px of room). */
+@media(max-width:1260px){.hdr-save .lbl{display:none}.hdr-save{padding:0!important;width:34px;justify-content:center}}
 @media(max-width:1370px){header .header-badge{display:none}}
 @media(max-width:1330px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
-@media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
+@media(max-width:1220px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 /* Phone: the icon-only LED nav still needs ~337px and overflowed the header.
    Hand navigation to the burger drawer, which already indexes every function. */
 @media(max-width:820px){.led-nav{display:none}}
@@ -742,6 +745,10 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
 
 /* the selected funding-mode button was dark-on-dark */
 :root[data-theme="light"] .fmode-toggle button.on{background:var(--teal);color:#fff}
+/* Dark mode, non-levy: the active pill was #fff on #3E86E0 (3.69:1). The levy pill
+   already sits dark-on-accent at 10:1 — mirror it rather than dulling the blue,
+   which mode-codes "government-backed" elsewhere. */
+:root[data-theme="dark"] body[data-fmode="nonlevy"] .fmode-toggle button.on{color:#04121F}
 :root[data-theme="light"] .fmode-toggle button{color:var(--text2)}
 
 /* (b) hardcoded hex in generated markup — .page only, so reports keep theirs */
@@ -924,20 +931,70 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 /* The header bar is dark in BOTH themes, but --glass is white in light, so the
    burger and theme toggle rendered as white buttons on the dark bar with pale
    text (1.67:1). Give them the same treatment they have in dark. */
-:root[data-theme="light"] #navBurger,
-:root[data-theme="light"] #themeToggle{
+:root[data-theme="light"] #navBurger{
   background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.20)!important;
   color:#eef4fa!important}
-:root[data-theme="light"] #navBurger:hover,
-:root[data-theme="light"] #themeToggle:hover{background:rgba(255,255,255,.16)!important}
+:root[data-theme="light"] #navBurger:hover{background:rgba(255,255,255,.16)!important}
 :root[data-theme="light"] .header-badge{color:#b7cbdd;border-color:rgba(255,255,255,.22)}
 :root[data-theme="light"] #clearAllBtn{
   background:rgba(255,120,140,.14)!important;border-color:rgba(255,140,158,.55)!important;color:#ffb3c0!important}
 /* active year pill: white on #818cf8 was 2.98:1 */
 .bh-yr.active{background:#4B5A99!important;color:#fff!important;border-color:#4B5A99!important}
+/* ── Header "Save plan" button ──────────────────────────────────────────────
+   Replaces the KSB standards-mapped badge (developer info, now on the KSB
+   panel itself). Plans were only reachable by scrolling to the card, so the
+   one action that stops you destroying a client's model was the hardest to
+   find. The amber dot marks state that differs from the last save. */
+.hdr-save{background:rgba(45,212,178,0.12);border:1px solid var(--teal);color:var(--teal);
+  border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;
+  gap:5px;flex:0 0 auto;white-space:nowrap;transition:all .15s}
+.hdr-save:hover{background:rgba(45,212,178,0.22)}
+.hdr-save:after{content:'';width:5px;height:5px;border-radius:50%;background:var(--amber);
+  box-shadow:0 0 6px var(--amber);flex:0 0 auto;display:none}
+.hdr-save.dirty:after{display:block}
+/* the flash that answers "where did it take me?" after the header button jumps */
+@keyframes scnFlash{0%,100%{box-shadow:0 0 0 0 rgba(45,212,178,0)}
+  25%,60%{box-shadow:0 0 0 3px rgba(45,212,178,.35)}}
+.scn-flash{animation:scnFlash 1.3s ease-out}
+@media(prefers-reduced-motion:reduce){.scn-flash{animation:none;border-color:var(--teal)}}
+/* stale-rules banner inside the plans card */
+.scn-stale{margin:0 0 12px;padding:11px 13px;border:1px solid var(--amber);border-radius:10px;
+  background:rgba(245,158,11,0.08);font-size:12px;color:var(--text2);line-height:1.5}
+.scn-stale b{color:var(--text)}
+.scn-stale table{width:100%;border-collapse:collapse;margin-top:9px;font-size:12px}
+.scn-stale th{text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text3);font-weight:400;padding:3px 0}
+.scn-stale td{padding:3px 0;font-variant-numeric:tabular-nums}
+.scn-stale td+td,.scn-stale th+th{text-align:right}
+.scn-rulechip{font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--amber);border:1px solid var(--amber);border-radius:6px;padding:2px 7px;
+  white-space:nowrap;flex:0 0 auto}
+:root[data-theme="light"] .hdr-save{background:rgba(0,195,221,0.14)}
+:root[data-theme="light"] .hdr-save:hover{background:rgba(0,195,221,0.24)}
+
+/* ── Dark-mode switch ───────────────────────────────────────────────────────
+   Was a round button showing the mode you'd GET, which reads backwards half the
+   time. A switch states the mode you're IN: thumb right + moon = dark is on.
+   It always sits on the navy header bar, so its colours are fixed rather than
+   token-driven — the same treatment in both themes. */
+.theme-switch{position:relative;width:46px;height:26px;flex:0 0 auto;padding:0;cursor:pointer;
+  border-radius:99px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.22);
+  transition:background .18s,border-color .18s}
+.theme-switch:hover{background:rgba(255,255,255,.16)}
+.theme-switch .ts-thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;
+  background:#eef4fa;color:#0F1826;display:flex;align-items:center;justify-content:center;
+  transition:transform .22s cubic-bezier(.4,0,.2,1);will-change:transform}
+.theme-switch[aria-checked="true"] .ts-thumb{transform:translateX(20px)}
+.theme-switch .ts-thumb svg{position:absolute;width:12px;height:12px;transition:opacity .18s}
+.theme-switch[aria-checked="true"] .ts-sun,
+.theme-switch[aria-checked="false"] .ts-moon{opacity:0}
+@media(prefers-reduced-motion:reduce){.theme-switch .ts-thumb{transition:none}
+  .theme-switch .ts-thumb svg{transition:none}}
+
 </style>
 <script>
-function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
+function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b){b.setAttribute('aria-checked',t==='dark'?'true':'false');b.title=(t==='dark')?'Dark mode is on — switch to light':'Dark mode is off — switch to dark';}try{localStorage.setItem('ac_theme',t);}catch(e){}}
 function toggleTheme(){var r=document.documentElement;r.classList.add('theme-anim');clearTimeout(window._tAnim);window._tAnim=setTimeout(function(){r.classList.remove('theme-anim');},600);applyTheme(r.getAttribute('data-theme')==='light'?'dark':'light');try{if(typeof projChart!=='undefined'&&projChart&&typeof renderProjection==='function')renderProjection();}catch(e){}}
 try{if(localStorage.getItem('ac_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}
 document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStorage.getItem('ac_theme')||'dark');}catch(e){}});
@@ -1002,7 +1059,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div class="logo-text">Fundable</div>
     </div>
   </div>
-  <span class="ksb-badge" id="ksbBadge" style="margin-left:24px">&#10024; KSBs loaded</span>
+  <button id="themeToggle" class="theme-switch" role="switch" aria-checked="true" onclick="toggleTheme()" title="Dark mode" aria-label="Dark mode"><span class="ts-thumb" aria-hidden="true"><svg class="ts-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 9.8A5.6 5.6 0 0 1 6.2 2.8a5.6 5.6 0 1 0 7 7z"/></svg><svg class="ts-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.4v1.5M8 13.1v1.5M1.4 8h1.5M13.1 8h1.5M3.3 3.3l1.1 1.1M11.6 11.6l1.1 1.1M12.7 3.3l-1.1 1.1M4.4 11.6l-1.1 1.1"/></svg></span></button>
+  <button class="hdr-save" id="hdrSaveBtn" onclick="goPlans()" title="Save this plan, or switch between client plans" aria-label="Save or switch client plans" style="margin-left:24px"><svg class="ico-floppy" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" aria-hidden="true"><path d="M2.9 2h8.2L14 4.9v8.2a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.9A.9.9 0 0 1 2.9 2z"/><path d="M5 2v3.4h5.2V2"/><rect x="4.3" y="8.6" width="7.4" height="5.4" rx=".5"/></svg><span class="lbl">Save plan</span></button>
   </div>
   <nav class="led-nav" id="ledNav" aria-label="Section navigation">
     <button data-target="sec-goal" onclick="goSection('sec-goal')"><span class="led-badge">START</span><span class="lbl">Goal</span></button>
@@ -1015,11 +1073,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button data-target="sec-jd" onclick="goSection('sec-jd')"><span class="dot"></span><span class="lbl">JD Matcher</span></button>
     <button data-target="__copilot" onclick="toggleCopilot()"><span class="dot"></span><span class="lbl">Co-pilot</span></button>
   </nav>
-  <div class="hdr-side" style="gap:8px;justify-content:flex-end">
+  <div class="hdr-side" style="gap:8px;justify-content:center">
     <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.28);transition:all .15s;margin-right:14px;white-space:nowrap;flex:0 0 auto"><span style="font-size:12px">&#8635;</span><span class="lbl">Reset all</span></button>
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
-    <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
-    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:9px;letter-spacing:.07em"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
+    
+    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:8px;letter-spacing:.05em;padding:5px 10px"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
   </div>
 </header>
 
@@ -1050,6 +1108,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span style="color:var(--text3);font-size:12px">&#9662;</span>
     </summary>
     <div style="margin-top:13px">
+      <div id="scnStale" style="display:none"></div>
       <div id="scnList"></div>
       <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08)">
         <button type="button" class="btn-add" onclick="scnSaveAs()">&#128190;&nbsp; Save current plan</button>
@@ -1173,7 +1232,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
   <div id="ksbDevPanel" style="display:none">
-  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load Standards &amp; KSB Data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span></div>
+  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load Standards &amp; KSB Data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span><span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span></div>
   <p class="step-sub">Upload the JSON file from your IfATE standards scraper. The co-pilot will match your talent objectives to actual Knowledge, Skills &amp; Behaviours.</p>
   <div class="card" style="border-color:rgba(167,139,250,0.2)">
     <div class="upload-zone ksb-zone" id="ksbDropzone" onclick="document.getElementById('ksbFile').click()">
@@ -1456,7 +1515,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27v</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2053,7 +2112,7 @@ const STANDARDS_BASE=[
 // KSB store — populated when JSON uploaded
 let KSB_DATA=null; // full parsed JSON
 let STANDARDS=JSON.parse(JSON.stringify(STANDARDS_BASE));
-// Header KSB badge: how many KSBs are accounted for across the standards library — updates as standards are backfilled.
+// KSB count (developer panel): how many standards carry full KSBs — updates as standards are backfilled.
 function updateKsbBadge(){
   var b=document.getElementById('ksbBadge'); if(!b||typeof STANDARDS==='undefined')return;
   var n=0, stds=0, tot=0;
@@ -2447,12 +2506,15 @@ function scnSaveAs(){
   var all=scnAll();
   if(all[nm]&&!confirm('"'+nm+'" already exists. Overwrite it?'))return;
   all[nm]=buildScenario(); scnWrite(all); renderScenarios();
+  scnClearStale(); scnSetBaseline();
   if(typeof setStatus==='function')setStatus('Saved as "'+nm+'".','ok');
 }
 function scnOpen(nm){
   var all=scnAll(); if(!all[nm])return;
   if(!confirm('Open "'+nm+'"? This replaces what is on screen — save the current plan first if you need it.'))return;
-  applyScenario(all[nm]); scnRefresh();
+  applyScenario(all[nm]); scnRefresh(); scnSetBaseline();
+  scnStaleNotice(all[nm]);
+  if(scnRulesStale(all[nm]))goPlans();
   if(typeof setStatus==='function')setStatus('Opened "'+nm+'".','ok');
 }
 function scnDelete(nm){
@@ -2490,7 +2552,9 @@ function scnImportFile(f){
     var j=null;
     try{ j=JSON.parse(r.result); }catch(e){ j=null; }
     if(!j||!j.meta||j.meta.app!=='ac-levy'){ alert('That is not a Fundable plan file.'); return; }
-    applyScenario(j); scnRefresh(); renderScenarios();
+    applyScenario(j); scnRefresh(); renderScenarios(); scnSetBaseline();
+    scnStaleNotice(j);
+    if(scnRulesStale(j))goPlans();
     if(typeof setStatus==='function')setStatus('Loaded plan from file.','ok');
   };
   r.readAsText(f);
@@ -2549,6 +2613,7 @@ function renderScenarios(){
     html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(var(--wash),0.06)">'+
       '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);font-weight:600">'+esc+'</div>'+
       '<div style="font-size:11px;color:var(--text3)">'+heads+' learner'+(heads===1?'':'s')+(when?(' &middot; saved '+when):'')+'</div></div>'+
+      (scnRulesStale(sc)?'<span class="scn-rulechip" title="Saved under '+escHtml(String(sc.meta.rulesVersion))+' funding rules — the current rulebook is '+escHtml(String(RULEBOOK.version))+'">'+escHtml(String(sc.meta.rulesVersion))+' rules</span>':'')+
       '<button type="button" onclick="scnOpen(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.35);border-radius:6px;padding:5px 12px;cursor:pointer">Open</button>'+
       '<button type="button" aria-label="Delete '+esc+'" title="Delete" onclick="scnDelete(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 10px;cursor:pointer">&#10005;</button>'+
     '</div>';
@@ -2556,9 +2621,105 @@ function renderScenarios(){
   el.innerHTML=html;
 }
 
+// ── Plans: header entry point ────────────────────────────────────────────────
+// The header button jumps here rather than saving blind: naming the plan is the
+// whole point, and the card is where you also switch client or export a file.
+function goPlans(){
+  var c=document.getElementById('scenarioCard'); if(!c)return;
+  c.open=true;
+  try{ c.scrollIntoView({behavior:'smooth',block:'center'}); }catch(e){ c.scrollIntoView(); }
+  c.classList.remove('scn-flash'); void c.offsetWidth; c.classList.add('scn-flash');
+  setTimeout(function(){ c.classList.remove('scn-flash'); },1500);
+}
+
+// ── Unsaved-changes marker ───────────────────────────────────────────────────
+// A save button that never changes appearance can't tell you whether it matters.
+// The baseline is whatever was last saved, opened or imported; anything that
+// moves the plan away from it lights the amber dot.
+var scnBaseline=null;
+function scnFingerprint(){
+  try{ var o=buildScenario(); delete o.meta; return JSON.stringify(o); }catch(e){ return null; }
+}
+function scnSetBaseline(){ scnBaseline=scnFingerprint(); markPlanDirty(); }
+function markPlanDirty(){
+  var b=document.getElementById('hdrSaveBtn'); if(!b)return;
+  var has=(programmes&&programmes.length)||(levyData&&levyData.byMonth&&levyData.byMonth.length);
+  var dirty=!!has&&scnFingerprint()!==scnBaseline;
+  b.classList.toggle('dirty',dirty);
+  b.title=dirty?'Unsaved changes — save this plan, or switch between client plans'
+               :'Save this plan, or switch between client plans';
+}
+
+// ── Stale funding rules ──────────────────────────────────────────────────────
+/* A saved plan records the rules era that produced it. The stored object holds
+   INPUTS only, so opening it recalculates on today's rulebook — meaning a plan
+   saved under older rules silently returns different money from the copy the
+   client was sent. Warning alone would be a bolt-on, so meta.figures snapshots
+   the headline numbers at save time and the banner shows the actual movement.
+   Plans saved before this shipped carry no snapshot: say so plainly rather than
+   implying nothing moved. */
+function scnRulesStale(sc){
+  try{ return !!(sc&&sc.meta&&sc.meta.rulesVersion&&sc.meta.rulesVersion!==RULEBOOK.version); }
+  catch(e){ return false; }
+}
+function scnFigures(){
+  try{
+    if(typeof levyReportData!=='function')return null;
+    var d=levyReportData(); if(!d)return null;
+    return {heads:+d.heads||0,planCost:Math.round(d.planCost||0),drawn:Math.round(d.drawn||0),
+            coInvest:Math.round(d.coInvest||0),otjCost:Math.round(d.otjCost||0),
+            trueCost:Math.round(d.trueCost||0)};
+  }catch(e){ return null; }
+}
+function scnClearStale(){
+  var w=document.getElementById('scnStale'); if(w){ w.innerHTML=''; w.style.display='none'; }
+}
+function scnStaleNotice(sc){
+  var w=document.getElementById('scnStale'); if(!w)return;
+  if(!scnRulesStale(sc)){ scnClearStale(); return; }
+  var was=escHtml(String(sc.meta.rulesVersion)), now=escHtml(String(RULEBOOK.version));
+  var old=sc.meta.figures, cur=scnFigures(), rows='';
+  if(old&&cur){
+    /* colour by effect on the EMPLOYER, not by sign: more drawn from the levy is
+       someone else paying, so a rise there is good while a rise anywhere else is
+       the employer's own cash. Signing it off arithmetically would have painted a
+       drop in levy funding green. */
+    var keys=[['planCost','Total plan cost',false],['drawn','Drawn from levy',true],
+              ['coInvest','Co-investment',false],['otjCost','Off-the-job time cost',false],
+              ['trueCost','True cost',false]];
+    for(var i=0;i<keys.length;i++){
+      var k=keys[i][0], a=+old[k]||0, b=+cur[k]||0, d=b-a;
+      if(a===0&&b===0)continue;
+      var better=keys[i][2]?(d>0):(d<0);
+      var col=d===0?'var(--text3)':(better?'var(--green)':'var(--money)');
+      var sign=d>0?'+':'';
+      rows+='<tr><td>'+keys[i][1]+'</td><td>'+fmt(a)+'</td><td>'+fmt(b)+
+            '</td><td style="color:'+col+'">'+(d===0?'—':(sign+fmt(d).replace('£-','-£')))+'</td></tr>';
+    }
+  }
+  var body='<b>These figures were saved under '+was+' funding rules.</b> '+
+    'The plan has been recalculated on the current '+now+' rules, so what you see now '+
+    'may not match the version you sent the client.';
+  if(rows){
+    body+='<table><thead><tr><th>Figure</th><th>Saved ('+was+')</th><th>Now ('+now+')</th><th>Change</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+      '<div style="margin-top:8px;color:var(--text3)">Re-issue any report you have already shared, or re-save this plan to accept the current figures.</div>';
+  }else if(old||cur){
+    body+=' This plan was saved before Fundable recorded its headline figures, so the movement can’t be shown — compare it against the report you issued.';
+  }
+  w.innerHTML='<div class="scn-stale"><div style="display:flex;align-items:flex-start;gap:9px">'+
+    '<span aria-hidden="true" style="color:var(--amber);font-size:14px;line-height:1.2">⚠</span>'+
+    '<div style="flex:1">'+body+'</div>'+
+    '<button type="button" onclick="scnClearStale()" aria-label="Dismiss the funding-rules notice" '+
+    'style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;line-height:1;padding:0 2px">✕</button>'+
+    '</div></div>';
+  w.style.display='';
+  w.setAttribute('role','status');
+}
+
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
-  return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
+  return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now(),
+                figures:(typeof scnFigures==='function'?scnFigures():null)},
           levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode, transfersRaised:transfersRaised};
 }
 function applyScenario(s){
@@ -2593,6 +2754,7 @@ function saveState(){
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
     persistScenario(false);
     toggleClearBtn(!!(hasLevy||programmes.length));
+    if(typeof markPlanDirty==='function')markPlanDirty();
   }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
 }
 function loadState(){
