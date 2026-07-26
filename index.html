@@ -101,7 +101,7 @@
 :root[data-theme="light"] .blob5{opacity:.66}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
-:root[data-theme="light"] header{background:rgba(255,255,255,.92);border:1px solid var(--border);--text:#0F1826;--text2:#3A4E63;--text3:#5C7186;--wash:14,32,51;--teal:#0A6E86}
+:root[data-theme="light"] header{background:#0F1826;border:1px solid #0F1826;--text:#eef4fa;--text2:#b7cbdd;--text3:#8ea6bb;--wash:255,255,255;--teal:#00C3DD}
 /* Scheme A — warm accents: terracotta on EPA chips + the Add-programme CTA in light mode */
 :root[data-theme="light"] .badge-epa,:root[data-theme="light"] .epa-chip{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;border-color:rgba(194,96,60,0.32)!important}
 :root[data-theme="light"] .btn-add{background:rgba(194,96,60,0.1)!important;color:#c2603c!important;-webkit-text-fill-color:#c2603c!important;border-color:rgba(194,96,60,0.34)!important}
@@ -815,20 +815,7 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
 
 /* Light header: nothing should read teal. The active LED badge carried a hardcoded
    teal glow and dark-on-teal text, neither of which any token controlled. */
-:root[data-theme="light"] .led-nav button.active .led-badge{
-  background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important;box-shadow:none!important}
-:root[data-theme="light"] .led-nav button.active{color:var(--navy)}
-:root[data-theme="light"] .led-nav button.active .dot{
-  background:var(--navy);border-color:var(--navy);box-shadow:none}
-:root[data-theme="light"] .led-nav button.active .lbl{color:var(--navy)}
-:root[data-theme="light"] .led-nav button{color:var(--text2)}
-:root[data-theme="light"] .led-badge{background:rgba(20,100,166,.09);color:var(--navy);border-color:rgba(20,100,166,.28)}
-/* logo wordmark follows the mark into blue */
-:root[data-theme="light"] .logo-text{color:#0F1826}
-/* header controls read ink, not the dark theme's pale blue */
-:root[data-theme="light"] #navBurger,:root[data-theme="light"] #themeToggle{color:var(--text2);border-color:var(--border)}
-:root[data-theme="light"] .header-badge{color:var(--text3);border-color:var(--border)}
-:root[data-theme="light"] .pulse-dot{background:var(--navy);box-shadow:0 0 8px rgba(20,100,166,.5)}
+/* header uses the dark bar in both themes — no light-specific overrides needed */
 
 /* Date columns: months are 3 letters but proportional widths differ (Jul vs May),
    so the years drifted. Mono + tabular figures makes every month the same width,
@@ -876,6 +863,12 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 .tone-key .kc{background:var(--cash-bg);border-color:var(--cash-line)}
 :root[data-theme="dark"] .tone-key .kf{background:rgba(62,134,224,.10);border-color:rgba(62,134,224,.26)}
 :root[data-theme="dark"] .tone-key .kc{background:rgba(224,164,59,.09);border-color:rgba(224,164,59,.24)}
+
+/* The nav had grown to 876px and was crowding the bar. Tighter label size and
+   padding buy back ~100px without dropping any item. */
+.led-nav .lbl{font-size:10px;letter-spacing:.02em}
+.led-nav button{padding:4px 7px}
+.led-nav{gap:1px}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1397,7 +1390,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27r</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
