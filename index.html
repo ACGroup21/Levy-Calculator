@@ -897,9 +897,12 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 /* DEPTH: cards sit on something and lift when you work in them */
 :root[data-theme="light"] .card{
   box-shadow:0 1px 2px rgba(16,40,72,.05),0 6px 16px -10px rgba(16,40,72,.16)}
+/* the card you're working in outlines in the same navy as the header panel,
+   so "you are here" ties back to the bar rather than competing with the cyan
+   used for structure or the funded/cash tints used for money. */
 :root[data-theme="light"] .card:focus-within{
   box-shadow:0 2px 4px rgba(16,40,72,.07),0 14px 30px -14px rgba(16,40,72,.28);
-  border-color:rgba(0,195,221,.45)}
+  border-color:#0F1826}
 :root[data-theme="light"] .page{
   box-shadow:0 2px 26px rgba(16,40,72,.10),0 0 0 1px rgba(16,40,72,.05)}
 
@@ -1453,7 +1456,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27u</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
