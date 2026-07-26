@@ -33,7 +33,7 @@
   --teal:#0A6E86;                /*  5.85:1 — darkened cyan, keeps the brand family */
   --cyan:#00C3DD;                /* FILL ONLY — spine nodes, logo, rules */
   --navy:#1464A6;                /*  6.17:1 — straight from the logo */
-  --purple:#4B5A99;
+  --purple:#4B5A99;--purple2:#4B5A99;
   --amber:#8A5A00;               /*  5.93:1 */
   --red:#B3123C;                 /*  6.84:1 */
   --green:#0F7A52;               /*  5.35:1 */
@@ -109,7 +109,7 @@
 :root[data-theme="light"] .jd-suit{background:rgba(194,96,60,0.08)!important;border-color:rgba(194,96,60,0.34)!important}
 :root[data-theme="light"] .jd-verdict{border-top-color:rgba(194,96,60,0.22)!important}
 /* the PDF report is an intentionally always-dark artifact — pin its theme tokens to dark regardless of app theme */
-.lvy-page{--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
+.lvy-page{--purple:#a78bfa;--purple2:#a5b0ff;--wash:255,255,255;--text:#ffffff;--text2:#cfe0ea;--text3:#8fb8cc;--glass:rgba(var(--wash),0.05)}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.65;min-height:100vh;overflow-x:hidden}
 
 .aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
@@ -416,7 +416,7 @@ button{font-family:var(--sans);cursor:pointer}
 .standard-search::placeholder{color:var(--text3)}
 
 /* plan / things to consider */
-.step-chip.plan{background:rgba(129,140,248,0.12);color:#a5b0ff;border-color:rgba(129,140,248,0.4)}
+.step-chip.plan{background:rgba(129,140,248,0.12);color:var(--purple2);border-color:rgba(129,140,248,0.4)}
 .plan-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.25rem}
 .plan-label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
 .month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:1.25rem}
@@ -445,11 +445,11 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:9px;padding:10px 14px;background:rgba(129,140,248,0.04)}
 .plan-collapse summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);user-select:none;list-style:none}
 .plan-collapse summary::-webkit-details-marker{display:none}
-.plan-collapse summary::before{content:'\25B8  ';color:#a5b0ff}
+.plan-collapse summary::before{content:'\25B8  ';color:var(--purple2)}
 .plan-collapse[open] summary::before{content:'\25BE  '}
-.plan-collapse summary:hover{color:#a5b0ff}
-.bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:#a5b0ff;transition:all .15s}
-.bh-yr:hover{border-color:#a5b0ff}
+.plan-collapse summary:hover{color:var(--purple2)}
+.bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 11px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:var(--purple2);transition:all .15s}
+.bh-yr:hover{border-color:var(--purple2)}
 .bh-yr.active{background:#818cf8;color:#0a0f1e;border-color:#818cf8}
 .bh-layout{display:grid;grid-template-columns:1fr 165px;gap:18px;align-items:start;margin-top:8px}
 @media(max-width:600px){.bh-layout{grid-template-columns:1fr}}
@@ -618,7 +618,7 @@ details summary:hover,details[open] summary{color:var(--teal)}
 .gift-rec strong{color:var(--teal)}
 .gift-rec .amt{color:var(--amber);font-weight:600}
 .gift-sv{background:rgba(123,97,255,0.08);border-color:rgba(123,97,255,0.32)}
-.gift-sv strong{color:#a78bfa}
+.gift-sv strong{color:var(--purple)}
 
 /* ── KSB panel ── */
 .ksb-panel{background:rgba(167,139,250,0.05);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:1rem 1.25rem;margin-top:.75rem;display:none}
@@ -696,6 +696,113 @@ footer span{color:var(--teal)}
 input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
 #clearAllBtn{min-height:26px!important}
 .btn-clear,.btn-demo,.btn-add,#reportSelectAll,button.exp-yr{min-height:24px}
+
+/* ── Light mode step 5 ──────────────────────────────────────────────────────
+   Two classes of remaining failure, both scoped to .page so the dark report
+   pages (.lvy-* live outside .page) are never touched.
+
+   (a) the ORIGINAL light patchwork used colours that themselves fail on white
+       (#c2603c terracotta ~4:1, #2563eb) — re-point them at verified values
+   (b) hardcoded hex inside JS-generated markup — caught via attribute
+       selectors on the inline style, again scoped to .page
+   ------------------------------------------------------------------------ */
+
+/* (a) repair the patchwork's own colours */
+:root[data-theme="light"] .btn-add,
+:root[data-theme="light"] .badge-epa,
+:root[data-theme="light"] .epa-chip,
+:root[data-theme="light"] .jd-suit{
+  color:var(--money)!important;-webkit-text-fill-color:var(--money)!important;
+  border-color:rgba(156,68,22,.34)!important;background:rgba(156,68,22,.08)!important}
+:root[data-theme="light"] .btn-add:hover{background:rgba(156,68,22,.15)!important}
+:root[data-theme="light"] .step-chip,
+:root[data-theme="light"] .btn-demo,
+:root[data-theme="light"] .jd-hit-tag,
+:root[data-theme="light"] .copilot-send{
+  color:var(--teal)!important;-webkit-text-fill-color:var(--teal)!important;
+  border-color:rgba(10,110,134,.32)!important;background:rgba(10,110,134,.08)!important}
+:root[data-theme="light"] .badge-ksb,
+:root[data-theme="light"] .ksb-badge,
+:root[data-theme="light"] .step-chip.ksb,
+:root[data-theme="light"] .step-chip.jd{
+  color:var(--purple)!important;-webkit-text-fill-color:var(--purple)!important;
+  border-color:rgba(75,90,153,.3)!important;background:rgba(75,90,153,.09)!important}
+
+/* the selected funding-mode button was dark-on-dark */
+:root[data-theme="light"] .fmode-toggle button.on{background:var(--teal);color:#fff}
+:root[data-theme="light"] .fmode-toggle button{color:var(--text2)}
+
+/* (b) hardcoded hex in generated markup — .page only, so reports keep theirs */
+:root[data-theme="light"] .page [style*="color:#2DD4B2"],
+:root[data-theme="light"] .page [style*="color:#2dd4b2"],
+:root[data-theme="light"] .page [style*="color:#39FF9E"],
+:root[data-theme="light"] .page [style*="color:#39ff9e"],
+:root[data-theme="light"] .page [style*="color:#1a88c0"],
+:root[data-theme="light"] .page [style*="color:#39A0D4"]{color:var(--teal)!important}
+
+:root[data-theme="light"] .page [style*="color:var(--purple)"],
+:root[data-theme="light"] .page [style*="color:var(--purple)"],
+:root[data-theme="light"] .page [style*="color:var(--purple2)"],
+:root[data-theme="light"] .page [style*="color:#7b61ff"]{color:var(--purple)!important}
+
+:root[data-theme="light"] .page [style*="color:#E0A43B"],
+:root[data-theme="light"] .page [style*="color:#e0a43b"],
+:root[data-theme="light"] .page [style*="color:#c2603c"],
+:root[data-theme="light"] .page [style*="color:#C2603C"]{color:var(--money)!important}
+
+:root[data-theme="light"] .page [style*="color:#aebecb"],
+:root[data-theme="light"] .page [style*="color:#AEBECB"],
+:root[data-theme="light"] .page [style*="color:#dfe9f2"],
+:root[data-theme="light"] .page [style*="color:#c7d6e2"]{color:var(--text2)!important}
+
+:root[data-theme="light"] .page [style*="color:#7e95ab"],
+:root[data-theme="light"] .page [style*="color:#8fb8cc"],
+:root[data-theme="light"] .page [style*="color:#9fb1c2"],
+:root[data-theme="light"] .page [style*="color:#8ba0b6"]{color:var(--text3)!important}
+
+:root[data-theme="light"] .page [style*="color:#ff8fa3"],
+:root[data-theme="light"] .page [style*="color:#FF8FA3"],
+:root[data-theme="light"] .page [style*="color:#ff4c6a"]{color:var(--red)!important}
+
+:root[data-theme="light"] .page [style*="color:#3aa76a"],
+:root[data-theme="light"] .page [style*="color:#2ecc71"]{color:var(--green)!important}
+
+/* white text set inline is invisible on the light ground */
+:root[data-theme="light"] .page [style*="color:#fff"],
+:root[data-theme="light"] .page [style*="color:#FFF"],
+:root[data-theme="light"] .page [style*="color:white"]{color:var(--text)!important}
+
+/* dark-theme default for the second purple (light value set in the light block) */
+:root{--purple2:#a5b0ff}
+/* active pills: the light theme's darker fills need light text, not the dark theme's ink */
+:root[data-theme="light"] .proj-range button.on,
+:root[data-theme="light"] .exp-yr.active,
+:root[data-theme="light"] .lvl-pill.on{color:#fff!important}
+
+/* final light sweep: any purple/ink still arriving from generated markup, plus
+   remaining active pills. Scoped to .page so reports are untouched. */
+:root[data-theme="light"] .page [style*="#a78bfa"],
+:root[data-theme="light"] .page [style*="#A78BFA"],
+:root[data-theme="light"] .page [style*="#a5b0ff"]{color:var(--purple)!important}
+:root[data-theme="light"] .page button.on,
+:root[data-theme="light"] .page .active{color:#fff}
+:root[data-theme="light"] .page .goal-tile.on,
+:root[data-theme="light"] .page .goal-tile.on *{color:var(--text)}
+
+/* non-levy blue #3E86E0 is 3.69:1 on white — re-point to the logo's deep blue.
+   .page only, so the dark non-levy report page keeps its own blue. */
+:root[data-theme="light"] .page [style*="#3E86E0"],
+:root[data-theme="light"] .page [style*="#3e86e0"]{color:var(--navy)!important}
+:root[data-theme="light"] .page [style*="border:1px solid #3E86E0"]{border-color:var(--navy)!important}
+/* selected framing / year pills: ensure the fill is dark enough for white text */
+:root[data-theme="light"] .exp-yr.active{background:var(--money);color:#fff!important}
+:root[data-theme="light"] .frame-toggle button.on,
+:root[data-theme="light"] .page .seg button.on{background:var(--teal);color:#fff!important}
+
+/* Elements with an inline teal fill need light text in light mode - but NOT .btn-add
+   etc, whose background is re-pointed to a LIGHT tint above (that pairing would be
+   white-on-white; it regressed once, hence the exclusion). */
+:root[data-theme="light"] .page button[style*="background:var(--teal)"]:not(.btn-add):not(.btn-demo):not(.btn-clear){color:#fff!important}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1062,7 +1169,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
 
     <div class="card" style="margin-top:14px">
-      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#a78bfa;margin-bottom:10px">Or add an apprenticeship unit <span style="color:var(--text3);text-transform:none;letter-spacing:0">&mdash; short, single-element training, levy-funded (live Apr 2026)</span></div>
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin-bottom:10px">Or add an apprenticeship unit <span style="color:var(--text3);text-transform:none;letter-spacing:0">&mdash; short, single-element training, levy-funded (live Apr 2026)</span></div>
       <div class="form-grid">
         <div class="field" style="grid-column:span 2">
           <label>Unit</label>
@@ -1075,7 +1182,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           <div class="date-pair-field"><label>Start date</label><input type="date" id="inp-unit-start" aria-label="Unit start date"></div>
           <div class="date-pair-field"><label>Delivery weeks <span class="epa-chip">1&ndash;16</span></label><input type="number" id="inp-unit-weeks" aria-label="Unit delivery weeks" min="1" max="16"></div>
         </div>
-        <div style="display:flex;align-items:flex-end"><button class="btn-add" onclick="addUnit()" style="flex:1;background:rgba(123,97,255,0.12);color:#a78bfa;border-color:rgba(123,97,255,0.4)">+ Add unit</button></div>
+        <div style="display:flex;align-items:flex-end"><button class="btn-add" onclick="addUnit()" style="flex:1;background:rgba(123,97,255,0.12);color:var(--purple);border-color:rgba(123,97,255,0.4)">+ Add unit</button></div>
       </div>
     </div>
 
@@ -1217,7 +1324,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26v</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3166,7 +3273,7 @@ function renderProgrammes(){
     const hide=(collapsed&&i>=LIMIT)?' style="display:none"':'';
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
-      const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:#a78bfa;border:1px solid rgba(123,97,255,0.3)">';
+      const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:var(--purple);border:1px solid rgba(123,97,255,0.3)">';
       return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td>${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
@@ -4226,7 +4333,7 @@ function levyPage2(d,framing){
   var rows=d.programmes.map(function(p){
     if(p.type==='unit'){
       var um1=p.cost*RULEBOOK.unit.m1*p.count,um2=p.cost*RULEBOOK.unit.m2*p.count;
-      return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(um1)+'</td><td class="r" style="color:#a78bfa">'+lvMoney(um2)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &middot; '+p.weeks+'w</td></tr>';
+      return '<tr><td style="color:#fff">'+p.name+' <span style="color:var(--purple)">(unit)</span></td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(p.cost)+'</td><td class="r">'+lvMoney(um1)+'</td><td class="r" style="color:var(--purple)">'+lvMoney(um2)+'</td><td class="r" style="color:#8ba0b6">'+fmtD(p.start)+' &middot; '+p.weeks+'w</td></tr>';
     }
     var training=p.cost*RULEBOOK.draw.training*p.count, epa=p.cost*RULEBOOK.draw.epa*p.count;
     var flag=(cohortMin&&(+p.count||0)<cohortMin)?' <span style="color:#E0A43B" title="below minimum cohort">&#9888;</span>':'';
@@ -4259,17 +4366,17 @@ function levyPage2(d,framing){
     var extra=d.perHead?Math.floor(d.expiry/d.perHead):0;
     moveLead='Your levy has headroom — about '+lvK(d.expiry)+' is forecast to go unused.';
     moveList=['Commit it to ~'+extra+' more apprentice'+(extra!==1?'s':'')+' (&asymp;'+lvK(d.perHead)+' each), staggered into '+troughTxt+'.',
-      'Or take the affordable rung — an <strong style="color:#a78bfa">apprenticeship unit</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, fully levy-covered, weeks not years) builds one capability element now.',
+      'Or take the affordable rung — an <strong style="color:var(--purple)">apprenticeship unit</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, fully levy-covered, weeks not years) builds one capability element now.',
       'Or gift '+lvK(d.giftable)+' to an SME or charity before it expires — social value.'];
   } else if(d.stage==='Scaling'){
     moveLead='You are near capacity, with '+lvK(d.coInvest)+' of co-investment appearing.';
-    moveList=['Add people through <strong style="color:#a78bfa">apprenticeship units</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, single-element, ~5% co-invest) — cheaper and faster than a full standard.',
+    moveList=['Add people through <strong style="color:var(--purple)">apprenticeship units</strong> ('+lvK(uMin)+'&ndash;'+lvK(uMax)+'/learner, single-element, ~5% co-invest) — cheaper and faster than a full standard.',
       'Stagger new starts into '+troughTxt+' so they don&rsquo;t stack onto your peak-drawdown months.',
       'Or bring in a levy transfer (up to 50% of another employer&rsquo;s levy) to cover the peak-drawdown months.'];
   } else {
     moveLead='Your levy is well-used across the plan.';
     moveList=['Progress completers to Level '+(d.maxLevel+1)+' standards to deepen capability and build succession.',
-      'Top up a specific skill with an <strong style="color:#a78bfa">apprenticeship unit</strong> ('+lvK(uMin)+'+/learner, weeks) — no full programme required.',
+      'Top up a specific skill with an <strong style="color:var(--purple)">apprenticeship unit</strong> ('+lvK(uMin)+'+/learner, weeks) — no full programme required.',
       'Protect the surplus and timing — the levy is working efficiently.'];
   }
   var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
@@ -4291,7 +4398,7 @@ function levyPage3(d,framing){
   var fin=framing==='finance';
   var noRate=!(d.payRate>0);
   var otjRows=d.programmes.map(function(p){
-    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:#a78bfa">(unit)</span></td><td>'+(p.hours||0)+' h total</td><td>'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+(+p.hours||0)*(d.payRate||0))+'</td></tr>';}
+    if(p.type==='unit'){var uov=(+p.hours||0)*(+p.count||0)*(d.payRate||0);return '<tr><td style="color:#fff">'+p.name+' <span style="color:var(--purple)">(unit)</span></td><td>'+(p.hours||0)+' h total</td><td>'+p.weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(uov)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+(+p.hours||0)*(d.payRate||0))+'</td></tr>';}
     var oh=(planCfg.otj||{})[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
     var overlay=oh*weeks*(+p.count||0)*(d.payRate||0);
     return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+oh*weeks*(d.payRate||0))+'</td></tr>';
