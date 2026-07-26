@@ -187,13 +187,13 @@ input[type=checkbox]{width:18px;height:18px;cursor:pointer}
 .cnt-btn{width:19px;height:19px;border-radius:6px;border:1px solid var(--border);background:rgba(var(--wash),0.05);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:border-color .12s,color .12s}
 .cnt-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal)}
 .cnt-btn:disabled{opacity:.3;cursor:default}
-.led-nav button{flex:0 0 auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:4px 10px;border-radius:99px;white-space:nowrap;transition:all .15s}
+.led-nav button{flex:0 0 auto;display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;letter-spacing:.03em;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:4px 10px;border-radius:99px;white-space:nowrap;transition:all .15s}
 .led-nav .dot{width:9px;height:9px;border-radius:50%;border:2px solid var(--text3);flex-shrink:0;transition:all .15s}
 .led-nav button:hover{color:var(--text)}
 .led-nav button:hover .dot{border-color:var(--teal)}
 .led-nav button.active{color:var(--teal)}
 .led-nav button.active .dot{background:var(--teal);border-color:var(--teal);box-shadow:0 0 9px var(--teal)}
-.led-nav .led-badge{font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.06em;color:var(--text3);border:1px solid rgba(var(--wash),0.22);border-radius:6px;padding:2px 6px;line-height:1;min-width:15px;text-align:center;flex-shrink:0;transition:all .15s}
+.led-nav .led-badge{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.06em;color:var(--text3);border:1px solid rgba(var(--wash),0.22);border-radius:6px;padding:2px 6px;line-height:1;min-width:15px;text-align:center;flex-shrink:0;transition:all .15s}
 .led-nav button:hover .led-badge{border-color:var(--teal);color:var(--text2)}
 .led-nav button.active .led-badge{background:var(--teal);color:#04121f;border-color:var(--teal);box-shadow:0 0 9px rgba(45,212,178,.5)}
 .led-nav button.pending{opacity:.4}
@@ -211,18 +211,18 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-tile.sel{border-color:var(--goal-accent);background:rgba(var(--wash),0.05);box-shadow:0 0 0 1px var(--goal-accent) inset}
 .goal-tile.sel .gt-ic,.goal-tile.sel .gt-lb{color:var(--goal-accent);transition:color .2s}
 .goal-tile .gt-ic{font-size:18px;height:24px;line-height:1;margin-bottom:6px;display:flex;align-items:center}
-.goal-suggest-btn{background:rgba(var(--wash),0.05);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:6px;padding:4px 10px;font-family:inherit;font-size:12.5px;cursor:pointer}
+.goal-suggest-btn{background:rgba(var(--wash),0.05);border:1px solid var(--goal-accent);color:var(--goal-accent);border-radius:6px;padding:4px 10px;font-family:inherit;font-size:12px;cursor:pointer}
 #goalSuggest{margin-top:8px;font-size:13px;line-height:2}
-.goal-tag{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;letter-spacing:.02em;color:var(--goal-accent);background:rgba(var(--wash),0.04);border:1px solid var(--goal-accent);border-radius:6px;padding:4px 10px;margin-bottom:9px}
+.goal-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--goal-accent);background:rgba(var(--wash),0.04);border:1px solid var(--goal-accent);border-radius:6px;padding:4px 10px;margin-bottom:9px}
 .goal-tile .gt-lb{font-size:14px;font-weight:600;margin-bottom:3px}
 .goal-tile .gt-sb{font-size:12px;color:var(--text3);line-height:1.35}
 .goal-emph{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(var(--wash),0.025);border:1px solid var(--goal-accent);border-radius:14px;padding:13px 15px;margin:10px 0 2px;transition:border-color .25s}
-.goal-emph .ge-eyebrow{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--goal-accent);opacity:.95;margin-bottom:2px}
+.goal-emph .ge-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--goal-accent);opacity:.95;margin-bottom:2px}
 .goal-emph .ge-goal{font-size:15px;font-weight:600;color:var(--text)}
 .goal-emph .ge-metric{display:flex;flex-direction:column;border-left:1px solid rgba(var(--wash),0.10);padding-left:18px}
 .goal-emph .ge-num{font-size:22px;font-weight:700;color:var(--goal-accent);line-height:1.05;transition:color .25s}
 .goal-emph .ge-lab{font-size:11px;color:var(--text3)}
-.goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
+.goal-emph .ge-note{flex:1 1 200px;font-size:12px;color:var(--text3);line-height:1.4;min-width:180px}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
 /* LARGE SCREENS — these are min-width rules, so they only ever ADD room; nothing below
    1600px is affected. The app was capped at 1100px, leaving big empty margins and
@@ -246,7 +246,7 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
    needs 1465px for everything, 1282px without the KSB badge, 1136px without both badges. */
 @media(max-width:1550px){.ksb-badge,.ksb-badge.loaded{display:none}}
 @media(max-width:1370px){header .header-badge{display:none}}
-@media(max-width:1220px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
+@media(max-width:1330px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
 /* Phone: the icon-only LED nav still needs ~337px and overflowed the header.
    Hand navigation to the burger drawer, which already indexes every function. */
@@ -271,12 +271,12 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 #funcArrow.show{opacity:1;transform:translate(0,-50%)}
 /* funding route: levy vs non-levy */
 .fmode-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:10px 14px;margin-bottom:14px;transition:border-color .2s,box-shadow .2s}
-.fmode-q{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);flex:0 0 auto}
+.fmode-q{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);flex:0 0 auto}
 .fmode-toggle{display:inline-flex;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.12);border-radius:10px;padding:2px;flex:0 0 auto}
-.fmode-toggle button{font-family:inherit;font-size:12.5px;border:none;background:transparent;color:var(--text2);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.fmode-toggle button{font-family:inherit;font-size:12px;border:none;background:transparent;color:var(--text2);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .fmode-toggle button[data-m="levy"].on{background:var(--teal);color:#04121f;font-weight:600}
 .fmode-toggle button[data-m="nonlevy"].on{background:#3E86E0;color:#fff;font-weight:600}
-.fmode-hint{font-size:12.5px;color:var(--text2);flex:1;min-width:210px;line-height:1.5}
+.fmode-hint{font-size:12px;color:var(--text2);flex:1;min-width:210px;line-height:1.5}
 .fmode-hint b{color:var(--text)}
 .fmode-hint .warn{color:var(--amber)}
 body[data-fmode="nonlevy"] .levy-only{display:none!important}
@@ -427,7 +427,7 @@ button{font-family:var(--sans);cursor:pointer}
 /* plan / things to consider */
 .step-chip.plan{background:rgba(129,140,248,0.12);color:var(--purple2);border-color:rgba(129,140,248,0.4)}
 .plan-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.25rem}
-.plan-label{display:block;font-family:var(--mono);font-size:10.5px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
+.plan-label{display:block;font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:9px}
 .month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:1.25rem}
 .month-cell{position:relative;text-align:center;font-family:var(--mono);font-size:12px;padding:9px 4px;border-radius:10px;cursor:pointer;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);color:var(--text2);transition:all .15s;user-select:none}
 .month-cell:hover{border-color:rgba(var(--wash),0.3)}
@@ -436,7 +436,7 @@ button{font-family:var(--sans);cursor:pointer}
 .month-cell .bh{position:absolute;top:3px;right:5px;font-size:8px;opacity:.65}
 @media(max-width:560px){.month-grid{grid-template-columns:repeat(4,1fr)}}
 .otj-details{margin-bottom:1.25rem;border:1px solid rgba(var(--wash),0.08);border-radius:10px;padding:10px 14px}
-.otj-details summary{cursor:pointer;font-size:12.5px;color:var(--text2);font-weight:500}
+.otj-details summary{cursor:pointer;font-size:12px;color:var(--text2);font-weight:500}
 .otj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:12px}
 .otj-grid .field label{margin-bottom:4px}
 .otj-grid input{width:100%;background:rgba(var(--wash),0.03);border:1px solid rgba(45,212,178,0.2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 11px}
@@ -447,7 +447,7 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-stat .ps{font-size:11px;color:var(--text3);margin-top:4px}
 .plan-rec{padding:10px 14px;border-radius:10px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.3);font-size:13px;line-height:1.6;margin-top:10px}
 .plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
-.plan-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;column-gap:18px;font-size:12.5px;margin-top:6px}
+.plan-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;column-gap:18px;font-size:12px;margin-top:6px}
 .plan-prog-grid>span{padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.06)}
 .plan-prog-grid .ppn{color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-prog-grid .ppc{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
@@ -465,7 +465,7 @@ button{font-family:var(--sans);cursor:pointer}
 .bh-summary{background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:16px 14px;text-align:center;position:sticky;top:70px}
 .bh-big{font-family:var(--mono);font-size:38px;font-weight:700;color:var(--teal);line-height:1}
 .bh-big-lbl{font-size:11px;color:var(--text2);margin-top:5px;line-height:1.4}
-.bh-sub2{font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:10px;line-height:1.6}
+.bh-sub2{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:10px;line-height:1.6}
 /* KSB vs JD match */
 .step-chip.jd{background:rgba(167,139,250,0.12);color:#c4b5fd;border-color:rgba(167,139,250,0.4)}
 .jd-score{display:flex;align-items:baseline;gap:14px;margin:16px 0 4px}
@@ -475,7 +475,7 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-bar span{display:block;height:100%;border-radius:99px}
 .jd-group{margin-top:16px}
 .jd-group-title{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:7px}
-.jd-ksb{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:10px;margin-bottom:5px;font-size:12.5px;line-height:1.5;border:1px solid transparent}
+.jd-ksb{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border-radius:10px;margin-bottom:5px;font-size:12px;line-height:1.5;border:1px solid transparent}
 .jd-ksb.hit{background:rgba(45,212,178,0.07);border-color:rgba(45,212,178,0.25)}
 .jd-ksb.miss{background:rgba(var(--wash),0.02);border-color:rgba(var(--wash),0.06);opacity:.72}
 .jd-id{font-family:var(--mono);font-size:11px;font-weight:700;flex-shrink:0;width:36px}
@@ -484,7 +484,7 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-mark{flex-shrink:0;font-family:var(--mono);font-weight:700}
 .jd-ksb.hit .jd-mark{color:var(--teal)}.jd-ksb.miss .jd-mark{color:var(--text3)}
 .jd-hits{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
-.jd-hit-tag{font-family:var(--mono);font-size:9.5px;padding:2px 6px;border-radius:6px;background:rgba(45,212,178,0.14);color:var(--teal)}
+.jd-hit-tag{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(45,212,178,0.14);color:var(--teal)}
 .jd-details{margin-top:14px;border-top:1px solid rgba(167,139,250,0.18);padding-top:8px}
 .jd-details summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text3);user-select:none;list-style:none}
 .jd-details summary::-webkit-details-marker{display:none}
@@ -493,39 +493,39 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-details summary:hover{color:var(--purple)}
 .jd-suit{margin-top:14px;padding:13px 15px;border-radius:10px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.35);font-size:13px;line-height:1.55;color:var(--text)}
 .jd-fair{display:flex;flex-direction:column;gap:8px;margin:12px 0}
-.jd-fair-q{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text2);cursor:pointer;line-height:1.45}
+.jd-fair-q{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--text2);cursor:pointer;line-height:1.45}
 .jd-fair-q input{margin-top:2px;accent-color:var(--teal);flex-shrink:0}
-.jd-verdict{font-size:12.5px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
-.jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12.5px;color:var(--text2);line-height:1.5}
-.jd-upload{margin-bottom:1rem;padding:13px 15px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:10px;text-align:center;cursor:pointer;font-size:12.5px;color:var(--text2);transition:all .15s}
+.jd-verdict{font-size:12px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
+.jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12px;color:var(--text2);line-height:1.5}
+.jd-upload{margin-bottom:1rem;padding:13px 15px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:10px;text-align:center;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
 /* best-moves (recommendations) panel */
 .bm-panel{margin-top:1rem;background:rgba(var(--wash),0.03);border:1px solid var(--border2);border-radius:14px;padding:16px 18px}
 .bm-head{font-weight:700;font-size:14px;color:var(--text);display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:10px}
 .bm-head>span:first-child{font-size:17px}
-.bm-sub{font-weight:400;font-size:11.5px;color:var(--text3)}
+.bm-sub{font-weight:400;font-size:12px;color:var(--text3)}
 .bm-move{border-top:1px solid var(--border);padding:11px 0 3px}
 .bm-move:first-of-type{border-top:none;padding-top:2px}
 .bm-move-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .bm-rk{font-family:var(--mono);font-size:15px;color:var(--teal);font-weight:700;line-height:1}
-.bm-t{font-weight:600;font-size:13.5px;color:var(--text);flex:1;min-width:0}
+.bm-t{font-weight:600;font-size:13px;color:var(--text);flex:1;min-width:0}
 .bm-save{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--teal);background:rgba(var(--wash),0.05);border:1px solid var(--border2);border-radius:99px;padding:4px 10px;white-space:nowrap}
 .bm-save.soft{color:var(--amber);border-color:var(--amber)}
-.bm-why{font-size:12.5px;color:var(--text2);line-height:1.5;margin-top:4px}
+.bm-why{font-size:12px;color:var(--text2);line-height:1.5;margin-top:4px}
 .bm-goal{color:var(--teal);font-size:11px;white-space:nowrap}
 .bm-clean{border-color:var(--border2)}
 .bm-clean .bm-head{color:var(--teal)}
 /* what-if comparison */
 .wi-scroll{overflow-x:auto}
-.wi-tbl{width:100%;border-collapse:collapse;font-size:12.5px;min-width:420px}
-.wi-h{text-align:right;padding:6px 14px;font-weight:600;color:var(--text);font-size:12.5px;border-bottom:1px solid var(--border2);vertical-align:top}
+.wi-tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:420px}
+.wi-h{text-align:right;padding:6px 14px;font-weight:600;color:var(--text);font-size:12px;border-bottom:1px solid var(--border2);vertical-align:top}
 .wi-h:first-child{text-align:left}
 .wi-rec{color:var(--teal)}
-.wi-tag{display:block;font-family:var(--mono);font-size:8.5px;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.wi-tag{display:block;font-family:var(--mono);font-size:9px;font-weight:600;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
 .wi-l{text-align:left;padding:6px 14px;color:var(--text2);white-space:nowrap}
 .wi-c{text-align:right;padding:6px 14px;font-family:var(--mono);color:var(--text);font-variant-numeric:tabular-nums}
 .wi-best{color:var(--teal);font-weight:700}
-.wi-notes{margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--text3);line-height:1.5}
+.wi-notes{margin-top:11px;display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--text3);line-height:1.5}
 .wi-foot{margin-top:9px;font-size:11px;color:var(--text3);font-style:italic;line-height:1.5}
 /* shortfall advisor */
 .sf-box{margin-top:1rem;padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6}
@@ -604,15 +604,15 @@ th.r,td.r{text-align:right}
 .exp-single .expiry-table{max-width:none;margin-top:0}
 .exp-single .expiry-details{margin-top:0;border-top:none;padding-top:0}
 @media(max-width:600px){.exp-single{grid-template-columns:1fr}}
-.expiry-sub{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
+.expiry-sub{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin:12px 0 2px}
 .expiry-table{width:100%;min-width:0;max-width:540px;table-layout:fixed;border-collapse:collapse;margin-top:4px;font-size:12px}
-.expiry-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:4px 10px;border-bottom:1px solid rgba(245,166,35,0.2)}
+.expiry-table th{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);padding:4px 10px;border-bottom:1px solid rgba(245,166,35,0.2)}
 .expiry-table td{padding:4px 10px;border-bottom:1px solid rgba(var(--wash),0.05);color:var(--text2);font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .expiry-table th.r,.expiry-table td.r{text-align:right}
 .expiry-table th:not(.r),.expiry-table td:not(.r){text-align:left}
 .expiry-table .c-red{color:var(--red)}.expiry-table .c-amber{color:var(--amber)}
 .expiry-details{margin-top:12px;border-top:1px solid rgba(245,166,35,0.18);padding-top:8px}
-.expiry-details summary{cursor:pointer;font-size:11.5px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;user-select:none;list-style:none}
+.expiry-details summary{cursor:pointer;font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;user-select:none;list-style:none}
 .expiry-details summary::-webkit-details-marker{display:none}
 .expiry-details summary::before{content:'\25B8  ';color:var(--amber)}
 .expiry-details[open] summary::before{content:'\25BE  '}
@@ -870,7 +870,7 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 :root[data-theme="dark"] .tone-fund{background:rgba(62,134,224,.10)!important;border-color:rgba(62,134,224,.26)!important}
 :root[data-theme="dark"] .tone-cash{background:rgba(224,164,59,.09)!important;border-color:rgba(224,164,59,.24)!important}
 /* a quiet key so the tinting is explained rather than decorative */
-.tone-key{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:10.5px;color:var(--text3)}
+.tone-key{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:11px;color:var(--text3)}
 .tone-key i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid}
 .tone-key .kf{background:var(--fund-bg);border-color:var(--fund-line)}
 .tone-key .kc{background:var(--cash-bg);border-color:var(--cash-line)}
@@ -960,7 +960,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <button id="clearAllBtn" onclick="clearSavedData()" title="Reset all data (levy + non-levy)" aria-label="Reset all data" style="background:rgba(255,76,106,0.12);border:1px solid var(--red);color:var(--red);border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;flex:0 0 auto;box-shadow:0 0 8px rgba(255,76,106,0.28);transition:all .15s;margin-right:14px;white-space:nowrap;flex:0 0 auto"><span style="font-size:12px">&#8635;</span><span class="lbl">Reset all</span></button>
     <button id="navBurger" onclick="openNav()" title="All functions" aria-label="Open the function menu" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#9776;</button>
     <button id="themeToggle" onclick="toggleTheme()" title="Toggle light / dark mode" aria-label="Toggle light or dark mode" style="background:var(--glass);border:1px solid var(--border);color:var(--text2);border-radius:99px;width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;flex:0 0 auto;transition:border-color .15s">&#127769;</button>
-    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
+    <button class="header-badge" onclick="goRules()" title="England apprenticeship funding rules (ESFA), 2026. Click to see the rules applied &amp; sources. Scotland (SDS) &amp; Wales use different rules." style="cursor:pointer;background:none;font-family:var(--mono);font-size:9px;letter-spacing:.07em"><span class="pulse-dot"></span>England &middot; ESFA 2026</button>
   </div>
 </header>
 
@@ -970,7 +970,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
       <span><strong>Rule change — August 2026:</strong> Levy funds declared before August 2026 expire after <strong>24 months</strong>. From August 2026 onwards, funds expire after <strong>12 months</strong>. This tool applies the correct window per declaration date automatically.</span>
     </div>
-    <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
+    <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
   <!-- FUNDING ROUTE: levy vs non-levy -->
@@ -987,7 +987,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <details class="card" id="scenarioCard" style="margin-bottom:1.1rem">
     <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
       <span style="font-size:15px">&#128194;</span>
-      <span style="flex:1;font-size:13.5px;color:var(--text2)"><b style="color:var(--text)">Client plans</b> &mdash; save this plan, switch between clients, or send one as a file. Everything stays in your browser.</span>
+      <span style="flex:1;font-size:13px;color:var(--text2)"><b style="color:var(--text)">Client plans</b> &mdash; save this plan, switch between clients, or send one as a file. Everything stays in your browser.</span>
       <span style="color:var(--text3);font-size:12px">&#9662;</span>
     </summary>
     <div style="margin-top:13px">
@@ -1036,23 +1036,23 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
     <div id="csvStatus" class="status"></div>
     <details style="margin-top:14px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
-      <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128200;</span>Don&rsquo;t have your ESFA export? <span style="color:var(--teal)">Estimate from payroll &#9662;</span></summary>
+      <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128200;</span>Don&rsquo;t have your ESFA export? <span style="color:var(--teal)">Estimate from payroll &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
         <div style="flex:1;min-width:180px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Annual pay bill (£)</label><input id="est-paybill" aria-label="Annual pay bill" type="number" min="0" placeholder="e.g. 4500000" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromPayroll()" style="white-space:nowrap">Estimate my levy</button>
       </div>
-      <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
+      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
     </details>
     <details style="margin-top:10px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
-      <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
+      <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
         <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" aria-label="Declared levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" aria-label="Levy period (per month or per year)" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
         <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromContributions()" style="white-space:nowrap">Work back my pay bill</button>
       </div>
-      <div style="margin-top:11px;font-size:11.5px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
+      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
     </details>
   </div>
 
@@ -1066,7 +1066,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <details class="card" id="trackerCard" style="margin-top:-4px">
     <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:11px;user-select:none">
       <span style="font-size:18px">&#128202;</span>
-      <span style="flex:1"><span style="font-weight:600;color:var(--text);font-size:14.5px">Do you have an apprentice tracker?</span><br><span style="font-size:12.5px;color:var(--text3)">Drop your report in here for synchronised data &mdash; adds real delivery (starts, planned ends, completions, outcomes) to the forecast.</span></span>
+      <span style="flex:1"><span style="font-weight:600;color:var(--text);font-size:14px">Do you have an apprentice tracker?</span><br><span style="font-size:12px;color:var(--text3)">Drop your report in here for synchronised data &mdash; adds real delivery (starts, planned ends, completions, outcomes) to the forecast.</span></span>
       <span id="trackerChev" style="color:var(--text3);font-size:12px">&#9662;</span>
     </summary>
     <div style="margin-top:14px">
@@ -1088,7 +1088,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128196;</span>What should the report contain? <span style="color:var(--teal)">See the format &#9662;</span></summary>
         <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.6">
           <em style="color:var(--text3)">For reference &mdash; nothing to fill in here.</em> Your tracker just needs to export one row per learner with these columns (names are matched flexibly, so slight variations are fine):
-          <div style="margin-top:9px;overflow-x:auto"><table style="border-collapse:collapse;font-size:11.5px;min-width:520px">
+          <div style="margin-top:9px;overflow-x:auto"><table style="border-collapse:collapse;font-size:12px;min-width:520px">
             <tr style="color:var(--text2)"><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Column</th><th style="text-align:left;padding:4px 12px 4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Meaning</th><th style="text-align:left;padding:4px 0;border-bottom:1px solid rgba(var(--wash),0.12)">Required</th></tr>
             <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">learner</td><td style="padding:4px 12px 4px 0">Name or reference</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
             <tr><td style="padding:4px 12px 4px 0;font-family:var(--mono);color:var(--text2)">standard</td><td style="padding:4px 12px 4px 0">Standard title or ST reference</td><td style="padding:4px 0;color:var(--teal)">yes</td></tr>
@@ -1157,12 +1157,12 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. 80% drawn monthly; 20% released on EPA completion.</p>
     <div class="card" id="deptBudgetCard">
       <details>
-        <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#127919;</span>Ringfence My Levy <span style="color:var(--text3);font-size:12.5px">&mdash; optional: reserve part of the pot, no plan needed &#9662;</span></summary>
+        <summary style="cursor:pointer;font-size:13px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#127919;</span>Ringfence My Levy <span style="color:var(--text3);font-size:12px">&mdash; optional: reserve part of the pot, no plan needed &#9662;</span></summary>
         <p class="step-sub" style="margin-top:11px">Set aside part of your company levy for a team or project &mdash; even one that isn&rsquo;t planned yet. The calculator checks each reservation against what the pot actually holds and shows its share. Tick <b>Apply to my projection</b> to reserve it, so the plan below flags any overspend.</p>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
           <div class="field" style="flex:2;min-width:160px;margin:0"><label>Department / project <span style="color:var(--text3)">(optional)</span></label><input id="rf-name" aria-label="Ring-fence name" placeholder="e.g. Finance, or Project Atlas" onkeydown="if(event.key==='Enter')addRingfence()"></div>
           <div class="field" style="flex:1;min-width:130px;margin:0"><label>Amount to reserve (&pound;)</label><input id="rf-amount" aria-label="Amount to reserve" type="number" min="0" placeholder="e.g. 40000" onkeydown="if(event.key==='Enter')addRingfence()"></div>
-          <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;padding-bottom:9px" title="Earmark this to gift / transfer to another employer as social value (capped at 50% of your annual levy)"><input type="checkbox" id="rf-gift" style="width:15px;height:15px;cursor:pointer;accent-color:#3aa76a">&#129309; Gift it</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;padding-bottom:9px" title="Earmark this to gift / transfer to another employer as social value (capped at 50% of your annual levy)"><input type="checkbox" id="rf-gift" style="width:15px;height:15px;cursor:pointer;accent-color:#3aa76a">&#129309; Gift it</label>
           <button class="btn-add" style="width:auto;padding:10px 20px" onclick="addRingfence()">+ Ring-fence</button>
         </div>
         <div id="rfList" style="margin-top:4px"></div>
@@ -1182,11 +1182,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             <button type="button" class="lvl-pill l6" data-lvl="6" onclick="setLevelFilter('6',this)">L6</button>
             <button type="button" class="lvl-pill l7" data-lvl="7" onclick="setLevelFilter('7',this)">L7</button>
           </div>
-          <div id="l7PolicyBox" style="display:none;margin-bottom:9px;font-size:12.5px;line-height:1.55;padding:11px 13px;border-radius:10px;background:rgba(245,166,35,0.09);border:1px solid rgba(245,166,35,0.4);color:#f5c87a"></div>
+          <div id="l7PolicyBox" style="display:none;margin-bottom:9px;font-size:12px;line-height:1.55;padding:11px 13px;border-radius:10px;background:rgba(245,166,35,0.09);border:1px solid rgba(245,166,35,0.4);color:#f5c87a"></div>
           <input type="text" id="standardSearch" class="standard-search" placeholder="🔍  Type to filter standards (e.g. data, nurse, project)…" oninput="renderStandardOptions()">
           <select id="inp-standard" aria-label="Apprenticeship standard" onchange="onStandardChange()"></select>
-          <div id="standardCount" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
-          <div id="standardWarn" style="display:none;margin-top:8px;font-size:12.5px;line-height:1.5;padding:9px 12px;border-radius:10px"></div>
+          <div id="standardCount" style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:5px;letter-spacing:.05em"></div>
+          <div id="standardWarn" style="display:none;margin-top:8px;font-size:12px;line-height:1.5;padding:9px 12px;border-radius:10px"></div>
           <div id="standardLink" style="margin-top:7px"></div>
         </div>
         <div class="field hidden" id="custom-name-wrap">
@@ -1211,13 +1211,13 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             <input type="date" id="inp-epa" aria-label="End-point assessment date" oninput="updateDurReadout();renderLearnerCost()">
           </div>
         </div>
-        <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
+        <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
         <details style="margin:9px 0 2px;grid-column:1/-1">
-          <summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
+          <summary style="cursor:pointer;font-size:12px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" aria-label="Learners aged 16 to 21" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" aria-label="Learners aged 22 to 24" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
-            <div><label style="display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" aria-label="Learners aged 25 or over" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">16&ndash;21</label><input id="inp-age1621" aria-label="Learners aged 16 to 21" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">22&ndash;24</label><input id="inp-age2224" aria-label="Learners aged 22 to 24" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">25+</label><input id="inp-age25" aria-label="Learners aged 25 or over" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
           </div>
           <div style="margin-top:8px;font-size:11px;color:var(--text3);line-height:1.5">Under-25 apprentices carry <strong>0% employer NIC</strong> up to &pound;50,270 (a real saving); at Level&nbsp;7, only 16&ndash;21 stay levy-funded from Jan 2026. Leave blank to skip &mdash; the plan just uses the total learner count.</div>
         </details>
@@ -1247,7 +1247,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div class="field" style="grid-column:span 2">
           <label>Unit</label>
           <select id="inp-unit" aria-label="Apprenticeship unit" onchange="onUnitChange()"></select>
-          <div id="unitInfo" style="font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:5px;letter-spacing:.04em"></div>
+          <div id="unitInfo" style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:5px;letter-spacing:.04em"></div>
         </div>
         <div class="field"><label>Funding rate (£)</label><input type="number" id="inp-unit-rate" aria-label="Unit price" min="0"></div>
         <div class="field"><label>Learners</label><input type="number" id="inp-unit-count" aria-label="Number of learners on the unit" min="1" value="1"></div>
@@ -1260,7 +1260,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
 
     <div id="progTable" class="card hidden">
-      <div style="display:flex;align-items:center;margin-bottom:11px"><span style="font-size:12.5px;color:var(--text3)">Your programmes</span><button type="button" onclick="clearProgrammes()" style="margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='rgba(var(--wash),0.15)';this.style.color='var(--text3)'">Clear programmes</button></div>
+      <div style="display:flex;align-items:center;margin-bottom:11px"><span style="font-size:12px;color:var(--text3)">Your programmes</span><button type="button" onclick="clearProgrammes()" style="margin-left:auto;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:border-color .12s,color .12s" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='rgba(var(--wash),0.15)';this.style.color='var(--text3)'">Clear programmes</button></div>
       <div class="sw">
         <table style="min-width:700px">
           <thead><tr><th>Programme</th><th class="r">Idv cost</th><th class="r">Total levy</th><th class="r">80% training</th><th class="r">20% EPA</th><th class="r">Learners</th><th>Start</th><th>EPA date</th><th class="r">Monthly draw</th><th></th></tr></thead>
@@ -1293,7 +1293,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div style="margin-top:10px"><span style="font-size:12px;color:var(--text3)">Provider's minimum <em>closed-cohort</em> size? <input id="cohortMin" aria-label="Minimum cohort size" type="number" min="1" max="50" placeholder="e.g. 8" oninput="setCohortMin(this.value)" style="width:56px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit"> <span style="opacity:.65">open/shared cohorts have no minimum</span></span></div>
       <div id="bestMoves"></div>
       <details id="whatIfCard" style="margin-top:12px">
-        <summary style="cursor:pointer;font-size:13.5px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#9878;&#65039;</span>Compare your options <span style="color:var(--text3);font-size:12.5px">&mdash; the same people, planned differently</span></summary>
+        <summary style="cursor:pointer;font-size:13px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#9878;&#65039;</span>Compare your options <span style="color:var(--text3);font-size:12px">&mdash; the same people, planned differently</span></summary>
         <div id="whatIfBody" style="margin-top:11px"></div>
       </details>
       <div id="shortfallAdvice"></div>
@@ -1327,7 +1327,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           <div class="field"><label>Acceptable capacity dip %</label><input type="number" min="1" max="100" id="plan-dip" aria-label="Expected productivity dip (%)" value="10" oninput="renderPlan()"></div>
           <div class="field"><label>Blended cost £/hour</label><input type="number" min="0" step="0.5" id="plan-rate" aria-label="Blended hourly pay rate" value="18" oninput="renderPlan()"></div>
         </div>
-        <div style="font-size:11.5px;color:var(--text3);line-height:1.55;margin:2px 0 14px"><strong style="color:var(--text2)">Blended cost £/hour</strong> = the average <em>fully-loaded</em> hourly cost of the people coming off the floor — gross salary + employer on-costs (NI, pension, etc.) &divide; working hours, averaged across the roles involved. <strong>£18/hr &asymp; a ~£30k salary fully loaded.</strong> One average keeps the plan simple; to cost a single learner at their actual wage, use the wage field on the cost-per-learner card (Programmes).</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.55;margin:2px 0 14px"><strong style="color:var(--text2)">Blended cost £/hour</strong> = the average <em>fully-loaded</em> hourly cost of the people coming off the floor — gross salary + employer on-costs (NI, pension, etc.) &divide; working hours, averaged across the roles involved. <strong>£18/hr &asymp; a ~£30k salary fully loaded.</strong> One average keeps the plan simple; to cost a single learner at their actual wage, use the wage field on the cost-per-learner card (Programmes).</div>
         <label class="plan-label">Your business calendar — click a month to cycle: Normal → <span style="color:var(--red)">Peak (avoid)</span> → <span style="color:var(--teal)">Quiet (good to start)</span></label>
         <div class="month-grid" id="monthGrid"></div>
         <div style="display:flex;justify-content:flex-end;margin:-0.75rem 0 1.1rem"><button class="btn-clear" onclick="clearMonths()" style="padding:5px 12px;font-size:12px">Clear calendar</button></div>
@@ -1345,12 +1345,12 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div class="step-row"><span class="step-chip">STEP 04</span><span class="step-title">Reports <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; build a master report or just the board cover</span></span></div>
       <details class="card" id="reportsCard">
         <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
-          <span style="flex:1;font-size:13.5px;color:var(--text2)">Tick the reports you need and build one master document &mdash; or generate just the board cover. Everything is assembled from the data you&rsquo;ve entered; nothing leaves your browser.</span>
+          <span style="flex:1;font-size:13px;color:var(--text2)">Tick the reports you need and build one master document &mdash; or generate just the board cover. Everything is assembled from the data you&rsquo;ve entered; nothing leaves your browser.</span>
           <span id="reportsChev" style="color:var(--text3);font-size:12px">&#9662;</span>
         </summary>
         <div style="margin-top:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-          <span style="font-size:12.5px;color:var(--text3)">Include in the report:</span>
+          <span style="font-size:12px;color:var(--text3)">Include in the report:</span>
           <button type="button" id="reportSelectAll" onclick="toggleSelectAllReports()" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.3);border-radius:6px;padding:4px 11px;cursor:pointer">Select all</button>
         </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
@@ -1368,7 +1368,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             <button class="btn-demo" onclick="openMasterReport(this)" style="background:var(--teal);color:#04121f;border:none">&#128196;&nbsp; Build master report &#8599;</button>
           </div>
         </div>
-        <div id="reportPickerNote" style="font-size:11.5px;color:var(--text3);margin-top:11px;line-height:1.55"></div>
+        <div id="reportPickerNote" style="font-size:12px;color:var(--text3);margin-top:11px;line-height:1.55"></div>
         </div>
       </details>
     </div>
@@ -1397,7 +1397,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27q</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2103,7 +2103,7 @@ function setLevelFilter(lvl,btn){
       const cut=new Date(now.getFullYear()-22,now.getMonth(),now.getDate());
       const cutStr=fmtDMY(cut);
       box.style.display='block';
-      box.innerHTML=`<strong>⚠ Level 7 — funding restricted since 1 January 2026.</strong><br>Level 7 apprenticeships are only levy-funded for learners aged <strong>under 22</strong> at their start date. To be eligible today, a learner must be born <strong>on or after ${cutStr}</strong>.<br><span style="font-size:11.5px;opacity:.85">Exception: learners aged 22–24 who have an EHC plan or are care-experienced remain eligible. Older learners must be self-funded.</span>`;
+      box.innerHTML=`<strong>⚠ Level 7 — funding restricted since 1 January 2026.</strong><br>Level 7 apprenticeships are only levy-funded for learners aged <strong>under 22</strong> at their start date. To be eligible today, a learner must be born <strong>on or after ${cutStr}</strong>.<br><span style="font-size:12px;opacity:.85">Exception: learners aged 22–24 who have an EHC plan or are care-experienced remain eligible. Older learners must be self-funded.</span>`;
     }else{
       box.style.display='none';
     }
@@ -2192,7 +2192,7 @@ function onStandardChange(){
 
 function lcCell(lab,val,sub,col,tone){
   return '<div class="'+(tone?'tone-'+tone:'')+'" style="background:rgba(var(--wash),0.025);border:1px solid rgba(var(--wash),0.07);border-radius:10px;padding:9px 11px;min-width:0">'+
-    '<div style="font-size:10.5px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
     '<div style="font-family:\'JetBrains Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
     '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4">'+sub+'</div></div>';
 }
@@ -2237,25 +2237,25 @@ function renderLearnerCost(){
     var levyAvail=(!nl&&levyData)?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0;
     if(levyAvail>0&&band>0){
       var nFund=Math.floor(levyAvail/band), yl=(M/12)+' year'+((M/12)!==1?'s':'');
-      capHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12.5px;color:var(--text2);line-height:1.5">&#128101; <strong style="color:#fff">How many can I train?</strong> At '+fmt(band)+'/learner, your levy (&asymp;&nbsp;'+fmt(Math.round(levyAvail))+' over '+yl+') funds about <strong style="color:'+GREEN+'">'+nFund+'</strong> at this standard.</div>';
+      capHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12px;color:var(--text2);line-height:1.5">&#128101; <strong style="color:#fff">How many can I train?</strong> At '+fmt(band)+'/learner, your levy (&asymp;&nbsp;'+fmt(Math.round(levyAvail))+' over '+yl+') funds about <strong style="color:'+GREEN+'">'+nFund+'</strong> at this standard.</div>';
     }
     // Level 7 age gate — verified against gov.uk (DfE update 28 May 2025), effective 1 Jan 2026
     var l7Html='';
     if((s.level||0)>=7){
-      l7Html='<div style="margin-top:11px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.55">'+
+      l7Html='<div style="margin-top:11px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text2);line-height:1.55">'+
         '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; from <strong>1 January 2026</strong>, Level 7 apprenticeships are levy-funded only for ages <strong>16&ndash;21</strong> (or under-25 care leavers / EHCP-holders at the start). Apprentices <strong>22 and over must self-fund</strong>. Anyone who started before 1 Jan 2026 stays funded to completion. '+
         '<a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk source</a></div>';
     }
     // #4 marginal — what adding THIS configured programme does (safe: per-learner cash x count, no engine mutation)
     var mCash=(nl?directCash:otjCost)*count;
-    var marginalHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12.5px;color:var(--text2);line-height:1.5">'+
+    var marginalHtml='<div style="margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12px;color:var(--text2);line-height:1.5">'+
       '&#10133; <strong style="color:#fff">Add this to your plan</strong> ('+count+' learner'+(count!==1?'s':'')+') &rarr; '+
       (noRate&&!nl?'your off-the-job cash (set a rate first)':'your cash &asymp; <strong style="color:'+(nl?MONEY:AMBER)+'">+'+fmt(mCash)+'</strong>')+
       ' &middot; draws <strong>'+fmt(band*count)+'</strong>'+(nl?(' band ('+(100-pct)+'% government-funded)'):' from your levy')+
       (programmes.length?' &mdash; see the running total below':'')+'.</div>';
     previewHtml='<div style="margin-top:13px;background:rgba(45,212,178,0.04);border:1px solid rgba(45,212,178,0.2);border-radius:14px;padding:13px 16px">'+
       '<div style="font-weight:700;color:#fff;margin-bottom:2px">Cost per learner <span style="font-weight:400;color:var(--text3);font-size:12px">— '+s.name+'</span></div>'+
-      '<div style="font-size:11.5px;color:var(--text3);margin-bottom:11px">'+(nl?'One learner, before adding to your plan. <b>Nothing is assumed levy-funded</b> — the government funds most of the band, you co-invest the rest (£0 for 16&ndash;21s), and your cash is co-investment + off-the-job time. A levy gift can cover the co-investment.':'One learner, before adding to your plan. The band is levy-funded; your real cash is the off-the-job time (plus co-investment only if your account runs short).')+'</div>'+
+      '<div style="font-size:12px;color:var(--text3);margin-bottom:11px">'+(nl?'One learner, before adding to your plan. <b>Nothing is assumed levy-funded</b> — the government funds most of the band, you co-invest the rest (£0 for 16&ndash;21s), and your cash is co-investment + off-the-job time. A levy gift can cover the co-investment.':'One learner, before adding to your plan. The band is levy-funded; your real cash is the off-the-job time (plus co-investment only if your account runs short).')+'</div>'+
       '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">'+rows+'</div>'+capHtml+l7Html+marginalHtml+'</div>';
   } else if(wrap){ wrap.style.display='none'; }
   // #2 + #3: accumulator + affordability strip, sourced from the live engine — shows whenever there is a plan
@@ -2284,11 +2284,11 @@ function lcPlanStrip(nl,MONEY,GREEN,BLUE,AMBER){
   }
   return '<div style="margin-top:13px;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:14px;padding:13px 16px">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px">'+
-      '<div style="font-size:12.5px;color:var(--text2)"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-right:9px">Your plan so far</span>'+impact+'</div>'+
-      '<span style="font-size:11.5px;font-weight:700;color:'+chipCol+';border:1px solid '+chipCol+';border-radius:99px;padding:2px 11px;white-space:nowrap">'+chipTxt+'</span>'+
+      '<div style="font-size:12px;color:var(--text2)"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-right:9px">Your plan so far</span>'+impact+'</div>'+
+      '<span style="font-size:12px;font-weight:700;color:'+chipCol+';border:1px solid '+chipCol+';border-radius:99px;padding:2px 11px;white-space:nowrap">'+chipTxt+'</span>'+
     '</div>'+
     '<div style="height:8px;border-radius:6px;background:rgba(var(--wash),0.08);overflow:hidden"><div style="height:100%;width:'+barPct+'%;background:'+barCol+';transition:width .25s"></div></div>'+
-    '<div style="font-size:10.5px;color:var(--text3);margin-top:6px">'+foot+'</div></div>';
+    '<div style="font-size:11px;color:var(--text3);margin-top:6px">'+foot+'</div></div>';
 }
 
 function updateDurReadout(){
@@ -2475,7 +2475,7 @@ function renderScenarios(){
   var el=document.getElementById('scnList'); if(!el)return;
   var all=scnAll(), names=Object.keys(all).sort();
   if(!names.length){
-    el.innerHTML='<div style="font-size:12.5px;color:var(--text3);padding:6px 0">No saved plans yet. Build a plan, then “Save current plan” to keep it — useful when you model more than one client.</div>';
+    el.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">No saved plans yet. Build a plan, then “Save current plan” to keep it — useful when you model more than one client.</div>';
     return;
   }
   var html='';
@@ -2488,7 +2488,7 @@ function renderScenarios(){
     }catch(e){}
     var esc=escHtml(n), arg=encodeURIComponent(n);
     html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(var(--wash),0.06)">'+
-      '<div style="flex:1;min-width:0"><div style="font-size:13.5px;color:var(--text);font-weight:600">'+esc+'</div>'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13px;color:var(--text);font-weight:600">'+esc+'</div>'+
       '<div style="font-size:11px;color:var(--text3)">'+heads+' learner'+(heads===1?'':'s')+(when?(' &middot; saved '+when):'')+'</div></div>'+
       '<button type="button" onclick="scnOpen(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.35);border-radius:6px;padding:5px 12px;cursor:pointer">Open</button>'+
       '<button type="button" aria-label="Delete '+esc+'" title="Delete" onclick="scnDelete(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 10px;cursor:pointer">&#10005;</button>'+
@@ -2696,13 +2696,13 @@ function renderDeliverySync(){
   var live=by.in_progress+by.gateway, leavers=by.achieved+by.withdrawn;
   var chip=function(lb,v,c){return v?'<span style="display:inline-flex;align-items:center;gap:6px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.10);border-radius:99px;padding:4px 11px;font-size:12px;color:var(--text2)"><b style="color:'+c+';font-family:var(--mono)">'+v+'</b> '+lb+'</span>':'';};
   el.innerHTML='<div style="margin-top:14px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.20);border-radius:14px;padding:13px 16px">'+
-    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px"><span style="color:var(--teal);font-size:15px">&#10003;</span><span style="font-weight:600;color:var(--text);font-size:13.5px">Delivery synchronised &mdash; '+n+' learner'+(n!==1?'s':'')+' from your tracker</span></div>'+
+    '<div style="display:flex;align-items:center;gap:9px;margin-bottom:10px"><span style="color:var(--teal);font-size:15px">&#10003;</span><span style="font-weight:600;color:var(--text);font-size:13px">Delivery synchronised &mdash; '+n+' learner'+(n!==1?'s':'')+' from your tracker</span></div>'+
     '<div style="display:flex;flex-wrap:wrap;gap:8px">'+
       chip('on programme',by.in_progress,'#eab308')+chip('at gateway',by.gateway,'#a78bfa')+
       chip('achieved',by.achieved,'#2DD4B2')+chip('withdrawn',by.withdrawn,'var(--red)')+chip('paused',by.paused,'#e0a13e')+
     '</div>'+
     (overdue?'<div style="margin-top:10px;font-size:12px;color:var(--red)">&#9888; '+overdue+' live learner'+(overdue!==1?'s are':' is')+' past the planned end date &mdash; check progress or re-plan.</div>':'')+
-    '<div style="margin-top:10px;font-size:11.5px;color:var(--text3);line-height:1.55">'+matched+' of '+n+' matched to a known standard. '+
+    '<div style="margin-top:10px;font-size:12px;color:var(--text3);line-height:1.55">'+matched+' of '+n+' matched to a known standard. '+
       (leavers?('<strong>'+leavers+'</strong> learner'+(leavers!==1?'s have':' has')+' left ('+by.achieved+' achieved, '+by.withdrawn+' withdrawn) &mdash; see the achievement rate (QAR) below. '):'')+
       'Actual outcomes stay in your browser; nothing is uploaded.</div>'+
   '</div>'+deliveryTable();
@@ -2742,8 +2742,8 @@ function deliveryTable(){
       '<td style="padding:6px 12px;color:var(--text2)">'+escHtml(d.std||d.standard||'')+(d.std?'':' <span title="not matched to a known standard in the library" style="color:#e0a13e">&#9888;</span>')+'</td>'+
       '<td style="padding:6px 12px;color:var(--text2);white-space:nowrap">'+dfmt(d.start)+'</td>'+
       '<td style="padding:6px 12px;color:var(--text2);white-space:nowrap">'+dfmt(d.plannedEnd)+'</td>'+
-      '<td style="padding:6px 12px;white-space:nowrap"><span style="display:inline-block;font-size:10.5px;color:'+m[1]+';border:1px solid '+m[1]+';border-radius:99px;padding:1px 8px">'+m[0]+'</span></td>'+
-      '<td style="padding:6px 12px;white-space:nowrap;text-align:right;color:'+st.c+';font-size:11.5px">'+st.t+'</td>'+
+      '<td style="padding:6px 12px;white-space:nowrap"><span style="display:inline-block;font-size:11px;color:'+m[1]+';border:1px solid '+m[1]+';border-radius:99px;padding:1px 8px">'+m[0]+'</span></td>'+
+      '<td style="padding:6px 12px;white-space:nowrap;text-align:right;color:'+st.c+';font-size:12px">'+st.t+'</td>'+
     '</tr>';
   }).join('');
   return '<details open style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;color:var(--text3);user-select:none;padding:2px 0">The synchronised report &mdash; '+n+' learner'+(n!==1?'s':'')+' read from your file</summary>'+
@@ -2799,12 +2799,12 @@ function renderQAR(){
   var qar=q.qar, delta=qar-N.overall, above=delta>=0;
   var col=qar>=N.overall?'#2DD4B2':(qar>=N.overall-8?'#eab308':'var(--red)');
   var ring='<div style="display:flex;align-items:baseline;gap:10px"><div style="font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;color:'+col+'">'+qar.toFixed(1)+'%</div><div style="font-size:12px;color:var(--text3);line-height:1.4">'+q.achieved+' achieved of<br>'+q.leavers+' leaver'+(q.leavers!==1?'s':'')+'</div></div>';
-  var bench='<div style="font-size:12.5px;color:var(--text2);margin-top:2px">'+(above?'<span style="color:#2DD4B2">&#9650; '+Math.abs(delta).toFixed(1)+' pts above</span>':'<span style="color:var(--red)">&#9660; '+Math.abs(delta).toFixed(1)+' pts below</span>')+' the national rate of <strong>'+N.overall+'%</strong> ('+N.year+'). Government target '+N.target+'%.</div>';
+  var bench='<div style="font-size:12px;color:var(--text2);margin-top:2px">'+(above?'<span style="color:#2DD4B2">&#9650; '+Math.abs(delta).toFixed(1)+' pts above</span>':'<span style="color:var(--red)">&#9660; '+Math.abs(delta).toFixed(1)+' pts below</span>')+' the national rate of <strong>'+N.overall+'%</strong> ('+N.year+'). Government target '+N.target+'%.</div>';
   var trend=N.trend.map(function(t){return '<span style="font-size:11px;color:var(--text3)">'+t.y+' <b style="color:var(--text2);font-family:var(--mono)">'+t.r+'%</b></span>';}).join('<span style="color:var(--text3)"> &rarr; </span>');
   var decomp='<div style="display:flex;gap:22px;margin-top:12px;flex-wrap:wrap">'+
-    '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Retention</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.retention!=null?q.retention.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:10.5px;color:var(--text3)">'+q.completers+' of '+q.leavers+' stayed to the end</div></div>'+
-    '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Pass rate</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.pass!=null?q.pass.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:10.5px;color:var(--text3)">'+q.achieved+' of '+q.completers+' who finished passed</div></div>'+
-    (q.atRisk>0?'<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Invested in non-achievers</div><div style="font-size:16px;font-weight:700;color:var(--red)">'+fmt(q.atRisk)+'</div><div style="font-size:10.5px;color:var(--text3)">'+(q.withdrawn+q.failed)+' learner'+((q.withdrawn+q.failed)!==1?'s':'')+' did not achieve</div></div>':'')+
+    '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Retention</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.retention!=null?q.retention.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+q.completers+' of '+q.leavers+' stayed to the end</div></div>'+
+    '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Pass rate</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.pass!=null?q.pass.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+q.achieved+' of '+q.completers+' who finished passed</div></div>'+
+    (q.atRisk>0?'<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Invested in non-achievers</div><div style="font-size:16px;font-weight:700;color:var(--red)">'+fmt(q.atRisk)+'</div><div style="font-size:11px;color:var(--text3)">'+(q.withdrawn+q.failed)+' learner'+((q.withdrawn+q.failed)!==1?'s':'')+' did not achieve</div></div>':'')+
     '</div>';
   // per-standard, lowest first
   var byStd=qarByStandard(), drag='';
@@ -2813,9 +2813,9 @@ function renderQAR(){
     if(worst.qar<qar-0.01){var wvs=worst.bench, wcol=worst.qar>=wvs?'#2DD4B2':'var(--red)';
       drag='<div style="font-size:12px;color:var(--text2);margin-top:12px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><strong style="color:var(--text)">'+escHtml(worst.name)+'</strong> drags your rate down most &mdash; <b style="color:'+wcol+'">'+worst.qar.toFixed(0)+'%</b> ('+worst.achieved+' of '+worst.leavers+'), against <strong>'+wvs.toFixed(1)+'%</strong> national'+(worst.benchIsLevel?(' for level '+worst.level):'')+'. '+(byStd.length>2?'<span style="color:var(--text3)">'+byStd.length+' standards have leavers; tap show working for the full breakdown.</span>':'')+'</div>';}
   }
-  var liveNote=q.live?'<div style="font-size:11.5px;color:var(--text3);margin-top:10px">'+q.live+' learner'+(q.live!==1?'s':'')+' still on programme &mdash; excluded until they leave (as the official QAR excludes still-in-learning).</div>':'';
+  var liveNote=q.live?'<div style="font-size:12px;color:var(--text3);margin-top:10px">'+q.live+' learner'+(q.live!==1?'s':'')+' still on programme &mdash; excluded until they leave (as the official QAR excludes still-in-learning).</div>':'';
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:var(--teal)">&#128200;</span> Show the working &amp; source</summary>'+
-    '<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:9px">'+
+    '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
     '<div><strong style="color:var(--text2)">Achievement rate</strong> = achievements &divide; leavers = '+q.achieved+' &divide; '+q.leavers+' = <b>'+qar.toFixed(1)+'%</b>.</div>'+
     '<div><strong style="color:var(--text2)">Leavers</strong> = achieved ('+q.achieved+') + withdrawn ('+q.withdrawn+') + completed-but-failed ('+q.failed+'). Still-on-programme ('+q.live+') excluded.</div>'+
     '<div><strong style="color:var(--text2)">Decomposition</strong>: retention ('+(q.retention!=null?q.retention.toFixed(1):'—')+'%) &times; pass ('+(q.pass!=null?q.pass.toFixed(1):'—')+'%) = achievement rate.</div>'+
@@ -3040,12 +3040,12 @@ function renderDataQuality(findings){
     :{c:'#2DD4B2',bg:'rgba(45,212,178,0.07)',bd:'rgba(45,212,178,0.3)',t:'✓ Data looks consistent'};
   const items=findings.map(f=>'<li style="margin:3px 0">'+(f.sev==='error'?'⛔ ':f.sev==='warn'?'△ ':'· ')+f.msg+'</li>').join('');
   const acked=!!scnDataAck;
-  const ackRow='<label style="display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12.5px;color:var(--text2);cursor:pointer">'+
+  const ackRow='<label style="display:flex;align-items:flex-start;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid rgba(var(--wash),0.08);font-size:12px;color:var(--text2);cursor:pointer">'+
     '<input type="checkbox" '+(acked?'checked':'')+' onchange="setDataAck(this.checked)" style="margin-top:2px;flex:none">'+
     '<span>I’ve reviewed this summary and confirm it reflects my levy account.'+(acked?' <strong style="color:#2DD4B2">Confirmed '+scnDataAck+'.</strong>':' <span style="color:var(--text3)">Your report records whether this has been confirmed.</span>')+'</span></label>';
   el.innerHTML='<div style="background:'+head.bg+';border:1px solid '+head.bd+';border-radius:14px;padding:12px 16px;margin-bottom:1.25rem">'+
     '<div style="font-weight:700;color:'+head.c+';margin-bottom:'+(findings.length?'7px':'0')+'">'+head.t+'</div>'+
-    (items?'<ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--text2);line-height:1.55">'+items+'</ul>':'<div style="font-size:12px;color:var(--text3)">Months are sequential, values are numeric, and the totals add up.</div>')+
+    (items?'<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text2);line-height:1.55">'+items+'</ul>':'<div style="font-size:12px;color:var(--text3)">Months are sequential, values are numeric, and the totals add up.</div>')+
     ackRow+
   '</div>';
 }
@@ -3082,7 +3082,7 @@ function renderRulesRef(){
   var el=document.getElementById('rulesRef');if(!el)return;
   var rows=fundingRulesRef().map(function(r){
     return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;padding:9px 0;border-top:1px solid rgba(var(--wash),0.06)">'+
-      '<div><div style="font-weight:600;color:var(--text);font-size:13.5px">'+r.label+'</div><div style="font-size:12px;color:var(--text3);line-height:1.45;margin-top:2px">'+r.detail+'</div></div>'+
+      '<div><div style="font-weight:600;color:var(--text);font-size:13px">'+r.label+'</div><div style="font-size:12px;color:var(--text3);line-height:1.45;margin-top:2px">'+r.detail+'</div></div>'+
       '<div style="text-align:right;white-space:nowrap"><div style="font-family:\'JetBrains Mono\',monospace;color:var(--teal);font-size:13px">'+r.value+'</div><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+r.eff+'</div></div>'+
     '</div>';
   }).join('');
@@ -3121,7 +3121,7 @@ function renderProjWorking(d){
   var totalInc=d.income.reduce(function(a,b){return a+b;},0);
   html+=row('Closing balance = '+fmt(d.bals[d.M-1])+' <span style="color:var(--text3);font-weight:400">· opening + income − drawdown</span>',
     'Opening '+fmt(levyData.balance)+', plus '+fmt(totalInc)+' levy income, less the training / EPA / unit amounts above, over '+d.M+' months. The balance is floored at £0 — in any exhausted month the shortfall becomes co-investment, not a negative pot.');
-  pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10.5px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
+  pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
     '<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:14px;padding:4px 16px 12px;margin-top:8px">'+html+
     '<div style="margin-top:11px;font-size:11px;color:var(--text3);border-top:1px solid rgba(var(--wash),0.06);padding-top:9px">Every rate above is read from the funding rulebook (see “Funding rules applied” near the top). Figures use the data you provided'+(scnDataAck?'.':' — not yet confirmed.')+'</div>'+
   '</div></details>';
@@ -3291,7 +3291,7 @@ function renderRingfences(){
   var M=(typeof projYears==='number'?projYears:3)*12;
   var companyLevy=(d&&d.levyAvail>0)?(+d.levyAvail):((levyData?((+levyData.balance||0)+(+levyData.monthlyAvg||0)*M):0));
   var yrs=(d&&d.years)?d.years:(M/12), yl=yrs+' year'+(yrs!==1?'s':'');
-  if(!ringfences.length){el.innerHTML='<div style="font-size:12.5px;color:var(--text3);margin-top:9px">No ring-fences yet &mdash; reserve part of your levy above (e.g. &pound;40,000 for Finance).</div>';return;}
+  if(!ringfences.length){el.innerHTML='<div style="font-size:12px;color:var(--text3);margin-top:9px">No ring-fences yet &mdash; reserve part of your levy above (e.g. &pound;40,000 for Finance).</div>';return;}
   var perHead=(d&&d.perHead>0)?d.perHead:0;
   var giftCap=(levyData?((+levyData.monthlyAvg||0)*12*RULEBOOK.transferCapPct):0);
   var rows=ringfences.map(function(r,i){
@@ -3301,8 +3301,8 @@ function renderRingfences(){
       ? '<span style="color:#3aa76a">&#129309; to gift'+(enabled>0?' &mdash; funds ~'+enabled+' apprenticeship'+(enabled!==1?'s':'')+' elsewhere':'')+'</span>'+(giftOver?' <span style="color:var(--red)">&#9888; over the '+Math.round(RULEBOOK.transferCapPct*100)+'% transfer cap ('+fmt(Math.round(giftCap))+')</span>':'')
       : (companyLevy>0?(pct.toFixed(1)+'% of your company levy'):'add levy in Step 1 to see its share');
     return '<div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)">'+
-      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--text);font-size:13.5px">'+esc((r.name&&r.name.trim())||(gift?'Gift':'Unnamed reservation'))+'</div>'+
-      '<div style="font-size:11.5px;color:var(--text3)">'+sub+'</div></div>'+
+      '<div style="flex:1;min-width:0"><div style="font-weight:600;color:var(--text);font-size:13px">'+esc((r.name&&r.name.trim())||(gift?'Gift':'Unnamed reservation'))+'</div>'+
+      '<div style="font-size:12px;color:var(--text3)">'+sub+'</div></div>'+
       '<div style="font-family:var(--mono);font-size:14px;color:'+(gift?'#3aa76a':'var(--money)')+';font-weight:600">'+fmt(amt)+'</div>'+
       '<button class="btn-rm" onclick="removeRingfence('+i+')" title="Remove">&#10005;</button></div>';
   }).join('');
@@ -3310,15 +3310,15 @@ function renderRingfences(){
   var summary;
   if(companyLevy>0){
     summary='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border2)">'+
-      '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:var(--text);font-size:13.5px">Total ring-fenced</span><span style="font-family:var(--mono);font-size:14px"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(total)+'</b> <span style="color:var(--text3);font-size:12px">('+totPct.toFixed(0)+'% of '+fmt(Math.round(companyLevy))+')</span></span></div>'+
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px;margin-bottom:8px"><span style="font-weight:700;color:var(--text);font-size:13px">Total ring-fenced</span><span style="font-family:var(--mono);font-size:14px"><b style="color:'+(over?'var(--red)':'var(--money)')+'">'+fmt(total)+'</b> <span style="color:var(--text3);font-size:12px">('+totPct.toFixed(0)+'% of '+fmt(Math.round(companyLevy))+')</span></span></div>'+
       '<div style="height:10px;background:rgba(var(--wash),0.09);border-radius:99px;overflow:hidden;margin-bottom:9px"><div style="height:100%;width:'+Math.min(100,totPct).toFixed(1)+'%;background:'+(over?'var(--red)':'var(--money)')+';border-radius:99px;transition:width .3s"></div></div>'+
       (over
         ? '<div style="font-size:13px;color:var(--red);font-weight:600">&#9888; Your reservations total '+fmt(total)+', but your company levy only holds &asymp;'+fmt(Math.round(companyLevy))+' over '+yl+' &mdash; over by '+fmt(Math.round(total-companyLevy))+'. Reduce a ring-fence.</div>'
         : '<div style="font-size:13px;color:var(--text2)">&#10003; Available from your pot &mdash; leaves <b style="color:var(--teal)">'+fmt(Math.round(remaining))+'</b> of company levy unreserved over '+yl+'.</div>')+
-      (ringfenceApply?'':'<div style="font-size:11.5px;color:var(--text3);margin-top:6px;font-style:italic">Informational only &mdash; tick &ldquo;Apply to my projection&rdquo; to reserve this against the plan below.</div>')+
+      (ringfenceApply?'':'<div style="font-size:12px;color:var(--text3);margin-top:6px;font-style:italic">Informational only &mdash; tick &ldquo;Apply to my projection&rdquo; to reserve this against the plan below.</div>')+
       '</div>';
   }else{
-    summary='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12.5px;color:var(--amber)">&#9888; Add your levy in <b>Step&nbsp;1</b> to check these '+fmt(total)+' of reservations against what the pot actually holds.</div>';
+    summary='<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--amber)">&#9888; Add your levy in <b>Step&nbsp;1</b> to check these '+fmt(total)+' of reservations against what the pot actually holds.</div>';
   }
   el.innerHTML=rows+summary;
 }
@@ -3355,7 +3355,7 @@ function renderProgrammes(){
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
     return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td class="dt">${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
   }).join('');
-  if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:10px;padding:6px 16px;font-size:12.5px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
+  if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:10px;padding:6px 16px;font-size:12px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
   if(typeof renderRingfences==='function')renderRingfences();
   if(typeof renderLearnerCost==='function')renderLearnerCost();
@@ -3471,10 +3471,10 @@ function renderCapacity(d){
       '<div style="font-size:13px;color:var(--text2);line-height:1.55">Your levy-eligible plan commits <strong>'+fmt(Math.round(d.levyPlanCost||d.planCost))+' for '+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</strong>, but '+(rfTotal>0?('after ring-fencing '+fmt(Math.round(rfTotal))+' ('+rfNames+') only <strong>'+fmt(Math.round(avail))+'</strong> is available'):('your levy provides <strong>'+fmt(Math.round(avail))+'</strong>'))+' &mdash; about <strong>'+cap+' fully-funded place'+(cap!==1?'s':'')+'</strong> over '+yl+'. You&rsquo;re over by roughly <strong>'+fmt(Math.round(gap))+'</strong> (~'+overN+' learner'+(overN!==1?'s':'')+').<br><br>To stay fully funded you must <strong>reorganise</strong> &mdash; stagger your starts into waves, or reduce/adjust the plan'+(rfTotal>0?', or release some ring-fenced levy':'')+' &mdash; <strong>or expect to apply for gifting</strong>: a levy transfer of up to 50% (&asymp;&nbsp;'+fmt(cap50)+'/yr) from another employer to cover the excess.</div>'+rfNote+'</div>';
   }
   if(d.niRelief>0.5){
-    el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
+    el.innerHTML+='<div style="margin-top:10px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text2);line-height:1.5">&#128176; <strong style="color:#2DD4B2">Employer NI relief</strong> &mdash; about <strong style="color:#2DD4B2">'+fmt(Math.round(d.niRelief))+'</strong> saved across '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' (0% employer NIC up to &pound;50,270). Estimated on the plan wage &mdash; a genuine saving <em>on top of</em> the levy, separate from funding.</div>';
   }
   if(d.l7SelfFund>0){
-    el.innerHTML+='<div style="margin-top:10px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12.5px;color:var(--text2);line-height:1.55">'+
+    el.innerHTML+='<div style="margin-top:10px;background:rgba(224,164,59,0.09);border:1px solid rgba(224,164,59,0.4);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text2);line-height:1.55">'+
       '<strong style="color:#E0A43B">&#9888;&#65039; Level 7 age gate</strong> &mdash; on your Level 7 programme(s), <strong>'+d.l7SelfFund+'</strong> learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ can no longer be levy-funded (from <strong>1 Jan 2026</strong>) and must <strong>self-fund about '+fmt(Math.round(d.l7SelfFundCost))+'</strong> of training (now excluded from your levy-funded figures above).'+
       (d.l7Crossover>0?' Of those, <strong style="color:#2DD4B2">'+d.l7Crossover+' aged 22&ndash;24</strong> still qualify for the under-25 NI relief &mdash; so it&rsquo;s self-funded training, but you keep the NI saving.':'')+
       ' <a href="https://www.gov.uk/government/publications/dfe-update-28-may-2025/dfe-update-further-education-28-may-2025" target="_blank" rel="noopener" style="color:#E0A43B">gov.uk</a></div>';
@@ -3492,7 +3492,7 @@ function whatIfScenarios(){
 }
 function renderWhatIf(){
   var el=document.getElementById('whatIfBody'); if(!el) return;
-  if(!programmes.length){el.innerHTML='<div style="font-size:12.5px;color:var(--text3)">Add programmes to compare options.</div>';return;}
+  if(!programmes.length){el.innerHTML='<div style="font-size:12px;color:var(--text3)">Add programmes to compare options.</div>';return;}
   var scens=whatIfScenarios().map(function(s){
     var d=_wiWith(s.t(programmes.map(function(p){return Object.assign({},p);})),levyReportData);
     return {name:s.name,note:s.note,coInvest:d.coInvest||0,empCash:(d.coInvest||0)+(d.selfFundCost||0),expiry:d.expiry||0,endBal:d.endBal||0,planCost:d.planCost||0};
@@ -3597,19 +3597,19 @@ function renderAffordLadder(coInvest,expiry){
   var cards=rungs.map(function(r){
     var on=(r.n-1===rec), open=(ladderOpen===r.n), hl=on||open;
     return '<div onclick="toggleLadderRung('+r.n+')" title="Tap for detail" style="flex:1;min-width:0;cursor:pointer;background:rgba(var(--wash),0.03);border:1px solid '+(hl?r.accent:'rgba(var(--wash),0.09)')+';border-radius:14px;padding:13px 15px;'+(hl?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+';transition:border-color .15s">'+
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:6px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:9.5px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'<span style="margin-left:auto;display:block;width:9px;height:9px;border-radius:50%;background:'+(open?r.accent:'transparent')+';border:1.5px solid '+r.accent+';box-shadow:'+(open?'0 0 8px '+r.accent+', 0 0 3px '+r.accent:'none')+';transition:background .2s,box-shadow .2s"></span></div>'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:6px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:10px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'<span style="margin-left:auto;display:block;width:9px;height:9px;border-radius:50%;background:'+(open?r.accent:'transparent')+';border:1.5px solid '+r.accent+';box-shadow:'+(open?'0 0 8px '+r.accent+', 0 0 3px '+r.accent:'none')+';transition:background .2s,box-shadow .2s"></span></div>'+
       '<div style="font-weight:700;color:var(--text);font-size:14px">'+r.type+'</div>'+
       '<div style="font-family:\'JetBrains Mono\',monospace;font-size:18px;color:'+r.accent+';margin:5px 0">'+fmt(r.cost)+'<span style="font-size:11px;color:#7e95ab"> /learner</span></div>'+
-      '<div style="font-size:11.5px;color:#aebecb;line-height:1.5"><div>⏱ '+r.dur+' · co-invest '+r.coinv+'</div><div style="margin-top:3px">'+r.builds+'</div></div>'+
+      '<div style="font-size:12px;color:#aebecb;line-height:1.5"><div>⏱ '+r.dur+' · co-invest '+r.coinv+'</div><div style="margin-top:3px">'+r.builds+'</div></div>'+
       '<div style="font-size:10px;color:#7e95ab;margin-top:7px;font-style:italic">'+r.note+'</div>'+
     '</div>';
   }).join('<div style="display:flex;align-items:center;color:#43607a;font-size:18px;padding:0 1px">→</div>');
-  var dp=(ladderOpen&&rungs[ladderOpen-1])?('<div style="margin-top:11px;background:rgba(var(--wash),0.03);border:1px solid '+rungs[ladderOpen-1].accent+';border-radius:10px;padding:13px 16px;font-size:12.5px;color:var(--text2);line-height:1.6"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-weight:700;color:'+rungs[ladderOpen-1].accent+'">Rung '+ladderOpen+' — '+rungs[ladderOpen-1].type+'</span><span onclick="toggleLadderRung('+ladderOpen+')" style="cursor:pointer;font-size:11px;color:var(--text3)">close &#10005;</span></div>'+rungs[ladderOpen-1].detail+'</div>'):'';
+  var dp=(ladderOpen&&rungs[ladderOpen-1])?('<div style="margin-top:11px;background:rgba(var(--wash),0.03);border:1px solid '+rungs[ladderOpen-1].accent+';border-radius:10px;padding:13px 16px;font-size:12px;color:var(--text2);line-height:1.6"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span style="font-weight:700;color:'+rungs[ladderOpen-1].accent+'">Rung '+ladderOpen+' — '+rungs[ladderOpen-1].type+'</span><span onclick="toggleLadderRung('+ladderOpen+')" style="cursor:pointer;font-size:11px;color:var(--text3)">close &#10005;</span></div>'+rungs[ladderOpen-1].detail+'</div>'):'';
   el.innerHTML='<div class="card" style="padding:1rem 1.1rem;margin-top:1.25rem">'+
     '<div style="font-weight:700;color:var(--text);margin-bottom:3px">Affordability ladder</div>'+
-    '<div style="font-size:12.5px;color:#aebecb;margin-bottom:13px">Three ways to build the same capability, cheapest first. '+recMsg+' <span style="color:var(--text3)">Tap a rung for detail.</span></div>'+
+    '<div style="font-size:12px;color:#aebecb;margin-bottom:13px">Three ways to build the same capability, cheapest first. '+recMsg+' <span style="color:var(--text3)">Tap a rung for detail.</span></div>'+
     '<div style="display:flex;gap:8px;align-items:stretch">'+cards+'</div>'+dp+
-    '<div style="font-size:10.5px;color:#7e95ab;margin-top:11px;font-style:italic">Indicative funding caps (ex-VAT). Unit rates: Skills England presets; apprenticeship bands: maximum government contribution — verify against your negotiated price. Foundation apprenticeships are 16–21 only (fully funded + up to £2,000 incentive); verified vs the gov.uk Aug 2025–Jul 2026 funding rules.</div>'+
+    '<div style="font-size:11px;color:#7e95ab;margin-top:11px;font-style:italic">Indicative funding caps (ex-VAT). Unit rates: Skills England presets; apprenticeship bands: maximum government contribution — verify against your negotiated price. Foundation apprenticeships are 16–21 only (fully funded + up to £2,000 incentive); verified vs the gov.uk Aug 2025–Jul 2026 funding rules.</div>'+
   '</div>';
 }
 function toggleLadderRung(n){ladderOpen=(ladderOpen===n)?null:n;if(_ladderArgs)renderAffordLadder(_ladderArgs.co,_ladderArgs.exp);}
@@ -3926,7 +3926,7 @@ function renderNonLevy(){
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
-  var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:10.5px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
     fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
     fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
@@ -3937,7 +3937,7 @@ function renderNonLevy(){
   var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
   if(s.target<0.5){
-    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:14px 16px;font-size:12.5px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
+    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
   } else {
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:15px 17px">'+
       ((typeof goalTag==='function')?goalTag('funding','A levy gift serves your goal &mdash; every transfer cuts your investment'):'')+
@@ -3945,26 +3945,26 @@ function renderNonLevy(){
       '<div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px"><b>Already secured a levy gift, or still fundraising one?</b> A levy-paying employer can transfer up to <b>50%</b> of their levy to you. It covers an apprentice&rsquo;s training <b>100%</b> (up to the band) &mdash; removing your co-investment for them. New starts only; you still provide the off-the-job time.</div>'+
       giftInput+
       '<div style="height:9px;border-radius:6px;background:rgba(var(--wash),0.08);overflow:hidden;margin-bottom:6px"><div id="nlBar" style="height:100%;width:'+(s.cov*100).toFixed(0)+'%;background:'+BLUE+';transition:width .25s"></div></div>'+
-      '<div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--text3);margin-bottom:10px"><span>Secured '+fmt(s.raised)+'</span><span>Target '+fmt(s.target)+' &rarr; your investment £0</span></div>'+
-      '<div id="nlImpact" style="font-size:12.5px;color:var(--text2);line-height:1.55">'+nlImpactText(f,s)+'</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:10px"><span>Secured '+fmt(s.raised)+'</span><span>Target '+fmt(s.target)+' &rarr; your investment £0</span></div>'+
+      '<div id="nlImpact" style="font-size:12px;color:var(--text2);line-height:1.55">'+nlImpactText(f,s)+'</div>'+
       '<div style="font-size:11px;color:var(--text3);margin-top:10px">Find pledges via the apprenticeship service &ldquo;find funding&rdquo; tool. <span style="color:'+BLUE+'">Arthur Curtis can help you source &amp; secure transfer pledges.</span></div>'+
     '</div>';
   }
-  var notes='<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:13px">'+
+  var notes='<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:13px">'+
     (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is counted at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;21 full funding</b>.</div>':'')+
     '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;21</b> at the start (from 1 Apr 2024), and 22&ndash;24 with an EHC plan or care experience (enter as 16&ndash;21 to apply, or verify eligibility).</div>'+
     (f.has25?'<div>Co-investment is <b>25%</b> for starts from Aug 2026 (applied by start date).</div>':'<div>Co-investment is <b>5%</b> now, rising to <b>25%</b> for starts from Aug 2026.</div>')+
     '<div>Non-levy employers reserve funding through the apprenticeship service; each reservation expires if unused in its window.</div>'+
   '</div>';
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; sources</summary>'+
-    '<div style="font-size:11.5px;color:var(--text3);line-height:1.65;margin-top:9px">'+
+    '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
     '<div><b style="color:var(--text2)">Your investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–21s) = '+fmt(f.employer)+(s.transfers>0.5?(', less transfers covering '+fmt(s.transfers)+' of bands &rarr; <b>'+fmt(s.residual)+'</b>'):' = <b>'+fmt(f.employer)+'</b>')+'.</div>'+
     '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–21 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the co-funded places = <b>'+fmt(s.gov)+'</b>.</div>'+
     '<div><b style="color:var(--text2)">Transfers</b> = full-band funding gifted by a levy employer (100% up to the band, sender caps at 50% of their levy, new starts only).</div>'+
     '<div style="margin-top:6px">Sources: <a href="https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding-for-employers-who-do-not-pay-the-apprenticeship-levy" target="_blank" rel="noopener" style="color:'+BLUE+'">non-levy funding</a> · <a href="https://www.gov.uk/guidance/receive-a-levy-transfer-from-another-business-to-fund-an-apprenticeship" target="_blank" rel="noopener" style="color:'+BLUE+'">receive a transfer</a> (gov.uk) · rules '+RULEBOOK.version+'. Indicative; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:0.75rem;border-color:rgba(62,134,224,0.3)">'+
-    '<div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(var(--wash),0.08)"><span style="font-size:16px;margin-right:8px">&#127963;&#65039;</span><span style="font-size:12.5px;color:var(--text3)">Your funding position</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:99px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
+    '<div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(var(--wash),0.08)"><span style="font-size:16px;margin-right:8px">&#127963;&#65039;</span><span style="font-size:12px;color:var(--text3)">Your funding position</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:99px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
     figs+fr+notes+working+
     '<div style="display:flex;justify-content:flex-end;margin-top:13px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><button onclick="clearSavedData()" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 12px;cursor:pointer">Clear plan</button></div>'+
     '</div>';
@@ -4073,7 +4073,7 @@ function brandCredit(){
   var t = brandOn()
     ? ((BRAND.name?escHtml(BRAND.name)+' &nbsp;&middot;&nbsp; ':'')+'Powered by '+fm)
     : fm+' by Arthur Curtis Education';
-  return '<strong style="font-family:monospace;font-size:9.5px;font-weight:400;letter-spacing:.04em;color:inherit;opacity:.9">'+t+' &nbsp;&mdash;&nbsp;</strong>';
+  return '<strong style="font-family:monospace;font-size:10px;font-weight:400;letter-spacing:.04em;color:inherit;opacity:.9">'+t+' &nbsp;&mdash;&nbsp;</strong>';
 }
 // Re-skin the report pages via a single injected stylesheet (kept out of the engine).
 function applyBrandStyle(){
@@ -4154,10 +4154,10 @@ function renderBrandPack(){
       '<div style="display:flex;align-items:center;gap:11px;flex-wrap:wrap">'+
         '<span class="brand-badge"><img src="'+brandLogo()+'" alt="" style="height:15px;max-width:72px;object-fit:contain">'+
           (on&&BRAND.name?escHtml(BRAND.name):'Fundable')+'</span>'+
-        '<span style="font-size:11.5px;color:var(--text3);flex:1;min-width:150px">'+
+        '<span style="font-size:12px;color:var(--text3);flex:1;min-width:150px">'+
           (on?'Client branding applied &middot; footer keeps &ldquo;Powered by Fundable&rdquo;'
              :'Every report carries the Fundable mark')+'</span>'+
-        (on?'<button type="button" onclick="clearBrand()" style="font-family:inherit;font-size:11.5px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 11px;cursor:pointer">Remove</button>':'')+
+        (on?'<button type="button" onclick="clearBrand()" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 11px;cursor:pointer">Remove</button>':'')+
       '</div>'+
     '</div>';
 }
@@ -4196,7 +4196,7 @@ function renderReportPicker(){
     var disabled=!ok, checked=reportSel[p.k]&&!disabled;
     return '<label style="display:flex;align-items:flex-start;gap:11px;padding:9px 4px;border-radius:10px;cursor:'+(disabled?'default':'pointer')+';opacity:'+(disabled?'0.5':'1')+'">'+
       '<input type="checkbox" data-part="'+p.k+'" '+(checked?'checked':'')+(disabled?' disabled':'')+' onchange="syncReportSel()" style="margin-top:2px;width:16px;height:16px;accent-color:var(--teal);flex:0 0 auto">'+
-      '<span><span style="font-weight:600;color:var(--text);font-size:13.5px">'+p.lb+'</span>'+(disabled?' <span style="font-size:11px;color:var(--text3)">&mdash; '+(p.disabledMsg||'not available yet')+'</span>':'')+'<br><span style="font-size:12px;color:var(--text3)">'+p.sb+'</span></span></label>';
+      '<span><span style="font-weight:600;color:var(--text);font-size:13px">'+p.lb+'</span>'+(disabled?' <span style="font-size:11px;color:var(--text3)">&mdash; '+(p.disabledMsg||'not available yet')+'</span>':'')+'<br><span style="font-size:12px;color:var(--text3)">'+p.sb+'</span></span></label>';
   }).join('');
   updateReportNote();updateSelectAllLabel();
 }
@@ -4477,13 +4477,13 @@ function levyPage3(d,framing){
     return '<tr><td style="color:#fff">'+p.name+'</td><td>'+oh+' h/wk</td><td>'+weeks+' wks</td><td class="r">'+p.count+'</td><td class="r">'+lvMoney(overlay)+'</td><td class="r" style="color:#2DD4B2">'+lvMoney((+p.cost||0)+oh*weeks*(d.payRate||0))+'</td></tr>';
   }).join('');
   var coNote = d.coInvest>1
-    ? '<div style="margin-top:11px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(255,76,106,0.05);border:1px solid rgba(255,76,106,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#ff8fa3">Co-investment &asymp;'+lvK(d.coInvest)+' is your cash, not levy.</strong> In '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+' the account is exhausted, so you fund part of the band directly'+(d.coFloor>1?' &mdash; about '+lvK(d.coFloor)+' of it is unavoidable (training draw out-pacing the levy)':'')+', charged at '+(d.co25?'<strong>25%</strong> from Aug 2026':'5%')+'.'+(noRate?'':' Your direct cash for this plan &asymp; <strong>'+lvK(d.coInvest+d.otjCost)+'</strong> (co-investment + off-the-job time).')+'</div>'
+    ? '<div style="margin-top:11px;font-size:12px;color:#c7d6e2;line-height:1.5;background:rgba(255,76,106,0.05);border:1px solid rgba(255,76,106,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#ff8fa3">Co-investment &asymp;'+lvK(d.coInvest)+' is your cash, not levy.</strong> In '+d.coMonths+' month'+(d.coMonths!==1?'s':'')+' the account is exhausted, so you fund part of the band directly'+(d.coFloor>1?' &mdash; about '+lvK(d.coFloor)+' of it is unavoidable (training draw out-pacing the levy)':'')+', charged at '+(d.co25?'<strong>25%</strong> from Aug 2026':'5%')+'.'+(noRate?'':' Your direct cash for this plan &asymp; <strong>'+lvK(d.coInvest+d.otjCost)+'</strong> (co-investment + off-the-job time).')+'</div>'
     : '';
   var niNote = d.niRelief>1
-    ? '<div style="margin-top:9px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#2DD4B2">Less employer NI relief &asymp;'+lvK(d.niRelief)+'.</strong> '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' carry 0% employer NIC up to &pound;50,270, so net cost of ownership &asymp; <strong style="color:#2DD4B2">'+lvK(Math.max(0,d.trueCost-d.niRelief))+'</strong>. A tax relief (separate from the levy), estimated on the plan wage.</div>'
+    ? '<div style="margin-top:9px;font-size:12px;color:#c7d6e2;line-height:1.5;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#2DD4B2">Less employer NI relief &asymp;'+lvK(d.niRelief)+'.</strong> '+d.niUnder25+' under-25 apprentice'+(d.niUnder25!==1?'s':'')+' carry 0% employer NIC up to &pound;50,270, so net cost of ownership &asymp; <strong style="color:#2DD4B2">'+lvK(Math.max(0,d.trueCost-d.niRelief))+'</strong>. A tax relief (separate from the levy), estimated on the plan wage.</div>'
     : '';
   var selfFundNote = d.selfFundCost>1
-    ? '<div style="margin-top:9px;font-size:11.5px;color:#c7d6e2;line-height:1.5;background:rgba(224,164,59,0.05);border:1px solid rgba(224,164,59,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#E0A43B">Plus employer self-fund &asymp;'+lvK(d.selfFundCost)+'.</strong> Level&nbsp;7 training for '+d.l7SelfFund+' learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ isn&rsquo;t levy-eligible from 1 Jan 2026, so it is excluded from the levy fee above and funded directly by you.</div>'
+    ? '<div style="margin-top:9px;font-size:12px;color:#c7d6e2;line-height:1.5;background:rgba(224,164,59,0.05);border:1px solid rgba(224,164,59,0.22);border-radius:10px;padding:9px 14px"><strong style="color:#E0A43B">Plus employer self-fund &asymp;'+lvK(d.selfFundCost)+'.</strong> Level&nbsp;7 training for '+d.l7SelfFund+' learner'+(d.l7SelfFund!==1?'s':'')+' aged 22+ isn&rsquo;t levy-eligible from 1 Jan 2026, so it is excluded from the levy fee above and funded directly by you.</div>'
     : '';
   var trueRow='<div class="lvy-true"><div class="lvy-true-cell"><div class="lvy-true-lab">Levy fee (training + EPA)</div><div class="lvy-true-num">'+lvK(d.levyPlanCost)+'</div>'+(d.coInvest>1?'<div class="lvy-true-sub" style="color:#ff8fa3">incl. &asymp;'+lvK(d.coInvest)+' your co-invest</div>':'')+'</div>'+
     '<div class="lvy-true-op">+</div>'+
@@ -4616,8 +4616,8 @@ function renderProjection(){
     sv.innerHTML=`&#129309; <strong>Social value.</strong> Gifting <span class="amt">${fmt(svGift)}</span> of ${src} levy to an SME, charity or supply-chain partner ${enabled>=1?`could fully fund <span class="amt">~${enabled}</span> apprenticeship${enabled!==1?'s':''} elsewhere`:'contributes toward funding an apprenticeship elsewhere'} <span style="color:var(--text3)">(based on your average programme cost of ${fmt(svPerHead)} per apprentice)</span>. Evidences the UK Social Value Model theme <strong>&ldquo;Tackling economic inequality &mdash; employment &amp; skills&rdquo;</strong>, reportable in tenders and CSR. <span style="color:var(--text3)">Indicative, based on your figures.</span>`;
     // CSR source index — provenance of each figure (mirrors "Show the working")
     const tcapPct=Math.round(RULEBOOK.transferCapPct*100);
-    const rowCSR=function(lab,basis){return '<div style="padding:8px 0;border-top:1px solid rgba(var(--wash),0.06)"><div style="font-weight:600;color:var(--text);font-size:12.5px;margin-bottom:3px">'+lab+'</div><div style="font-size:11.5px;color:var(--text2);line-height:1.5">'+basis+'</div></div>';};
-    sv.innerHTML+='<details style="margin-top:11px"><summary style="cursor:pointer;font-size:12.5px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3)">CSR SOURCE INDEX</span><span style="color:var(--teal)">Where this is drawn from &#9662;</span></summary>'+
+    const rowCSR=function(lab,basis){return '<div style="padding:8px 0;border-top:1px solid rgba(var(--wash),0.06)"><div style="font-weight:600;color:var(--text);font-size:12px;margin-bottom:3px">'+lab+'</div><div style="font-size:12px;color:var(--text2);line-height:1.5">'+basis+'</div></div>';};
+    sv.innerHTML+='<details style="margin-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text3)">CSR SOURCE INDEX</span><span style="color:var(--teal)">Where this is drawn from &#9662;</span></summary>'+
       '<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:10px;padding:2px 15px 11px;margin-top:8px">'+
       rowCSR('Giftable levy &mdash; '+fmt(svGift), (exp.total>1?('The lesser of your forecast expiry (<strong>'+fmt(exp.total)+'</strong>) and the '+tcapPct+'% annual transfer cap (<strong>'+fmt(Math.max(0,annual*RULEBOOK.transferCapPct))+'</strong>). Rule: a levy transfer is capped at '+tcapPct+'% of your annual levy.'):'Your projected levy surplus after the plan &mdash; levy not committed to your own programmes.'))+
       rowCSR('Apprenticeships funded elsewhere &mdash; ~'+enabled, '<strong>'+fmt(svGift)+'</strong> giftable &divide; average programme cost <strong>'+fmt(svPerHead)+'</strong> = ~<strong>'+enabled+'</strong>. Whole apprenticeships enabled &mdash; no monetised multiplier is applied.')+
@@ -5012,14 +5012,14 @@ function jdBuildReport(){
   var sideCats=cats.map(function(c){return '<div style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">'+jdIcon(c.ic,c.col,20)+'<span style="color:#dfe9f2;font-size:12px;font-weight:600;letter-spacing:.04em;flex:1">'+c.label.toUpperCase()+'</span><span style="color:'+c.col+';font-size:12px;font-weight:700">'+c.pct+'%</span></div>'+jdBar(c.pct,c.col)+'</div>';}).join('');
   var accordions=cats.map(function(c){
     var cov=c.items.filter(function(i){return i.covered;}),gaps=c.items.filter(function(i){return !i.covered;});
-    var covRows=cov.map(function(it){return '<div style="break-inside:avoid;display:flex;gap:9px;margin-bottom:9px;align-items:flex-start">'+jdIcon('check',JD_CYAN,15)+'<span style="color:#dfe9f2;font-weight:700;font-size:11.5px;min-width:30px">'+(it.id||'')+'</span><span style="color:#a9bccd;font-size:11.5px;line-height:1.45">'+it.stmt+'</span></div>';}).join('');
+    var covRows=cov.map(function(it){return '<div style="break-inside:avoid;display:flex;gap:9px;margin-bottom:9px;align-items:flex-start">'+jdIcon('check',JD_CYAN,15)+'<span style="color:#dfe9f2;font-weight:700;font-size:12px;min-width:30px">'+(it.id||'')+'</span><span style="color:#a9bccd;font-size:12px;line-height:1.45">'+it.stmt+'</span></div>';}).join('');
     var gapRows=gaps.map(function(it){return '<div class="gap-item" onclick="jdRev(this)" style="cursor:pointer;margin-bottom:11px;border-radius:10px;padding:4px 6px;margin-left:-6px;transition:background .12s">'+
-      '<div style="display:flex;gap:10px;align-items:flex-start"><span style="color:'+c.col+';font-size:8px;margin-top:6px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:12.5px;min-width:34px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:12.5px;line-height:1.5;flex:1">'+it.stmt+'</span><span class="rev-ind" style="color:'+c.col+';font-size:10px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px">In reality '+jdIcon('chev',c.col,13)+'</span></div>'+
+      '<div style="display:flex;gap:10px;align-items:flex-start"><span style="color:'+c.col+';font-size:8px;margin-top:6px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:12px;min-width:34px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:12px;line-height:1.5;flex:1">'+it.stmt+'</span><span class="rev-ind" style="color:'+c.col+';font-size:10px;font-weight:700;white-space:nowrap;display:inline-flex;align-items:center;gap:4px">In reality '+jdIcon('chev',c.col,13)+'</span></div>'+
       '<div class="reveal" style="display:none;margin-left:44px;margin-top:7px;background:rgba(32,214,195,0.07);border-left:2px solid '+c.col+';padding:7px 11px"><span style="color:'+c.col+';font-size:9px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:12px;line-height:1.5">'+jdReality(it.stmt,c.key)+'</span></div>'+
     '</div>';}).join('');
     var panel='<div style="display:flex;gap:20px;align-items:center;margin-bottom:20px;background:rgba(var(--wash),0.03);border:'+JD_CB+';border-radius:14px;padding:16px 20px">'+jdDonut(c.pct,80,9,c.col)+'<div style="flex:1"><div style="font-size:14px;color:#dfe9f2;font-weight:600">'+c.covered+' of '+c.total+' '+c.label.toLowerCase()+' evidenced by the job description</div><div style="color:'+c.col+';font-weight:600;margin-top:4px;font-size:13px">'+gaps.length+' to develop through work-exposure</div>'+jdBar(c.pct,c.col)+'</div></div>'+
       (cov.length?'<div style="margin-bottom:'+(gaps.length?'22px':'0')+'"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'+jdIcon('check',JD_CYAN,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div><div style="columns:2;column-gap:34px">'+covRows+'</div></div>':'')+
-      (gaps.length?'<div><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+jdIcon('cal',c.col,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">To develop — work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:12.5px;margin-bottom:14px;line-height:1.5">Arrange real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each:</div>'+gapRows+'</div>':'<div style="display:flex;align-items:center;gap:9px;color:'+JD_CYAN+';font-weight:600;font-size:14px">'+jdIcon('check',JD_CYAN,17)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>');
+      (gaps.length?'<div><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'+jdIcon('cal',c.col,17)+'<span style="font-weight:700;font-size:14px;color:#fff;font-family:'+JD_HF+'">To develop — work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:12px;margin-bottom:14px;line-height:1.5">Arrange real workplace exposure — tasks, projects, shadowing or rotations — so the apprentice can practise and evidence each:</div>'+gapRows+'</div>':'<div style="display:flex;align-items:center;gap:9px;color:'+JD_CYAN+';font-weight:600;font-size:14px">'+jdIcon('check',JD_CYAN,17)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>');
     return '<div style="border:'+JD_CB+';border-radius:14px;overflow:hidden;margin-bottom:14px;background:rgba(15,42,74,0.92)">'+
       '<button class="acc-btn" onclick="jdToggle(this)" style="width:100%;display:flex;align-items:center;gap:14px;padding:18px 22px;background:transparent;border:none;cursor:pointer;text-align:left;font-family:inherit">'+
         '<span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:15px;font-family:'+JD_HF+'">'+c.key+'</span>'+
@@ -5039,7 +5039,7 @@ function jdBuildReport(){
     '<img src="'+brandLogo()+'" style="height:50px;margin-bottom:28px">'+
     '<div style="font-family:'+JD_HF+';font-size:54px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.0">JD Matcher Report</div>'+
     '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Fundable by Arthur Curtis Education</span><span style="color:#7e93a8"> · '+fmtDMY(new Date())+'</span></div>'+
-    '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12.5px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
+    '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
     '<div style="margin-top:18px;background:'+P+';border:'+JD_CB+';border-radius:14px;display:flex;align-items:center;padding:22px 28px">'+
       '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief",JD_CYAN,30)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:4px">'+d.stdName+'</div></div></div>'+
       '<div style="width:1px;height:54px;background:rgba(var(--wash),0.09)"></div>'+
@@ -5066,7 +5066,7 @@ function jdBuildReport(){
       '</div>'+
       '<div style="flex:1">'+
         '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span style="font-family:'+JD_HF+';font-size:18px;font-weight:800;color:#fff">KSB BREAKDOWN &amp; DEVELOPMENT PLAN</span></div>'+
-        '<div style="color:#8ba0b6;font-size:12.5px;margin-bottom:16px">Tap <strong style="color:'+JD_CYAN+'">K</strong> / <strong style="color:'+JD_PURPLE+'">S</strong> / <strong style="color:'+JD_GOLD+'">B</strong> to expand each area’s evidence and work-exposure plan.</div>'+
+        '<div style="color:#8ba0b6;font-size:12px;margin-bottom:16px">Tap <strong style="color:'+JD_CYAN+'">K</strong> / <strong style="color:'+JD_PURPLE+'">S</strong> / <strong style="color:'+JD_GOLD+'">B</strong> to expand each area’s evidence and work-exposure plan.</div>'+
         accordions+
       '</div>'+
     '</div>'+
@@ -5168,7 +5168,7 @@ function jdPdfKsbBody(c){
   var covRows=cov.length?cov.map(function(it){return '<div style="break-inside:avoid;display:flex;gap:7px;margin-bottom:7px;align-items:flex-start"><span style="color:'+JD_CYAN+';font-size:11px;margin-top:1px">&#10003;</span><span style="color:#dfe9f2;font-weight:700;font-size:10.5px;min-width:26px">'+(it.id||'')+'</span><span style="color:#a9bccd;font-size:10.5px;line-height:1.4">'+it.stmt+'</span></div>';}).join(''):'<div style="color:#8ba0b6;font-size:11px;line-height:1.5">None evidenced in the job description yet &mdash; all to be developed through work-exposure.</div>';
   var gapRows=gaps.length?gaps.map(function(it){var rl=jdReality(it.stmt,c.key);return '<div style="break-inside:avoid;margin-bottom:11px">'+
     '<div style="display:flex;gap:8px;align-items:flex-start"><span style="color:'+c.col+';font-size:7px;margin-top:5px">&#9679;</span><span style="color:'+c.col+';font-weight:700;font-size:11px;min-width:30px">'+(it.id||'')+'</span><span style="color:#c9d6e2;font-size:11px;line-height:1.42">'+it.stmt+'</span></div>'+
-    '<div style="margin-left:38px;margin-top:4px;background:rgba(32,214,195,0.06);border-left:2px solid '+c.col+';padding:5px 9px"><span style="color:'+c.col+';font-size:8.5px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:10px;line-height:1.42">'+rl+'</span></div>'+
+    '<div style="margin-left:38px;margin-top:4px;background:rgba(32,214,195,0.06);border-left:2px solid '+c.col+';padding:5px 9px"><span style="color:'+c.col+';font-size:9px;font-weight:800;letter-spacing:.07em">IN REALITY&nbsp;&nbsp;</span><span style="color:#aebfce;font-size:10px;line-height:1.42">'+rl+'</span></div>'+
   '</div>';}).join(''):'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:12px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
   var cols=gaps.length>=4?2:1;
   return '<div style="display:flex;gap:22px;flex:1;min-height:0">'+
@@ -5179,7 +5179,7 @@ function jdPdfKsbBody(c){
     '<div style="width:1px;background:rgba(var(--wash),0.08)"></div>'+
     '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div>'+
-      '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
+      '<div style="color:#8ba0b6;font-size:11px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
       '<div style="columns:'+cols+';column-gap:24px">'+gapRows+'</div>'+
     '</div>'+
   '</div>';
@@ -5199,7 +5199,7 @@ function jdKsbBodySubset(c,cov,devSub,gapsTotal){
     '<div style="width:1px;background:rgba(var(--wash),0.08)"></div>'+
     '<div style="flex:1;display:flex;flex-direction:column;min-height:0">'+
       '<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gapsTotal+')</span></div>'+
-      '<div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
+      '<div style="color:#8ba0b6;font-size:11px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div>'+
       '<div style="columns:'+cols+';column-gap:24px">'+gapRows+'</div>'+
     '</div>'+
   '</div>';
@@ -5222,7 +5222,7 @@ function jdDevContInner(c,sub){return jdSecTitle(c,'Work-exposure plan (continue
 /* combined single page (Evidenced above, To-develop below) — used for short areas like Behaviours to avoid two sparse pages */
 function jdKsbCombinedInner(c,cov,gaps){
   var evid='<div style="display:flex;align-items:center;gap:7px;margin:4px 0 10px">'+jdIcon('check',JD_CYAN,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">Evidenced in the job description ('+cov.length+')</span></div>'+(cov.length?'<div style="columns:'+(JD_LARGE?2:3)+';column-gap:26px">'+cov.map(jdEvidItemHtml).join('')+'</div>':'<div style="color:#8ba0b6;font-size:12px;line-height:1.5">None of this standard&rsquo;s '+c.label.toLowerCase()+' are evidenced by the job description yet.</div>');
-  var dev=gaps.length?'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:10.5px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div><div style="columns:2;column-gap:26px">'+gaps.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>':'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:13px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
+  var dev=gaps.length?'<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">'+jdIcon('cal',c.col,16)+'<span style="font-weight:700;font-size:13px;color:#fff;font-family:'+JD_HF+'">To develop &mdash; work-exposure plan ('+gaps.length+')</span></div><div style="color:#8ba0b6;font-size:11px;margin-bottom:10px;line-height:1.4">Arrange real workplace exposure &mdash; tasks, projects, shadowing or rotations &mdash; so the apprentice can practise and evidence each:</div><div style="columns:2;column-gap:26px">'+gaps.map(function(it){return jdDevItemHtml(c,it);}).join('')+'</div>':'<div style="display:flex;align-items:center;gap:8px;color:'+JD_CYAN+';font-size:13px">'+jdIcon('check',JD_CYAN,16)+'All '+c.label.toLowerCase()+' are evidenced by this job description.</div>';
   var divider='<div style="height:1px;background:rgba(var(--wash),0.12);margin:18px 0"></div>';
   return jdPdfKsbHead(c)+evid+divider+dev;
 }
@@ -5248,9 +5248,9 @@ function jdBuildPdfPages(){
     '<div style="color:#fff;font-size:18px;font-weight:700;margin-bottom:16px">'+d.stdName+'</div>'+
     '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.07em;font-family:'+JD_HF+';margin-bottom:12px">AREA BREAKDOWN</div>'+
     cats.map(function(c){return '<div style="display:flex;align-items:center;gap:13px;margin-bottom:13px">'+jdDonut(c.pct,52,6,c.col)+'<div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</span><span style="color:'+c.col+';font-size:12px;font-weight:700">'+c.covered+' / '+c.total+'</span></div>'+jdBar(c.pct,c.col)+'</div></div>';}).join('')+
-    '<div style="margin-top:auto;display:flex;align-items:center;gap:8px;color:#9fb1c2;font-size:10.5px;line-height:1.4">'+jdIcon("brain",JD_PURPLE,16)+'<span>Indicative keyword analysis, not a compliance verdict.</span></div>'+
+    '<div style="margin-top:auto;display:flex;align-items:center;gap:8px;color:#9fb1c2;font-size:11px;line-height:1.4">'+jdIcon("brain",JD_PURPLE,16)+'<span>Indicative keyword analysis, not a compliance verdict.</span></div>'+
   '</div>';
-  var inThis=cats.map(function(c){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(var(--wash),0.06)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:12px;font-family:'+JD_HF+'">'+c.key+'</span><div style="flex:1"><div style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</div><div style="color:#8ba0b6;font-size:10.5px"><span class="pgref" data-k="'+c.key+'">Page</span></div></div><span style="color:'+c.col+';font-size:11px;font-weight:700">'+(c.total-c.covered)+' to develop</span></div>';}).join('');
+  var inThis=cats.map(function(c){return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(var(--wash),0.06)"><span style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:'+c.col+'24;color:'+c.col+';font-weight:800;font-size:12px;font-family:'+JD_HF+'">'+c.key+'</span><div style="flex:1"><div style="color:#dfe9f2;font-size:12px;font-weight:600">'+c.label+'</div><div style="color:#8ba0b6;font-size:11px"><span class="pgref" data-k="'+c.key+'">Page</span></div></div><span style="color:'+c.col+';font-size:11px;font-weight:700">'+(c.total-c.covered)+' to develop</span></div>';}).join('');
   var col3='<div style="flex:0 0 286px;display:flex;flex-direction:column;gap:12px">'+
     '<div style="background:'+P+';border:'+JD_CB+';border-radius:14px;padding:16px">'+
       '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+jdIcon("bulb",JD_CYAN,18)+'<span style="color:'+JD_CYAN+';font-size:12px;font-weight:700;letter-spacing:.05em;font-family:'+JD_HF+'">INSIGHT</span></div>'+
@@ -5268,7 +5268,7 @@ function jdBuildPdfPages(){
       '<div style="color:#8ba0b6;font-size:11px;letter-spacing:.1em">WORKFORCE INTELLIGENCE&nbsp;&middot;&nbsp;<span style="color:'+JD_CYAN+';font-weight:700">JD MATCHER</span></div>'+
       '<div style="font-size:14px"><span style="color:'+JD_CYAN+';font-weight:600">'+d.stdName+'</span><span style="color:#7e93a8"> &middot; '+date+'</span></div>'+
     '</div>'+
-    '<div style="margin-top:14px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:13px 18px;display:flex;gap:12px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,22)+'<div><div style="font-size:15px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' &middot; '+score+'% coverage</div><div style="font-size:11.5px;color:#aebfce;margin-top:3px;line-height:1.45">'+v.note+'</div></div></div>'+
+    '<div style="margin-top:14px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:13px 18px;display:flex;gap:12px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,22)+'<div><div style="font-size:15px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' &middot; '+score+'% coverage</div><div style="font-size:12px;color:#aebfce;margin-top:3px;line-height:1.45">'+v.note+'</div></div></div>'+
     '<div style="display:flex;gap:16px;margin-top:16px;flex:1;min-height:0">'+col1+col2+col3+'</div>';
   var host=document.createElement('div');host.style.cssText='position:absolute;left:-30000px;top:0;width:'+JD_PG_W+'px';document.body.appendChild(host);
   function measure(el){host.appendChild(el);var h=el.offsetHeight;host.removeChild(el);return h;}
@@ -5581,9 +5581,9 @@ function processQuery(q){
 
   // Policy warnings — defunding & Level 7 age restriction
   if(primary.defunded){
-    html+=`<div style="font-size:11.5px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.35);color:#ff8fa3"><strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date. Consider an alternative below or enrol before the deadline.</div>`;
+    html+=`<div style="font-size:12px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.35);color:#ff8fa3"><strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date. Consider an alternative below or enrol before the deadline.</div>`;
   }else if(primary.level===7){
-    html+=`<div style="font-size:11.5px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.35);color:#f5c87a"><strong>⚠ Level 7 — under-22s only (from 1 Jan 2026).</strong> Levy funds only apprentices aged under 22 at the start (or 22–24 with an EHC plan / care-experienced).</div>`;
+    html+=`<div style="font-size:12px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.35);color:#f5c87a"><strong>⚠ Level 7 — under-22s only (from 1 Jan 2026).</strong> Levy funds only apprentices aged under 22 at the start (or 22–24 with an EHC plan / care-experienced).</div>`;
   }
 
   html+=`
@@ -5715,7 +5715,7 @@ document.addEventListener('keydown',e=>{
       var exp=c[3],ok=Math.abs(got-exp)<0.005;if(ok)pass++;
       if(c[0]!==grp){grp=c[0];rows+='<tr><td colspan="4" style="padding:11px 8px 3px;color:#8fb8cc;font-weight:600;font-size:12px">'+grp+'</td></tr>';}
       rows+='<tr style="border-top:1px solid rgba(var(--wash),0.06)">'+
-        '<td style="padding:6px 8px;font-size:12.5px">'+c[1]+' <a href="'+SRC[c[4]]+'" target="_blank" rel="noopener" style="color:#39A0D4;font-size:10px">gov.uk</a></td>'+
+        '<td style="padding:6px 8px;font-size:12px">'+c[1]+' <a href="'+SRC[c[4]]+'" target="_blank" rel="noopener" style="color:#39A0D4;font-size:10px">gov.uk</a></td>'+
         '<td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:12px">'+fmt(got)+'</td>'+
         '<td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:12px;color:#8fb8cc">'+fmt(exp)+'</td>'+
         '<td style="padding:6px 8px;text-align:center;color:'+(ok?'#2DD4B2':'#ff6b81')+';font-weight:700">'+(ok?'✓':'✗ FAIL')+'</td></tr>';
@@ -5865,7 +5865,7 @@ function renderGoalConfirm(){
   const hasData=!!(levyData&&levyData.byMonth&&levyData.byMonth.length&&programmes.length);
   const fx=GOAL_FX[scnGoal.key]||'tailor your forecast';
   c.innerHTML='&#10003; Goal set: <strong style="color:var(--goal-accent)">'+(o?o.lb:scnGoal.key)+'</strong>'+note
-    +'<div style="margin-top:5px;color:var(--text3);font-size:12.5px">Your forecast will '+fx+(hasData?'.':' — add your levy data and programmes to see it.')+'</div>';
+    +'<div style="margin-top:5px;color:var(--text3);font-size:12px">Your forecast will '+fx+(hasData?'.':' — add your levy data and programmes to see it.')+'</div>';
 }
 function setGoal(key){
   const o=GOALS.find(x=>x.key===key);if(!o)return;
