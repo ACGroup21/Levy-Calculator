@@ -753,8 +753,14 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
    brand from control and the switch read as part of the wordmark. Now: 8px inside
    a group, 24px between groups. Left = who this is · the menu. Right = what you can
    do to the plan · what mode you're in · where the rules come from. */
-header .hdr-side>#themeToggle{margin-left:24px}   /* 8+24 = 32 clear of the brand */
-header .hdr-side>#navBurger{margin-left:16px}     /* 8+16 = 24 clear of the actions */
+header .hdr-side>#themeToggle,
+header .hdr-side>.header-badge{margin-left:24px}  /* 8+24 = 32: logo | toggle | badge evenly spaced */
+header .hdr-side>#navBurger{margin-left:auto;margin-right:4px}
+/* The logo's SVG carries transparent padding in its viewBox, so the mark the eye
+   sees starts 28px in while its box starts at 24px. The menu is a hard-edged
+   circle, so it needs 4px of inset to LOOK level with the logo rather than measure
+   level with it. (Pulling it further clear of the actions was measured and rejected:
+   48px pushed the menu 16px past the edge — the header has no slack to give.) */
 /* Function menu: 28 items in 8 groups sat flush at 0px apart, so the eye had to
    parse a solid block. Same grouping rule as the header — a little air inside a
    group, more between groups — plus a taller tap target. */
