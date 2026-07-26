@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Fundable light mode — six sky and cloud treatments, shown with real app furniture.">
+<title>Fundable — light mode: sky &amp; clouds</title>
+<style>
+  :root{
+    --ink:#0E2033; --ink2:#3A4E63; --muted:#5C7186;
+    --accent:#0A6E86; --deep:#1464A6; --cyan:#00C3DD; --money:#9C4416;
+    --mono:ui-monospace,"JetBrains Mono",Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",system-ui,Roboto,Arial,sans-serif;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#e9eef5;color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1200px;margin:0 auto;padding:34px clamp(16px,4vw,30px) 80px}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(24px,3.2vw,32px);letter-spacing:-.02em;margin:11px 0 0;font-weight:800}
+  .lede{color:var(--ink2);max-width:66ch;margin:12px 0 0;font-size:15px}
+  .sub{color:var(--muted);max-width:70ch;margin:8px 0 0;font-size:13.5px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:26px}
+  @media(max-width:1000px){.grid{grid-template-columns:1fr}}
+  .opt{border:1px solid rgba(14,32,51,.13);border-radius:15px;overflow:hidden;background:#fff;box-shadow:0 1px 3px rgba(14,32,51,.05)}
+  .meta{padding:14px 17px;border-top:1px solid rgba(14,32,51,.1)}
+  .meta h3{margin:0;font-size:15.5px;letter-spacing:-.01em}
+  .meta p{color:var(--ink2);font-size:13px;line-height:1.6;margin:8px 0 0}
+  .verdict{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(14,32,51,.12);font-size:12.5px;color:var(--muted)}
+  .verdict b{color:var(--accent)}
+
+  /* ── the sky stage ── */
+  .sky{position:relative;height:280px;overflow:hidden;background:var(--sky)}
+  .cloud{position:absolute;border-radius:50%;filter:blur(var(--cb,55px));opacity:var(--co,.75);
+         background:var(--cc,#fff);animation:drift var(--cd,60s) linear infinite}
+  @keyframes drift{
+    0%{transform:translate(0,0) scale(1)}
+    25%{transform:translate(46px,-22px) scale(1.07)}
+    50%{transform:translate(14px,20px) scale(.96)}
+    75%{transform:translate(-38px,-12px) scale(1.05)}
+    100%{transform:translate(0,0) scale(1)}}
+  .c1{width:300px;height:170px;top:-40px;left:-50px}
+  .c2{width:240px;height:140px;top:38%;right:-60px;animation-direction:reverse;animation-duration:74s}
+  .c3{width:200px;height:120px;bottom:-46px;left:24%;animation-duration:86s}
+  .c4{width:160px;height:100px;top:12%;left:44%;animation-duration:96s;animation-delay:-20s}
+
+  /* app slice floating on the sky */
+  .slice{position:relative;z-index:2;padding:16px}
+  .bar{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;background:rgba(255,255,255,.92);
+       border:1px solid rgba(14,32,51,.1);margin-bottom:12px;backdrop-filter:blur(6px)}
+  .logo{display:flex;gap:2px}.logo i{display:block;width:7px;height:7px;border-radius:2px;background:#0F1826}
+  .logo i.c{background:var(--cyan)}
+  .brandw{font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:#0F1826;margin-left:5px}
+  .navs{margin-left:auto;display:flex;gap:11px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .card{background:#fff;border:1px solid rgba(14,32,51,.11);border-radius:12px;padding:13px;box-shadow:0 1px 3px rgba(14,32,51,.06)}
+  .steprow{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .chip{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;padding:3px 8px;border-radius:20px;background:#fff;color:var(--accent);border:1px solid rgba(0,195,221,.5)}
+  .stitle{font-size:13.5px;font-weight:700;letter-spacing:-.01em}
+  .figs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .fig{background:#f7fafd;border:1px solid #eaf1f8;border-radius:8px;padding:8px 9px}
+  .fig .k{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+  .fig .v{font-family:var(--mono);font-size:14px;font-weight:600}
+  .fig .v.m{color:var(--money)} .fig .v.d{color:var(--deep)}
+  .note{margin-top:9px;font-size:11px;color:var(--muted);font-family:var(--mono);letter-spacing:.04em}
+
+  .foot{margin-top:40px;border-top:1px solid rgba(14,32,51,.12);padding-top:18px;color:var(--ink2);font-size:13.5px;line-height:1.7;max-width:82ch}
+  .foot b{color:var(--ink)}
+  @media(prefers-reduced-motion:reduce){.cloud{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">Fundable · light mode — sky &amp; clouds</span>
+  <h1>Six skies to sit the app on.</h1>
+  <p class="lede">Dark mode has stars on near-black; light mode should be the same idea inverted — white clouds on a blue sky, not grey clouds on white. Each panel shows the real app furniture floating on the sky so you can judge legibility, not just prettiness.</p>
+  <p class="sub">Clouds drift slowly and sit behind everything; all six are click-through and freeze under reduced-motion.</p>
+
+  <div class="grid">
+
+    <!-- 1 -->
+    <div class="opt">
+      <div class="sky" style="--sky:#eaf2fb">
+        <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div><div class="cloud c4"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>1 · Pale sky</h3><p>A soft blue ground with white clouds drifting through it.</p>
+        <div class="verdict"><b>My recommendation.</b> Blue enough to read as sky, pale enough that white cards still pop and nothing competes with the numbers.</div></div>
+    </div>
+
+    <!-- 2 -->
+    <div class="opt">
+      <div class="sky" style="--sky:linear-gradient(180deg,#d6e6f7 0%,#eef4fb 62%,#f7fafd 100%)">
+        <div class="cloud c1" style="--co:.8"></div><div class="cloud c2" style="--co:.8"></div><div class="cloud c3" style="--co:.85"></div><div class="cloud c4" style="--co:.7"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>2 · Sky gradient</h3><p>Deeper blue at the top fading to almost white further down the page.</p>
+        <div class="verdict">Feels like real sky and <b>gives the page a top</b>. The catch: on a long page the gradient runs out, so it must repeat or fix.</div></div>
+    </div>
+
+    <!-- 3 -->
+    <div class="opt">
+      <div class="sky" style="--sky:linear-gradient(180deg,#cfe2f5 0%,#e4eefa 48%,#ffffff 100%)">
+        <div class="cloud c2" style="--cb:45px;--co:.9;top:52%"></div>
+        <div class="cloud c3" style="--cb:42px;--co:.95;bottom:-30px;left:10%;width:260px"></div>
+        <div class="cloud c4" style="--cb:40px;--co:.9;top:64%;left:58%;width:190px"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>3 · Horizon</h3><p>Clouds banked low with clear sky above, so the page has a skyline.</p>
+        <div class="verdict">The most <b>pictorial</b> of the six. Lovely on a landing page; on a working tool the banking draws the eye downward, away from the figures.</div></div>
+    </div>
+
+    <!-- 4 -->
+    <div class="opt">
+      <div class="sky" style="--sky:#e3edf8">
+        <div class="cloud c1" style="--cb:70px;--co:.95;width:380px"></div>
+        <div class="cloud c2" style="--cb:70px;--co:.9;width:330px"></div>
+        <div class="cloud c3" style="--cb:70px;--co:.9;width:300px"></div>
+        <div class="cloud c4" style="--cb:70px;--co:.85;width:260px"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>4 · Overcast</h3><p>Heavier cloud cover — the sky mostly filled, blue showing through the gaps.</p>
+        <div class="verdict">Softest and calmest, but it <b>washes back toward white</b>, which loses the blue you asked for. Close to where light mode already was.</div></div>
+    </div>
+
+    <!-- 5 -->
+    <div class="opt">
+      <div class="sky" style="--sky:#d3e4f6">
+        <div class="cloud c1" style="--cb:38px;--co:.9;width:220px;height:110px"></div>
+        <div class="cloud c3" style="--cb:36px;--co:.85;width:170px;height:90px"></div>
+        <div class="cloud c4" style="--cb:34px;--co:.8;width:150px;height:80px"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>5 · High altitude</h3><p>A deeper, more saturated blue with fewer, crisper clouds.</p>
+        <div class="verdict">The <b>most confident</b> use of blue and the clearest mirror of the dark theme. Watch it over a long session — a strong ground can tire the eye.</div></div>
+    </div>
+
+    <!-- 6 -->
+    <div class="opt">
+      <div class="sky" style="--sky:#f2f7fc">
+        <div class="cloud c1" style="--co:.5"></div><div class="cloud c3" style="--co:.45"></div><div class="cloud c4" style="--co:.4"></div>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span><span class="navs"><span>Goal</span><span>01</span><span>02</span></span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>6 · Barely there</h3><p>The faintest blue with clouds you notice only if you look for them.</p>
+        <div class="verdict">Safest for hours of use and it will never date — but it is <b>close to what you already rejected</b>, so it may not read as blue enough.</div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <b>My recommendation: 1 (Pale sky), with 5 as the alternative if you want the blue to be unmistakable.</b> One is blue enough to read as sky while leaving the white cards and the money figures completely dominant; five is the bolder statement and the truer mirror of the dark theme, at some cost over a long working session.<br><br>
+    <b>One practical note:</b> the app scrolls for about eleven screens, so a top-to-bottom gradient (option 2 or 3) either runs out or has to be fixed to the viewport. A flat sky with drifting clouds (1, 4, 5, 6) behaves the same at any scroll depth, which is why I favour it for a tool rather than a landing page.
+  </div>
+</div>
+</body>
+</html>
