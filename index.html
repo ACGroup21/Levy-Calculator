@@ -457,6 +457,18 @@ tr:hover td{background:rgba(45,212,178,0.02)}
    ~10px reclaimed per column clears the clip without dropping any data.
    Must sit AFTER the base th/td rules — media queries add no specificity. */
 @media(max-width:1400px){th{padding:8px 6px}td{padding:10px 6px}}
+
+/* ── Splash: covers the parse of a ~3MB single-file app, then gets out of the way.
+   Shown once per browser session; hard-capped so it can never become friction. ── */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(900px 520px at 50% 42%,rgba(0,195,221,.07),transparent 60%),#050c18;transition:opacity .45s ease,visibility .45s}
+#splash.done{opacity:0;visibility:hidden;pointer-events:none}
+#splash .sp-mark{animation:sp-in .55s cubic-bezier(.2,.7,.3,1) both}
+#splash .sp-wm{font-family:var(--sans);font-weight:300;letter-spacing:.34em;text-transform:uppercase;font-size:14px;color:var(--text);opacity:.92;animation:sp-in .55s .09s cubic-bezier(.2,.7,.3,1) both}
+#splash .sp-bar{width:128px;height:2px;border-radius:2px;background:rgba(150,190,225,.14);overflow:hidden}
+#splash .sp-bar i{display:block;height:100%;width:38%;background:linear-gradient(90deg,transparent,#00C3DD,transparent);animation:sp-sweep 1.05s ease-in-out infinite}
+@keyframes sp-in{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes sp-sweep{from{transform:translateX(-120%)}to{transform:translateX(360%)}}
+@media(prefers-reduced-motion:reduce){#splash .sp-mark,#splash .sp-wm{animation:none}#splash .sp-bar i{animation:none;width:100%}}
 th.r,td.r{text-align:right}
 .mono{font-family:var(--mono)}.td-name{color:var(--text);font-weight:500}
 
@@ -590,6 +602,29 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 </head>
 <body>
 
+<div id="splash" role="status" aria-label="Loading Fundable">
+  <svg class="sp-mark" viewBox="-14 -14 114 113" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:96px" aria-hidden="true"><defs><filter id="spGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="spLink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD" filter="url(#spGlow)" opacity=".75"/><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#spLink)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
+  <div class="sp-wm">Fundable</div>
+  <div class="sp-bar"><i></i></div>
+</div>
+<script>
+// Dismiss as soon as the app is ready; MIN avoids a jarring flash, CAP guarantees the
+// splash can never hold the user up. Shown once per session, so it never becomes friction.
+(function(){
+  var s=document.getElementById('splash'); if(!s)return;
+  try{ if(sessionStorage.getItem('ac_splash')){ s.parentNode.removeChild(s); return; } }catch(e){}
+  var t0=Date.now(), MIN=400, CAP=1400, gone=false;
+  function hide(){
+    if(gone)return; gone=true;
+    try{sessionStorage.setItem('ac_splash','1');}catch(e){}
+    s.classList.add('done');
+    setTimeout(function(){ if(s.parentNode)s.parentNode.removeChild(s); },520);
+  }
+  function ready(){ setTimeout(hide, Math.max(0, MIN-(Date.now()-t0))); }
+  if(document.readyState==='complete')ready(); else window.addEventListener('load',ready);
+  setTimeout(hide, CAP);
+})();
+</script>
 <div class="aurora">
   <div class="aurora-blob blob1"></div><div class="aurora-blob blob2"></div>
   <div class="aurora-blob blob3"></div><div class="aurora-blob blob4"></div><div class="aurora-blob blob5"></div>
@@ -1039,7 +1074,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
