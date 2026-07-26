@@ -755,6 +755,12 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
    do to the plan · what mode you're in · where the rules come from. */
 header .hdr-side>.header-badge,
 header .hdr-side>#navBurger{margin-left:16px}
+/* Function menu: 28 items in 8 groups sat flush at 0px apart, so the eye had to
+   parse a solid block. Same grouping rule as the header — a little air inside a
+   group, more between groups — plus a taller tap target. */
+.nav-list button.nav-item{padding:10px 12px!important;margin-bottom:3px}
+.nav-list .nav-grp{margin:22px 8px 7px!important}
+.nav-list .nav-grp:first-child{margin-top:4px!important}
 :root[data-theme="light"] .fmode-toggle button{color:var(--text2)}
 
 /* (b) hardcoded hex in generated markup — .page only, so reports keep theirs */
@@ -1525,7 +1531,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27z</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
