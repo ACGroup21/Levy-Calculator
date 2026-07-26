@@ -95,6 +95,27 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 /* flex-basis 0 keeps both sides equal so the nav sits centred, but min-width:max-content
    stops a side ever shrinking below its content and spilling over the nav. */
 .hdr-side{flex:1 1 0;display:flex;align-items:center;min-width:max-content}
+/* ── Page navigator rail: where am I in an 11-screen app, and jump/scrub anywhere ── */
+#navRail{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:120;display:flex;flex-direction:column;align-items:flex-end;gap:8px;opacity:.5;transition:opacity .2s}
+#navRail:hover,#navRail.live{opacity:1}
+#railTrack{position:relative;width:24px;padding:8px 0;display:flex;flex-direction:column;align-items:center;cursor:grab;touch-action:none}
+#railTrack:active{cursor:grabbing}
+#railTrack::before{content:'';position:absolute;top:0;bottom:0;width:2px;background:rgba(var(--wash),0.13);border-radius:2px}
+.rail-tick{position:relative;width:100%;height:22px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer}
+.rail-tick i{display:block;width:7px;height:7px;border-radius:50%;background:rgba(var(--wash),0.3);transition:all .18s}
+.rail-tick:hover i{background:var(--text2);transform:scale(1.3)}
+.rail-tick.on i{background:var(--teal);box-shadow:0 0 9px var(--teal);width:9px;height:9px}
+.rail-tick .rl{position:absolute;right:26px;top:50%;transform:translateY(-50%) translateX(6px);white-space:nowrap;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);background:rgba(5,12,24,0.94);border:1px solid var(--border);border-radius:6px;padding:3px 9px;opacity:0;pointer-events:none;transition:all .18s}
+.rail-tick:hover .rl{opacity:1;transform:translateY(-50%) translateX(0)}
+#railGrip{position:absolute;right:-3px;width:10px;height:10px;border-radius:50%;background:var(--text);box-shadow:0 0 10px rgba(var(--wash),.5);pointer-events:none;transition:top .12s linear}
+#railBtn{background:var(--glass);border:1px solid var(--border);color:var(--text3);border-radius:8px;width:24px;height:24px;font-size:11px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:all .15s}
+#railBtn:hover{color:var(--teal);border-color:var(--teal)}
+#railPick{position:absolute;right:32px;top:0;background:rgba(5,12,24,0.97);border:1px solid var(--border2);border-radius:11px;padding:11px 13px;box-shadow:0 18px 46px rgba(0,0,0,.6);display:none;min-width:186px;backdrop-filter:blur(16px)}
+#railPick.open{display:block}
+#railPick h6{margin:0 0 8px;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);font-weight:500}
+#railPick label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);padding:4px 0;cursor:pointer}
+#railPick input{accent-color:var(--teal);cursor:pointer}
+@media(max-width:900px){#navRail{display:none}}
 .cnt-step{display:inline-flex;align-items:center;gap:5px;justify-content:flex-end}
 .cnt-step .cnt-n{min-width:16px;text-align:center;display:inline-block}
 .cnt-btn{width:19px;height:19px;border-radius:5px;border:1px solid var(--border);background:rgba(var(--wash),0.05);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;font-family:inherit;transition:border-color .12s,color .12s}
@@ -137,6 +158,22 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 .goal-emph .ge-lab{font-size:11px;color:var(--text3)}
 .goal-emph .ge-note{flex:1 1 200px;font-size:12.5px;color:var(--text3);line-height:1.4;min-width:180px}
 /* collapse to dots only when space is tight, so all options always fit (never scroll) */
+/* LARGE SCREENS — these are min-width rules, so they only ever ADD room; nothing below
+   1600px is affected. The app was capped at 1100px, leaving big empty margins and
+   small-looking text on a large monitor. */
+@media(min-width:1600px){
+  .page{max-width:1280px}
+  body{font-size:15px}
+  .card{padding:1.6rem}
+  .step-title{font-size:19px}
+  .step-sub{font-size:14px}
+  .metric .v,.metric-v{font-size:1.05em}
+}
+@media(min-width:1900px){
+  .page{max-width:1420px}
+  body{font-size:16px}
+  .step-title{font-size:20px}
+}
 /* Header crowding: drop the lowest-value items first so nothing ever wraps or overlaps.
    These elements wrap/collide rather than overflow, so they need explicit breakpoints. */
 /* Thresholds are measured, not guessed: at 1280px the header has 1217px of room and
@@ -604,6 +641,12 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   </div>
 </header>
 
+<div id="navRail" aria-label="Page navigator">
+  <button id="railBtn" onclick="toggleRailPick(event)" title="Choose which sections show on the rail" aria-label="Choose sections">&#9776;</button>
+  <div id="railTrack"><div id="railGrip"></div></div>
+  <div id="railPick"><h6>Show on rail</h6><div id="railPickList"></div></div>
+</div>
+
 <div class="page">
   <div style="padding-top:1.5rem">
     <div class="rule-banner">
@@ -1017,7 +1060,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26g</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2847,6 +2890,90 @@ function buildNavDrawer(){
     }).join('');
   }).join('');
 }
+// ── Page navigator rail ──────────────────────────────────────────────
+// The app runs ~11 screens deep; the top nav and drawer both tell you WHERE to go
+// but never WHERE YOU ARE. The rail adds position + scrubbing, and lets each user
+// keep only the sections they care about (SLT, HR and finance read different parts).
+var railHidden={};
+try{railHidden=JSON.parse(localStorage.getItem('ac_rail')||'{}')||{};}catch(e){railHidden={};}
+function railSections(){
+  return [].filter.call(document.querySelectorAll('.led-nav button[data-target]'),function(b){
+    if(b.dataset.target==='__copilot')return false;
+    if(b.style.display==='none')return false;              // mode-hidden (e.g. Forecast in non-levy)
+    return !!document.getElementById(b.dataset.target);
+  });
+}
+function buildRail(){
+  var track=document.getElementById('railTrack');if(!track)return;
+  var grip=document.getElementById('railGrip');
+  [].slice.call(track.querySelectorAll('.rail-tick')).forEach(function(n){n.remove();});
+  railSections().forEach(function(b){
+    var id=b.dataset.target, lbl=(b.querySelector('.lbl')||{}).textContent||id;
+    if(railHidden[id])return;
+    var t=document.createElement('button');
+    t.className='rail-tick'; t.type='button'; t.dataset.target=id;
+    t.setAttribute('aria-label','Go to '+lbl);
+    t.innerHTML='<i></i><span class="rl">'+escHtml(lbl)+'</span>';
+    t.onclick=function(){goSection(id);};
+    track.insertBefore(t,grip);
+  });
+  buildRailPick();
+  updateRail();
+}
+function buildRailPick(){
+  var el=document.getElementById('railPickList');if(!el)return;
+  el.innerHTML=railSections().map(function(b){
+    var id=b.dataset.target, lbl=(b.querySelector('.lbl')||{}).textContent||id;
+    return '<label><input type="checkbox" '+(railHidden[id]?'':'checked')+' onchange="toggleRailSection(\''+id+'\',this.checked)"> '+escHtml(lbl)+'</label>';
+  }).join('');
+}
+function toggleRailSection(id,show){
+  if(show)delete railHidden[id]; else railHidden[id]=1;
+  try{localStorage.setItem('ac_rail',JSON.stringify(railHidden));}catch(e){}
+  buildRail();
+}
+function toggleRailPick(e){
+  if(e)e.stopPropagation();
+  document.getElementById('railPick').classList.toggle('open');
+}
+function updateRail(){
+  var track=document.getElementById('railTrack'),grip=document.getElementById('railGrip');
+  if(!track||!grip)return;
+  var max=Math.max(1,document.documentElement.scrollHeight-window.innerHeight);
+  var frac=Math.min(1,Math.max(0,window.scrollY/max));
+  var h=track.clientHeight;
+  grip.style.top=Math.round(frac*(h-10))+'px';
+  // active tick = last section whose top is above the viewport middle
+  var mid=window.scrollY+window.innerHeight*0.35, active=null;
+  [].forEach.call(track.querySelectorAll('.rail-tick'),function(t){
+    var s=document.getElementById(t.dataset.target);
+    if(s&&s.getBoundingClientRect().top+window.scrollY<=mid)active=t;
+    t.classList.remove('on');
+  });
+  if(!active)active=track.querySelector('.rail-tick');   // at the very top, mark the first
+  if(active)active.classList.add('on');
+}
+(function(){
+  var track=document.getElementById('railTrack');if(!track)return;
+  var rail=document.getElementById('navRail'),dragging=false;
+  function scrub(clientY){
+    var r=track.getBoundingClientRect();
+    var frac=Math.min(1,Math.max(0,(clientY-r.top)/Math.max(1,r.height)));
+    window.scrollTo({top:frac*(document.documentElement.scrollHeight-window.innerHeight),behavior:'auto'});
+  }
+  track.addEventListener('pointerdown',function(e){
+    if(e.target.closest('.rail-tick'))return;             // let tick clicks jump instead
+    dragging=true;rail.classList.add('live');track.setPointerCapture(e.pointerId);scrub(e.clientY);e.preventDefault();
+  });
+  track.addEventListener('pointermove',function(e){if(dragging)scrub(e.clientY);});
+  ['pointerup','pointercancel'].forEach(function(ev){track.addEventListener(ev,function(){dragging=false;rail.classList.remove('live');});});
+  window.addEventListener('scroll',updateRail,{passive:true});
+  window.addEventListener('resize',updateRail);
+  document.addEventListener('click',function(e){
+    var p=document.getElementById('railPick');
+    if(p&&p.classList.contains('open')&&!e.target.closest('#navRail'))p.classList.remove('open');
+  });
+})();
 function openNav(){document.getElementById('navBack').classList.add('open');document.getElementById('navDrawer').classList.add('open');document.getElementById('navDrawer').setAttribute('aria-hidden','false');}
 function closeNav(){document.getElementById('navBack').classList.remove('open');document.getElementById('navDrawer').classList.remove('open');document.getElementById('navDrawer').setAttribute('aria-hidden','true');}
 // Arrow tracks the target through the (smooth) scroll, then settles + holds 2.5s + fades.
@@ -2911,6 +3038,7 @@ function setFundingMode(m,userChose){
   updateFmodeHint();
   if(typeof syncLevyFundingNav==='function')syncLevyFundingNav();
   if(typeof applyFundingFlow==='function')applyFundingFlow();
+  if(typeof buildRail==='function')buildRail();
   if(typeof renderLearnerCost==='function')renderLearnerCost();
   if(typeof renderGoalGrid==='function')renderGoalGrid();
   if(typeof renderReportPicker==='function')renderReportPicker();
@@ -4921,6 +5049,7 @@ renderRulesRef();
 renderReportPicker();
 renderQAR();
 buildNavDrawer();
+buildRail();
 updateKsbBadge();
 (function(){
   var lg=document.querySelector('.logo-mark-img');
