@@ -163,6 +163,9 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 @media(max-width:1370px){header .header-badge{display:none}}
 @media(max-width:1220px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
 @media(max-width:1000px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
+/* Phone: the icon-only LED nav still needs ~337px and overflowed the header.
+   Hand navigation to the burger drawer, which already indexes every function. */
+@media(max-width:820px){.led-nav{display:none}}
 @media(max-width:760px){header .header-badge{display:none}}
 /* burger function menu + pointing arrow */
 .nav-back{position:fixed;inset:0;background:rgba(2,6,14,0.55);backdrop-filter:blur(2px);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -1074,7 +1077,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26k</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
