@@ -740,6 +740,25 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <span class="fmode-hint" id="fmodeHint"></span>
   </div>
 
+  <!-- Client plans -->
+  <details class="card" id="scenarioCard" style="margin-bottom:1.1rem">
+    <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
+      <span style="font-size:15px">&#128194;</span>
+      <span style="flex:1;font-size:13.5px;color:var(--text2)"><b style="color:var(--text)">Client plans</b> &mdash; save this plan, switch between clients, or send one as a file. Everything stays in your browser.</span>
+      <span style="color:var(--text3);font-size:12px">&#9662;</span>
+    </summary>
+    <div style="margin-top:13px">
+      <div id="scnList"></div>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:13px;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08)">
+        <button type="button" class="btn-add" onclick="scnSaveAs()">&#128190;&nbsp; Save current plan</button>
+        <button type="button" class="btn-clear" onclick="scnExportFile()">&#11015;&nbsp; Export as file</button>
+        <button type="button" class="btn-clear" onclick="document.getElementById('scnFile').click()">&#11014;&nbsp; Open a file</button>
+        <button type="button" class="btn-clear" onclick="exportPlanCSV()">&#128202;&nbsp; Export numbers (CSV)</button>
+        <input type="file" id="scnFile" accept=".json,application/json" aria-label="Open a Fundable plan file" style="display:none" onchange="scnImportFile(this.files[0]);this.value=''">
+      </div>
+    </div>
+  </details>
+
   <!-- STEP 00: GOAL -->
   <div class="step-row" id="sec-goal"><span class="step-chip">START</span><span class="step-title">Plan to Achieve</span></div>
   <p class="step-sub">Your goal shapes how the calculator prioritises its recommendations &nbsp;&middot;&nbsp; change it any time by clicking the Goal tab in the top menu</p>
@@ -1135,7 +1154,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26r</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26s</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2115,6 +2134,126 @@ const SCEN_SCHEMA=1;
 let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null, scnDataAck=null, lastDataFindings=[];
 let ringfences=[], ringfenceApply=false;
 function scnNewId(){try{if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();}catch(e){}return 'scn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*1e6).toString(36);}
+// ── Client scenarios: save, switch, export ───────────────────────────────────
+// The app held ONE state, so modelling a second client destroyed the first. These
+// keep a named set locally and let a plan travel as a file (no backend needed).
+function scnAll(){try{return JSON.parse(localStorage.getItem('ac_scenarios')||'{}')||{};}catch(e){return {};}}
+function scnWrite(o){try{localStorage.setItem('ac_scenarios',JSON.stringify(o));}catch(e){alert('Could not save — browser storage may be full.');}}
+function scnSaveAs(){
+  var nm=(prompt('Save this plan as — a client or scenario name:','')||'').trim();
+  if(!nm)return;
+  var all=scnAll();
+  if(all[nm]&&!confirm('"'+nm+'" already exists. Overwrite it?'))return;
+  all[nm]=buildScenario(); scnWrite(all); renderScenarios();
+  if(typeof setStatus==='function')setStatus('Saved as "'+nm+'".','ok');
+}
+function scnOpen(nm){
+  var all=scnAll(); if(!all[nm])return;
+  if(!confirm('Open "'+nm+'"? This replaces what is on screen — save the current plan first if you need it.'))return;
+  applyScenario(all[nm]); scnRefresh();
+  if(typeof setStatus==='function')setStatus('Opened "'+nm+'".','ok');
+}
+function scnDelete(nm){
+  if(!confirm('Delete the saved plan "'+nm+'"? This cannot be undone.'))return;
+  var all=scnAll(); delete all[nm]; scnWrite(all); renderScenarios();
+}
+function scnRefresh(){
+  var fns=['renderProgrammes','renderProjection','renderNonLevy','renderGoalGrid','renderLearnerCost',
+           'renderRingfences','renderDeliverySync','renderQAR','renderReportPicker'];
+  for(var i=0;i<fns.length;i++){
+    var f=window[fns[i]];
+    if(typeof f==='function'){try{f();}catch(e){}}
+  }
+  if(typeof setFundingMode==='function')setFundingMode(fundingMode,false);
+  if(typeof saveState==='function')saveState();
+  var ls=document.getElementById('levySummary');
+  var has=(programmes&&programmes.length)||(levyData&&levyData.byMonth&&levyData.byMonth.length);
+  if(ls&&has)ls.classList.remove('hidden');
+}
+function acDownload(name,text,mime){
+  var b=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var u=URL.createObjectURL(b),a=document.createElement('a');
+  a.href=u;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(u);a.remove();},400);
+}
+function scnExportFile(){
+  var nm=(prompt('Name this file (a client name works well):','fundable-plan')||'fundable-plan').trim();
+  var safe=nm.replace(/[^A-Za-z0-9 _-]+/g,'')||'fundable-plan';
+  acDownload(safe+'.fundable.json', JSON.stringify(buildScenario(),null,2), 'application/json');
+}
+function scnImportFile(f){
+  if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    var j=null;
+    try{ j=JSON.parse(r.result); }catch(e){ j=null; }
+    if(!j||!j.meta||j.meta.app!=='ac-levy'){ alert('That is not a Fundable plan file.'); return; }
+    applyScenario(j); scnRefresh(); renderScenarios();
+    if(typeof setStatus==='function')setStatus('Loaded plan from file.','ok');
+  };
+  r.readAsText(f);
+}
+// CSV out — finance teams ask for the numbers, not a PDF.
+function csvCell(v){
+  v=(v===null||v===undefined)?'':String(v);
+  return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+function exportPlanCSV(){
+  if(!programmes.length){alert('Add some programmes first.');return;}
+  var d=null; try{ if(typeof levyReportData==='function')d=levyReportData(); }catch(e){}
+  var rows=[];
+  rows.push(['Programme','Individual price','Learners','Total','Start','EPA','Months','Monthly draw']);
+  for(var i=0;i<programmes.length;i++){
+    var p=programmes[i], isUnit=(p.type==='unit');
+    var dur=isUnit?'':mBetween(p.start,p.epa);
+    var mo=isUnit?'':(((+p.cost||0)*RULEBOOK.draw.training/Math.max(1,dur))*(+p.count||0)).toFixed(2);
+    rows.push([p.name,(+p.cost||0),(+p.count||0),((+p.cost||0)*(+p.count||0)),p.start||'',p.epa||'',dur,mo]);
+  }
+  if(d){
+    rows.push([]);
+    rows.push(['Summary']);
+    rows.push(['Learners',d.heads]);
+    rows.push(['Total plan cost',Math.round(d.planCost)]);
+    rows.push(['Drawn from levy',Math.round(d.drawn)]);
+    rows.push(['Co-investment',Math.round(d.coInvest)]);
+    rows.push(['Off-the-job time cost',Math.round(d.otjCost)]);
+    rows.push(['True cost',Math.round(d.trueCost)]);
+    rows.push(['Rules version',RULEBOOK.version]);
+  }
+  var out=[];
+  for(var r=0;r<rows.length;r++){
+    var line=[];
+    for(var c=0;c<rows[r].length;c++)line.push(csvCell(rows[r][c]));
+    out.push(line.join(','));
+  }
+  acDownload('fundable-plan.csv', out.join('\n'), 'text/csv;charset=utf-8');
+}
+function renderScenarios(){
+  var el=document.getElementById('scnList'); if(!el)return;
+  var all=scnAll(), names=Object.keys(all).sort();
+  if(!names.length){
+    el.innerHTML='<div style="font-size:12.5px;color:var(--text3);padding:6px 0">No saved plans yet. Build a plan, then “Save current plan” to keep it — useful when you model more than one client.</div>';
+    return;
+  }
+  var html='';
+  for(var i=0;i<names.length;i++){
+    var n=names[i], sc=all[n], when='', heads=0;
+    try{ when=new Date(sc.meta.savedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }catch(e){}
+    try{
+      var ps=sc.programmes||[];
+      for(var k=0;k<ps.length;k++)heads+=(+ps[k].count||0);
+    }catch(e){}
+    var esc=escHtml(n), arg=encodeURIComponent(n);
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(var(--wash),0.06)">'+
+      '<div style="flex:1;min-width:0"><div style="font-size:13.5px;color:var(--text);font-weight:600">'+esc+'</div>'+
+      '<div style="font-size:11px;color:var(--text3)">'+heads+' learner'+(heads===1?'':'s')+(when?(' &middot; saved '+when):'')+'</div></div>'+
+      '<button type="button" onclick="scnOpen(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.35);border-radius:7px;padding:5px 12px;cursor:pointer">Open</button>'+
+      '<button type="button" aria-label="Delete '+esc+'" title="Delete" onclick="scnDelete(decodeURIComponent(\''+arg+'\'))" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:7px;padding:5px 10px;cursor:pointer">&#10005;</button>'+
+    '</div>';
+  }
+  el.innerHTML=html;
+}
+
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now()},
@@ -3731,7 +3870,7 @@ function extractBrandColours(uri,cb){
   img.onerror=function(){cb([]);};
   img.src=uri;
 }
-function saveBrand(){try{localStorage.setItem('ac_brand',JSON.stringify(BRAND));}catch(e){}applyBrandStyle();renderBrandPack();}
+function saveBrand(){try{localStorage.setItem('ac_brand',JSON.stringify(BRAND));}catch(e){}applyBrandStyle();renderBrandPack();renderScenarios();}
 function setBrandField(k,v){BRAND[k]=v;saveBrand();}
 function clearBrand(){BRAND={name:'',logo:'',primary:'',accent:''};saveBrand();}
 function handleBrandFile(f){
