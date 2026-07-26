@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Fundable — flowing wave-mesh background options in brand colours.">
+<title>Fundable — flowing wave-mesh backgrounds</title>
+<style>
+  :root{
+    --ink:#0E2033; --ink2:#3A4E63; --muted:#57697D;
+    --accent:#0A6E86; --deep:#1464A6; --cyan:#00C3DD;
+    --mono:ui-monospace,"JetBrains Mono",Consolas,monospace;
+    --sans:-apple-system,"Segoe UI",system-ui,Roboto,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#0a1018;color:#e9f1f8;font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1240px;margin:0 auto;padding:34px clamp(16px,4vw,30px) 80px}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#7f95aa}
+  h1{font-size:clamp(24px,3.2vw,32px);letter-spacing:-.02em;margin:11px 0 0;font-weight:800}
+  .lede{color:#a9c0d4;max-width:68ch;margin:12px 0 0;font-size:15px}
+  .sub{color:#7f95aa;max-width:72ch;margin:8px 0 0;font-size:13.5px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:26px}
+  @media(max-width:1040px){.grid{grid-template-columns:1fr}}
+  .opt{border:1px solid rgba(150,190,225,.16);border-radius:15px;overflow:hidden;background:#0e1620}
+  .meta{padding:14px 17px;border-top:1px solid rgba(150,190,225,.14)}
+  .meta h3{margin:0;font-size:15.5px}
+  .meta p{color:#a9c0d4;font-size:13px;line-height:1.6;margin:8px 0 0}
+  .verdict{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(150,190,225,.16);font-size:12.5px;color:#7f95aa}
+  .verdict b{color:var(--cyan)}
+  .stage{position:relative;height:290px;overflow:hidden}
+  .stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .slice{position:relative;z-index:3;padding:16px}
+  .bar{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;margin-bottom:12px;
+       background:rgba(10,16,24,.62);border:1px solid rgba(150,190,225,.16);backdrop-filter:blur(8px)}
+  .bar.lt{background:rgba(255,255,255,.9);border-color:rgba(14,32,51,.1)}
+  .logo{display:flex;gap:2px}.logo i{display:block;width:7px;height:7px;border-radius:2px;background:#fff}
+  .bar.lt .logo i{background:#0F1826}
+  .logo i.c{background:var(--cyan)!important}
+  .brandw{font-size:10px;letter-spacing:.22em;text-transform:uppercase;font-weight:600;margin-left:5px}
+  .bar.lt .brandw{color:#0F1826}
+  .card{border-radius:12px;padding:13px;background:rgba(10,16,24,.72);border:1px solid rgba(150,190,225,.16);backdrop-filter:blur(8px)}
+  .card.lt{background:rgba(255,255,255,.94);border-color:rgba(14,32,51,.1);color:var(--ink)}
+  .steprow{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .chip{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;padding:3px 8px;border-radius:20px;
+        border:1px solid rgba(0,195,221,.55);color:var(--cyan)}
+  .card.lt .chip{color:var(--accent)}
+  .stitle{font-size:13.5px;font-weight:700}
+  .figs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .fig{border-radius:8px;padding:8px 9px;background:rgba(150,190,225,.06);border:1px solid rgba(150,190,225,.1)}
+  .card.lt .fig{background:#f7fafd;border-color:#eaf1f8}
+  .fig .k{font-family:var(--mono);font-size:7.5px;letter-spacing:.09em;text-transform:uppercase;color:#7f95aa;margin-bottom:4px}
+  .card.lt .fig .k{color:var(--muted)}
+  .fig .v{font-family:var(--mono);font-size:14px;font-weight:600}
+  .fig .v.m{color:#E0A43B} .fig .v.d{color:#5FB3E8}
+  .card.lt .fig .v.m{color:#9C4416} .card.lt .fig .v.d{color:var(--deep)}
+  .foot{margin-top:40px;border-top:1px solid rgba(150,190,225,.14);padding-top:18px;color:#a9c0d4;font-size:13.5px;line-height:1.7;max-width:82ch}
+  .foot b{color:#e9f1f8}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="eyebrow">Fundable · flowing wave mesh</span>
+  <h1>Four takes on the effect you sent.</h1>
+  <p class="lede">All drawn live on canvas in your brand colours — cyan <span class="mono">#00C3DD</span> into deep blue <span class="mono">#1464A6</span> — rather than the rainbow of the references, so it reads as Fundable rather than generic tech. The first three are dark; the fourth shows the same idea adapted for light mode.</p>
+  <p class="sub">Real app furniture sits on top of each so you can see whether numbers stay readable over moving geometry.</p>
+
+  <div class="grid">
+
+    <div class="opt">
+      <div class="stage"><canvas data-fx="mesh"></canvas>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>1 · Wireframe mesh</h3><p>A triangulated lattice rippling as a wave passes through it — closest to your first reference.</p>
+        <div class="verdict">The most <b>structural</b> reading: a network under tension. Strongest link to your logo, which is literally connected nodes.</div></div>
+    </div>
+
+    <div class="opt">
+      <div class="stage"><canvas data-fx="ribbons"></canvas>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>2 · Flowing ribbons</h3><p>Dense parallel curves sliding over one another, like your second reference.</p>
+        <div class="verdict">The most <b>fluid</b> and the calmest to sit behind text — no hard geometry to fight with type.</div></div>
+    </div>
+
+    <div class="opt">
+      <div class="stage"><canvas data-fx="dots"></canvas>
+        <div class="slice">
+          <div class="bar"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span></div>
+          <div class="card"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>3 · Dot field wave</h3><p>A grid of points lifted by a travelling wave, brighter at the crests — your third reference.</p>
+        <div class="verdict">Closest to the <b>constellation already in dark mode</b>, so it would feel like an evolution rather than a replacement.</div></div>
+    </div>
+
+    <div class="opt">
+      <div class="stage" style="background:#eaf2fb"><canvas data-fx="light"></canvas>
+        <div class="slice">
+          <div class="bar lt"><span class="logo"><i></i><i></i><i></i><i class="c"></i></span><span class="brandw">Fundable</span></div>
+          <div class="card lt"><div class="steprow"><span class="chip">STEP 02</span><span class="stitle">Your funding position</span></div>
+            <div class="figs"><div class="fig"><div class="k">Total</div><div class="v">£58,000</div></div><div class="fig"><div class="k">Levy</div><div class="v d">£47,700</div></div><div class="fig"><div class="k">Off-the-job</div><div class="v m">£61,776</div></div><div class="fig"><div class="k">Co-invest</div><div class="v m">£10,300</div></div></div></div>
+        </div>
+      </div>
+      <div class="meta"><h3>4 · The same idea, in light mode</h3><p>The mesh drawn in blues on the pale sky instead of glowing on black.</p>
+        <div class="verdict">Proves the effect <b>survives inversion</b> — it reads as a blueprint rather than a neon visualiser, which arguably suits a funding tool better.</div></div>
+    </div>
+
+  </div>
+
+  <div class="foot">
+    <b>My recommendation: use this on the demo and landing pages, and the quiet version (4) at low opacity in the app.</b> The effect is genuinely striking, and it earns its place on a page whose job is to impress in ten seconds. In the app — where someone reads figures for an hour — the same energy competes with the numbers.<br><br>
+    <b>The honest tension:</b> this is the most "AI-generated tech" look of anything we have built, and your actual differentiator is being verifiable rather than futuristic. Rendering it in your own two brand colours instead of the rainbow keeps it yours; going full spectrum would make it look like everyone else's landing page.
+  </div>
+</div>
+
+<script>
+(function(){
+  var reduce = matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('canvas[data-fx]').forEach(function(cv){
+    var fx=cv.dataset.fx, ctx=cv.getContext('2d'), W,H,DPR=Math.min(2,devicePixelRatio||1), t=0, raf;
+    function size(){ W=cv.width=cv.clientWidth*DPR; H=cv.height=cv.clientHeight*DPR; }
+    size(); addEventListener('resize',size);
+    function grad(a){ var g=ctx.createLinearGradient(0,0,W,H);
+      g.addColorStop(0,'rgba(0,195,221,'+a+')'); g.addColorStop(.55,'rgba(60,150,220,'+a+')');
+      g.addColorStop(1,'rgba(20,100,166,'+a+')'); return g; }
+    function wave(x,y,k){ return Math.sin(x*0.010+t*k)*22 + Math.sin(y*0.016-t*0.8)*16 + Math.sin((x+y)*0.006+t*1.3)*12; }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      if(fx==='mesh'||fx==='light'){
+        var lightMode=(fx==='light'), step=Math.max(26,W/26), cols=Math.ceil(W/step)+2, rows=Math.ceil(H/step)+2;
+        var pts=[];
+        for(var j=0;j<rows;j++){ pts[j]=[];
+          for(var i=0;i<cols;i++){
+            var x=i*step, y=j*step + wave(x,j*step,0.9)*(lightMode?0.7:1);
+            pts[j][i]={x:x,y:y};
+          }}
+        ctx.lineWidth=DPR*(lightMode?0.9:1);
+        ctx.strokeStyle = lightMode ? 'rgba(20,100,166,0.30)' : grad(0.55);
+        for(var j2=0;j2<rows-1;j2++){
+          for(var i2=0;i2<cols-1;i2++){
+            var a=pts[j2][i2],b=pts[j2][i2+1],c=pts[j2+1][i2];
+            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.lineTo(c.x,c.y); ctx.stroke();
+          }}
+      } else if(fx==='ribbons'){
+        ctx.lineWidth=DPR*1.1;
+        for(var n=0;n<46;n++){
+          var off=n*(H/34)-H*0.25;
+          ctx.beginPath();
+          for(var x=0;x<=W;x+=8){
+            var y=off + Math.sin(x*0.0055+t*0.9+n*0.16)*44 + Math.sin(x*0.0016-t*0.55)*30;
+            x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+          }
+          ctx.strokeStyle=grad(0.10+0.30*Math.abs(Math.sin(n*0.35+t*0.3)));
+          ctx.stroke();
+        }
+      } else { // dots
+        var s=Math.max(15,W/44);
+        for(var y2=0;y2<H+s;y2+=s){
+          for(var x2=0;x2<W+s;x2+=s){
+            var d=wave(x2,y2,1.1), lift=d*0.9;
+            var bright=(d+50)/100;
+            ctx.beginPath();
+            ctx.arc(x2, y2+lift, DPR*(0.9+bright*1.7), 0, 7);
+            ctx.fillStyle='rgba('+Math.round(0+bright*90)+','+Math.round(160+bright*70)+','+Math.round(200+bright*40)+','+(0.20+bright*0.62)+')';
+            ctx.fill();
+          }}
+      }
+      t+=reduce?0:0.011;
+      if(!reduce) raf=requestAnimationFrame(draw);
+    }
+    draw();
+    document.addEventListener('visibilitychange',function(){
+      if(document.hidden){ if(raf)cancelAnimationFrame(raf); } else if(!reduce){ raf=requestAnimationFrame(draw); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
