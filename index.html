@@ -92,13 +92,16 @@
 :root[data-theme="light"] .lvl-pill{background:#eef2f7;color:var(--text2);border-color:var(--border)}
 :root[data-theme="light"] .nd,:root[data-theme="light"] .fab-ping{background:var(--teal)}
 :root[data-theme="light"] .ld{background:var(--red)}
+/* Atmosphere: white-on-pale was 1.24:1 and effectively invisible. Brand blooms
+   are both visible AND put the identity back into light mode. */
 :root[data-theme="light"] .aurora{display:block;opacity:1}
 :root[data-theme="light"] .aurora-blob{
-  background:#ffffff;filter:blur(46px);opacity:.85;
-  border-radius:46% 54% 52% 48%/56% 48% 52% 44%;animation-duration:64s}
-:root[data-theme="light"] .blob2{opacity:.78}
-:root[data-theme="light"] .blob4{opacity:.72}
-:root[data-theme="light"] .blob5{opacity:.66}                 /* drop the coloured haze — keep it clean white */
+  filter:blur(80px);border-radius:46% 54% 52% 48%/56% 48% 52% 44%;animation-duration:68s}
+:root[data-theme="light"] .blob1{background:#00C3DD;opacity:.16}
+:root[data-theme="light"] .blob2{background:#1464A6;opacity:.12}
+:root[data-theme="light"] .blob3{background:#00C3DD;opacity:.11}
+:root[data-theme="light"] .blob4{background:#3E86E0;opacity:.10}
+:root[data-theme="light"] .blob5{background:#00C3DD;opacity:.09}                 /* drop the coloured haze — keep it clean white */
 :root[data-theme="light"] .card{background:#fff;box-shadow:0 1px 3px rgba(20,30,45,0.05)}
 :root[data-theme="light"] input,:root[data-theme="light"] select,:root[data-theme="light"] textarea{background:#fff!important;border-color:#dbe2ea!important}
 :root[data-theme="light"] header{background:#0F1826;border:1px solid #0F1826;--text:#eef4fa;--text2:#b7cbdd;--text3:#8ea6bb;--wash:255,255,255;--teal:#00C3DD}
@@ -869,6 +872,66 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 .led-nav .lbl{font-size:10px;letter-spacing:.02em}
 .led-nav button{padding:4px 7px}
 .led-nav{gap:1px}
+
+/* ── Light mode character ─────────────────────────────────────────────────
+   The accessibility work drained the brand out: cyan was darkened to pass as
+   TEXT, then applied to fills, borders and indicators that never needed 4.5:1.
+   Cyan comes back on non-text elements; text keeps the verified colours. */
+
+/* focus + selection carry the brand */
+:root[data-theme="light"] :where(button,a[href],input,select,textarea,summary,[tabindex]):focus-visible{
+  outline-color:#00C3DD}
+:root[data-theme="light"] ::selection{background:rgba(0,195,221,.22)}
+
+/* step chip: cyan dot and edge, ink text */
+:root[data-theme="light"] .step-chip{
+  background:#fff;border:1px solid rgba(0,195,221,.55);color:var(--text)!important;
+  -webkit-text-fill-color:var(--text)!important;box-shadow:0 0 0 3px rgba(0,195,221,.06)}
+
+/* the step spine reads as brand, not decoration */
+:root[data-theme="light"] .page:before{
+  background:linear-gradient(180deg,rgba(0,195,221,.75),rgba(20,100,166,.18))}
+:root[data-theme="light"] .step-row:before{
+  box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(0,195,221,.22)}
+
+/* DEPTH: cards sit on something and lift when you work in them */
+:root[data-theme="light"] .card{
+  box-shadow:0 1px 2px rgba(16,40,72,.05),0 6px 16px -10px rgba(16,40,72,.16)}
+:root[data-theme="light"] .card:focus-within{
+  box-shadow:0 2px 4px rgba(16,40,72,.07),0 14px 30px -14px rgba(16,40,72,.28);
+  border-color:rgba(0,195,221,.45)}
+:root[data-theme="light"] .page{
+  box-shadow:0 2px 26px rgba(16,40,72,.10),0 0 0 1px rgba(16,40,72,.05)}
+
+/* metrics and figure tiles get a cyan hairline at the top — brand as structure */
+:root[data-theme="light"] .metric{position:relative;overflow:hidden}
+:root[data-theme="light"] .metric:before{
+  content:'';position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,rgba(0,195,221,.85),rgba(0,195,221,0))}
+/* except where the funded/cash tint is already carrying meaning */
+:root[data-theme="light"] .metric.tone-fund:before,
+:root[data-theme="light"] .metric.tone-cash:before{display:none}
+
+/* progress + affordability bars in brand cyan */
+:root[data-theme="light"] .bar>i,:root[data-theme="light"] #nlBar{background:#00C3DD!important}
+
+/* dividers pick up a hint of the brand rather than flat grey */
+:root[data-theme="light"] .divider{background:linear-gradient(90deg,rgba(0,195,221,.30),rgba(20,100,166,.06))}
+
+/* The header bar is dark in BOTH themes, but --glass is white in light, so the
+   burger and theme toggle rendered as white buttons on the dark bar with pale
+   text (1.67:1). Give them the same treatment they have in dark. */
+:root[data-theme="light"] #navBurger,
+:root[data-theme="light"] #themeToggle{
+  background:rgba(255,255,255,.08)!important;border-color:rgba(255,255,255,.20)!important;
+  color:#eef4fa!important}
+:root[data-theme="light"] #navBurger:hover,
+:root[data-theme="light"] #themeToggle:hover{background:rgba(255,255,255,.16)!important}
+:root[data-theme="light"] .header-badge{color:#b7cbdd;border-color:rgba(255,255,255,.22)}
+:root[data-theme="light"] #clearAllBtn{
+  background:rgba(255,120,140,.14)!important;border-color:rgba(255,140,158,.55)!important;color:#ffb3c0!important}
+/* active year pill: white on #818cf8 was 2.98:1 */
+.bh-yr.active{background:#4B5A99!important;color:#fff!important;border-color:#4B5A99!important}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1390,7 +1453,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27r</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
