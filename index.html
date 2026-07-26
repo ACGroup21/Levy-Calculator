@@ -1079,7 +1079,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26n</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3629,10 +3629,13 @@ function hexA(h,a){
 }
 // The credit line: branded reports read "Powered by Fundable"; unbranded keep the AC mark.
 function brandCredit(){
+  // Reports are a professional deliverable: Arthur Curtis Education is the authority,
+  // Fundable is the instrument. AC Digital is app chrome and never appears on a report.
+  var fm='<span style="font-family:Inter,system-ui,sans-serif;font-weight:300;letter-spacing:.2em;text-transform:uppercase">Fundable</span>';
   var t = brandOn()
-    ? ((BRAND.name?escHtml(BRAND.name)+' &nbsp;&middot;&nbsp; ':'')+'Powered by Fundable')
-    : 'Fundable &middot; built by AC Digital';
-  return '<strong style="font-family:monospace;font-size:9.5px;letter-spacing:.04em;color:inherit;opacity:.9">'+t+' &nbsp;&mdash;&nbsp;</strong>';
+    ? ((BRAND.name?escHtml(BRAND.name)+' &nbsp;&middot;&nbsp; ':'')+'Powered by '+fm)
+    : 'Produced with '+fm+' &nbsp;&middot;&nbsp; Arthur Curtis Education';
+  return '<strong style="font-family:monospace;font-size:9.5px;font-weight:400;letter-spacing:.04em;color:inherit;opacity:.9">'+t+' &nbsp;&mdash;&nbsp;</strong>';
 }
 // Re-skin the report pages via a single injected stylesheet (kept out of the engine).
 function applyBrandStyle(){
@@ -4597,7 +4600,7 @@ function jdBuildReport(){
   el.innerHTML=jdReportDecor()+'<div style="position:relative;z-index:2;flex:1 0 auto;padding:46px 46px 0">'+
     '<img src="'+brandLogo()+'" style="height:50px;margin-bottom:28px">'+
     '<div style="font-family:'+JD_HF+';font-size:54px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.0">JD Matcher Report</div>'+
-    '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Fundable</span><span style="color:#7e93a8"> · '+fmtDMY(new Date())+'</span></div>'+
+    '<div style="margin-top:13px;font-size:17px"><span style="color:'+JD_CYAN+';font-weight:600">Arthur Curtis Education</span><span style="color:#7e93a8"> · '+fmtDMY(new Date())+'</span></div>'+
     '<div style="margin-top:22px;background:'+(v.status==='incompatible'?'rgba(214,71,93,0.14)':'rgba(32,214,195,0.12)')+';border:1px solid '+(v.status==='incompatible'?'rgba(214,71,93,0.4)':'rgba(32,214,195,0.35)')+';border-radius:14px;padding:18px 22px;display:flex;gap:14px;align-items:flex-start">'+jdIcon(v.status==='incompatible'?'x':'target',v.col,24)+'<div><div style="font-size:17px;font-weight:800;color:'+v.col+';font-family:'+JD_HF+'">'+v.label+' · '+score+'% coverage</div><div style="font-size:12.5px;color:#aebfce;margin-top:5px;line-height:1.5;max-width:840px">'+v.note+'</div></div></div>'+
     '<div style="margin-top:18px;background:'+P+';border:'+JD_CB+';border-radius:16px;display:flex;align-items:center;padding:22px 28px">'+
       '<div style="flex:1;display:flex;align-items:center;gap:16px">'+jdIcon("brief",JD_CYAN,30)+'<div><div style="color:#8ba0b6;font-size:11px;letter-spacing:.08em">APPRENTICESHIP STANDARD</div><div style="color:#fff;font-size:20px;font-weight:700;margin-top:4px">'+d.stdName+'</div></div></div>'+
@@ -4630,7 +4633,7 @@ function jdBuildReport(){
       '</div>'+
     '</div>'+
   '</div>'+
-  '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Fundable · JD Matcher · built by AC Digital · indicative keyword analysis, not a compliance verdict</span></div>';
+  '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:16px;margin-right:14px;opacity:.9"><span style="flex:1">Arthur Curtis Education · JD Matcher · produced with Fundable · indicative keyword analysis, not a compliance verdict</span></div>';
   return el;
 }
 var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,j,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.8,0,7);ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
@@ -4656,7 +4659,7 @@ function jdPageDecor(W,H,cid){
 }
 /* draws network + dotted border frame straight onto the canvas (fast for html2canvas, unlike thousands of SVG circles) */
 function jdDrawNet(cv,W,H){if(!cv)return;try{var ctx=cv.getContext('2d'),N=[],i,j,n=Math.round(W*H/16000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H});for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle='rgba(58,200,230,'+((1-d/150)*0.5)+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle='rgba(95,224,238,0.85)';for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.7,0,7);ctx.fill();}var m=20,T=46,s=18;ctx.fillStyle='rgba(54,194,224,0.55)';for(var gx=m;gx<=W-m;gx+=s)for(var gy=m;gy<=H-m;gy+=s){if(gy<=m+T||gy>=H-m-T||gx>=W-m-T||gx<=m+T){ctx.beginPath();ctx.arc(gx,gy,1.05,0,7);ctx.fill();}}}catch(e){}}
-function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Fundable &middot; JD Matcher &middot; built by AC Digital &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
+function jdPdfFoot(label,n){return '<div style="margin-top:auto;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;color:#7e93a8;font-size:11px"><img src="'+brandLogo()+'" style="height:15px;margin-right:12px;opacity:.9"><span style="flex:1">Arthur Curtis Education &middot; JD Matcher &middot; produced with Fundable &middot; indicative keyword analysis, not a compliance verdict</span><span class="jdpg" style="color:#9fb1c2">'+label+' &middot; Page '+n+' of 4</span></div>';}
 var JD_PG_W=1123, JD_PG_H=794;
 /* large-text mode: content pages render onto a small virtual page (468px) so reading text scales to ~18pt large print when fit to A4 (the summary stays full-size, handled in jdBuildPdfPages) */
 var JD_LARGE=false;
