@@ -69,11 +69,11 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:
 .logo-row{display:flex;align-items:center;gap:12px}
 .logo-mark-img{width:42px;height:42px;display:block;filter:drop-shadow(0 0 10px rgba(45,212,178,0.25))}
 .logo-mark-img.spin{animation:logo-spin .7s cubic-bezier(.45,.05,.25,1)}
-.logo-mark-img .lg-live{animation:lg-pulse 2.8s ease-in-out infinite}
-@keyframes lg-pulse{0%,100%{filter:drop-shadow(0 0 1.5px rgba(24,166,201,.5))}50%{filter:drop-shadow(0 0 6px rgba(24,166,201,.95))}}
-.logo-mark-img.spin .lg-live{animation:lg-flare .7s ease-out}
-@keyframes lg-flare{0%{filter:drop-shadow(0 0 10px rgba(24,166,201,1))}100%{filter:drop-shadow(0 0 1.5px rgba(24,166,201,.5))}}
-@media(prefers-reduced-motion:reduce){.logo-mark-img .lg-live,.logo-mark-img.spin .lg-live{animation:none;filter:drop-shadow(0 0 3px rgba(24,166,201,.6))}}
+.logo-mark-img .lg-halo{opacity:.35;transform-box:fill-box;transform-origin:center;animation:lg-pulse 2.8s ease-in-out infinite}
+@keyframes lg-pulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.18)}}
+.logo-mark-img.spin .lg-halo{animation:lg-flare .7s ease-out}
+@keyframes lg-flare{0%{opacity:1;transform:scale(1.35)}100%{opacity:.3;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.logo-mark-img .lg-halo,.logo-mark-img.spin .lg-halo{animation:none;opacity:.6;transform:none}}
 @keyframes logo-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.logo-mark-img.spin{animation:none}}
 .logo-mark{width:36px;height:36px;background:linear-gradient(135deg,rgba(13,74,66,0.8) 0%,rgba(26,58,88,0.8) 100%);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:var(--teal);box-shadow:0 0 16px rgba(45,212,178,0.12)}
@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 <header>
   <div class="hdr-side">
   <div class="logo-row">
-    <svg class="logo-mark-img" viewBox="0 0 89 91" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:38px" role="img" aria-label="Fundable"><rect x="30" y="43.5" width="34" height="5" rx="2.5" fill="#18a6c9"/><rect x="0" y="0" width="26" height="26" rx="6" fill="var(--text)"/><rect x="32" y="0" width="26" height="26" rx="6" fill="var(--text)"/><rect x="0" y="32" width="26" height="26" rx="6" fill="var(--text)"/><rect x="0" y="65" width="26" height="26" rx="6" fill="var(--text)"/><rect class="lg-live" x="62" y="32" width="27" height="27" rx="6.5" fill="#18a6c9"/></svg>
+    <svg class="logo-mark-img" viewBox="-10 -10 109 111" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:46px" role="img" aria-label="Fundable"><defs><filter id="lgGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4.5"/></filter></defs><rect class="lg-halo" x="62" y="32" width="27" height="27" rx="6.5" fill="#18a6c9" filter="url(#lgGlow)"/><rect x="30" y="43.5" width="34" height="5" rx="2.5" fill="#18a6c9"/><rect x="0" y="0" width="26" height="26" rx="6" fill="var(--text)"/><rect x="32" y="0" width="26" height="26" rx="6" fill="var(--text)"/><rect x="0" y="32" width="26" height="26" rx="6" fill="var(--text)"/><rect x="0" y="65" width="26" height="26" rx="6" fill="var(--text)"/><rect class="lg-live" x="62" y="32" width="27" height="27" rx="6.5" fill="#18a6c9"/></svg>
     <div>
       <div class="logo-text">Fundable</div>
     </div>
@@ -1008,7 +1008,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26d</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
