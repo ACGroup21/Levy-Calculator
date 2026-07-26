@@ -825,6 +825,21 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
    so the years drifted. Mono + tabular figures makes every month the same width,
    which lines the years up vertically regardless of the month. */
 td.dt{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
+
+/* ── Light mode: clouds ──────────────────────────────────────────────────────
+   Dark mode has stars; light mode gets weather. Reuses the aurora blobs rather
+   than adding markup - in light they are re-tinted as soft cloud banks, blurred
+   harder and drifting slower so the page feels airy rather than starry. */
+:root[data-theme="light"] .aurora{display:block;opacity:.85}
+:root[data-theme="light"] .aurora-blob{
+  filter:blur(75px);opacity:.5;border-radius:48% 52% 55% 45%/58% 46% 54% 42%;
+  animation-duration:70s}
+:root[data-theme="light"] .blob1{background:#dbe7f6}
+:root[data-theme="light"] .blob2{background:#e6eef8}
+:root[data-theme="light"] .blob3{background:#d8e9f2}
+:root[data-theme="light"] .blob4{background:#e9eef7}
+:root[data-theme="light"] .blob5{background:#dfeaf7}
+@media(prefers-reduced-motion:reduce){:root[data-theme="light"] .aurora-blob{animation:none}}
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b)b.innerHTML=(t==='light')?'☀️':'🌙';try{localStorage.setItem('ac_theme',t);}catch(e){}}
@@ -1346,7 +1361,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-27a</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
