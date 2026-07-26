@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fundable — header spacing options</title>
+<style>
+:root{
+  --bg:#050C18; --surface:#0B1524; --panel:#0F1826;
+  --text:#eef4fa; --text2:#b7cbdd; --text3:#8ea6bb;
+  --teal:#2DD4B2; --cyan:#00C3DD; --navy:#1464A6; --red:#FF4C6A; --amber:#F59E0B;
+  --border:rgba(255,255,255,.10);
+  --mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 28px 96px}
+h1{color:var(--text);font-size:26px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--text3);font-size:14px;margin:0 0 10px;max-width:70ch}
+.note{font-size:13px;color:var(--text3);border-left:2px solid var(--cyan);padding:8px 0 8px 14px;margin:22px 0 40px;max-width:78ch}
+
+/* ── option block ── */
+.opt{margin:0 0 52px}
+.opt-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:5px}
+.opt-num{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(0,195,221,.4);border-radius:6px;padding:3px 9px}
+.opt-num.rec{color:var(--teal);border-color:rgba(45,212,178,.55);background:rgba(45,212,178,.10)}
+.opt-name{color:var(--text);font-size:17px;font-weight:600}
+.opt-why{font-size:13px;color:var(--text3);margin:0 0 16px;max-width:82ch}
+.opt-why b{color:var(--text2);font-weight:600}
+
+/* ── the header replica ── */
+.bar{position:relative;display:flex;align-items:center;justify-content:space-between;height:62px;
+  padding:0 1.5rem;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.side{display:flex;align-items:center;min-width:max-content;flex:1 1 0}
+.side.r{justify-content:flex-end}
+.logo-row{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.logo-text{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--text);line-height:1}
+.rule{width:1px;height:24px;background:rgba(255,255,255,.16);flex:0 0 auto}
+
+/* controls, matched to the live app */
+.pill{border-radius:99px;padding:4px 11px;cursor:pointer;font-family:var(--mono);font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;line-height:1;display:flex;align-items:center;gap:5px;
+  flex:0 0 auto;white-space:nowrap;background:none}
+.save{background:rgba(45,212,178,.12);border:1px solid var(--teal);color:var(--teal)}
+.reset{background:rgba(255,76,106,.12);border:1px solid var(--red);color:var(--red);
+  box-shadow:0 0 8px rgba(255,76,106,.28)}
+.circ{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text2);border-radius:99px;
+  width:34px;height:34px;cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto}
+.badge{font-family:var(--mono);font-size:8px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);
+  border:1px solid rgba(55,77,106,.75);padding:5px 10px;border-radius:99px;white-space:nowrap;flex:0 0 auto;
+  background:none;cursor:pointer;display:flex;align-items:center;gap:6px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex:0 0 auto}
+
+/* the switch, with the mode-lit track */
+.sw{position:relative;width:46px;height:26px;flex:0 0 auto;padding:0;cursor:pointer;border-radius:99px;
+  background:rgba(0,195,221,.20);border:1px solid rgba(0,195,221,.62);
+  box-shadow:0 0 10px rgba(0,195,221,.32),inset 0 0 7px rgba(0,195,221,.22)}
+.sw .thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#eef4fa;
+  color:#0F1826;display:flex;align-items:center;justify-content:center;transform:translateX(20px)}
+.sw .thumb svg{width:12px;height:12px}
+
+nav.nav{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+nav.nav button{background:none;border:none;color:var(--text3);font:inherit;font-size:12px;cursor:pointer;
+  padding:6px 9px;border-radius:8px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+nav.nav button.on{color:var(--text);background:rgba(255,255,255,.06)}
+.led{font-family:var(--mono);font-size:8px;letter-spacing:.06em;color:var(--cyan)}
+.nd{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.28)}
+
+/* measurement callouts under each bar */
+.gaps{display:flex;gap:18px;flex-wrap:wrap;margin-top:9px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.05em;color:var(--text3)}
+.gaps span b{color:var(--cyan);font-weight:400}
+
+.verdict{margin-top:52px;border:1px solid rgba(45,212,178,.30);background:rgba(45,212,178,.06);
+  border-radius:12px;padding:20px 22px}
+.verdict h2{margin:0 0 8px;font-size:15px;color:var(--teal);font-weight:600}
+.verdict p{margin:0 0 10px;font-size:13.5px;color:var(--text2)}
+.verdict p:last-child{margin:0}
+@media(max-width:900px){.wrap{padding:32px 16px 64px}.bar{overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Header spacing — three ways to organise it</h1>
+<p class="sub">The complaint: the mode switch is jammed against the wordmark, so a utility control reads as part of the brand lockup. All three options below fix that; they differ in <em>where the controls live</em> and <em>what the spacing says</em>.</p>
+<p class="note">The organising rule underneath all three: <b>gaps encode grouping</b> — 8px between things that belong together, 24–32px between things that don't. Right now every gap in the header is 8px, so nothing is grouped and the eye can't tell brand from control.</p>
+
+<!-- ─────────────── OPTION 1 ─────────────── -->
+<div class="opt">
+  <div class="opt-head"><span class="opt-num">Option 1</span><span class="opt-name">Hairline rule</span></div>
+  <p class="opt-why">Keeps the switch on the left where you put it, and draws an explicit line where the brand ends and the controls begin. <b>Most literal fix</b> — but it adds a piece of furniture to a bar that currently has none.</p>
+  <div class="bar">
+    <div class="side">
+      <div class="logo-row">
+        <svg viewBox="-10 -10 106 105" style="width:auto;height:34px"><defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#g1)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
+        <div class="logo-text">Fundable</div>
+      </div>
+      <div style="width:22px"></div><div class="rule"></div><div style="width:22px"></div>
+      <button class="sw"><span class="thumb"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 9.8A5.6 5.6 0 0 1 6.2 2.8a5.6 5.6 0 1 0 7 7z"/></svg></span></button>
+      <div style="width:8px"></div>
+      <button class="pill save"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><path d="M2.9 2h8.2L14 4.9v8.2a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.9A.9.9 0 0 1 2.9 2z"/><path d="M5 2v3.4h5.2V2"/><rect x="4.3" y="8.6" width="7.4" height="5.4" rx=".5"/></svg>Save plan</button>
+    </div>
+    <nav class="nav">
+      <button class="on"><span class="led">START</span>Goal</button><button><span class="led">01</span>Levy</button>
+      <button><span class="nd"></span>Delivery</button><button><span class="led">02</span>Programmes</button>
+      <button><span class="led">03</span>Forecast</button><button><span class="nd"></span>Plan</button>
+      <button><span class="led">04</span>Reports</button>
+    </nav>
+    <div class="side r" style="gap:8px">
+      <button class="pill reset">↻ Reset all</button>
+      <button class="circ">☰</button>
+      <div style="width:14px"></div>
+      <button class="badge"><span class="dot"></span>England · ESFA 2026</button>
+    </div>
+  </div>
+  <div class="gaps"><span>brand → rule <b>22px</b></span><span>rule → switch <b>22px</b></span><span>switch → save <b>8px</b></span><span>burger → badge <b>14px</b></span></div>
+</div>
+
+<!-- ─────────────── OPTION 2 ─────────────── -->
+<div class="opt">
+  <div class="opt-head"><span class="opt-num rec">Option 2 — recommended</span><span class="opt-name">Grouped by job</span></div>
+  <p class="opt-why">Switch stays left but gets <b>32px of air</b>, so it reads as its own thing rather than part of the lockup. Save moves right to sit beside Reset, because <b>they're both plan actions</b> — one saves your work, one destroys it, and they belong in the same cluster. The right flank then reads in three clear beats: plan actions · menu · provenance. No new furniture, and every gap earns its width.</p>
+  <div class="bar">
+    <div class="side">
+      <div class="logo-row">
+        <svg viewBox="-10 -10 106 105" style="width:auto;height:34px"><defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#g2)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
+        <div class="logo-text">Fundable</div>
+      </div>
+      <div style="width:32px"></div>
+      <button class="sw"><span class="thumb"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 9.8A5.6 5.6 0 0 1 6.2 2.8a5.6 5.6 0 1 0 7 7z"/></svg></span></button>
+    </div>
+    <nav class="nav">
+      <button class="on"><span class="led">START</span>Goal</button><button><span class="led">01</span>Levy</button>
+      <button><span class="nd"></span>Delivery</button><button><span class="led">02</span>Programmes</button>
+      <button><span class="led">03</span>Forecast</button><button><span class="nd"></span>Plan</button>
+      <button><span class="led">04</span>Reports</button>
+    </nav>
+    <div class="side r">
+      <button class="pill save"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><path d="M2.9 2h8.2L14 4.9v8.2a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.9A.9.9 0 0 1 2.9 2z"/><path d="M5 2v3.4h5.2V2"/><rect x="4.3" y="8.6" width="7.4" height="5.4" rx=".5"/></svg>Save plan</button>
+      <div style="width:8px"></div>
+      <button class="pill reset">↻ Reset all</button>
+      <div style="width:24px"></div>
+      <button class="circ">☰</button>
+      <div style="width:24px"></div>
+      <button class="badge"><span class="dot"></span>England · ESFA 2026</button>
+    </div>
+  </div>
+  <div class="gaps"><span>brand → switch <b>32px</b></span><span>save ↔ reset <b>8px</b></span><span>actions → menu <b>24px</b></span><span>menu → badge <b>24px</b></span></div>
+</div>
+
+<!-- ─────────────── OPTION 3 ─────────────── -->
+<div class="opt">
+  <div class="opt-head"><span class="opt-num">Option 3</span><span class="opt-name">Brand alone</span></div>
+  <p class="opt-why">The logo gets the whole left flank to itself and every control moves right in three clusters. <b>Cleanest brand presentation</b> — the lockup is never adjacent to a control — but it reverses your earlier call to put the switch on the left, and it loads one side of the bar heavily.</p>
+  <div class="bar">
+    <div class="side">
+      <div class="logo-row">
+        <svg viewBox="-10 -10 106 105" style="width:auto;height:34px"><defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#g3)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eef4fa"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
+        <div class="logo-text">Fundable</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="on"><span class="led">START</span>Goal</button><button><span class="led">01</span>Levy</button>
+      <button><span class="nd"></span>Delivery</button><button><span class="led">02</span>Programmes</button>
+      <button><span class="led">03</span>Forecast</button><button><span class="nd"></span>Plan</button>
+      <button><span class="led">04</span>Reports</button>
+    </nav>
+    <div class="side r">
+      <button class="pill save"><svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round"><path d="M2.9 2h8.2L14 4.9v8.2a.9.9 0 0 1-.9.9H2.9a.9.9 0 0 1-.9-.9V2.9A.9.9 0 0 1 2.9 2z"/><path d="M5 2v3.4h5.2V2"/><rect x="4.3" y="8.6" width="7.4" height="5.4" rx=".5"/></svg>Save plan</button>
+      <div style="width:8px"></div>
+      <button class="pill reset">↻ Reset all</button>
+      <div style="width:24px"></div>
+      <button class="sw"><span class="thumb"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 9.8A5.6 5.6 0 0 1 6.2 2.8a5.6 5.6 0 1 0 7 7z"/></svg></span></button>
+      <div style="width:8px"></div>
+      <button class="circ">☰</button>
+      <div style="width:24px"></div>
+      <button class="badge"><span class="dot"></span>England · ESFA 2026</button>
+    </div>
+  </div>
+  <div class="gaps"><span>brand → nav <b>auto</b></span><span>save ↔ reset <b>8px</b></span><span>actions → display <b>24px</b></span><span>display ↔ menu <b>8px</b></span><span>menu → badge <b>24px</b></span></div>
+</div>
+
+<div class="verdict">
+  <h2>My recommendation: Option 2</h2>
+  <p>It fixes the actual complaint — the switch gets real separation from the wordmark — without adding a divider that no other part of the app uses, and without undoing your decision to keep the switch on the left.</p>
+  <p>The reason I'd move <strong>Save</strong> across is that Save and Reset are the same kind of thing: both act on the plan you're holding. Right now one sits with the brand and one sits with the menu, which is why the bar reads as scattered even at matched gaps. Put them together and the header states four things in order — <strong>who this is</strong> · <strong>what mode you're in</strong> · <strong>where you are</strong> · <strong>what you can do to the plan</strong>.</p>
+  <p>One caveat worth naming: Save and Reset next to each other puts a green button beside a red destructive one. Reset already asks for confirmation, and the colour difference is stark, so I think 8px is fine — but if you'd rather not have them touching, say so and I'll push Reset out to its own cluster.</p>
+</div>
+
+</div>
+</body>
+</html>
