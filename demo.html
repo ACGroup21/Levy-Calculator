@@ -142,12 +142,24 @@
   .foot-in .made b{color:var(--text2); font-weight:600}
   .foot-in .disc{flex:1; min-width:240px; line-height:1.5}
   @media(max-width:640px){ .foot-in{flex-direction:column; align-items:flex-start; gap:10px} }
+
+  /* ── Accessibility ───────────────────────────────────────────────── */
+  :where(a,button,[tabindex]):focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:6px}
+  .skip{position:absolute;left:-9999px;top:0;z-index:99;background:var(--teal);color:#03251d;
+        padding:10px 16px;border-radius:0 0 10px 0;font-weight:650;text-decoration:none}
+  .skip:focus{left:0}
+  @media(prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;animation-iteration-count:1!important;
+      transition-duration:.01ms!important;scroll-behavior:auto!important}
+    .btn:hover,.cap:hover{transform:none}
+  }
 </style>
 </head>
 <body>
 
-<canvas id="sky"></canvas>
+<canvas id="sky" aria-hidden="true"></canvas>
 
+<a class="skip" href="#main">Skip to content</a>
 <div class="page">
   <header class="bar">
     <div class="brand"><svg viewBox="-6 -6 98 97" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:32px;align-self:center" role="img" aria-label="Fundable"><defs><linearGradient id="dLink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#dLink)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#fff"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#fff"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#fff"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#fff"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg><span style="letter-spacing:.24em;font-weight:300;text-transform:uppercase">Fundable</span> <small>by AC Digital</small></div>
@@ -155,7 +167,7 @@
     <span class="pill">England · ESFA 2026</span>
   </header>
 
-  <div class="shell">
+  <main id="main" class="shell">
     <!-- HERO -->
     <div class="hero">
       <div>
@@ -188,7 +200,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <hr class="rule">
 
