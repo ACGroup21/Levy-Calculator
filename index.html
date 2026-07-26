@@ -474,17 +474,34 @@ tr:hover td{background:rgba(45,212,178,0.02)}
    Must sit AFTER the base th/td rules — media queries add no specificity. */
 @media(max-width:1400px){th{padding:8px 6px}td{padding:10px 6px}}
 
-/* ── Splash: covers the parse of a ~3MB single-file app, then gets out of the way.
-   Shown once per browser session; hard-capped so it can never become friction. ── */
-#splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:radial-gradient(900px 520px at 50% 42%,rgba(0,195,221,.07),transparent 60%),#050c18;transition:opacity .45s ease,visibility .45s}
+/* ── Splash: the funded node hops each part of the mark while the app loads, settles
+   home, then the whole lockup lifts to where the real header logo sits. ── */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(900px 520px at 50% 42%,rgba(0,195,221,.07),transparent 60%),#050c18;
+  transition:opacity .5s ease .12s,visibility .5s .12s}
 #splash.done{opacity:0;visibility:hidden;pointer-events:none}
-#splash .sp-mark{animation:sp-in .55s cubic-bezier(.2,.7,.3,1) both}
-#splash .sp-wm{font-family:var(--sans);font-weight:300;letter-spacing:.34em;text-transform:uppercase;font-size:14px;color:var(--text);opacity:.92;animation:sp-in .55s .09s cubic-bezier(.2,.7,.3,1) both}
-#splash .sp-bar{width:128px;height:2px;border-radius:2px;background:rgba(150,190,225,.14);overflow:hidden}
-#splash .sp-bar i{display:block;height:100%;width:38%;background:linear-gradient(90deg,transparent,#00C3DD,transparent);animation:sp-sweep 1.05s ease-in-out infinite}
+.sp-inner{display:flex;flex-direction:column;align-items:center;gap:20px;
+  transition:transform .62s cubic-bezier(.6,0,.25,1),opacity .5s ease .1s}
+#splash.done .sp-inner{transform:translate(var(--lx,-36vw),var(--ly,-38vh)) scale(var(--ls,.26));opacity:.1}
+#splash .sp-mark{animation:sp-in .5s cubic-bezier(.2,.7,.3,1) both}
+#splash .sp-wm{font-family:var(--sans);font-weight:300;letter-spacing:.32em;text-transform:uppercase;
+  font-size:14px;color:var(--text);animation:sp-wm .5s .12s cubic-bezier(.2,.7,.3,1) both}
+/* the travelling node — home is x=60,y=29.5, so the path returns to translate(0,0) */
+.sp-trav{transform-box:view-box;animation:sp-hop 1.5s cubic-bezier(.5,0,.5,1) infinite}
+#splash.settling .sp-trav{animation:sp-settle .45s cubic-bezier(.3,1.4,.4,1) both}
+@keyframes sp-hop{
+  0%,8%{transform:translate(0,0)}
+  22%,30%{transform:translate(-30.5px,-29.5px)}
+  44%,52%{transform:translate(-60px,-29.5px)}
+  66%,74%{transform:translate(-60px,0)}
+  86%,94%{transform:translate(-60px,29.5px)}
+  100%{transform:translate(0,0)}
+}
+@keyframes sp-settle{from{transform:translate(0,0) scale(1.22)}to{transform:translate(0,0) scale(1)}}
 @keyframes sp-in{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:none}}
-@keyframes sp-sweep{from{transform:translateX(-120%)}to{transform:translateX(360%)}}
-@media(prefers-reduced-motion:reduce){#splash .sp-mark,#splash .sp-wm{animation:none}#splash .sp-bar i{animation:none;width:100%}}
+@keyframes sp-wm{from{opacity:0;letter-spacing:.5em}to{opacity:.92;letter-spacing:.32em}}
+@media(prefers-reduced-motion:reduce){#splash .sp-mark,#splash .sp-wm,.sp-trav{animation:none}
+  #splash.done .sp-inner{transform:none;opacity:0}}
 th.r,td.r{text-align:right}
 .mono{font-family:var(--mono)}.td-name{color:var(--text);font-weight:500}
 
@@ -627,26 +644,45 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 <body>
 
 <div id="splash" role="status" aria-label="Loading Fundable">
-  <svg class="sp-mark" viewBox="-14 -14 114 113" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:96px" aria-hidden="true"><defs><filter id="spGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter><linearGradient id="spLink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD" filter="url(#spGlow)" opacity=".75"/><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#spLink)"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
-  <div class="sp-wm">Fundable</div>
-  <div class="sp-bar"><i></i></div>
+  <div class="sp-inner">
+    <svg class="sp-mark" viewBox="-14 -14 114 113" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:96px" aria-hidden="true"><defs><linearGradient id="spLink" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1464A6"/><stop offset="1" stop-color="#00C3DD"/></linearGradient></defs><rect x="29.5" y="39.7" width="32" height="5.6" rx="2.8" fill="url(#spLink)" opacity=".55"/><rect x="0" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="29.5" y="0" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="29.5" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect x="0" y="59" width="26" height="26" rx="5.3" fill="#eaf3fb"/><rect class="sp-trav" x="60" y="29.5" width="26" height="26" rx="5.3" fill="#00C3DD"/></svg>
+    <div class="sp-wm">Fundable</div>
+  </div>
 </div>
 <script>
-// Dismiss as soon as the app is ready; MIN avoids a jarring flash, CAP guarantees the
-// splash can never hold the user up. Shown once per session, so it never becomes friction.
+// The node hops while the app loads (honest: it loops only as long as loading actually
+// takes), settles home, then the lockup lifts to the real header logo and hands over.
 (function(){
   var s=document.getElementById('splash'); if(!s)return;
   try{ if(sessionStorage.getItem('ac_splash')){ s.parentNode.removeChild(s); return; } }catch(e){}
-  var t0=Date.now(), MIN=400, CAP=1400, gone=false;
-  function hide(){
+  var t0=Date.now(), MIN=520, CAP=2200, gone=false;
+  function handOver(){
+    // measure the real header logo so the lockup lands on it rather than guessing
+    try{
+      var a=s.querySelector('.sp-inner').getBoundingClientRect();
+      var t=document.querySelector('.logo-row');
+      if(t){
+        var b=t.getBoundingClientRect();
+        s.style.setProperty('--lx',Math.round((b.left+b.width/2)-(a.left+a.width/2))+'px');
+        s.style.setProperty('--ly',Math.round((b.top+b.height/2)-(a.top+a.height/2))+'px');
+        // scale by HEIGHT: the splash lockup is stacked, the header one is inline, so the
+        // width ratio would make it grow rather than shrink. Clamped for safety.
+        var sc=Math.max(.18,Math.min(.6,b.height/Math.max(1,a.height)));
+        s.style.setProperty('--ls',sc.toFixed(3));
+      }
+    }catch(e){}
+    s.classList.add('done');
+    setTimeout(function(){ if(s.parentNode)s.parentNode.removeChild(s); },760);
+  }
+  function finish(){
     if(gone)return; gone=true;
     try{sessionStorage.setItem('ac_splash','1');}catch(e){}
-    s.classList.add('done');
-    setTimeout(function(){ if(s.parentNode)s.parentNode.removeChild(s); },520);
+    s.classList.add('settling');            // node springs home
+    setTimeout(handOver,430);               // then lift to the header
   }
-  function ready(){ setTimeout(hide, Math.max(0, MIN-(Date.now()-t0))); }
+  function ready(){ setTimeout(finish, Math.max(0, MIN-(Date.now()-t0))); }
   if(document.readyState==='complete')ready(); else window.addEventListener('load',ready);
-  setTimeout(hide, CAP);
+  setTimeout(finish, CAP);
 })();
 </script>
 <div class="aurora">
@@ -1099,7 +1135,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-26q</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
