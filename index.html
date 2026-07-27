@@ -1660,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28x</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28y</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2782,12 +2782,20 @@ function renderScenarios(){
                 'projectionSection','planSection','sec-reports','sec-jd'];
   var ticking=false;
   function shown(el){ return !!(el&&el.offsetParent!==null&&el.getBoundingClientRect().height>0); }
+  /* A section's heading is not always its previous sibling — projectionSection
+     and sec-reports sit in different parents from their step-row, so a sibling
+     walk missed them and the chip lagged a step behind the nav. Search document
+     order instead: the last visible step row that appears before the section. */
   function ownerRow(el){
     if(!el)return null;
     if(el.classList.contains('step-row'))return el;
-    var n=el.previousElementSibling;
-    while(n){ if(n.classList&&n.classList.contains('step-row'))return n; n=n.previousElementSibling; }
-    return null;
+    var rows=document.querySelectorAll('.step-row'), found=null;
+    for(var i=0;i<rows.length;i++){
+      if(!shown(rows[i]))continue;
+      var pos=rows[i].compareDocumentPosition(el);
+      if(pos&Node.DOCUMENT_POSITION_FOLLOWING||pos&Node.DOCUMENT_POSITION_CONTAINED_BY)found=rows[i];
+    }
+    return found;
   }
   function paint(){
     ticking=false;
