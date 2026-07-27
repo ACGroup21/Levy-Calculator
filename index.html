@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29m</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2902,7 +2902,8 @@ function renderScenarios(){
    the flight-versus-rest distinction: firing is just a dock change with further
    to travel. The loop stops itself once it arrives and nothing is moving. */
 (function(){
-  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0, armed=false;
+  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0, armed=false, fade=null;
+  var HOLD=4000;   // visible for the flight plus a beat, then gone
   var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
   function node(){
     if(!tile){
@@ -2975,18 +2976,28 @@ function renderScenarios(){
   };
   window.fireTile=function(target){
     var d=dockFor(target); if(!d)return;
-    if(!armed){                       // first selection: start the flight at the logo
+    if(!armed){                       // launch from the logo each time it wakes
       var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
       if(n){ var lr=n.getBoundingClientRect(); x=lr.left; y=lr.top; snap=false; }
       armed=true;
     }
+    /* It marks a selection, not a position: it shows the jump, holds a beat so you
+       can see where you landed, then leaves rather than becoming furniture. */
+    clearTimeout(fade);
+    fade=setTimeout(function(){
+      armed=false; dock=null; running=false;
+      if(tile)tile.classList.remove('lit');
+    },HOLD);
     tileDock(d);
     var host=d.parentElement;
     if(host){ host.classList.remove('tile-hit'); void host.offsetWidth;
       host.classList.add('tile-hit');
       setTimeout(function(){host.classList.remove('tile-hit');},700); }
   };
-  window.restTile=function(d){ if(d)tileDock(d,{soft:true}); };
+  /* Deliberately inert. The tile used to ride the active step as you scrolled,
+     which made it permanent furniture; it is now purely a response to a
+     selection. Kept as a no-op so the scroll pass needs no special-casing. */
+  window.restTile=function(){};
 
   /* dock resolution: a real slot beats every heuristic */
   function dockFor(target){
