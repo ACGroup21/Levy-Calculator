@@ -947,6 +947,24 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 :root[data-theme="light"] .page{
   box-shadow:0 2px 26px rgba(16,40,72,.10),0 0 0 1px rgba(16,40,72,.05)}
 
+/* HOVER LIFT: the card you're pointing at rises off the page. Shadow does the
+   work — a 1px translate keeps it feeling physical without shifting text enough
+   to reflow or make the pointer chase the card. Pointer-only, so it never fires
+   on touch where there is no hover, and it yields to :focus-within so keyboard
+   focus is never outranked by a stray mouse position. */
+@media(hover:hover){
+  .card:hover{transform:translateY(-1px)}
+  :root[data-theme="dark"] .card:hover{
+    box-shadow:0 4px 10px rgba(0,0,0,.28),0 16px 34px -16px rgba(0,0,0,.55);
+    border-color:rgba(45,212,178,.34)}
+  :root[data-theme="light"] .card:hover{
+    box-shadow:0 3px 6px rgba(16,40,72,.08),0 18px 34px -16px rgba(16,40,72,.26);
+    border-color:#cfe0ec}
+  :root[data-theme="light"] .card:focus-within:hover{border-color:#0F1826}
+}
+.card{transition:border-color .25s,box-shadow .25s,transform .25s}
+@media(prefers-reduced-motion:reduce){.card:hover{transform:none}}
+
 /* metrics and figure tiles get a cyan hairline at the top — brand as structure */
 :root[data-theme="light"] .metric{position:relative;overflow:hidden}
 :root[data-theme="light"] .metric:before{
@@ -1554,7 +1572,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
