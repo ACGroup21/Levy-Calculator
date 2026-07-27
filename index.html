@@ -1709,7 +1709,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29x</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3886,7 +3886,7 @@ function onUnitChange(){
   const i=parseInt(document.getElementById('inp-unit').value)||0,u=UNIT_PRESETS[i];if(!u)return;
   document.getElementById('inp-unit-rate').value=u.rate;
   document.getElementById('inp-unit-weeks').value=Math.min(16,Math.max(1,Math.round(u.hours/9)));
-  const info=document.getElementById('unitInfo');if(info)info.textContent='Funding cap £'+u.rate.toLocaleString('en-GB')+' · minimum '+u.hours+' delivery hours';
+  const info=document.getElementById('unitInfo');if(info)info.innerHTML='Anything a provider quotes above <b>£'+u.rate.toLocaleString('en-GB')+'</b> comes out of your own budget. <span style="color:var(--text3)">Funding cap £'+u.rate.toLocaleString('en-GB')+' · minimum '+u.hours+' delivery hours.</span>';
 }
 function addUnit(){
   const i=parseInt(document.getElementById('inp-unit').value);if(isNaN(i)||!UNIT_PRESETS[i]){alert('Select a unit.');return;}
@@ -4637,8 +4637,8 @@ function renderNonLevy(){
   var notes='<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:13px">'+
     (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is counted at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;21 full funding</b>.</div>':'')+
     '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;21</b> at the start (from 1 Apr 2024), and 22&ndash;24 with an EHC plan or care experience (enter as 16&ndash;21 to apply, or verify eligibility).</div>'+
-    (f.has25?'<div>Co-investment is <b>25%</b> for starts from Aug 2026 (applied by start date).</div>':'<div>Co-investment is <b>5%</b> now, rising to <b>25%</b> for starts from Aug 2026.</div>')+
-    '<div>Non-levy employers reserve funding through the apprenticeship service; each reservation expires if unused in its window.</div>'+
+    (f.has25?'<div>You are funding <b>a quarter</b> of every band yourself on these starts &mdash; five times the old share. <span style="color:var(--text3)">Co-investment is 25% for starts from Aug 2026, applied by start date.</span></div>':'<div>Starting before August 2026 costs you <b>5%</b> of the band; the same programme started after costs <b>25%</b> &mdash; five times as much of your own cash. <span style="color:var(--text3)">Applied by start date.</span></div>')+
+    '<div>If you do not start the apprentice inside the reservation window the funding goes and you have to reserve again. <span style="color:var(--text3)">Non-levy employers reserve through the apprenticeship service; each reservation expires if unused.</span></div>'+
   '</div>';
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; sources</summary>'+
     '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
