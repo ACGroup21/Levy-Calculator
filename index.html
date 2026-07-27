@@ -1274,7 +1274,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <div style="padding-top:1.5rem">
     <div class="rule-banner">
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
-      <span><strong>Rule change — August 2026:</strong> Levy funds declared before August 2026 expire after <strong>24 months</strong>. From August 2026 onwards, funds expire after <strong>12 months</strong>. This tool applies the correct window per declaration date automatically.</span>
+      <span><strong>From August 2026 you have half as long to spend your levy.</strong> Anything you declare from then expires after <strong>12 months</strong> instead of 24, so funds you have not committed inside a year go back to the Treasury. <span style="color:var(--text3)">Declarations made before August 2026 keep their 24-month window; this tool applies the correct one per declaration date automatically.</span></span>
     </div>
     <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
@@ -1461,7 +1461,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <div class="divider"></div>
 
     <div class="step-row" id="sec-programmes"><span class="step-chip">STEP 02</span><span class="step-title">Add Apprenticeship Programmes</span></div>
-    <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. 80% drawn monthly; 20% released on EPA completion.</p>
+    <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. <strong>A fifth of the cost is held back until they pass</strong>, so someone who leaves part-way still costs you everything drawn to that point. <span style="color:var(--text3)">80% drawn monthly across the practical period, 20% released at end-point assessment.</span></p>
     <div class="card" id="deptBudgetCard">
       <details>
         <summary style="cursor:pointer;font-size:13px;color:var(--text2);list-style:none;display:flex;align-items:center;gap:8px;user-select:none"><span style="font-size:14px">&#127919;</span>Ringfence My Levy <span style="color:var(--text3);font-size:12px">&mdash; optional: reserve part of the pot, no plan needed &#9662;</span></summary>
@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -4512,7 +4512,7 @@ function updateFmodeHint(){
     msg='No levy pot &mdash; the government funds <b>95%</b> of each apprenticeship (<b>100%</b> for 16&ndash;21s); you co-invest the rest.';
     if(pb&&pb>3000000)msg+=' <span class="warn" title="Worked back from your levy data: annual levy ÷ 0.5% + the £15k allowance.">&#9888; Your levy data implies a pay bill of about &pound;'+(pb/1e6).toFixed(1)+'m &mdash; over &pound;3m, so you would actually pay the levy. Modelling a hypothetical?</span>';
   }else{
-    msg='Pay bill over &pound;3m &mdash; you pay the 0.5% levy and draw training from your pot.';
+    msg='Pay bill over &pound;3m &mdash; your training is paid from levy you have already handed over, so the real question is whether you spend it before it expires. <span style="color:var(--text3)">0.5% levy, drawn from your pot.</span>';
     if(pb&&pb>0&&pb<3000000)msg+=' <span class="warn" title="Worked back from your levy data: annual levy ÷ 0.5% + the £15k allowance.">&#9888; Your levy data implies a pay bill of about &pound;'+(pb/1e6).toFixed(2)+'m &mdash; below &pound;3m, so you likely would not pay the levy. Switch to Non-levy?</span>';
   }
   el.innerHTML=msg;
