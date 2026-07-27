@@ -139,18 +139,24 @@ html.theme-anim,html.theme-anim *:not(canvas):not(.aurora-blob){transition:backg
 /* constellation network background */
 .constellation{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:112px 1.5rem 5rem;background:var(--bg)}
-[id^="sec-"],#projectionSection,#planSection{scroll-margin-top:120px}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:136px 1.5rem 5rem;background:transparent}
+[id^="sec-"],#projectionSection,#planSection{scroll-margin-top:144px}
 
 /* Two rows (2026-07-28). One 62px strip was carrying the brand, the mode, the
    rules provenance, the plan actions AND nine step links — the steps lost their
    labels below 1220px, degrading the one navigation the app actually depends on.
    Row 1 is identity and controls; row 2 is the step spine. */
-header{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;flex-direction:column;
-  background:rgba(5,12,24,0.82);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border)}
-.hdr-main{display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 1.5rem}
-.hdr-steps{display:flex;align-items:center;gap:2px;height:42px;padding:0 1.5rem;
+/* Pebble: the header is a floating bar the same width as the app column rather than
+   a full-bleed strip, so the whole product reads as one object on the canvas instead
+   of chrome pinned to the browser. Width tracks .page exactly (1100px cap, same
+   1.5rem gutters) so the logo lines up with the content beneath it. */
+header{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;
+  display:flex;flex-direction:column;width:calc(100% - 3rem);max-width:1100px;
+  background:rgba(5,12,24,0.88);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
+  border:1px solid var(--border);border-radius:16px;
+  box-shadow:0 14px 34px -20px rgba(0,0,0,.75)}
+.hdr-main{display:flex;align-items:center;justify-content:space-between;height:60px;padding:0 1.25rem}
+.hdr-steps{display:flex;align-items:center;gap:2px;height:40px;padding:0 1.25rem;
   border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none;
   justify-content:flex-start}
 /* Centre the steps with auto margins rather than justify-content:center — when the
@@ -4077,7 +4083,7 @@ function showFuncArrow(el){
   var a=document.getElementById('funcArrow');if(!a)return;
   clearTimeout(a._fade);clearTimeout(a._settle);
   if(a._onScroll)window.removeEventListener('scroll',a._onScroll,true);
-  function place(){var r=el.getBoundingClientRect();a.style.top=Math.min(Math.max(r.top+r.height/2,106),window.innerHeight-30)+'px';var l=r.left-52;a.style.left=(l<6?6:l)+'px';}
+  function place(){var r=el.getBoundingClientRect();a.style.top=Math.min(Math.max(r.top+r.height/2,130),window.innerHeight-30)+'px';var l=r.left-52;a.style.left=(l<6?6:l)+'px';}
   function finish(){if(a._onScroll){window.removeEventListener('scroll',a._onScroll,true);a._onScroll=null;}clearTimeout(a._fade);a._fade=setTimeout(function(){a.classList.remove('show');},2500);}
   place();a.classList.add('show');
   a._onScroll=function(){place();clearTimeout(a._settle);a._settle=setTimeout(finish,120);};
