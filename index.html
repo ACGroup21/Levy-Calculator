@@ -1032,30 +1032,22 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 :root[data-theme="light"] footer{
   --text:#eef4fa;--text2:#b7cbdd;--text3:#8ea6bb;--teal:#00C3DD;--wash:255,255,255}
 
-/* ── The step spine ───────────────────────────────────────────────────────────
-   The rail was at 13.6px and the marker dots centre at 6.5px — a 7px near-miss,
-   which reads as a mistake rather than a gap. Aligned, the dots become stations
-   ON the line instead of debris beside it.
-
-   .page:before is the untravelled track; .page:after is the travelled part,
-   scaled from the top as you scroll. Because the fill starts where you started,
-   the line no longer begins at an arbitrary hard edge — which is what made the
-   top look unfinished. No elbow needed. */
-.page:before{left:6px!important}
-.page:after{content:'';position:absolute;left:6px;top:83.2px;width:1px;
-  background:linear-gradient(180deg,rgba(0,195,221,.95),rgba(0,195,221,.55));
-  transform-origin:top;transform:scaleY(var(--spine-p,0));
-  will-change:transform;pointer-events:none;z-index:1}
-
-/* dots become states: travelled, here, still to come */
-.step-row:before{transition:background .2s,box-shadow .2s,transform .2s}
-.step-row.spine-past:before{background:rgba(0,195,221,.5)}
-.step-row.spine-here:before{background:#00C3DD;transform:scale(1.6);
-  box-shadow:0 0 0 3px rgba(0,195,221,.18),0 0 10px rgba(0,195,221,.5)}
-@media(prefers-reduced-motion:reduce){
-  .page:after{transition:none}
-  .step-row:before{transition:none}
-  .step-row.spine-here:before{transform:none;box-shadow:0 0 0 3px rgba(0,195,221,.25)}
+/* ── Active step ──────────────────────────────────────────────────────────────
+   The spine was a third "where am I" signal on top of the nav highlight and the
+   step numbering, and a rail plus eleven dots is a lot of furniture to say what
+   the chip can say on its own. The chip now lights exactly as the nav badge
+   does, so the same gesture means the same thing in both places. */
+.page:before{display:none}
+.step-row:before{display:none}
+.step-row .step-chip{transition:background .2s,border-color .2s,box-shadow .2s,color .2s}
+.step-row.step-active .step-chip{background:var(--teal)!important;border-color:var(--teal)!important;
+  color:#04121f!important;-webkit-text-fill-color:#04121f!important;
+  box-shadow:0 0 9px rgba(45,212,178,.5)}
+:root[data-theme="light"] .step-row.step-active .step-chip{
+  background:#00C3DD!important;border-color:#00C3DD!important;
+  color:#04121f!important;-webkit-text-fill-color:#04121f!important;
+  box-shadow:0 0 9px rgba(0,195,221,.45)}
+@media(prefers-reduced-motion:reduce){.step-row .step-chip{transition:none}}
 }
 @media(prefers-reduced-motion:reduce){.card:hover{transform:none}}
 
@@ -1666,7 +1658,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28r</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28s</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2775,42 +2767,31 @@ function renderScenarios(){
 // ── Plans: header entry point ────────────────────────────────────────────────
 // The header button jumps here rather than saving blind: naming the plan is the
 // whole point, and the card is where you also switch client or export a file.
-/* Drives the spine fill and the dot states. One rAF-batched pass per scroll:
-   a single custom property write plus class toggles, no per-dot layout reads
-   in the loop. The "you are here" line sits just below the fixed header, so a
-   step counts as reached when its marker crosses the point you actually read. */
+/* Marks the step you are reading, so its chip lights the way the nav badge does.
+   One rAF-batched pass per scroll: class toggles only, no layout writes. The
+   reference line sits just below the fixed header, so a step counts as current
+   when its heading reaches the point you actually read from. */
 (function(){
-  var page=document.querySelector('.page'); if(!page)return;
   var ticking=false;
-  function readLine(){
-    var h=document.querySelector('header');
-    return (h?h.getBoundingClientRect().height:62)+110;
-  }
   function paint(){
     ticking=false;
     var rows=document.querySelectorAll('.step-row');
     if(!rows.length)return;
-    var line=readLine(), pr=page.getBoundingClientRect();
-    var first=rows[0].getBoundingClientRect(), last=rows[rows.length-1].getBoundingClientRect();
-    var spineTop=pr.top+83.2, spineLen=page.offsetHeight-83.2;
-    var travelled=Math.min(Math.max(line-spineTop,0),spineLen);
-    page.style.setProperty('--spine-p',(spineLen>0?travelled/spineLen:0).toFixed(4));
-    var hereIdx=-1;
+    var h=document.querySelector('header');
+    var line=(h?h.getBoundingClientRect().height:62)+110;
+    var active=-1;
     for(var i=0;i<rows.length;i++){
-      if(rows[i].getBoundingClientRect().top<=line)hereIdx=i; else break;
+      if(rows[i].getBoundingClientRect().top<=line)active=i; else break;
     }
-    for(var j=0;j<rows.length;j++){
-      rows[j].classList.toggle('spine-past',j<hereIdx);
-      rows[j].classList.toggle('spine-here',j===hereIdx);
-    }
+    for(var j=0;j<rows.length;j++)rows[j].classList.toggle('step-active',j===active);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
-  window.addEventListener('scroll',onScroll,{passive:true});
-  window.addEventListener('resize',onScroll,{passive:true});
+  addEventListener('scroll',onScroll,{passive:true});
+  addEventListener('resize',onScroll,{passive:true});
   document.addEventListener('DOMContentLoaded',paint);
-  window.addEventListener('load',paint);
+  addEventListener('load',paint);
   setTimeout(paint,300);
-  window.repaintSpine=paint;   // sections show/hide as data loads
+  window.repaintSpine=paint;   // sections show and hide as data loads
 })();
 function goPlans(){
   var c=document.getElementById('scenarioCard'); if(!c)return;
