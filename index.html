@@ -768,9 +768,13 @@ input[type=checkbox]{width:18px!important;height:18px!important;cursor:pointer}
    a group, 24px between groups. Left = who this is · the menu. Right = what you can
    do to the plan · what mode you're in · where the rules come from. */
 header .hdr-side>#themeToggle{margin-left:24px}   /* 8+24 = 32 clear of the brand */
-/* Names the mode you're in, so the switch doesn't rely on thumb position alone. */
+/* Names the mode you're in, so the switch doesn't rely on thumb position alone.
+   It lights with the mode: white for light, teal for dark. Both sit on the navy
+   header bar in either theme, so the pair is fixed rather than token-driven. */
 .ts-label{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--text3);white-space:nowrap;flex:0 0 auto;line-height:1;transition:color .18s}
+:root[data-theme="light"] .ts-label{color:#ffffff}
+:root[data-theme="dark"]  .ts-label{color:#2DD4B2}
 /* The label costs 63px; at 1280 the header was left with ~6px of slack, so it
    drops before the Save label does — naming the mode matters less than naming
    the action, and the lit track plus the thumb icon still carry the state. */
@@ -1576,7 +1580,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
