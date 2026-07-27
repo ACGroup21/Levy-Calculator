@@ -1706,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29e</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2867,6 +2867,8 @@ function renderScenarios(){
     document.querySelectorAll('.step-row').forEach(function(r){
       r.classList.toggle('step-active',r===row&&shown(r));
     });
+    // the tile is the position marker, so it rides the active step
+    if(typeof restTile==='function'&&row)restTile(row.querySelector('.step-chip')||row);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
   addEventListener('scroll',onScroll,{passive:true});
@@ -2889,6 +2891,10 @@ function renderScenarios(){
     return tile;
   }
   function centre(r){ return {x:r.left+r.width/2-6.5, y:r.top+r.height/2-6.5}; }
+  /* Rests in the left margin beside the chip rather than on top of it: sitting
+     over the label would hide "STEP 02", and the margin is where the old marker
+     dots lived, so the eye already reads that column as position. */
+  function restPoint(r){ return {x:r.left-21, y:r.top+r.height/2-6.5}; }
   function onScreen(r){ return r.width>0&&r.bottom>0&&r.top<innerHeight; }
   /* Cache the element it docked on, never its coordinates: the page scrolls
      between flights, so a stored viewport position is meaningless by the time
@@ -2897,7 +2903,7 @@ function renderScenarios(){
   function origin(){
     if(fromEl&&fromEl.isConnected){
       var r=fromEl.getBoundingClientRect();
-      if(onScreen(r))return centre(r);
+      if(onScreen(r))return restPoint(r);
     }
     var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
     return n?centre(n.getBoundingClientRect()):{x:24,y:30};
@@ -2920,8 +2926,7 @@ function renderScenarios(){
   }
   function arrive(dock){
     var t=node();
-    t.classList.remove('lit');
-    fromEl=dock;
+    fromEl=dock;                 // it stays lit: the tile IS the position marker
     dock.classList.remove('tile-hit'); void dock.offsetWidth; dock.classList.add('tile-hit');
     setTimeout(function(){dock.classList.remove('tile-hit');},700);
   }
@@ -2929,7 +2934,7 @@ function renderScenarios(){
     var t=node(), a=origin(), r=dock.getBoundingClientRect();
     // if the target never came into view, pulse it rather than flying to nowhere
     if(!onScreen(r)){ arrive(dock); return; }
-    var b=centre(r);
+    var b=restPoint(r);
     t.style.transition='none';
     t.style.transform='translate3d('+a.x+'px,'+a.y+'px,0)';
     t.classList.add('lit');
@@ -2953,6 +2958,23 @@ function renderScenarios(){
       last=y; waited+=60; settle=setTimeout(tick,60);
     })();
   }
+  /* Fixed position means the tile would drift as the page scrolls, so it is
+     re-pinned to its dock every frame the page moves — and hidden outright once
+     that dock leaves the screen, rather than sticking to the viewport edge
+     pointing at nothing. Skipped while a flight is in progress so the two do
+     not fight over the transform. */
+  window.restTile=function(dock){
+    var t=node();
+    if(flight)return;
+    if(dock)fromEl=dock;
+    if(!fromEl||!fromEl.isConnected){t.classList.remove('lit');return;}
+    var r=fromEl.getBoundingClientRect();
+    if(!onScreen(r)){t.classList.remove('lit');return;}
+    var pt=restPoint(r);
+    t.style.transition='transform .18s linear,opacity .18s';
+    t.style.transform='translate3d('+pt.x+'px,'+pt.y+'px,0)';
+    t.classList.add('lit');
+  };
   window.fireTile=function(target){
     var dock=dockFor(target); if(!dock)return;
     cancel();
