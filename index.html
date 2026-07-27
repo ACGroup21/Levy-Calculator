@@ -1026,6 +1026,11 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 /* the page column now sits on a dark stage, so it needs a real edge and lift */
 :root[data-theme="light"] .page{
   box-shadow:0 0 0 1px rgba(255,255,255,.06),0 18px 60px -22px rgba(0,0,0,.75)}
+/* The footer sits outside .page, so the navy canvas put light-mode ink on a dark
+   ground — the quote fell to 3.04:1 and "AC Digital" to 2.08:1. It now takes the
+   same token flip the header already uses for exactly this reason. */
+:root[data-theme="light"] footer{
+  --text:#eef4fa;--text2:#b7cbdd;--text3:#8ea6bb;--teal:#00C3DD;--wash:255,255,255}
 
 /* ── The step spine ───────────────────────────────────────────────────────────
    The rail was at 13.6px and the marker dots centre at 6.5px — a 7px near-miss,
@@ -1661,7 +1666,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28r</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
