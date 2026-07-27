@@ -511,6 +511,7 @@ button{font-family:var(--sans);cursor:pointer}
   background:#00C3DD;box-shadow:0 0 12px rgba(0,195,221,.85),0 0 3px rgba(0,195,221,1);
   opacity:0;pointer-events:none;will-change:transform}
 #flyTile.lit{opacity:1}
+#flyTile{transition:opacity .2s}
 /* the dock: the chip takes a brief brighter pulse as the tile arrives */
 .step-chip.tile-hit{animation:tileHit .55s ease-out}
 @keyframes tileHit{
@@ -1713,7 +1714,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2888,40 +2889,88 @@ function renderScenarios(){
   setTimeout(boot,1200);       // late panels (reports, QAR) arrive after data
   window.repaintSpine=boot;    // sections show and hide as data loads
 })();
-/* Fires the logo's cyan node at whatever you just asked to see. One tile, always
-   re-aimed: a second click cancels the flight in progress rather than spawning
-   another. It waits for the smooth scroll to settle before launching, because a
-   tile animating across a moving page reads as chaos rather than direction. */
+/* ── The travelling tile ─────────────────────────────────────────────────────
+   ONE dock, ONE loop. The previous build had two owners of the tile's position
+   — an explicit jump set it to the clicked target, while the scroll pass re-
+   pinned it to the active step on every frame — so it landed somewhere and was
+   immediately dragged away, and the "wait for the scroll to settle" logic raced
+   both. All of that is gone.
+
+   Each frame the tile eases toward its dock's LIVE position. That removes settle
+   detection (nothing to wait for), removes stale endpoints (the target is re-read
+   every frame, so it stays correct while the page is still scrolling) and removes
+   the flight-versus-rest distinction: firing is just a dock change with further
+   to travel. The loop stops itself once it arrives and nothing is moving. */
 (function(){
-  var tile=null, flight=null, settle=null, fromEl=null;
+  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0;
   var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
   function node(){
-    if(!tile){ tile=document.createElement('div'); tile.id='flyTile';
-      tile.setAttribute('aria-hidden','true'); document.body.appendChild(tile); }
+    if(!tile){
+      tile=document.createElement('div'); tile.id='flyTile';
+      tile.setAttribute('aria-hidden','true');
+      document.body.appendChild(tile);
+      tile.style.transition='none';        // driven per frame, never by CSS
+    }
     return tile;
   }
-  function centre(r){ return {x:r.left+r.width/2-6.5, y:r.top+r.height/2-6.5}; }
-  /* Rests in the left margin beside the chip rather than on top of it: sitting
-     over the label would hide "STEP 02", and the margin is where the old marker
-     dots lived, so the eye already reads that column as position. */
-  function restPoint(r){ return {x:r.left-21, y:r.top+r.height/2-6.5}; }
-  function onScreen(r){ return r.width>0&&r.bottom>0&&r.top<innerHeight; }
-  /* Cache the element it docked on, never its coordinates: the page scrolls
-     between flights, so a stored viewport position is meaningless by the time
-     it is reused — that put the tile 7,000px off-screen. Recompute at launch,
-     and fall back to the logo when the last dock has scrolled out of view. */
-  function origin(){
-    if(fromEl&&fromEl.isConnected){
-      var r=fromEl.getBoundingClientRect();
-      if(onScreen(r))return restPoint(r);
-    }
-    var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
-    return n?centre(n.getBoundingClientRect()):{x:24,y:30};
+  /* Where the tile wants to be: centred on its dock, clamped into the viewport so
+     it stays visible while you work inside a long section — the dock of the step
+     you are reading is usually scrolled off the top. */
+  function pointFor(el){
+    var r=el.getBoundingClientRect();
+    var h=document.querySelector('header');
+    var top=(h?h.getBoundingClientRect().height:62)+14;
+    return {x:Math.max(6,r.left+r.width/2-6.5),
+            y:Math.max(top,Math.min(r.top+r.height/2-6.5,innerHeight-26))};
   }
-  /* dock on the step chip where there is one; otherwise the card itself */
+  function frame(){
+    if(!dock||!dock.isConnected){running=false;if(tile)tile.classList.remove('lit');return;}
+    var t=node(), p=pointFor(dock);
+    if(snap||REDUCED.matches){ x=p.x; y=p.y; snap=false; }
+    else { x+=(p.x-x)*0.16; y+=(p.y-y)*0.16; }
+    t.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
+    t.classList.add('lit');
+    if(Math.abs(p.x-x)<0.4&&Math.abs(p.y-y)<0.4){
+      x=p.x; y=p.y;
+      t.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
+      running=false; return;                // arrived and still: stop burning frames
+    }
+    requestAnimationFrame(frame);
+  }
+  function kick(){ if(!running){ running=true; requestAnimationFrame(frame); } }
+
+  /* soft:true is the scroll pass offering a dock. It yields to a recent jump, so
+     a deliberate selection is never overridden by the section you scrolled past
+     on the way to it. */
+  window.tileDock=function(el,opts){
+    if(!el)return;
+    opts=opts||{};
+    if(opts.soft&&Date.now()<lockUntil)return;
+    node();
+    if(dock!==el){
+      dock=el;
+      if(!opts.soft)lockUntil=Date.now()+1400;   // the jump owns it until it lands
+      if(!dock.__seen&&!opts.soft){              // first ever placement: start at the logo
+        var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
+        if(n&&x===0&&y===0){ var r=n.getBoundingClientRect(); x=r.left; y=r.top; }
+      }
+      dock.__seen=1;
+    }
+    kick();
+  };
+  window.fireTile=function(target){
+    var d=dockFor(target); if(!d)return;
+    tileDock(d);
+    var host=d.parentElement;
+    if(host){ host.classList.remove('tile-hit'); void host.offsetWidth;
+      host.classList.add('tile-hit');
+      setTimeout(function(){host.classList.remove('tile-hit');},700); }
+  };
+  window.restTile=function(d){ if(d)tileDock(d,{soft:true}); };
+
+  /* dock resolution: a real slot beats every heuristic */
   function dockFor(target){
     if(!target)return null;
-    // a real slot beats every heuristic below it
     var host=target.matches&&target.matches('input,select,textarea,canvas,img,svg')
       ? (target.closest('.card,.step-row')||target.parentElement) : target;
     if(host&&host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
@@ -2931,64 +2980,13 @@ function renderScenarios(){
     if(near){ var s2=near.querySelector(':scope > .tile-slot'); if(s2)return s2; }
     if(target.classList&&target.classList.contains('step-row'))
       return target.querySelector('.step-chip')||target;
-    var inner=target.querySelector&&target.querySelector('.step-row .step-chip');
-    if(inner)return inner;
-    var row=target.previousElementSibling;
-    while(row){ if(row.classList&&row.classList.contains('step-row'))
-      return row.querySelector('.step-chip')||row; row=row.previousElementSibling; }
-    return target;
+    return host||target;
   }
-  function cancel(){
-    if(flight){clearTimeout(flight);flight=null;}
-    if(settle){clearTimeout(settle);settle=null;}
-  }
-  function arrive(dock){
-    var t=node();
-    fromEl=dock;                 // it stays lit: the tile IS the position marker
-    dock.classList.remove('tile-hit'); void dock.offsetWidth; dock.classList.add('tile-hit');
-    setTimeout(function(){dock.classList.remove('tile-hit');},700);
-  }
-  function launch(dock){
-    var t=node(), a=origin(), r=dock.getBoundingClientRect();
-    // if the target never came into view, pulse it rather than flying to nowhere
-    if(!onScreen(r)){ arrive(dock); return; }
-    var b=restPoint(r);
-    t.style.transition='none';
-    t.style.transform='translate3d('+a.x+'px,'+a.y+'px,0)';
-    t.classList.add('lit');
-    void t.offsetWidth;
-    var dist=Math.hypot(b.x-a.x,b.y-a.y);
-    // slowed: the first pass was quick enough that the eye caught the landing but
-    // not the travel, which is the whole point of moving the mark rather than
-    // just relighting it. Long enough to follow, short enough not to be waited on.
-    var ms=Math.max(430,Math.min(1050,320+dist*0.9));
-    t.style.transition='transform '+ms+'ms cubic-bezier(.22,.7,.25,1),opacity .2s';
-    t.style.transform='translate3d('+b.x+'px,'+b.y+'px,0)';
-    flight=setTimeout(function(){ flight=null; arrive(dock); },ms);
-  }
-  /* Wait until the target has actually arrived on screen AND the page has
-     stopped moving. Waiting for "not moving" alone raced the smooth scroll: on
-     the first tick the browser often has not started scrolling yet, so the tile
-     launched at a target still a thousand pixels below the fold. Capped, so a
-     long scroll never leaves it un-fired. */
-  function whenSettled(dock,fn){
-    var last=-1, waited=0;
-    (function tick(){
-      var y=scrollY, here=onScreen(dock.getBoundingClientRect());
-      if((here&&y===last)||waited>1200){ fn(); return; }
-      last=y; waited+=60; settle=setTimeout(tick,60);
-    })();
-  }
-  /* Fixed position means the tile would drift as the page scrolls, so it is
-     re-pinned to its dock every frame the page moves — and hidden outright once
-     that dock leaves the screen, rather than sticking to the viewport edge
-     pointing at nothing. Skipped while a flight is in progress so the two do
-     not fight over the transform. */
+  window.tileDockFor=dockFor;
+
   /* Every drawer destination gets a slot. Inputs cannot hold a child, so those
-     hand off to the card that contains the field — the tile lands on the panel
-     holding the control, which is where you were sent anyway. Slots are built
-     once and then left alone: because each lives INSIDE its target, it tracks
-     that target through every relayout with no recomputation. */
+     hand off to the card containing the field. Slots live INSIDE their target, so
+     they track it through every relayout with no repositioning pass. */
   window.buildTileSlots=function(){
     if(typeof NAV_INDEX==='undefined')return 0;
     var made=0;
@@ -2998,11 +2996,7 @@ function renderScenarios(){
       var host=target;
       if(host.matches('input,select,textarea,canvas,img,svg'))
         host=host.closest('.card,.step-row')||host.parentElement;
-      /* A closed <details> hides everything after its <summary>, so a slot placed
-         directly inside one has no layout until the panel is opened — it measured
-         as collapsed rather than sitting in the margin. Hang it on the summary,
-         which is always rendered. */
-      if(host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
+      if(host&&host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
       if(!host||host.querySelector(':scope > .tile-slot'))return;
       if(getComputedStyle(host).position==='static')host.style.position='relative';
       var slot=document.createElement('i');
@@ -3012,31 +3006,8 @@ function renderScenarios(){
     });});
     return made;
   };
-  window.restTile=function(dock){
-    var t=node();
-    if(flight)return;
-    if(dock)fromEl=dock;
-    if(!fromEl||!fromEl.isConnected){t.classList.remove('lit');return;}
-    var r=fromEl.getBoundingClientRect();
-    /* The heading of the step you are READING is usually scrolled off the top,
-       so pinning strictly to the chip hid the marker almost all the time. Clamp
-       it into view instead: it rides down the margin and rests against the
-       header while you work inside a long section. */
-    var pt=restPoint(r);
-    var h=document.querySelector('header');
-    var top=(h?h.getBoundingClientRect().height:62)+14;
-    pt.y=Math.max(top,Math.min(pt.y,innerHeight-26));
-    pt.x=Math.max(6,pt.x);
-    t.style.transition='transform .18s linear,opacity .18s';
-    t.style.transform='translate3d('+pt.x+'px,'+pt.y+'px,0)';
-    t.classList.add('lit');
-  };
-  window.fireTile=function(target){
-    var dock=dockFor(target); if(!dock)return;
-    cancel();
-    if(REDUCED.matches){ arrive(dock); return; }
-    whenSettled(dock,function(){ settle=null; launch(dock); });
-  };
+  addEventListener('scroll',kick,{passive:true});
+  addEventListener('resize',function(){snap=true;kick();},{passive:true});
 })();
 function goPlans(){
   var c=document.getElementById('scenarioCard'); if(!c)return;
