@@ -1660,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28z</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2789,11 +2789,15 @@ function renderScenarios(){
   function ownerRow(el){
     if(!el)return null;
     if(el.classList.contains('step-row'))return el;
+    // a section may CONTAIN its own heading (projectionSection, sec-reports) or
+    // sit after it; handle both rather than assuming one shape
+    var inside=el.querySelector('.step-row');
+    if(shown(inside))return inside;
     var rows=document.querySelectorAll('.step-row'), found=null;
     for(var i=0;i<rows.length;i++){
       if(!shown(rows[i]))continue;
-      var pos=rows[i].compareDocumentPosition(el);
-      if(pos&Node.DOCUMENT_POSITION_FOLLOWING||pos&Node.DOCUMENT_POSITION_CONTAINED_BY)found=rows[i];
+      // keep the last row that appears before this section in document order
+      if(rows[i].compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)found=rows[i];
     }
     return found;
   }
