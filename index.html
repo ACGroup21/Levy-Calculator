@@ -1660,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28v</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2785,6 +2785,10 @@ function renderScenarios(){
     for(var i=0;i<rows.length;i++){
       if(rows[i].getBoundingClientRect().top<=line)active=i; else break;
     }
+    // At the top of the page nothing has crossed the line yet, which left step 1
+    // unlit until you scrolled past it. Arriving on the page means you are on the
+    // first step, so it is current until a later one takes over.
+    if(active<0)active=0;
     for(var j=0;j<rows.length;j++)rows[j].classList.toggle('step-active',j===active);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
