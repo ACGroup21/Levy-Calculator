@@ -500,6 +500,13 @@ button{font-family:var(--sans);cursor:pointer}
 
    Fixed position, so it crosses the SCREEN rather than the document — some jumps
    are 7,000px and nothing can travel that visibly. */
+/* Landing slots. One per navigable destination, sitting in the left margin at
+   the top of its location. They are REAL elements with real geometry so the
+   tile can read exactly where to land — opacity:0 rather than display:none or
+   visibility:hidden, both of which would leave nothing to measure. Invisible to
+   the eye, present to the mechanics. */
+.tile-slot{position:absolute;left:-21px;top:12px;width:13px;height:13px;border-radius:3px;
+  opacity:0;pointer-events:none;background:#0F1826}
 #flyTile{position:fixed;left:0;top:0;z-index:306;width:13px;height:13px;border-radius:3px;
   background:#00C3DD;box-shadow:0 0 12px rgba(0,195,221,.85),0 0 3px rgba(0,195,221,1);
   opacity:0;pointer-events:none;will-change:transform}
@@ -1706,7 +1713,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29g</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29h</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2868,15 +2875,18 @@ function renderScenarios(){
       r.classList.toggle('step-active',r===row&&shown(r));
     });
     // the tile is the position marker, so it rides the active step
-    if(typeof restTile==='function'&&row)restTile(row.querySelector('.step-chip')||row);
+    if(typeof restTile==='function'&&row)
+      restTile(row.querySelector(':scope > .tile-slot')||row.querySelector('.step-chip')||row);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
   addEventListener('scroll',onScroll,{passive:true});
   addEventListener('resize',onScroll,{passive:true});
-  document.addEventListener('DOMContentLoaded',paint);
-  addEventListener('load',paint);
-  setTimeout(paint,300);
-  window.repaintSpine=paint;   // sections show and hide as data loads
+  function boot(){ if(typeof buildTileSlots==='function')buildTileSlots(); paint(); }
+  document.addEventListener('DOMContentLoaded',boot);
+  addEventListener('load',boot);
+  setTimeout(boot,300);
+  setTimeout(boot,1200);       // late panels (reports, QAR) arrive after data
+  window.repaintSpine=boot;    // sections show and hide as data loads
 })();
 /* Fires the logo's cyan node at whatever you just asked to see. One tile, always
    re-aimed: a second click cancels the flight in progress rather than spawning
@@ -2911,6 +2921,13 @@ function renderScenarios(){
   /* dock on the step chip where there is one; otherwise the card itself */
   function dockFor(target){
     if(!target)return null;
+    // a real slot beats every heuristic below it
+    var host=target.matches&&target.matches('input,select,textarea,canvas,img,svg')
+      ? (target.closest('.card,.step-row')||target.parentElement) : target;
+    var slot=host&&host.querySelector&&host.querySelector(':scope > .tile-slot');
+    if(slot)return slot;
+    var near=host&&host.closest&&host.closest('.card,.step-row');
+    if(near){ var s2=near.querySelector(':scope > .tile-slot'); if(s2)return s2; }
     if(target.classList&&target.classList.contains('step-row'))
       return target.querySelector('.step-chip')||target;
     var inner=target.querySelector&&target.querySelector('.step-row .step-chip');
@@ -2966,6 +2983,29 @@ function renderScenarios(){
      that dock leaves the screen, rather than sticking to the viewport edge
      pointing at nothing. Skipped while a flight is in progress so the two do
      not fight over the transform. */
+  /* Every drawer destination gets a slot. Inputs cannot hold a child, so those
+     hand off to the card that contains the field — the tile lands on the panel
+     holding the control, which is where you were sent anyway. Slots are built
+     once and then left alone: because each lives INSIDE its target, it tracks
+     that target through every relayout with no recomputation. */
+  window.buildTileSlots=function(){
+    if(typeof NAV_INDEX==='undefined')return 0;
+    var made=0;
+    NAV_INDEX.forEach(function(g){ g.items.forEach(function(it){
+      if(it.id==='__copilot')return;
+      var target=document.getElementById(it.id); if(!target)return;
+      var host=target;
+      if(host.matches('input,select,textarea,canvas,img,svg'))
+        host=host.closest('.card,.step-row')||host.parentElement;
+      if(!host||host.querySelector(':scope > .tile-slot'))return;
+      if(getComputedStyle(host).position==='static')host.style.position='relative';
+      var slot=document.createElement('i');
+      slot.className='tile-slot'; slot.setAttribute('aria-hidden','true');
+      slot.dataset.slot=it.id;
+      host.appendChild(slot); made++;
+    });});
+    return made;
+  };
   window.restTile=function(dock){
     var t=node();
     if(flight)return;
