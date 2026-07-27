@@ -487,9 +487,16 @@ button{font-family:var(--sans);cursor:pointer}
    soft teal halo. Low alpha deliberately — glow is what dark mode has that light
    cannot, but a page of hard halos would fight the money figures.
    Dark only: on white this renders as grey dirt. */
+/* Glow marks attention, not existence. Every card glowing at rest meant nothing
+   stood out and the page hummed; it now reads as flat until you point at a card
+   or work inside one. Resting shadow is plain depth with no teal in it. */
 :root[data-theme="dark"] .card,
 :root[data-theme="dark"] .metric{
-  box-shadow:0 0 0 1px rgba(45,212,178,.05),0 10px 34px -18px rgba(45,212,178,.30)}
+  box-shadow:0 1px 2px rgba(0,0,0,.30),0 8px 24px -18px rgba(0,0,0,.55)}
+:root[data-theme="dark"] .card:focus-within{
+  box-shadow:0 0 0 1px rgba(45,212,178,.14),0 4px 10px rgba(0,0,0,.28),
+             0 18px 44px -16px rgba(45,212,178,.42);
+  border-color:rgba(45,212,178,.40)}
 
 /* ── The travelling tile ─────────────────────────────────────────────────────
    The logo's detached cyan node is the app's navigation cursor: it fires from
@@ -1709,7 +1716,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29x</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29y</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
