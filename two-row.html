@@ -151,7 +151,7 @@ html.theme-anim,html.theme-anim *:not(canvas):not(.aurora-blob){transition:backg
    of chrome pinned to the browser. Width tracks .page exactly (1100px cap, same
    1.5rem gutters) so the logo lines up with the content beneath it. */
 header{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:100;
-  display:flex;flex-direction:column;width:calc(100% - 3rem);max-width:1100px;
+  display:flex;flex-direction:column;width:calc(100% - 3rem);max-width:calc(1100px - 3rem);
   background:rgba(5,12,24,0.88);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);
   border:1px solid var(--border);border-radius:16px;
   box-shadow:0 14px 34px -20px rgba(0,0,0,.75)}
