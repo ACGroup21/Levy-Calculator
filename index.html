@@ -1706,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29d</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2940,13 +2940,16 @@ function renderScenarios(){
     t.style.transform='translate3d('+b.x+'px,'+b.y+'px,0)';
     flight=setTimeout(function(){ flight=null; arrive(dock); },ms);
   }
-  /* wait for the page to stop moving, then fly — capped so a long smooth scroll
-     never leaves the tile un-fired */
-  function afterScroll(fn){
+  /* Wait until the target has actually arrived on screen AND the page has
+     stopped moving. Waiting for "not moving" alone raced the smooth scroll: on
+     the first tick the browser often has not started scrolling yet, so the tile
+     launched at a target still a thousand pixels below the fold. Capped, so a
+     long scroll never leaves it un-fired. */
+  function whenSettled(dock,fn){
     var last=-1, waited=0;
     (function tick(){
-      var y=scrollY;
-      if(y===last||waited>900){ fn(); return; }
+      var y=scrollY, here=onScreen(dock.getBoundingClientRect());
+      if((here&&y===last)||waited>1200){ fn(); return; }
       last=y; waited+=60; settle=setTimeout(tick,60);
     })();
   }
@@ -2954,7 +2957,7 @@ function renderScenarios(){
     var dock=dockFor(target); if(!dock)return;
     cancel();
     if(REDUCED.matches){ arrive(dock); return; }
-    afterScroll(function(){ settle=null; launch(dock); });
+    whenSettled(dock,function(){ settle=null; launch(dock); });
   };
 })();
 function goPlans(){
