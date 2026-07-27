@@ -1706,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29g</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2972,8 +2972,15 @@ function renderScenarios(){
     if(dock)fromEl=dock;
     if(!fromEl||!fromEl.isConnected){t.classList.remove('lit');return;}
     var r=fromEl.getBoundingClientRect();
-    if(!onScreen(r)){t.classList.remove('lit');return;}
+    /* The heading of the step you are READING is usually scrolled off the top,
+       so pinning strictly to the chip hid the marker almost all the time. Clamp
+       it into view instead: it rides down the margin and rests against the
+       header while you work inside a long section. */
     var pt=restPoint(r);
+    var h=document.querySelector('header');
+    var top=(h?h.getBoundingClientRect().height:62)+14;
+    pt.y=Math.max(top,Math.min(pt.y,innerHeight-26));
+    pt.x=Math.max(6,pt.x);
     t.style.transition='transform .18s linear,opacity .18s';
     t.style.transform='translate3d('+pt.x+'px,'+pt.y+'px,0)';
     t.classList.add('lit');
