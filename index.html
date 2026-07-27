@@ -506,7 +506,7 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-hits{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
 .jd-hit-tag{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:6px;background:rgba(45,212,178,0.14);color:var(--teal)}
 .jd-details{margin-top:14px;border-top:1px solid rgba(167,139,250,0.18);padding-top:8px}
-.jd-details summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text3);user-select:none;list-style:none}
+.jd-details summary{cursor:pointer;font-family:var(--sans);font-size:12px;letter-spacing:normal;color:var(--text2);user-select:none;list-style:none}
 .jd-details summary::-webkit-details-marker{display:none}
 .jd-details summary::before{content:'\25B8  ';color:var(--purple)}
 .jd-details[open] summary::before{content:'\25BE  '}
@@ -632,13 +632,13 @@ th.r,td.r{text-align:right}
 .expiry-table th:not(.r),.expiry-table td:not(.r){text-align:left}
 .expiry-table .c-red{color:var(--red)}.expiry-table .c-amber{color:var(--amber)}
 .expiry-details{margin-top:12px;border-top:1px solid rgba(245,166,35,0.18);padding-top:8px}
-.expiry-details summary{cursor:pointer;font-size:12px;color:var(--text3);font-family:var(--mono);letter-spacing:.04em;user-select:none;list-style:none}
+.expiry-details summary{cursor:pointer;font-size:12px;color:var(--text2);font-family:var(--sans);letter-spacing:normal;user-select:none;list-style:none}
 .expiry-details summary::-webkit-details-marker{display:none}
 .expiry-details summary::before{content:'\25B8  ';color:var(--amber)}
 .expiry-details[open] summary::before{content:'\25BE  '}
 .expiry-details summary:hover{color:var(--amber)}
 
-details summary{font-family:var(--mono);font-size:11px;color:var(--text3);cursor:pointer;user-select:none;letter-spacing:.05em;padding:6px 0}
+details summary{font-family:var(--sans);font-size:12px;color:var(--text2);cursor:pointer;user-select:none;letter-spacing:normal;padding:6px 0}
 details summary:hover,details[open] summary{color:var(--teal)}
 
 .gift-note{font-size:12px;color:var(--text3);margin-top:1rem;line-height:1.75}
@@ -971,6 +971,31 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
   :root[data-theme="light"] .card:focus-within:hover{border-color:#0F1826}
 }
 .card{transition:border-color .25s,box-shadow .25s,transform .25s}
+
+/* ── Brand presence, and when a card may take colour ──────────────────────────
+   Measured 2026-07-28: saturated brand surface was 12.33% of the page in dark
+   but 0.03% in light. Light was never flat — it has MORE surface levels and more
+   shadows than dark — it was colourless, because dark gets its colour free from
+   glow on a near-black ground while light's 7%-alpha tints render as white.
+   Glow is impossible on white, so in light the colour has to come from area and
+   saturation instead.
+
+   Step chips carry it: a solid navy fill with white text, the same pair already
+   chosen for the dropdown group dividers, so the blue means one thing throughout. */
+.step-chip{background:#1464A6!important;border:1px solid #1464A6!important;color:#ffffff!important;
+  -webkit-text-fill-color:#ffffff!important}
+
+/* A card takes a wash only when it is a LEAF — nothing nested inside it. A card
+   that contains other cards is a container, and tinting it would flatten the
+   nesting it exists to express. One shared low-chroma wash, never a hue per card:
+   14 cards each with their own colour is a rainbow, and colour here must stay
+   free for the funded/your-cash meaning the figures carry. */
+:root[data-theme="light"] .page > .card:not(:has(.card)){
+  background:#f7fafd;border-color:#dbe7f2}
+:root[data-theme="light"] .page > .card:not(:has(.card)) .metric,
+:root[data-theme="light"] .page > .card:not(:has(.card)) .fig{background:#ffffff}
+:root[data-theme="dark"] .page > .card:not(:has(.card)){
+  background:#111c2e}
 @media(prefers-reduced-motion:reduce){.card:hover{transform:none}}
 
 /* metrics and figure tiles get a cyan hairline at the top — brand as structure */
@@ -1580,7 +1605,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28n</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
