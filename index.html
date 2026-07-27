@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29s</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3262,6 +3262,52 @@ var QAR_NATIONAL={year:'2024/25',overall:65.4,target:67,
   byLevel:{3:66.4,4:60.9,5:66.2,6:69.3}, // verified 2024/25 (gov.uk NARTs via FE Week); L2 & L7 not published as isolated figures → fall back to overall
   source:'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships/2024-25'};
 function qarBench(level){var b=QAR_NATIONAL.byLevel[level];return (b!=null)?{r:b,level:true}:{r:QAR_NATIONAL.overall,level:false};}
+/* ── Hybrid end year ─────────────────────────────────────────────────────────
+   ESFA counts an aim in the LATEST of its candidate years — actual end, planned
+   end, and (for an aim that never reported complete) the reporting year — with
+   years running 1 August to 31 July. Taking the latest means an aim lands in the
+   year it really finished rather than the year it was meant to, so a delayed
+   completion is never split across periods and never counted twice.
+
+   The practical consequence, which is what an employer actually feels: a year's
+   rate is not a cohort. It is everyone who finished — or should have — inside
+   that window, drawn from many different start years. Someone slipping past 31
+   July moves into the next year, so a rate can move with no new starts at all. */
+function fyStart(d){                     // funding year that a date falls in
+  if(!d)return null;
+  var m=String(d).match(/^(\d{4})-(\d{1,2})/); if(!m)return null;
+  var y=+m[1], mo=+m[2];
+  return mo>=8?y:y-1;                    // Aug starts the year
+}
+function fyLabel(y){ return y+'/'+String((y+1)%100).padStart(2,'0'); }
+function qarNowFy(){ var d=new Date(); return d.getMonth()>=7?d.getFullYear():d.getFullYear()-1; }
+function qarIsOverdue(x,nowMk){
+  if(x.status==='achieved'||x.status==='withdrawn')return false;
+  if(/fail/i.test(x.outcome||''))return false;
+  if(x.actualEnd)return false;
+  var pe=x.plannedEnd?mKey(x.plannedEnd):null;
+  return pe!==null&&pe<nowMk;
+}
+function hybridEndYear(x){
+  var nowMk=(function(){var d=new Date();return d.getFullYear()*12+d.getMonth();})();
+  var c=[];
+  var a=fyStart(x.actualEnd), pl=fyStart(x.plannedEnd);
+  if(a!==null)c.push(a);
+  if(pl!==null)c.push(pl);
+  if(qarIsOverdue(x,nowMk))c.push(qarNowFy());   // never reported complete
+  return c.length?Math.max.apply(null,c):null;
+}
+/* years we can legitimately report: those with at least one leaver, and never a
+   future year — an aim whose planned end has not arrived yet is not a leaver. */
+function qarYears(rows){
+  rows=rows||delivery||[];
+  var now=qarNowFy(), seen={};
+  rows.forEach(function(x){ var y=hybridEndYear(x);
+    if(y!==null&&y<=now)seen[y]=1; });
+  return Object.keys(seen).map(Number).sort(function(a,b){return a-b;})
+    .filter(function(y){ return computeQAR(rows,y).leavers>0; });
+}
+
 /* Verified against the published ESFA methodology (Qualification achievement
    rates 2024 to 2025, gov.uk):
      achievement rate = Achievers / Leavers x 100
@@ -3274,8 +3320,9 @@ function qarBench(level){var b=QAR_NATIONAL.byLevel[level];return (b!=null)?{r:b
    every in-learning record, which inflated the rate by shrinking the
    denominator. They are now counted, and reported separately so the number is
    explicable. */
-function computeQAR(rows){
+function computeQAR(rows,yr){
   rows=rows||delivery||[];
+  if(yr!==undefined&&yr!==null)rows=rows.filter(function(x){return hybridEndYear(x)===yr;});
   var achieved=0,withdrawn=0,failed=0,live=0,overdue=0,atRisk=0;
   var nowMk=(function(){var d=new Date();return d.getFullYear()*12+d.getMonth();})();
   rows.forEach(function(x){
@@ -3302,6 +3349,8 @@ function qarByStandard(){
     return {name:k,level:lv,bench:b.r,benchIsLevel:b.level,leavers:q.leavers,qar:q.qar,achieved:q.achieved,withdrawn:q.withdrawn+q.failed};
   }).filter(function(r){return r.leavers>0;}).sort(function(a,b){return a.qar-b.qar;});
 }
+var qarYear=null;
+function setQarYear(y){ qarYear=y; renderQAR(); }
 function renderQAR(){
   var el=document.getElementById('qarSection');if(!el)return;
   /* Rendering nothing made a headline feature look deleted rather than waiting
@@ -3323,11 +3372,31 @@ function renderQAR(){
       '</div>';
     return;
   }
-  var q=computeQAR();
+  var years=qarYears();
+  if(qarYear===null||years.indexOf(qarYear)<0)qarYear=years.length?years[years.length-1]:null;
+  var q=computeQAR(null,qarYear);
   var N=QAR_NATIONAL, src=N.source;
+  /* Your own rate per year, on the same scale as the national trend beside it —
+     the comparison the benchmark is actually for. */
+  var yearPicker='';
+  if(years.length){
+    yearPicker='<div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:10px 0 2px">'+
+      '<span style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">Year</span>'+
+      years.map(function(y){
+        var on=(y===qarYear), r=computeQAR(null,y);
+        return '<button type="button" onclick="setQarYear('+y+')" style="font-family:var(--mono);font-size:10px;'+
+          'letter-spacing:.05em;border-radius:99px;padding:4px 10px;cursor:pointer;'+
+          (on?'background:var(--teal);color:#04121f;border:1px solid var(--teal);font-weight:600'
+             :'background:none;color:var(--text3);border:1px solid rgba(var(--wash),0.18)')+
+          '" title="'+r.achieved+' of '+r.leavers+' leavers">'+fyLabel(y)+
+          (r.qar!=null?(' &middot; '+r.qar.toFixed(0)+'%'):'')+'</button>';
+      }).join('')+
+      '<span style="font-size:11px;color:var(--text3)">counted by the year each learner finished &mdash; or should have</span>'+
+      '</div>';
+  }
   var head='<div style="display:flex;align-items:center;gap:9px;margin-bottom:4px"><span style="font-size:17px">&#127942;</span><span style="font-weight:700;color:var(--text);font-size:15px">Achievement rate (QAR)</span><span style="font-size:11px;color:var(--text3);border:1px solid rgba(var(--wash),0.15);border-radius:99px;padding:1px 9px">your cohort</span></div>';
   if(!q.leavers){
-    el.innerHTML='<div class="card" style="margin-top:1rem">'+head+
+    el.innerHTML='<div class="card" style="margin-top:1rem">'+head+yearPicker+
       '<div style="font-size:13px;color:var(--text2);line-height:1.6;margin-top:8px">No learners have completed or left yet, so an achievement rate can&rsquo;t be calculated &mdash; QAR counts only <strong>leavers</strong> (those who reached the end). <strong>'+q.live+'</strong> learner'+(q.live!==1?'s are':' is')+' still on programme. It becomes available as cohorts complete.</div></div>';
     return;
   }
@@ -3388,10 +3457,11 @@ function renderQAR(){
     '<div><strong style="color:var(--text2)">Leavers</strong> = achieved ('+q.achieved+') + withdrawn ('+q.withdrawn+') + completed-but-failed ('+q.failed+') + overdue past planned end ('+q.overdue+'), which ESFA counts as leavers and treats as withdrawals. Still-on-programme ('+q.live+') excluded.</div>'+
     '<div><strong style="color:var(--text2)">Decomposition</strong>: retention ('+(q.retention!=null?q.retention.toFixed(1):'—')+'%) &times; pass ('+(q.pass!=null?q.pass.toFixed(1):'—')+'%) = achievement rate.</div>'+
     (byStd.length?('<div style="margin-top:6px"><strong style="color:var(--text2)">By standard</strong> (lowest first, vs national): '+byStd.map(function(r){return escHtml(r.name)+' '+r.qar.toFixed(0)+'% ('+r.achieved+'/'+r.leavers+') vs '+r.bench.toFixed(1)+'%'+(r.benchIsLevel?(' L'+r.level):' overall');}).join(' &middot; ')+'</div>'):'')+
+    '<div style="margin-top:6px"><strong style="color:var(--text2)">Hybrid end year</strong>: ESFA counts an aim in the <em>latest</em> of its actual end year, its planned end year and &mdash; where it never reported complete &mdash; the reporting year, with years running 1 August to 31 July. So an aim lands in the year it really finished rather than the year it was meant to, is never split across periods and is never counted twice. A year is therefore <strong>not a cohort</strong>: it is everyone who finished, or should have, inside that window, from many different start years &mdash; which is why a rate can move with no new starts at all.</div>'+
     '<div style="margin-top:6px"><strong style="color:var(--text2)">Benchmark</strong>: national all-age all-level rate '+N.overall+'% ('+N.year+', published Mar 2026), target '+N.target+'%. By level &mdash; L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (L2 &amp; L7 not published separately &rarr; compared to the overall rate). Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'. Source: <a href="'+src+'" target="_blank" rel="noopener" style="color:var(--teal)">gov.uk Explore Education Statistics &mdash; Apprenticeships</a>.</div>'+
     '<div style="margin-top:6px;font-style:italic">This is an <strong>indicative rate on your own learners</strong>, computed from your tracker export. It is <strong>not</strong> the official ESFA provider QAR, which is calculated from full ILR data on a &ldquo;hybrid end year&rdquo; basis with national inclusion/exclusion rules &mdash; use it to steer, not for published performance management.</div>'+
     '</div></details>';
-  el.innerHTML='<div class="card" style="margin-top:1rem">'+head+
+  el.innerHTML='<div class="card" style="margin-top:1rem">'+head+yearPicker+
     '<div style="display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-start;margin-top:10px"><div>'+ring+trend+'</div><div style="flex:1;min-width:220px">'+bench+decomp+'</div></div>'+outlook+
     drag+liveNote+working+'</div>';
 }
