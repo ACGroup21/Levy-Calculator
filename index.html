@@ -480,6 +480,25 @@ button{font-family:var(--sans);cursor:pointer}
 .bh-yr{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.03em;padding:4px 10px;border-radius:99px;cursor:pointer;background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.3);color:var(--purple2);transition:all .15s}
 .bh-yr:hover{border-color:var(--purple2)}
 .bh-yr.active{background:#818cf8;color:#0a0f1e;border-color:#818cf8}
+/* ── Dark-mode glow ──────────────────────────────────────────────────────────
+   The step-1 numerical panels read as "lit" because of a teal gradient hairline
+   and a teal-tinted border — there was no actual glow anywhere except the active
+   step chip. Cards and panels now carry a real one: a hairline teal ring plus a
+   soft teal halo. Low alpha deliberately — glow is what dark mode has that light
+   cannot, but a page of hard halos would fight the money figures.
+   Dark only: on white this renders as grey dirt. */
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .metric{
+  box-shadow:0 0 0 1px rgba(45,212,178,.05),0 10px 34px -18px rgba(45,212,178,.30)}
+/* the hover lift has to stay ahead of the resting glow or pointing at a card
+   would read as less prominent than leaving it alone */
+@media(hover:hover){
+  :root[data-theme="dark"] .card:hover{
+    box-shadow:0 0 0 1px rgba(45,212,178,.12),0 4px 10px rgba(0,0,0,.28),
+               0 18px 44px -16px rgba(45,212,178,.42);
+    border-color:rgba(45,212,178,.34)}
+}
+
 .bh-layout{display:grid;grid-template-columns:1fr 165px;gap:18px;align-items:start;margin-top:8px}
 @media(max-width:600px){.bh-layout{grid-template-columns:1fr}}
 .bh-summary{background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.25);border-radius:10px;padding:16px 14px;text-align:center;position:sticky;top:70px}
@@ -1660,7 +1679,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29a</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
