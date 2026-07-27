@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29q</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2645,7 +2645,7 @@ const RULEBOOK={
   coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
   expiryMonths:{before:24,from:12}, // unused funds expire after N months (by declaration date)
   apprenticeshipMinMonths:8,        // minimum apprenticeship duration (reserved for units/duration work)
-  achievementBenchmark:0.60,        // national apprenticeship QAR (~60%, FY2024/25) — the "stay on track" floor; update annually
+  achievementBenchmark:0.654,       // national apprenticeship achievement rate 2024/25 (65.4%) — was 0.60 here while the QAR module used 65.4, two benchmarks in one app; single source now, update annually
   ambitionMargin:{keepPace:0,aboveAverage:0.10,sectorLeading:0.20}, // added to the benchmark by ambition; target capped at 90%
   unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
 };
@@ -3262,19 +3262,38 @@ var QAR_NATIONAL={year:'2024/25',overall:65.4,target:67,
   byLevel:{3:66.4,4:60.9,5:66.2,6:69.3}, // verified 2024/25 (gov.uk NARTs via FE Week); L2 & L7 not published as isolated figures → fall back to overall
   source:'https://explore-education-statistics.service.gov.uk/find-statistics/apprenticeships/2024-25'};
 function qarBench(level){var b=QAR_NATIONAL.byLevel[level];return (b!=null)?{r:b,level:true}:{r:QAR_NATIONAL.overall,level:false};}
+/* Verified against the published ESFA methodology (Qualification achievement
+   rates 2024 to 2025, gov.uk):
+     achievement rate = Achievers / Leavers x 100
+     retention  rate  = Completers / Leavers x 100
+     pass       rate  = Achievers / Completers x 100
+   Those three matched already. What did NOT match is the Leaver definition:
+   Leaver is set where an actual end date exists OR the aim is "overdue
+   continuing" — a learner still in learning past their planned end date. ESFA
+   counts those as leavers and treats them as withdrawals. We were excluding
+   every in-learning record, which inflated the rate by shrinking the
+   denominator. They are now counted, and reported separately so the number is
+   explicable. */
 function computeQAR(rows){
   rows=rows||delivery||[];
-  var achieved=0,withdrawn=0,failed=0,live=0,atRisk=0;
+  var achieved=0,withdrawn=0,failed=0,live=0,overdue=0,atRisk=0;
+  var nowMk=(function(){var d=new Date();return d.getFullYear()*12+d.getMonth();})();
   rows.forEach(function(x){
     var isFail=/fail/i.test(x.outcome||'');
     if(x.status==='achieved')achieved++;
     else if(isFail){failed++;atRisk+=(+x.price||+x.stdBand||0);}
     else if(x.status==='withdrawn'){withdrawn++;atRisk+=(+x.price||+x.stdBand||0);}
-    else live++; // in_progress / gateway / paused — still in learning, excluded
+    else {
+      var pe=x.plannedEnd?mKey(x.plannedEnd):null;
+      if(pe!==null&&pe<nowMk){ overdue++; atRisk+=(+x.price||+x.stdBand||0); }  // overdue continuing = leaver
+      else live++;                                                              // genuinely still in learning
+    }
   });
-  var completers=achieved+failed, leavers=completers+withdrawn;
-  return {achieved:achieved,withdrawn:withdrawn,failed:failed,live:live,completers:completers,leavers:leavers,atRisk:atRisk,
-    qar:leavers?achieved/leavers*100:null, retention:leavers?completers/leavers*100:null, pass:completers?achieved/completers*100:null, total:rows.length};
+  var completers=achieved+failed, leavers=completers+withdrawn+overdue;
+  return {achieved:achieved,withdrawn:withdrawn,failed:failed,live:live,overdue:overdue,
+    completers:completers,leavers:leavers,atRisk:atRisk,
+    qar:leavers?achieved/leavers*100:null, retention:leavers?completers/leavers*100:null,
+    pass:completers?achieved/completers*100:null, total:rows.length};
 }
 function qarByStandard(){
   var g={};
@@ -3366,7 +3385,7 @@ function renderQAR(){
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:var(--teal)">&#128200;</span> Show the working &amp; source</summary>'+
     '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
     '<div><strong style="color:var(--text2)">Achievement rate</strong> = achievements &divide; leavers = '+q.achieved+' &divide; '+q.leavers+' = <b>'+qar.toFixed(1)+'%</b>.</div>'+
-    '<div><strong style="color:var(--text2)">Leavers</strong> = achieved ('+q.achieved+') + withdrawn ('+q.withdrawn+') + completed-but-failed ('+q.failed+'). Still-on-programme ('+q.live+') excluded.</div>'+
+    '<div><strong style="color:var(--text2)">Leavers</strong> = achieved ('+q.achieved+') + withdrawn ('+q.withdrawn+') + completed-but-failed ('+q.failed+') + overdue past planned end ('+q.overdue+'), which ESFA counts as leavers and treats as withdrawals. Still-on-programme ('+q.live+') excluded.</div>'+
     '<div><strong style="color:var(--text2)">Decomposition</strong>: retention ('+(q.retention!=null?q.retention.toFixed(1):'—')+'%) &times; pass ('+(q.pass!=null?q.pass.toFixed(1):'—')+'%) = achievement rate.</div>'+
     (byStd.length?('<div style="margin-top:6px"><strong style="color:var(--text2)">By standard</strong> (lowest first, vs national): '+byStd.map(function(r){return escHtml(r.name)+' '+r.qar.toFixed(0)+'% ('+r.achieved+'/'+r.leavers+') vs '+r.bench.toFixed(1)+'%'+(r.benchIsLevel?(' L'+r.level):' overall');}).join(' &middot; ')+'</div>'):'')+
     '<div style="margin-top:6px"><strong style="color:var(--text2)">Benchmark</strong>: national all-age all-level rate '+N.overall+'% ('+N.year+', published Mar 2026), target '+N.target+'%. By level &mdash; L3 '+N.byLevel[3]+'%, L4 '+N.byLevel[4]+'%, L5 '+N.byLevel[5]+'%, L6 '+N.byLevel[6]+'% (L2 &amp; L7 not published separately &rarr; compared to the overall rate). Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'. Source: <a href="'+src+'" target="_blank" rel="noopener" style="color:var(--teal)">gov.uk Explore Education Statistics &mdash; Apprenticeships</a>.</div>'+
@@ -3624,7 +3643,7 @@ function fundingRulesRef(){
     {label:'Transfer cap',value:pc(b.transferCapPct),eff:'annual',detail:'You may gift up to '+pc(b.transferCapPct)+' of your annual levy to other employers; they receive 100% funding for the training.'},
     {label:'Apprenticeship minimum',value:b.apprenticeshipMinMonths+' months',eff:'from 2025',detail:'An apprenticeship must run at least '+b.apprenticeshipMinMonths+' months to be levy-fundable; shorter needs go via a unit.'},
     {label:'Apprenticeship units',value:pc(b.unit.coInvest)+' · '+pc(b.unit.m1)+'/'+pc(b.unit.m2),eff:'from Apr 2026',detail:b.unit.minHours+'–'+b.unit.maxHours+'h single-element units: '+pc(b.unit.m1)+' drawn at '+pc(b.unit.m1)+' of delivery, '+pc(b.unit.m2)+' on completion, '+pc(b.unit.coInvest)+' co-invest, paid after apprenticeships.'},
-    {label:'Achievement benchmark',value:pc(b.achievementBenchmark),eff:'QAR FY2024/25',detail:'National apprenticeship achievement rate (~'+pc(b.achievementBenchmark)+') — the “stay on track” floor the report measures ambition against.'}
+    {label:'Achievement benchmark',value:pc(b.achievementBenchmark),eff:'QAR 2024/25',detail:'National apprenticeship achievement rate (~'+pc(b.achievementBenchmark)+') — the “stay on track” floor the report measures ambition against.'}
   ];
 }
 function renderRulesRef(){
