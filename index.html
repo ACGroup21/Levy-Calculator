@@ -469,7 +469,7 @@ button{font-family:var(--sans);cursor:pointer}
 .plan-rec.warn{background:rgba(245,166,35,0.08);border-color:rgba(245,166,35,0.35);color:#f5c87a}
 .plan-prog-grid{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto auto;column-gap:18px;font-size:12px;margin-top:6px}
 .plan-prog-grid>span{padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.06)}
-.plan-prog-grid .ppn{color:var(--text2);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plan-prog-grid .ppn{color:var(--text);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plan-prog-grid .ppc{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
 .plan-collapse{border:1px solid rgba(129,140,248,0.18);border-radius:10px;padding:10px 14px;background:rgba(129,140,248,0.04)}
 .plan-collapse summary{cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);user-select:none;list-style:none}
@@ -595,7 +595,7 @@ tr:hover td{background:rgba(45,212,178,0.02)}
 @media(prefers-reduced-motion:reduce){#splash .sp-mark,#splash .sp-wm,.sp-trav{animation:none}
   #splash.done .sp-inner{transform:none;opacity:0}}
 th.r,td.r{text-align:right}
-.mono{font-family:var(--mono)}.td-name{color:var(--text);font-weight:500}
+.mono{font-family:var(--mono)}.td-name{color:var(--text);font-weight:600}
 
 .chart-wrap{position:relative;width:100%;height:300px;margin-bottom:1.5rem}
 .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:10px}
@@ -686,7 +686,7 @@ details summary:hover,details[open] summary{color:var(--teal)}
 .msg.user .msg-bubble{background:rgba(55,77,106,0.35);border:1px solid rgba(55,77,106,0.4);color:var(--text);border-top-right-radius:3px}
 .msg-bubble strong{color:var(--teal)}
 .msg-bubble .r-section{margin-top:8px;padding-top:8px;border-top:1px solid rgba(45,212,178,0.12)}
-.msg-bubble .r-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.msg-bubble .r-label{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text);letter-spacing:normal;text-transform:none;margin-bottom:3px}
 .msg-bubble .r-val{font-family:var(--mono);font-size:13px;color:var(--teal)}
 .msg-bubble .r-warn{color:var(--amber)}.msg-bubble .r-bad{color:var(--red)}
 
@@ -1580,7 +1580,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28m</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3422,9 +3422,12 @@ function loadDemo(){
   buildLevyData(mm,tI,tO,0);
   const d=o=>{const x=new Date(today);x.setMonth(x.getMonth()+o);return x.toISOString().slice(0,10);};
   programmes=[
-    {name:'L3 Business Administrator',cost:7000,count:3,start:d(0),epa:d(18)},
-    {name:'L4 Data Analyst',cost:14000,count:2,start:d(2),epa:d(26)},
-    {name:'L5 Operations / Departmental Manager',cost:9000,count:1,start:d(4),epa:d(34)},
+    /* Names and bands must match the standards library exactly, or the row's
+       STANDARDS.find(s=>s.name===p.name) misses and the learner silently loses
+       its KSB badge and standard-derived data. Bands are the library's. */
+    {name:'L3 Business administrator',cost:5000,count:3,start:d(0),epa:d(18)},
+    {name:'L4 Data analyst',cost:15000,count:2,start:d(2),epa:d(26)},
+    {name:'L5 Operations manager',cost:9000,count:1,start:d(4),epa:d(28)},
   ];
   renderProgrammes();renderProjection();saveState();
   setStatus('[DEMO] Sample data loaded — scroll down to view the 36-month projection.','ok');
