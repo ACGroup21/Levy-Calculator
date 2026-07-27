@@ -996,6 +996,11 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 :root[data-theme="light"] .page > .card:not(:has(.card)) .fig{background:#ffffff}
 :root[data-theme="dark"] .page > .card:not(:has(.card)){
   background:#111c2e}
+/* The light theme carries an older chip override further up the sheet with
+   !important, which beat the fill above and left the chip at 2.82:1 — under the
+   4.5 threshold. Same specificity, so this has to come last to win. */
+:root[data-theme="light"] .step-chip{background:#1464A6!important;border-color:#1464A6!important;
+  color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
 @media(prefers-reduced-motion:reduce){.card:hover{transform:none}}
 
 /* metrics and figure tiles get a cyan hairline at the top — brand as structure */
@@ -1605,7 +1610,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28o</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
