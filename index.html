@@ -500,31 +500,15 @@ button{font-family:var(--sans);cursor:pointer}
 
    Fixed position, so it crosses the SCREEN rather than the document — some jumps
    are 7,000px and nothing can travel that visibly. */
-/* Landing slots. One per navigable destination, sitting in the left margin at
-   the top of its location. They are REAL elements with real geometry so the
-   tile can read exactly where to land — opacity:0 rather than display:none or
-   visibility:hidden, both of which would leave nothing to measure. Invisible to
-   the eye, present to the mechanics. */
-.tile-slot{position:absolute;left:-21px;top:12px;width:13px;height:13px;border-radius:3px;
-  opacity:0;pointer-events:none;background:#0F1826}
-#flyTile{position:fixed;left:0;top:0;z-index:306;width:13px;height:13px;border-radius:3px;
-  background:#00C3DD;box-shadow:0 0 12px rgba(0,195,221,.85),0 0 3px rgba(0,195,221,1);
-  opacity:0;pointer-events:none;will-change:transform}
-#flyTile.lit{opacity:1}
-#flyTile{transition:opacity .2s}
-/* the dock: the chip takes a brief brighter pulse as the tile arrives */
-.step-chip.tile-hit{animation:tileHit .55s ease-out}
-@keyframes tileHit{
-  0%{box-shadow:0 0 0 0 rgba(0,195,221,.85)}
-  40%{box-shadow:0 0 0 7px rgba(0,195,221,0)}
-  100%{box-shadow:0 0 0 0 rgba(0,195,221,0)}}
-.card.tile-hit{animation:tileHitCard .6s ease-out}
-@keyframes tileHitCard{
-  0%{box-shadow:0 0 0 1px rgba(0,195,221,.55)}
-  100%{box-shadow:0 0 0 1px rgba(0,195,221,0)}}
-@media(prefers-reduced-motion:reduce){
-  #flyTile{display:none}
-  .step-chip.tile-hit,.card.tile-hit{animation:none}}
+/* The logo's detached node reaches out and returns when you choose something —
+   the whole confirmation, in the header, using the mark's own vocabulary. It
+   cannot collide with anything on the page because it never leaves the header. */
+@keyframes lgReach{
+  0%{transform:translateX(0)}
+  40%{transform:translateX(26px)}
+  100%{transform:translateX(0)}}
+.lg-live.reach,.lg-halo.reach{animation:lgReach .72s cubic-bezier(.35,0,.25,1)}
+@media(prefers-reduced-motion:reduce){.lg-live.reach,.lg-halo.reach{animation:none}}
 /* the hover lift has to stay ahead of the resting glow or pointing at a card
    would read as less prominent than leaving it alone */
 @media(hover:hover){
@@ -1714,7 +1698,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29n</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2876,169 +2860,40 @@ function renderScenarios(){
       r.classList.toggle('step-active',r===row&&shown(r));
     });
     // the tile is the position marker, so it rides the active step
-    if(typeof restTile==='function'&&row)
-      restTile(row.querySelector(':scope > .tile-slot')||row.querySelector('.step-chip')||row);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
   addEventListener('scroll',onScroll,{passive:true});
   addEventListener('resize',onScroll,{passive:true});
-  function boot(){ if(typeof buildTileSlots==='function')buildTileSlots(); paint(); }
+  function boot(){ paint(); }
   document.addEventListener('DOMContentLoaded',boot);
   addEventListener('load',boot);
   setTimeout(boot,300);
-  setTimeout(boot,1200);       // late panels (reports, QAR) arrive after data
   window.repaintSpine=boot;    // sections show and hide as data loads
 })();
-/* ── The travelling tile ─────────────────────────────────────────────────────
-   ONE dock, ONE loop. The previous build had two owners of the tile's position
-   — an explicit jump set it to the clicked target, while the scroll pass re-
-   pinned it to the active step on every frame — so it landed somewhere and was
-   immediately dragged away, and the "wait for the scroll to settle" logic raced
-   both. All of that is gone.
+/* ── Selection gesture ───────────────────────────────────────────────────────
+   The travelling tile is gone. It needed landing slots, dock resolution, a lock
+   against the scroll pass, settle detection and a fade timer — a great deal of
+   machinery for a confirmation, and every version of it read as clutter
+   somewhere on the page.
 
-   Each frame the tile eases toward its dock's LIVE position. That removes settle
-   detection (nothing to wait for), removes stale endpoints (the target is re-read
-   every frame, so it stays correct while the page is still scrolling) and removes
-   the flight-versus-rest distinction: firing is just a dock change with further
-   to travel. The loop stops itself once it arrives and nothing is moving. */
+   The logo does the job instead: the detached cyan node reaches away from the F
+   and comes back. One class toggle, no geometry, and it uses the mark's own
+   vocabulary — the same node the splash screen hops. */
 (function(){
-  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0, armed=false, fade=null;
-  var HOLD=4000;   // visible for the flight plus a beat, then gone
-  var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
-  function node(){
-    if(!tile){
-      tile=document.createElement('div'); tile.id='flyTile';
-      tile.setAttribute('aria-hidden','true');
-      document.body.appendChild(tile);
-      tile.style.transition='none';        // driven per frame, never by CSS
-    }
-    return tile;
-  }
-  /* Where the tile wants to be: centred on its dock, clamped into the viewport so
-     it stays visible while you work inside a long section — the dock of the step
-     you are reading is usually scrolled off the top. */
-  /* X comes from the page column, never from the dock: some docks resolve to a
-     step chip, which sits ON the card, and the tile was landing on top of the
-     label. The margin is the tile's lane — it only ever moves up and down it. */
-  function pointFor(el){
-    var r=el.getBoundingClientRect();
-    var page=document.querySelector('.page');
-    var pr=page?page.getBoundingClientRect():{left:24};
-    var h=document.querySelector('header');
-    var top=(h?h.getBoundingClientRect().height:62)+14;
-    return {x:Math.max(6,pr.left+2),
-            y:Math.max(top,Math.min(r.top+r.height/2-6.5,innerHeight-26))};
-  }
-  /* One easing step. Split out from the loop so a dock change can place the tile
-     SYNCHRONOUSLY: correctness must not depend on requestAnimationFrame, which is
-     throttled in a hidden or backgrounded tab. rAF only smooths the travel. */
-  function step(){
-    /* Nothing to point at until you have chosen something: the tile is the answer
-       to "where did that take me", so it has no business on screen before the
-       first selection. */
-    if(!armed||!dock||!dock.isConnected){ if(tile)tile.classList.remove('lit'); return true; }
-    var t=node(), p=pointFor(dock);
-    if(snap||REDUCED.matches){ x=p.x; y=p.y; snap=false; }
-    else { x+=(p.x-x)*0.16; y+=(p.y-y)*0.16; }
-    var done=Math.abs(p.x-x)<0.4&&Math.abs(p.y-y)<0.4;
-    if(done){ x=p.x; y=p.y; }
-    t.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
-    t.classList.add('lit');
-    return done;
-  }
-  function frame(){
-    if(step()){ running=false; return; }     // arrived and still: stop burning frames
-    requestAnimationFrame(frame);
-  }
-  function kick(){
-    step();                                   // place it now, animate the rest
-    if(!running){ running=true; requestAnimationFrame(frame); }
-  }
-
-  /* soft:true is the scroll pass offering a dock. It yields to a recent jump, so
-     a deliberate selection is never overridden by the section you scrolled past
-     on the way to it. */
-  window.tileDock=function(el,opts){
-    if(!el)return;
-    opts=opts||{};
-    if(opts.soft&&Date.now()<lockUntil)return;
-    node();
-    if(dock!==el){
-      dock=el;
-      if(!opts.soft)lockUntil=Date.now()+1400;   // the jump owns it until it lands
-      if(!dock.__seen&&!opts.soft){              // first ever placement: start at the logo
-        var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
-        if(n&&x===0&&y===0){ var r=n.getBoundingClientRect(); x=r.left; y=r.top; }
-      }
-      dock.__seen=1;
-    }
-    kick();
+  var t=null;
+  window.logoReach=function(){
+    var live=document.querySelector('.lg-live'), halo=document.querySelector('.lg-halo');
+    if(!live)return;
+    [live,halo].forEach(function(el){ if(!el)return;
+      el.classList.remove('reach'); void el.getBoundingClientRect(); el.classList.add('reach'); });
+    clearTimeout(t);
+    t=setTimeout(function(){ [live,halo].forEach(function(el){ if(el)el.classList.remove('reach'); }); },780);
   };
-  window.fireTile=function(target){
-    var d=dockFor(target); if(!d)return;
-    if(!armed){                       // launch from the logo each time it wakes
-      var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
-      if(n){ var lr=n.getBoundingClientRect(); x=lr.left; y=lr.top; snap=false; }
-      armed=true;
-    }
-    /* It marks a selection, not a position: it shows the jump, holds a beat so you
-       can see where you landed, then leaves rather than becoming furniture. */
-    clearTimeout(fade);
-    fade=setTimeout(function(){
-      armed=false; dock=null; running=false;
-      if(tile)tile.classList.remove('lit');
-    },HOLD);
-    tileDock(d);
-    var host=d.parentElement;
-    if(host){ host.classList.remove('tile-hit'); void host.offsetWidth;
-      host.classList.add('tile-hit');
-      setTimeout(function(){host.classList.remove('tile-hit');},700); }
-  };
-  /* Deliberately inert. The tile used to ride the active step as you scrolled,
-     which made it permanent furniture; it is now purely a response to a
-     selection. Kept as a no-op so the scroll pass needs no special-casing. */
+  /* the old entry points survive as thin shims so no caller needs editing */
+  window.showFuncArrow=function(){ logoReach(); };
+  window.fireTile=function(){ logoReach(); };
   window.restTile=function(){};
-
-  /* dock resolution: a real slot beats every heuristic */
-  function dockFor(target){
-    if(!target)return null;
-    var host=target.matches&&target.matches('input,select,textarea,canvas,img,svg')
-      ? (target.closest('.card,.step-row')||target.parentElement) : target;
-    if(host&&host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
-    var slot=host&&host.querySelector&&host.querySelector(':scope > .tile-slot');
-    if(slot)return slot;
-    var near=host&&host.closest&&host.closest('.card,.step-row');
-    if(near){ var s2=near.querySelector(':scope > .tile-slot'); if(s2)return s2; }
-    if(target.classList&&target.classList.contains('step-row'))
-      return target.querySelector('.step-chip')||target;
-    return host||target;
-  }
-  window.tileDockFor=dockFor;
-
-  /* Every drawer destination gets a slot. Inputs cannot hold a child, so those
-     hand off to the card containing the field. Slots live INSIDE their target, so
-     they track it through every relayout with no repositioning pass. */
-  window.buildTileSlots=function(){
-    if(typeof NAV_INDEX==='undefined')return 0;
-    var made=0;
-    NAV_INDEX.forEach(function(g){ g.items.forEach(function(it){
-      if(it.id==='__copilot')return;
-      var target=document.getElementById(it.id); if(!target)return;
-      var host=target;
-      if(host.matches('input,select,textarea,canvas,img,svg'))
-        host=host.closest('.card,.step-row')||host.parentElement;
-      if(host&&host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
-      if(!host||host.querySelector(':scope > .tile-slot'))return;
-      if(getComputedStyle(host).position==='static')host.style.position='relative';
-      var slot=document.createElement('i');
-      slot.className='tile-slot'; slot.setAttribute('aria-hidden','true');
-      slot.dataset.slot=it.id;
-      host.appendChild(slot); made++;
-    });});
-    return made;
-  };
-  addEventListener('scroll',kick,{passive:true});
-  addEventListener('resize',function(){snap=true;kick();},{passive:true});
+  window.buildTileSlots=function(){ return 0; };
 })();
 function goPlans(){
   var c=document.getElementById('scenarioCard'); if(!c)return;
@@ -6437,7 +6292,7 @@ function goSection(id){
     return;
   }
   el.scrollIntoView({behavior:'smooth',block:'start'});
-  if(typeof fireTile==='function')fireTile(el);
+  if(typeof logoReach==='function')logoReach();
   // light up the clicked item immediately (bottom sections can't always trigger scroll-spy)
   document.querySelectorAll('.led-nav button[data-target]').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
 }
