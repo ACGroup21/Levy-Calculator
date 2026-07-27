@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29v</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3232,7 +3232,7 @@ function deliveryTable(){
   var n=delivery.length;
   var todayIso=(today&&today.toISOString?today.toISOString().slice(0,10):'');
   var dfmt=function(s){return (s&&/^\d{4}-\d{2}-\d{2}/.test(s))?fmtD(s):'<span style="color:var(--text3)">&mdash;</span>';};
-  var smeta={in_progress:['On programme','#eab308'],gateway:['At gateway','#a78bfa'],achieved:['Achieved','#2DD4B2'],withdrawn:['Withdrawn','var(--red)'],paused:['Paused','#e0a13e']};
+  var smeta=trkStatusMeta();
   var trs=delivery.map(function(d){
     var m=smeta[d.status]||['&mdash;','var(--text3)'], st=trkStanding(d,todayIso);
     return '<tr style="border-top:1px solid rgba(var(--wash),0.06)">'+
@@ -3348,6 +3348,18 @@ function qarByStandard(){
   return Object.keys(g).map(function(k){var q=computeQAR(g[k].rows), lv=g[k].level, b=qarBench(lv);
     return {name:k,level:lv,bench:b.r,benchIsLevel:b.level,leavers:q.leavers,qar:q.qar,achieved:q.achieved,withdrawn:q.withdrawn+q.failed};
   }).filter(function(r){return r.leavers>0;}).sort(function(a,b){return a.qar-b.qar;});
+}
+/* Status colours are written inline at render time, so they cannot be overridden
+   in CSS — the palette itself has to know the theme. The dark values are tuned
+   for a near-black card and collapse on white: amber #eab308 reads 1.85:1 there.
+   Light mode takes the darker amber, violet and green from its own tokens. */
+function trkStatusMeta(){
+  var lt=document.documentElement.getAttribute('data-theme')==='light';
+  return {in_progress:['On programme',lt?'#8A5A00':'#eab308'],
+          gateway:['At gateway',lt?'#4B5A99':'#a78bfa'],
+          achieved:['Achieved',lt?'#0F7A52':'#2DD4B2'],
+          withdrawn:['Withdrawn','var(--red)'],
+          paused:['Paused',lt?'#8A5A00':'#e0a13e']};
 }
 var qarYear=null;
 function setQarYear(y){ qarYear=y; renderQAR(); }
