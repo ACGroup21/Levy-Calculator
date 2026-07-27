@@ -490,6 +490,33 @@ button{font-family:var(--sans);cursor:pointer}
 :root[data-theme="dark"] .card,
 :root[data-theme="dark"] .metric{
   box-shadow:0 0 0 1px rgba(45,212,178,.05),0 10px 34px -18px rgba(45,212,178,.30)}
+
+/* ── The travelling tile ─────────────────────────────────────────────────────
+   The logo's detached cyan node is the app's navigation cursor: it fires from
+   the mark, flies across the viewport and docks into the step chip of wherever
+   you asked to go. It replaces the locator arrow — same job, but the brand mark
+   does it, and it lands on the marker that already means "you are here" rather
+   than parking over the money figures.
+
+   Fixed position, so it crosses the SCREEN rather than the document — some jumps
+   are 7,000px and nothing can travel that visibly. */
+#flyTile{position:fixed;left:0;top:0;z-index:306;width:13px;height:13px;border-radius:3px;
+  background:#00C3DD;box-shadow:0 0 12px rgba(0,195,221,.85),0 0 3px rgba(0,195,221,1);
+  opacity:0;pointer-events:none;will-change:transform}
+#flyTile.lit{opacity:1}
+/* the dock: the chip takes a brief brighter pulse as the tile arrives */
+.step-chip.tile-hit{animation:tileHit .55s ease-out}
+@keyframes tileHit{
+  0%{box-shadow:0 0 0 0 rgba(0,195,221,.85)}
+  40%{box-shadow:0 0 0 7px rgba(0,195,221,0)}
+  100%{box-shadow:0 0 0 0 rgba(0,195,221,0)}}
+.card.tile-hit{animation:tileHitCard .6s ease-out}
+@keyframes tileHitCard{
+  0%{box-shadow:0 0 0 1px rgba(0,195,221,.55)}
+  100%{box-shadow:0 0 0 1px rgba(0,195,221,0)}}
+@media(prefers-reduced-motion:reduce){
+  #flyTile{display:none}
+  .step-chip.tile-hit,.card.tile-hit{animation:none}}
 /* the hover lift has to stay ahead of the resting glow or pointing at a card
    would read as less prominent than leaving it alone */
 @media(hover:hover){
@@ -1679,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29b</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2848,6 +2875,76 @@ function renderScenarios(){
   addEventListener('load',paint);
   setTimeout(paint,300);
   window.repaintSpine=paint;   // sections show and hide as data loads
+})();
+/* Fires the logo's cyan node at whatever you just asked to see. One tile, always
+   re-aimed: a second click cancels the flight in progress rather than spawning
+   another. It waits for the smooth scroll to settle before launching, because a
+   tile animating across a moving page reads as chaos rather than direction. */
+(function(){
+  var tile=null, flight=null, settle=null, from=null;
+  var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
+  function node(){
+    if(!tile){ tile=document.createElement('div'); tile.id='flyTile';
+      tile.setAttribute('aria-hidden','true'); document.body.appendChild(tile); }
+    return tile;
+  }
+  function centre(r){ return {x:r.left+r.width/2-6.5, y:r.top+r.height/2-6.5}; }
+  function origin(){
+    if(from)return from;                        // fly on from where it last docked
+    var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
+    return n?centre(n.getBoundingClientRect()):{x:24,y:30};
+  }
+  /* dock on the step chip where there is one; otherwise the card itself */
+  function dockFor(target){
+    if(!target)return null;
+    if(target.classList&&target.classList.contains('step-row'))
+      return target.querySelector('.step-chip')||target;
+    var inner=target.querySelector&&target.querySelector('.step-row .step-chip');
+    if(inner)return inner;
+    var row=target.previousElementSibling;
+    while(row){ if(row.classList&&row.classList.contains('step-row'))
+      return row.querySelector('.step-chip')||row; row=row.previousElementSibling; }
+    return target;
+  }
+  function cancel(){
+    if(flight){clearTimeout(flight);flight=null;}
+    if(settle){clearTimeout(settle);settle=null;}
+  }
+  function arrive(dock){
+    var t=node();
+    t.classList.remove('lit');
+    from=centre(dock.getBoundingClientRect());
+    dock.classList.remove('tile-hit'); void dock.offsetWidth; dock.classList.add('tile-hit');
+    setTimeout(function(){dock.classList.remove('tile-hit');},700);
+  }
+  function launch(dock){
+    var t=node(), a=origin(), b=centre(dock.getBoundingClientRect());
+    t.style.transition='none';
+    t.style.transform='translate3d('+a.x+'px,'+a.y+'px,0)';
+    t.classList.add('lit');
+    void t.offsetWidth;
+    var dist=Math.hypot(b.x-a.x,b.y-a.y);
+    var ms=Math.max(260,Math.min(620,240+dist*0.55));
+    t.style.transition='transform '+ms+'ms cubic-bezier(.34,.8,.3,1),opacity .18s';
+    t.style.transform='translate3d('+b.x+'px,'+b.y+'px,0)';
+    flight=setTimeout(function(){ flight=null; arrive(dock); },ms);
+  }
+  /* wait for the page to stop moving, then fly — capped so a long smooth scroll
+     never leaves the tile un-fired */
+  function afterScroll(fn){
+    var last=-1, waited=0;
+    (function tick(){
+      var y=scrollY;
+      if(y===last||waited>900){ fn(); return; }
+      last=y; waited+=60; settle=setTimeout(tick,60);
+    })();
+  }
+  window.fireTile=function(target){
+    var dock=dockFor(target); if(!dock)return;
+    cancel();
+    if(REDUCED.matches){ arrive(dock); return; }
+    afterScroll(function(){ settle=null; launch(dock); });
+  };
 })();
 function goPlans(){
   var c=document.getElementById('scenarioCard'); if(!c)return;
@@ -4257,6 +4354,9 @@ function openNav(){document.getElementById('navBack').classList.add('open');docu
 function closeNav(){document.getElementById('navBack').classList.remove('open');document.getElementById('navDrawer').classList.remove('open');document.getElementById('navDrawer').setAttribute('aria-hidden','true');}
 // Arrow tracks the target through the (smooth) scroll, then settles + holds 2.5s + fades.
 function showFuncArrow(el){
+  // the locator arrow is replaced by the travelling tile; keeping the old entry
+  // point means every existing caller (nav jumps, drawer items) gets it for free
+  if(typeof fireTile==='function'){fireTile(el);return;}
   var a=document.getElementById('funcArrow');if(!a)return;
   clearTimeout(a._fade);clearTimeout(a._settle);
   if(a._onScroll)window.removeEventListener('scroll',a._onScroll,true);
@@ -6243,6 +6343,7 @@ function goSection(id){
     return;
   }
   el.scrollIntoView({behavior:'smooth',block:'start'});
+  if(typeof fireTile==='function')fireTile(el);
   // light up the clicked item immediately (bottom sections can't always trigger scroll-spy)
   document.querySelectorAll('.led-nav button[data-target]').forEach(b=>b.classList.toggle('active',b.dataset.target===id));
 }
