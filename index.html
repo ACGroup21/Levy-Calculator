@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29k</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2923,21 +2923,28 @@ function renderScenarios(){
     return {x:Math.max(6,r.left+r.width/2-6.5),
             y:Math.max(top,Math.min(r.top+r.height/2-6.5,innerHeight-26))};
   }
-  function frame(){
-    if(!dock||!dock.isConnected){running=false;if(tile)tile.classList.remove('lit');return;}
+  /* One easing step. Split out from the loop so a dock change can place the tile
+     SYNCHRONOUSLY: correctness must not depend on requestAnimationFrame, which is
+     throttled in a hidden or backgrounded tab. rAF only smooths the travel. */
+  function step(){
+    if(!dock||!dock.isConnected){ if(tile)tile.classList.remove('lit'); return true; }
     var t=node(), p=pointFor(dock);
     if(snap||REDUCED.matches){ x=p.x; y=p.y; snap=false; }
     else { x+=(p.x-x)*0.16; y+=(p.y-y)*0.16; }
+    var done=Math.abs(p.x-x)<0.4&&Math.abs(p.y-y)<0.4;
+    if(done){ x=p.x; y=p.y; }
     t.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
     t.classList.add('lit');
-    if(Math.abs(p.x-x)<0.4&&Math.abs(p.y-y)<0.4){
-      x=p.x; y=p.y;
-      t.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
-      running=false; return;                // arrived and still: stop burning frames
-    }
+    return done;
+  }
+  function frame(){
+    if(step()){ running=false; return; }     // arrived and still: stop burning frames
     requestAnimationFrame(frame);
   }
-  function kick(){ if(!running){ running=true; requestAnimationFrame(frame); } }
+  function kick(){
+    step();                                   // place it now, animate the rest
+    if(!running){ running=true; requestAnimationFrame(frame); }
+  }
 
   /* soft:true is the scroll pass offering a dock. It yields to a recent jump, so
      a deliberate selection is never overridden by the section you scrolled past
