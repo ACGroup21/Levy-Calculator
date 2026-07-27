@@ -1706,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29f</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2940,8 +2940,11 @@ function renderScenarios(){
     t.classList.add('lit');
     void t.offsetWidth;
     var dist=Math.hypot(b.x-a.x,b.y-a.y);
-    var ms=Math.max(260,Math.min(620,240+dist*0.55));
-    t.style.transition='transform '+ms+'ms cubic-bezier(.34,.8,.3,1),opacity .18s';
+    // slowed: the first pass was quick enough that the eye caught the landing but
+    // not the travel, which is the whole point of moving the mark rather than
+    // just relighting it. Long enough to follow, short enough not to be waited on.
+    var ms=Math.max(430,Math.min(1050,320+dist*0.9));
+    t.style.transition='transform '+ms+'ms cubic-bezier(.22,.7,.25,1),opacity .2s';
     t.style.transform='translate3d('+b.x+'px,'+b.y+'px,0)';
     flight=setTimeout(function(){ flight=null; arrive(dock); },ms);
   }
