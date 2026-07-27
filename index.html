@@ -1713,7 +1713,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29i</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2924,6 +2924,7 @@ function renderScenarios(){
     // a real slot beats every heuristic below it
     var host=target.matches&&target.matches('input,select,textarea,canvas,img,svg')
       ? (target.closest('.card,.step-row')||target.parentElement) : target;
+    if(host&&host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
     var slot=host&&host.querySelector&&host.querySelector(':scope > .tile-slot');
     if(slot)return slot;
     var near=host&&host.closest&&host.closest('.card,.step-row');
@@ -2997,6 +2998,11 @@ function renderScenarios(){
       var host=target;
       if(host.matches('input,select,textarea,canvas,img,svg'))
         host=host.closest('.card,.step-row')||host.parentElement;
+      /* A closed <details> hides everything after its <summary>, so a slot placed
+         directly inside one has no layout until the panel is opened — it measured
+         as collapsed rather than sitting in the margin. Hang it on the summary,
+         which is always rendered. */
+      if(host.tagName==='DETAILS')host=host.querySelector(':scope > summary')||host;
       if(!host||host.querySelector(':scope > .tile-slot'))return;
       if(getComputedStyle(host).position==='static')host.style.position='relative';
       var slot=document.createElement('i');
