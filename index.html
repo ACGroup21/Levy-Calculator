@@ -1706,7 +1706,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29c</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2881,7 +2881,7 @@ function renderScenarios(){
    another. It waits for the smooth scroll to settle before launching, because a
    tile animating across a moving page reads as chaos rather than direction. */
 (function(){
-  var tile=null, flight=null, settle=null, from=null;
+  var tile=null, flight=null, settle=null, fromEl=null;
   var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
   function node(){
     if(!tile){ tile=document.createElement('div'); tile.id='flyTile';
@@ -2889,8 +2889,16 @@ function renderScenarios(){
     return tile;
   }
   function centre(r){ return {x:r.left+r.width/2-6.5, y:r.top+r.height/2-6.5}; }
+  function onScreen(r){ return r.width>0&&r.bottom>0&&r.top<innerHeight; }
+  /* Cache the element it docked on, never its coordinates: the page scrolls
+     between flights, so a stored viewport position is meaningless by the time
+     it is reused — that put the tile 7,000px off-screen. Recompute at launch,
+     and fall back to the logo when the last dock has scrolled out of view. */
   function origin(){
-    if(from)return from;                        // fly on from where it last docked
+    if(fromEl&&fromEl.isConnected){
+      var r=fromEl.getBoundingClientRect();
+      if(onScreen(r))return centre(r);
+    }
     var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
     return n?centre(n.getBoundingClientRect()):{x:24,y:30};
   }
@@ -2913,12 +2921,15 @@ function renderScenarios(){
   function arrive(dock){
     var t=node();
     t.classList.remove('lit');
-    from=centre(dock.getBoundingClientRect());
+    fromEl=dock;
     dock.classList.remove('tile-hit'); void dock.offsetWidth; dock.classList.add('tile-hit');
     setTimeout(function(){dock.classList.remove('tile-hit');},700);
   }
   function launch(dock){
-    var t=node(), a=origin(), b=centre(dock.getBoundingClientRect());
+    var t=node(), a=origin(), r=dock.getBoundingClientRect();
+    // if the target never came into view, pulse it rather than flying to nowhere
+    if(!onScreen(r)){ arrive(dock); return; }
+    var b=centre(r);
     t.style.transition='none';
     t.style.transform='translate3d('+a.x+'px,'+a.y+'px,0)';
     t.classList.add('lit');
