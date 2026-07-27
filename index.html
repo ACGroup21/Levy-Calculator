@@ -1200,13 +1200,15 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 </style>
 <script>
 function applyTheme(t){t=(t==='light')?'light':'dark';document.documentElement.setAttribute('data-theme',t);var b=document.getElementById('themeToggle');if(b){b.setAttribute('aria-checked',t==='dark'?'true':'false');b.title=(t==='dark')?'Dark mode is on — switch to light':'Dark mode is off — switch to dark';}
+  /* Views that write colour inline keep the old palette until something asks
+     again — the delivery status pills sat amber-on-white at 1.85:1. Redrawn here
+     rather than in toggleTheme so it holds however the theme was set, including
+     restoring a saved one on load. */
+  try{if(typeof renderDeliverySync==='function')renderDeliverySync();}catch(e){}
+  try{if(typeof renderQAR==='function')renderQAR();}catch(e){}
   var tl=document.getElementById('themeLabel');if(tl)tl.textContent=(t==='dark')?'Dark mode':'Light mode';try{localStorage.setItem('ac_theme',t);}catch(e){}}
 function toggleTheme(){var r=document.documentElement;r.classList.add('theme-anim');clearTimeout(window._tAnim);window._tAnim=setTimeout(function(){r.classList.remove('theme-anim');},600);applyTheme(r.getAttribute('data-theme')==='light'?'dark':'light');try{if(typeof projChart!=='undefined'&&projChart&&typeof renderProjection==='function')renderProjection();}catch(e){}
-  /* Anything that writes colour inline has to be redrawn, or it keeps the old
-     theme's palette: the delivery table's status pills were still amber-on-white
-     after switching to light, at 1.85:1. */
-  try{if(typeof renderDeliverySync==='function')renderDeliverySync();}catch(e){}
-  try{if(typeof renderQAR==='function')renderQAR();}catch(e){}}
+}
 try{if(localStorage.getItem('ac_theme')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}
 document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStorage.getItem('ac_theme')||'dark');}catch(e){}});
 </script>
@@ -1728,7 +1730,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30a</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
