@@ -298,7 +298,7 @@ body[data-fmode="nonlevy"] .fmode-bar{border-color:rgba(62,134,224,0.45);box-sha
 .step-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;padding-top:1.5rem}
 .step-chip{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--teal);letter-spacing:0.12em;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.25);border-radius:6px;padding:4px 10px}
 .step-chip.ksb{color:var(--purple);background:rgba(167,139,250,0.08);border-color:rgba(167,139,250,0.25)}
-.step-title{font-size:16px;font-weight:500;color:var(--text)}
+.step-title{font-size:16px;font-weight:700;color:var(--text)}
 .proj-range{display:flex;gap:2px;margin-left:auto;background:rgba(var(--wash),0.04);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:2px}
 .proj-range button{font-family:var(--mono);font-size:11px;color:var(--text3);background:transparent;border:none;border-radius:6px;padding:4px 10px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .proj-range button:hover{color:var(--text)}
@@ -1040,6 +1040,9 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 .page:before{display:none}
 .step-row:before{display:none}
 .step-row .step-chip{transition:background .2s,border-color .2s,box-shadow .2s,color .2s}
+/* Titles are bold — matching the weight the card summaries already use, so a
+   heading reads as a heading wherever it appears. */
+.step-title{font-weight:700}
 .step-row.step-active .step-chip{background:var(--teal)!important;border-color:var(--teal)!important;
   color:#04121f!important;-webkit-text-fill-color:#04121f!important;
   box-shadow:0 0 9px rgba(45,212,178,.5)}
@@ -1657,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28u</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
