@@ -503,9 +503,15 @@ button{font-family:var(--sans);cursor:pointer}
 /* The logo's detached node reaches out and returns when you choose something —
    the whole confirmation, in the header, using the mark's own vocabulary. It
    cannot collide with anything on the page because it never leaves the header. */
+/* The SVG clips to its viewBox by default, and the node sits 10 user units from
+   that edge — so a 26-unit reach slid straight out of the box and was cut off
+   rather than travelling. overflow:visible lets it leave the box; the distance is
+   held to 20 units (~9px on screen) so it stops short of the wordmark, which sits
+   12px away. */
+.logo-mark-img{overflow:visible}
 @keyframes lgReach{
   0%{transform:translateX(0)}
-  40%{transform:translateX(26px)}
+  42%{transform:translateX(20px)}
   100%{transform:translateX(0)}}
 .lg-live.reach,.lg-halo.reach{animation:lgReach .72s cubic-bezier(.35,0,.25,1)}
 @media(prefers-reduced-motion:reduce){.lg-live.reach,.lg-halo.reach{animation:none}}
@@ -1698,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29n</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29o</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
