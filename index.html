@@ -1660,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28w</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2769,27 +2769,42 @@ function renderScenarios(){
 // ── Plans: header entry point ────────────────────────────────────────────────
 // The header button jumps here rather than saving blind: naming the plan is the
 // whole point, and the card is where you also switch client or export a file.
-/* Marks the step you are reading, so its chip lights the way the nav badge does.
-   One rAF-batched pass per scroll: class toggles only, no layout writes. The
-   reference line sits just below the fixed header, so a step counts as current
-   when its heading reaches the point you actually read from. */
+/* The chip follows the MENU PANEL rather than running its own scroll maths.
+   The nav already decides the current section with an IntersectionObserver, and
+   a second calculation could disagree with it — which is exactly what happened:
+   two step rows are hidden (height 0, top 0), so they satisfied any "has this
+   crossed the line" test the instant you scrolled past STEP 01 and stole the
+   active state from it. Reading the nav's answer means the header and the page
+   can never contradict each other. */
 (function(){
   var ticking=false;
+  function rowFor(id){
+    var el=document.getElementById(id);
+    if(!el)return null;
+    if(el.classList.contains('step-row'))return el;
+    // section containers (projectionSection, planSection) sit after their heading
+    var n=el;
+    while(n){
+      if(n.classList&&n.classList.contains('step-row'))return n;
+      n=n.previousElementSibling||n.parentElement;
+      if(n===document.body)break;
+    }
+    return null;
+  }
+  function visible(r){ return !!(r&&r.offsetParent!==null&&r.getBoundingClientRect().height>0); }
   function paint(){
     ticking=false;
     var rows=document.querySelectorAll('.step-row');
     if(!rows.length)return;
-    var h=document.querySelector('header');
-    var line=(h?h.getBoundingClientRect().height:62)+110;
-    var active=-1;
-    for(var i=0;i<rows.length;i++){
-      if(rows[i].getBoundingClientRect().top<=line)active=i; else break;
+    var btn=document.querySelector('.led-nav button.active[data-target]');
+    var target=btn?rowFor(btn.dataset.target):null;
+    if(!visible(target)){
+      // before the observer has fired, or on a target with no step row of its
+      // own, fall back to the first visible step — you are at the start
+      target=null;
+      for(var i=0;i<rows.length;i++){ if(visible(rows[i])){target=rows[i];break;} }
     }
-    // At the top of the page nothing has crossed the line yet, which left step 1
-    // unlit until you scrolled past it. Arriving on the page means you are on the
-    // first step, so it is current until a later one takes over.
-    if(active<0)active=0;
-    for(var j=0;j<rows.length;j++)rows[j].classList.toggle('step-active',j===active);
+    for(var j=0;j<rows.length;j++)rows[j].classList.toggle('step-active',rows[j]===target);
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
   addEventListener('scroll',onScroll,{passive:true});
