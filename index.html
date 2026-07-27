@@ -1660,7 +1660,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28x</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2769,42 +2769,46 @@ function renderScenarios(){
 // ── Plans: header entry point ────────────────────────────────────────────────
 // The header button jumps here rather than saving blind: naming the plan is the
 // whole point, and the card is where you also switch client or export a file.
-/* The chip follows the MENU PANEL rather than running its own scroll maths.
-   The nav already decides the current section with an IntersectionObserver, and
-   a second calculation could disagree with it — which is exactly what happened:
-   two step rows are hidden (height 0, top 0), so they satisfied any "has this
-   crossed the line" test the instant you scrolled past STEP 01 and stole the
-   active state from it. Reading the nav's answer means the header and the page
-   can never contradict each other. */
+/* One pass decides where you are, and drives BOTH the menu panel and the step
+   chip from it — so the header and the page can never disagree.
+
+   Two bugs this replaces: the old IntersectionObserver band was ~36px tall and
+   a fast scroll could skip it entirely, leaving the nav highlight stale; and the
+   chip's own crossed-the-line test counted the two hidden step rows (height 0,
+   top 0), which stole the active state from STEP 01 the moment you scrolled
+   past it. Hidden elements are now skipped explicitly. */
 (function(){
+  var SECTIONS=['sec-goal','sec-levy','sec-funding','trackerCard','sec-programmes',
+                'projectionSection','planSection','sec-reports','sec-jd'];
   var ticking=false;
-  function rowFor(id){
-    var el=document.getElementById(id);
+  function shown(el){ return !!(el&&el.offsetParent!==null&&el.getBoundingClientRect().height>0); }
+  function ownerRow(el){
     if(!el)return null;
     if(el.classList.contains('step-row'))return el;
-    // section containers (projectionSection, planSection) sit after their heading
-    var n=el;
-    while(n){
-      if(n.classList&&n.classList.contains('step-row'))return n;
-      n=n.previousElementSibling||n.parentElement;
-      if(n===document.body)break;
-    }
+    var n=el.previousElementSibling;
+    while(n){ if(n.classList&&n.classList.contains('step-row'))return n; n=n.previousElementSibling; }
     return null;
   }
-  function visible(r){ return !!(r&&r.offsetParent!==null&&r.getBoundingClientRect().height>0); }
   function paint(){
     ticking=false;
-    var rows=document.querySelectorAll('.step-row');
-    if(!rows.length)return;
-    var btn=document.querySelector('.led-nav button.active[data-target]');
-    var target=btn?rowFor(btn.dataset.target):null;
-    if(!visible(target)){
-      // before the observer has fired, or on a target with no step row of its
-      // own, fall back to the first visible step — you are at the start
-      target=null;
-      for(var i=0;i<rows.length;i++){ if(visible(rows[i])){target=rows[i];break;} }
+    var h=document.querySelector('header');
+    var line=(h?h.getBoundingClientRect().height:62)+120;
+    var currentId=null;
+    for(var i=0;i<SECTIONS.length;i++){
+      var el=document.getElementById(SECTIONS[i]);
+      if(!shown(el))continue;                       // hidden sections never qualify
+      if(el.getBoundingClientRect().top<=line)currentId=SECTIONS[i];
     }
-    for(var j=0;j<rows.length;j++)rows[j].classList.toggle('step-active',rows[j]===target);
+    if(!currentId){                                  // above the first section
+      for(var k=0;k<SECTIONS.length;k++){ if(shown(document.getElementById(SECTIONS[k]))){currentId=SECTIONS[k];break;} }
+    }
+    document.querySelectorAll('.led-nav button[data-target]').forEach(function(btn){
+      btn.classList.toggle('active',btn.dataset.target===currentId);
+    });
+    var row=ownerRow(document.getElementById(currentId));
+    document.querySelectorAll('.step-row').forEach(function(r){
+      r.classList.toggle('step-active',r===row&&shown(r));
+    });
   }
   function onScroll(){ if(!ticking){ticking=true;requestAnimationFrame(paint);} }
   addEventListener('scroll',onScroll,{passive:true});
@@ -6219,13 +6223,11 @@ function updateSectionNav(){
     const el=document.getElementById(id);if(el)el.classList.toggle('pending',pending);
   });
 }
-// scroll-spy: highlight the banner nav item for the section currently in view
-(function(){
-  const items=[...document.querySelectorAll('.led-nav button[data-target]')].filter(b=>b.dataset.target!=='__copilot');
-  const setActive=id=>items.forEach(b=>b.classList.toggle('active',b.dataset.target===id));
-  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:'-40% 0px -55% 0px',threshold:0});
-  ['sec-goal','sec-levy','sec-funding','trackerCard','sec-programmes','projectionSection','planSection','sec-reports','sec-jd'].forEach(id=>{const el=document.getElementById(id);if(el)io.observe(el);});
-})();
+// scroll-spy retired: it used an IntersectionObserver with rootMargin
+// -40%/-55%, leaving a band only ~36px tall at a 720px viewport. IO fires on
+// transitions, so a wheel flick or the smooth-scroll from a nav click could
+// clear that band without ever intersecting and the highlight would go stale.
+// The nav and the step chip are now driven by one deterministic pass below.
 
 // JD upload wiring
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
