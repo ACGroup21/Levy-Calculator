@@ -410,10 +410,11 @@ button{font-family:var(--sans);cursor:pointer}
 :root[data-theme="light"] .field select option,
 :root[data-theme="light"] #rev-period option,
 :root[data-theme="light"] select option{background:#ffffff;color:#0E2033}
-/* optgroup headings had the same problem one level up: #1f8a76 on #0a201b was
-   still rendering its dark-mode colours in light, at 4.01:1. */
-:root[data-theme="light"] .field select optgroup{background:#f2f8fb;color:#0A6E86}
-.field select optgroup{background:#0a201b;color:#3FA98F;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em}
+/* Group dividers are blue with white text in BOTH themes — they separate the list
+   rather than belonging to either mode, and the old near-black/green pair read as
+   4.01:1 in dark and kept its dark colours in light. #fff on #1464A6 = 6.17:1. */
+:root[data-theme="light"] .field select optgroup{background:#1464A6;color:#ffffff}
+.field select optgroup{background:#1464A6;color:#ffffff;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.08em}
 .field select optgroup option{color:var(--text);font-family:var(--sans);font-weight:400;letter-spacing:0}
 .field input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.4) sepia(1) hue-rotate(150deg)}
 .date-pair{display:flex;flex-direction:column;gap:10px}
@@ -1553,7 +1554,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28i</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
