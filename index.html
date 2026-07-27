@@ -497,6 +497,18 @@ button{font-family:var(--sans);cursor:pointer}
   box-shadow:0 0 0 1px rgba(45,212,178,.14),0 4px 10px rgba(0,0,0,.28),
              0 18px 44px -16px rgba(45,212,178,.42);
   border-color:rgba(45,212,178,.40)}
+/* Panels answer to the pointer the same way cards do — a metric tile is a thing
+   you look at and reach for, so it should light when you do. Pointer-gated, so
+   a tap on touch never leaves one stuck lit. */
+.metric{transition:border-color .2s,box-shadow .2s}
+@media(hover:hover){
+  :root[data-theme="dark"] .metric:hover{
+    box-shadow:0 0 0 1px rgba(45,212,178,.12),0 12px 30px -14px rgba(45,212,178,.40);
+    border-color:rgba(45,212,178,.34)}
+  :root[data-theme="light"] .metric:hover{
+    box-shadow:0 0 0 1px rgba(0,195,221,.20),0 12px 26px -14px rgba(16,40,72,.24);
+    border-color:#cfe0ec}
+}
 
 /* ── The travelling tile ─────────────────────────────────────────────────────
    The logo's detached cyan node is the app's navigation cursor: it fires from
@@ -1716,7 +1728,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29z</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
