@@ -1002,6 +1002,31 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 :root[data-theme="light"] .step-chip{background:#1464A6!important;border-color:#1464A6!important;
   color:#ffffff!important;-webkit-text-fill-color:#ffffff!important}
 
+/* ── Light mode: navy sky, lit pages ─────────────────────────────────────────
+   Light mode kept losing because it was judged by dark's yardstick, and dark's
+   qualities — glow, a constellation, depth built by making surfaces brighter —
+   are impossible on a light ground. So it stops competing: the canvas becomes
+   the same navy as the menu panel with white stars, and the reading surfaces
+   become light pages floating on it. One design with a dark stage, not an
+   inverted theme. (Internal build; the commercial version is a separate job.) */
+:root[data-theme="light"] body{background:#0F1826}
+:root[data-theme="light"] .page{background:#f2f6fa}
+:root[data-theme="light"] .card{background:#ffffff}
+:root[data-theme="light"] .page > .card:not(:has(.card)){background:#f8fbfe;border-color:#e2ebf4}
+
+/* the pale-tint blooms were tuned for a light canvas and turn to smoke on navy;
+   the dark treatment is what belongs behind stars */
+:root[data-theme="light"] .aurora-blob{filter:blur(90px);opacity:.30}
+:root[data-theme="light"] .blob1{background:#0d4a42}
+:root[data-theme="light"] .blob2{background:#1a3a58}
+:root[data-theme="light"] .blob3{background:#0a3a30}
+:root[data-theme="light"] .blob4{background:#253755}
+:root[data-theme="light"] .blob5{background:#0f5545}
+
+/* the page column now sits on a dark stage, so it needs a real edge and lift */
+:root[data-theme="light"] .page{
+  box-shadow:0 0 0 1px rgba(255,255,255,.06),0 18px 60px -22px rgba(0,0,0,.75)}
+
 /* ── The step spine ───────────────────────────────────────────────────────────
    The rail was at 13.6px and the marker dots centre at 6.5px — a 7px near-miss,
    which reads as a mistake rather than a gap. Aligned, the dots become stations
@@ -1636,7 +1661,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-28q</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -6154,9 +6179,9 @@ document.addEventListener('keydown',e=>{
       n.phase+=n.speed;
       const gl=0.5+0.5*Math.sin(n.phase), hh=HUE(n);
       ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);
-      ctx.fillStyle='hsla('+hh+','+(_lt?70:72)+'%,'+(_lt?52:55)+'%,'+(_lt?(0.2+0.26*gl):(0.3+0.45*gl)).toFixed(3)+')';ctx.fill();
+      ctx.fillStyle=_lt?('rgba(255,255,255,'+(0.30+0.45*gl).toFixed(3)+')'):('hsla('+hh+',72%,55%,'+(0.3+0.45*gl).toFixed(3)+')');ctx.fill();
       ctx.beginPath();ctx.arc(n.x,n.y,n.r*2.8,0,7);
-      ctx.fillStyle='hsla('+hh+',75%,65%,'+(0.05*gl).toFixed(3)+')';ctx.fill();
+      ctx.fillStyle=_lt?('rgba(255,255,255,'+(0.055*gl).toFixed(3)+')'):('hsla('+hh+',75%,65%,'+(0.05*gl).toFixed(3)+')');ctx.fill();
     }
     if(running)raf=requestAnimationFrame(frame);
   }
