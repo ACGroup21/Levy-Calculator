@@ -175,15 +175,29 @@ function specimen(o){
 document.getElementById('opts').innerHTML=OPTIONS.map(specimen).join('');
 
 document.fonts.ready.then(function(){
-  var need=['Inter','JetBrains Mono','IBM Plex Sans','IBM Plex Mono','Public Sans','Roboto Mono','Source Sans 3','Source Code Pro','Manrope','Newsreader'];
-  var missing=need.filter(function(f){ return !document.fonts.check('16px "'+f+'"'); });
+  // document.fonts.check() gives false negatives for weights it has not yet
+  // rendered, which would flag a face that is actually fine. Measure instead:
+  // render the same string in the candidate and in a deliberately different
+  // fallback — identical widths mean the candidate never loaded.
+  var need=['Inter','JetBrains Mono','IBM Plex Sans','IBM Plex Mono','Public Sans',
+            'Roboto Mono','Source Sans 3','Source Code Pro','Manrope','Newsreader'];
+  var cv=document.createElement('canvas'), ctx=cv.getContext('2d');
+  var probe='MWmwiIl10O£25,272 handgloves';
+  function width(stack,weight){ ctx.font=(weight||400)+' 32px '+stack; return ctx.measureText(probe).width; }
+  var missing=need.filter(function(f){
+    var base=width('monospace'), base2=width('serif');
+    var a=width('"'+f+'", monospace'), b=width('"'+f+'", serif');
+    // loaded => it overrides BOTH fallbacks, so both measurements agree with each other
+    // and at least one differs from its fallback
+    return (a===base && b===base2);
+  });
   var el=document.getElementById('loadcheck');
   if(missing.length){
     el.style.color='#F59E0B';
-    el.textContent='⚠ NOT loaded, so those specimens are showing a fallback: '+missing.join(', ');
+    el.textContent='\u26a0 NOT loaded, so those specimens are showing a fallback: '+missing.join(', ');
   } else {
     el.style.color='#2DD4B2';
-    el.textContent='✓ all ten faces loaded — every specimen below is showing its real type';
+    el.textContent='\u2713 all ten faces loaded \u2014 every specimen below is showing its real type';
   }
 });
 </script>
