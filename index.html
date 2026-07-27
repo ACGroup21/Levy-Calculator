@@ -1704,7 +1704,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29o</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29p</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -3285,7 +3285,25 @@ function qarByStandard(){
 }
 function renderQAR(){
   var el=document.getElementById('qarSection');if(!el)return;
-  if(!delivery||!delivery.length){el.innerHTML='';return;}
+  /* Rendering nothing made a headline feature look deleted rather than waiting
+     for data — the section simply was not there. It now says what it is and what
+     it needs. */
+  if(!delivery||!delivery.length){
+    el.innerHTML='<div class="card" style="margin-top:1rem">'+
+      '<div style="display:flex;align-items:center;gap:9px"><span style="font-size:17px">&#127942;</span>'+
+      '<span style="font-weight:700;color:var(--text);font-size:15px">Achievement rate</span>'+
+      '<span style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;'+
+      'color:var(--text3);border:1px solid rgba(var(--wash),0.18);border-radius:6px;padding:2px 7px">Needs delivery data</span></div>'+
+      '<div style="font-size:13px;color:var(--text2);line-height:1.65;margin-top:9px;max-width:70ch">'+
+      'How many of your apprentices actually finish, measured on your own learners and set against the '+
+      'national rate of <b style="color:var(--text)">'+QAR_NATIONAL.overall+'%</b>. It also shows what you spent on '+
+      'people who did not achieve &mdash; usually the most uncomfortable number in the plan.</div>'+
+      '<div style="font-size:12px;color:var(--text3);margin-top:9px">Drop an apprentice tracker report into '+
+      '<b style="color:var(--text2)">Delivery</b> above and this fills in. Nothing to type.</div>'+
+      '<button type="button" class="btn-add" style="margin-top:12px" onclick="navJump(\'trackerCard\')">Add delivery data</button>'+
+      '</div>';
+    return;
+  }
   var q=computeQAR();
   var N=QAR_NATIONAL, src=N.source;
   var head='<div style="display:flex;align-items:center;gap:9px;margin-bottom:4px"><span style="font-size:17px">&#127942;</span><span style="font-weight:700;color:var(--text);font-size:15px">Achievement rate (QAR)</span><span style="font-size:11px;color:var(--text3);border:1px solid rgba(var(--wash),0.15);border-radius:99px;padding:1px 9px">your cohort</span></div>';
@@ -3312,6 +3330,39 @@ function renderQAR(){
       drag='<div style="font-size:12px;color:var(--text2);margin-top:12px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><strong style="color:var(--text)">'+escHtml(worst.name)+'</strong> drags your rate down most &mdash; <b style="color:'+wcol+'">'+worst.qar.toFixed(0)+'%</b> ('+worst.achieved+' of '+worst.leavers+'), against <strong>'+wvs.toFixed(1)+'%</strong> national'+(worst.benchIsLevel?(' for level '+worst.level):'')+'. '+(byStd.length>2?'<span style="color:var(--text3)">'+byStd.length+' standards have leavers; tap show working for the full breakdown.</span>':'')+'</div>';}
   }
   var liveNote=q.live?'<div style="font-size:12px;color:var(--text3);margin-top:10px">'+q.live+' learner'+(q.live!==1?'s':'')+' still on programme &mdash; excluded until they leave (as the official QAR excludes still-in-learning).</div>':'';
+  /* Outlook. The learners still on programme have no outcome yet, so any forward
+     number rests on an assumption — which means the honest form is a RANGE, not a
+     single figure. Floor: none of them achieve. Ceiling: all of them do. The
+     middle assumes they perform like your own leavers have, which is the least
+     arbitrary assumption available and is stated on screen. */
+  var outlook='';
+  if(q.live>0&&q.leavers>0){
+    var denom=q.leavers+q.live;
+    var floorR=q.achieved/denom*100;
+    var ceilR=(q.achieved+q.live)/denom*100;
+    var midR=(q.achieved+q.live*(qar/100))/denom*100;
+    var mcol=midR>=N.overall?'#2DD4B2':(midR>=N.overall-8?'#eab308':'var(--red)');
+    var span=Math.max(0.001,ceilR-floorR);
+    var midPct=Math.min(100,Math.max(0,(midR-floorR)/span*100));
+    var benchPct=(N.overall>=floorR&&N.overall<=ceilR)?((N.overall-floorR)/span*100):null;
+    outlook='<div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(var(--wash),0.08)">'+
+      '<div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)">'+
+      'Outlook once the '+q.live+' on programme finish</div>'+
+      '<div style="display:flex;align-items:baseline;gap:10px;margin-top:5px">'+
+        '<div style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:'+mcol+'">'+midR.toFixed(1)+'%</div>'+
+        '<div style="font-size:12px;color:var(--text3)">if they perform like your past leavers</div></div>'+
+      '<div style="position:relative;height:6px;border-radius:99px;background:rgba(var(--wash),0.10);margin:10px 0 5px">'+
+        '<div style="position:absolute;left:0;top:0;bottom:0;width:'+midPct.toFixed(1)+'%;border-radius:99px;background:'+mcol+';opacity:.55"></div>'+
+        '<div style="position:absolute;left:'+midPct.toFixed(1)+'%;top:-3px;width:2px;height:12px;background:'+mcol+'"></div>'+
+        (benchPct!==null?('<div title="national '+N.overall+'%" style="position:absolute;left:'+benchPct.toFixed(1)+'%;top:-5px;width:1px;height:16px;background:var(--text3)"></div>'):'')+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3)">'+
+        '<span>'+floorR.toFixed(1)+'% if none of them achieve</span>'+
+        '<span>'+ceilR.toFixed(1)+'% if all of them do</span></div>'+
+      '<div style="font-size:11px;color:var(--text3);margin-top:7px;font-style:italic">A projection, not a measurement '+
+      '&mdash; the '+q.live+' still in learning have no outcome yet. The range is the whole of what is still possible.</div>'+
+      '</div>';
+  }
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:var(--teal)">&#128200;</span> Show the working &amp; source</summary>'+
     '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
     '<div><strong style="color:var(--text2)">Achievement rate</strong> = achievements &divide; leavers = '+q.achieved+' &divide; '+q.leavers+' = <b>'+qar.toFixed(1)+'%</b>.</div>'+
@@ -3322,7 +3373,7 @@ function renderQAR(){
     '<div style="margin-top:6px;font-style:italic">This is an <strong>indicative rate on your own learners</strong>, computed from your tracker export. It is <strong>not</strong> the official ESFA provider QAR, which is calculated from full ILR data on a &ldquo;hybrid end year&rdquo; basis with national inclusion/exclusion rules &mdash; use it to steer, not for published performance management.</div>'+
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:1rem">'+head+
-    '<div style="display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-start;margin-top:10px"><div>'+ring+trend+'</div><div style="flex:1;min-width:220px">'+bench+decomp+'</div></div>'+
+    '<div style="display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-start;margin-top:10px"><div>'+ring+trend+'</div><div style="flex:1;min-width:220px">'+bench+decomp+'</div></div>'+outlook+
     drag+liveNote+working+'</div>';
 }
 var TRK_SAMPLE_CSV=['learner,standard,level,start,planned end,actual end,status,outcome,price,progress',
@@ -3641,7 +3692,30 @@ function loadDemo(){
     {name:'L4 Data analyst',cost:15000,count:2,start:d(2),epa:d(26)},
     {name:'L5 Operations manager',cost:9000,count:1,start:d(4),epa:d(28)},
   ];
-  renderProgrammes();renderProjection();saveState();
+  /* A finished cohort, so the achievement rate has leavers to work from. Without
+     any delivery rows QAR renders nothing and reads as missing rather than
+     waiting. Deliberately mixed — 6 achieved, 2 withdrawn, 1 failed, 3 still on
+     programme — so the decomposition, the at-risk spend and the outlook range all
+     have something real to show. */
+  var dm=function(o){var x=new Date(today);x.setMonth(x.getMonth()+o);return x.toISOString().slice(0,7);};
+  delivery=[
+    {learner:'Cohort 2024 — 1',standard:'L3 Business administrator',start:dm(-30),plannedEnd:dm(-12),actualEnd:dm(-12),status:'achieved',outcome:'pass',price:5000},
+    {learner:'Cohort 2024 — 2',standard:'L3 Business administrator',start:dm(-30),plannedEnd:dm(-12),actualEnd:dm(-11),status:'achieved',outcome:'pass',price:5000},
+    {learner:'Cohort 2024 — 3',standard:'L3 Business administrator',start:dm(-30),plannedEnd:dm(-12),actualEnd:dm(-18),status:'withdrawn',outcome:'',price:5000},
+    {learner:'Cohort 2024 — 4',standard:'L4 Data analyst',start:dm(-28),plannedEnd:dm(-4),actualEnd:dm(-4),status:'achieved',outcome:'distinction',price:15000},
+    {learner:'Cohort 2024 — 5',standard:'L4 Data analyst',start:dm(-28),plannedEnd:dm(-4),actualEnd:dm(-3),status:'achieved',outcome:'pass',price:15000},
+    {learner:'Cohort 2024 — 6',standard:'L4 Data analyst',start:dm(-28),plannedEnd:dm(-4),actualEnd:dm(-4),status:'completed',outcome:'fail',price:15000},
+    {learner:'Cohort 2024 — 7',standard:'L5 Operations manager',start:dm(-26),plannedEnd:dm(-2),actualEnd:dm(-2),status:'achieved',outcome:'pass',price:9000},
+    {learner:'Cohort 2024 — 8',standard:'L5 Operations manager',start:dm(-26),plannedEnd:dm(-2),actualEnd:dm(-14),status:'withdrawn',outcome:'',price:9000},
+    {learner:'Cohort 2025 — 1',standard:'L3 Business administrator',start:dm(-12),plannedEnd:dm(6),actualEnd:'',status:'in_progress',outcome:'',price:5000},
+    {learner:'Cohort 2025 — 2',standard:'L3 Business administrator',start:dm(-12),plannedEnd:dm(6),actualEnd:'',status:'in_progress',outcome:'',price:5000},
+    {learner:'Cohort 2025 — 3',standard:'L4 Data analyst',start:dm(-10),plannedEnd:dm(14),actualEnd:'',status:'gateway',outcome:'',price:15000},
+    {learner:'Cohort 2025 — 4',standard:'L5 Operations manager',start:dm(-8),plannedEnd:dm(16),actualEnd:'',status:'in_progress',outcome:'',price:9000}
+  ];
+  renderProgrammes();renderProjection();
+  if(typeof renderDeliverySync==='function')renderDeliverySync();
+  if(typeof renderQAR==='function')renderQAR();
+  saveState();
   setStatus('[DEMO] Sample data loaded — scroll down to view the 36-month projection.','ok');
 }
 // Non-levy sample — no levy pot; funding is government + a fundraised levy transfer (gifting received)
