@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Fundable — six type pairings in context</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&family=Source+Code+Pro:wght@400;500;600&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050C18;--surface:#0B1524;--panel:#0F1826;
+  --text:#eef4fa;--text2:#b7cbdd;--text3:#8ea6bb;
+  --teal:#2DD4B2;--cyan:#00C3DD;--navy:#1464A6;--amber:#F59E0B;
+  --cool-bg:rgba(45,212,178,.07);--cool-line:rgba(45,212,178,.26);
+  --warm-bg:rgba(245,158,11,.07);--warm-line:rgba(245,158,11,.28);
+  --border:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);line-height:1.6;
+  font-family:'Inter',system-ui,sans-serif;font-size:14px}
+.wrap{max-width:1000px;margin:0 auto;padding:44px 22px 90px}
+h1{color:var(--text);font-size:25px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+.lede{color:var(--text3);font-size:14px;margin:0 0 8px;max-width:66ch}
+.warn{margin:16px 0 30px;border-left:2px solid var(--amber);padding:9px 0 9px 14px;font-size:13px;color:var(--text3)}
+#loadcheck{font-size:12px;margin-top:7px}
+
+/* ── one specimen ── */
+.opt{margin:0 0 40px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+.opt.cur{border-color:rgba(45,212,178,.4)}
+.opt-hd{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.02)}
+.opt-n{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--cyan);border:1px solid rgba(0,195,221,.4);border-radius:6px;padding:3px 9px;flex:0 0 auto}
+.opt.cur .opt-n{color:var(--teal);border-color:rgba(45,212,178,.55);background:rgba(45,212,178,.1)}
+.opt-name{color:var(--text);font-size:15px;font-weight:600;font-family:'Inter',sans-serif}
+.opt-why{font-family:'Inter',sans-serif;font-size:12.5px;color:var(--text3);margin-left:auto;max-width:46ch;text-align:right}
+.body{padding:20px}
+
+/* the specimen inherits its faces from these two vars */
+.spec{--sans:'Inter',sans-serif;--mono:'JetBrains Mono',monospace}
+.spec .chip{font-family:var(--mono);font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan);
+  border:1px solid rgba(0,195,221,.35);border-radius:6px;padding:3px 8px;display:inline-block}
+.spec .steptitle{font-family:var(--sans);font-size:16px;font-weight:600;color:var(--text);margin:11px 0 3px}
+.spec .stepsub{font-family:var(--sans);font-size:12px;color:var(--text3);margin:0 0 16px}
+.spec .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px 17px;margin-bottom:13px}
+.spec .cardh{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--text);margin:0 0 4px}
+.spec .body-t{font-family:var(--sans);font-size:13px;color:var(--text2);margin:0 0 13px;max-width:64ch}
+.spec .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);margin-bottom:9px}
+.spec .figs{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:9px}
+.spec .fig{border:1px solid var(--border);border-radius:10px;padding:11px 12px}
+.spec .fig.cool{background:var(--cool-bg);border-color:var(--cool-line)}
+.spec .fig.warm{background:var(--warm-bg);border-color:var(--warm-line)}
+.spec .fig .l{font-family:var(--sans);font-size:11px;color:var(--text3);margin-bottom:3px}
+.spec .fig .v{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.15}
+.spec .fig .s{font-family:var(--sans);font-size:11px;color:var(--text3);margin-top:3px}
+.spec table{width:100%;border-collapse:collapse;margin-top:13px}
+.spec th{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);
+  font-weight:400;text-align:left;padding:0 8px 7px 0;border-bottom:1px solid var(--border)}
+.spec th.r,.spec td.r{text-align:right}
+.spec td{font-family:var(--sans);font-size:13px;color:var(--text2);padding:8px 8px 8px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.spec td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text)}
+.spec .rule{font-family:var(--mono);font-size:13px;color:var(--teal);margin-top:12px}
+.spec .btn{font-family:var(--sans);font-size:13px;font-weight:600;background:rgba(45,212,178,.12);
+  border:1px solid var(--teal);color:var(--teal);border-radius:10px;padding:9px 16px;margin-top:14px;display:inline-block}
+.pick{font-family:'Inter',sans-serif;font-size:12px;color:var(--text3);margin-top:12px}
+.pick b{color:var(--text2)}
+
+/* role ladder: one row per role, spec on the left, specimen on the right */
+.grp{margin:0 0 6px}
+.grp-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.grp-h span{color:var(--cyan)}
+.row{display:grid;grid-template-columns:190px minmax(0,1fr);gap:18px;align-items:baseline;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.row:last-child{border-bottom:none}
+.role{font-family:'Inter',sans-serif;font-size:12px;color:var(--text2)}
+.role em{display:block;font-style:normal;font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--text3);margin-top:2px;letter-spacing:.03em}
+.samp{min-width:0}
+.assembled{margin-top:22px;padding-top:16px;border-top:1px dashed rgba(255,255,255,.12)}
+.assembled-h{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:12px}
+@media(max-width:720px){.row{grid-template-columns:1fr;gap:4px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Six type pairings, in context</h1>
+<p class="lede">Each pairing is broken out by role — page title, step title, card heading, body, subtitle, caption and button, then the mono side: eyebrows, chips, figures and rule expressions. Judge one role at a time; the assembled block at the foot of each shows them working together. Identical content throughout, so the only thing changing is the type.</p>
+<div class="warn">These load from Google Fonts. If your network blocks them you would be judging fallbacks without knowing, so each specimen is checked at runtime and flagged below.
+<div id="loadcheck">checking…</div></div>
+
+<div id="opts"></div>
+</div>
+
+<script>
+var OPTIONS=[
+ {n:'Current', name:'Inter + JetBrains Mono', cur:true,
+  sans:"'Inter',sans-serif", mono:"'JetBrains Mono',monospace",
+  why:'What is live now. Neutral and highly legible, but Inter is the default of nearly every SaaS product — it reads as competent rather than particular.'},
+ {n:'Option 2', name:'IBM Plex Sans + IBM Plex Mono',
+  sans:"'IBM Plex Sans',sans-serif", mono:"'IBM Plex Mono',monospace",
+  why:'One family, so the sans and mono share skeletons and the figures sit naturally beside the prose. Institutional without being stiff — engineered for exactly this kind of data-and-text mix.'},
+ {n:'Option 3', name:'Public Sans + Roboto Mono',
+  sans:"'Public Sans',sans-serif", mono:"'Roboto Mono',monospace",
+  why:'Public Sans is a government design-system typeface. For a tool whose whole claim is that the funding numbers are verifiable, the face itself carries that association.'},
+ {n:'Option 4', name:'Source Sans 3 + Source Code Pro',
+  sans:"'Source Sans 3',sans-serif", mono:"'Source Code Pro',monospace",
+  why:'The quiet workhorse. Slightly narrower than Inter so dense tables fit more, and a genuinely calm reading texture over long explanatory passages.'},
+ {n:'Option 5', name:'Manrope + IBM Plex Mono',
+  sans:"'Manrope',sans-serif", mono:"'IBM Plex Mono',monospace",
+  why:'Geometric and a little warmer than Inter — rounder bowls, more open. Softens a screen full of money without losing precision in the figures.'},
+ {n:'Option 6', name:'Newsreader + Inter + IBM Plex Mono',
+  sans:"'Inter',sans-serif", mono:"'IBM Plex Mono',monospace", display:"'Newsreader',Georgia,serif",
+  why:'A serif for headings only, sans for body, mono for figures. Editorial authority — it reads like a considered document rather than a dashboard. The riskiest and the most distinctive.'}
+];
+
+function specimen(o){
+  var dsp=o.display?('font-family:'+o.display+';font-weight:600;letter-spacing:-.005em;'):'';
+  var LANG=[
+    ['Display / page title','22px · 700', dsp||'font-family:var(--sans);font-weight:700;', 'font-size:22px;line-height:1.25;color:var(--text)', 'What an apprenticeship actually costs you'],
+    ['Step title','16px · 600', dsp||'font-family:var(--sans);font-weight:600;', 'font-size:16px;color:var(--text)', 'Choose your apprenticeships'],
+    ['Card heading','14px · 600', 'font-family:var(--sans);font-weight:600;', 'font-size:14px;color:var(--text)', 'What this costs you'],
+    ['Body','13px · 400', 'font-family:var(--sans);font-weight:400;', 'font-size:13px;line-height:1.6;color:var(--text2);max-width:62ch', 'Your levy covers the training itself. Off-the-job time is real payroll cost and is never funded, which is why it sits with your own money rather than with the government contribution.'],
+    ['Subtitle / secondary','12px · 400', 'font-family:var(--sans);font-weight:400;', 'font-size:12px;color:var(--text3);max-width:62ch', 'Pick the standards you want to run, then set how many people go on each.'],
+    ['Caption / hint','11px · 400', 'font-family:var(--sans);font-weight:400;', 'font-size:11px;color:var(--text3)', 'Indicative figures for planning, not a funding agreement.'],
+    ['Button label','13px · 600', 'font-family:var(--sans);font-weight:600;', 'font-size:13px;color:var(--teal)', 'See the full analysis']
+  ];
+  var FIG=[
+    ['Eyebrow / mono label','10px · caps', 'font-family:var(--mono);font-weight:400;', 'font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3)', 'Cost per learner'],
+    ['Chip / badge','9px · caps', 'font-family:var(--mono);font-weight:400;', 'font-size:9px;letter-spacing:.09em;text-transform:uppercase;color:var(--cyan)', 'STEP 02 &middot; ENGLAND &middot; ESFA 2026'],
+    ['Figure &mdash; headline','22px · 600', 'font-family:var(--mono);font-weight:600;', 'font-size:22px;font-variant-numeric:tabular-nums;color:var(--text)', '&pound;25,272'],
+    ['Figure &mdash; inline','13px · 400', 'font-family:var(--mono);font-weight:400;', 'font-size:13px;font-variant-numeric:tabular-nums;color:var(--text)', '&pound;15,000&nbsp;&nbsp;&pound;11,250&nbsp;&nbsp;&pound;3,750&nbsp;&nbsp;&pound;25,272'],
+    ['Rule expression','13px · 400', 'font-family:var(--mono);font-weight:400;', 'font-size:13px;color:var(--teal)', '0.5% &minus; &pound;15k &middot; 80% / 20% &middot; 5% &rarr; 25% &middot; 24mo &rarr; 12mo']
+  ];
+  function rows(list){
+    return list.map(function(r){
+      return '<div class="row"><div class="role">'+r[0]+'<em>'+r[1]+'</em></div>'+
+             '<div class="samp" style="'+r[2]+r[3]+'">'+r[4]+'</div></div>';
+    }).join('');
+  }
+  function faceName(f){ return f.split(',')[0].replace(/["']/g,''); }
+  var langLbl=(o.display?faceName(o.display)+' headings, ':'')+faceName(o.sans);
+  return '<div class="opt'+(o.cur?' cur':'')+'">'+
+    '<div class="opt-hd"><span class="opt-n">'+o.n+'</span>'+
+      '<span class="opt-name">'+o.name+'</span>'+
+      '<span class="opt-why">'+o.why+'</span></div>'+
+    '<div class="body"><div class="spec" style="--sans:'+o.sans+';--mono:'+o.mono+'">'+
+      '<div class="grp"><div class="grp-h">Language <span>&mdash; '+langLbl+'</span></div>'+rows(LANG)+'</div>'+
+      '<div class="grp"><div class="grp-h">Figures &amp; labels <span>&mdash; '+faceName(o.mono)+'</span></div>'+rows(FIG)+'</div>'+
+      '<div class="assembled"><div class="assembled-h">Assembled</div>'+
+        '<span class="chip">STEP 02</span>'+
+        '<div class="steptitle" style="'+dsp+'">Choose your apprenticeships</div>'+
+        '<p class="stepsub">Pick the standards you want to run, then set how many people go on each.</p>'+
+        '<div class="card">'+
+          '<div class="cardh" style="'+dsp+'">What this costs you</div>'+
+          '<p class="body-t">Your levy covers the training itself. Off-the-job time is real payroll cost and is never funded, which is why it sits with your own money.</p>'+
+          '<div class="eyebrow">Cost per learner</div>'+
+          '<div class="figs">'+
+            '<div class="fig cool"><div class="l">Funding band</div><div class="v">&pound;15,000</div><div class="s">drawn 80% / 20%</div></div>'+
+            '<div class="fig cool"><div class="l">Covered by levy</div><div class="v">&pound;11,250</div><div class="s">pot + 12 months in</div></div>'+
+            '<div class="fig warm"><div class="l">Your co-investment</div><div class="v">&pound;3,750</div><div class="s">25% from Aug 2026</div></div>'+
+            '<div class="fig warm"><div class="l">Off-the-job time</div><div class="v">&pound;25,272</div><div class="s">6 h/wk &times; &pound;18/hr</div></div>'+
+          '</div>'+
+          '<table><thead><tr><th>Apprenticeship</th><th class="r">Learners</th><th class="r">Training</th><th class="r">Your cash</th></tr></thead>'+
+          '<tbody>'+
+            '<tr><td>L3 Business administrator</td><td class="num r">3</td><td class="num r">&pound;15,000</td><td class="num r">&pound;25,272</td></tr>'+
+            '<tr><td>L5 People professional</td><td class="num r">2</td><td class="num r">&pound;22,000</td><td class="num r">&pound;20,592</td></tr>'+
+          '</tbody></table>'+
+        '</div>'+
+      '</div>'+
+    '</div></div></div>';
+}
+document.getElementById('opts').innerHTML=OPTIONS.map(specimen).join('');
+
+document.fonts.ready.then(function(){
+  var need=['Inter','JetBrains Mono','IBM Plex Sans','IBM Plex Mono','Public Sans','Roboto Mono','Source Sans 3','Source Code Pro','Manrope','Newsreader'];
+  var missing=need.filter(function(f){ return !document.fonts.check('16px "'+f+'"'); });
+  var el=document.getElementById('loadcheck');
+  if(missing.length){
+    el.style.color='#F59E0B';
+    el.textContent='⚠ NOT loaded, so those specimens are showing a fallback: '+missing.join(', ');
+  } else {
+    el.style.color='#2DD4B2';
+    el.textContent='✓ all ten faces loaded — every specimen below is showing its real type';
+  }
+});
+</script>
+</body>
+</html>
