@@ -1730,7 +1730,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30a</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30b</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5780,11 +5780,22 @@ function jdBuildReport(){
   return el;
 }
 var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,j,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.8,0,7);ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
+/* The JD report builds a standalone document, so it needs its own copy of the
+   faces. Rather than embedding another 80KB of base64, it lifts the @font-face
+   rules straight out of the app's stylesheet at generation time — one source,
+   and the report can never drift from the app's typography. */
+function inlinedFaceCss(){
+  var out='';
+  [].forEach.call(document.styleSheets,function(ss){
+    try{[].forEach.call(ss.cssRules,function(r){ if(r.type===5)out+=r.cssText; });}catch(e){}
+  });
+  return out;
+}
 function jdReportDocHTML(){
   var el=jdBuildReport();el.style.position='relative';el.style.left='auto';el.style.top='auto';
   return '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JD Matcher Report — '+lastJD.stdName+'</title>'+
-    '<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@600;700;800&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">'+
-    '<style>html,body{margin:0;background:#06121f;font-family:Inter,system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(var(--wash),0.08)}.rpbar button{font-family:Inter,sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:10px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(var(--wash),0.04)!important}.gap-item:hover{background:rgba(var(--wash),0.05)}'+
+    '<style>'+inlinedFaceCss()+'</style>'+
+    '<style>html,body{margin:0;background:#06121f;font-family:'Public Sans',system-ui,sans-serif}.rpbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;align-items:center;padding:12px;background:#0a1c30;border-bottom:1px solid rgba(var(--wash),0.08)}.rpbar button{font-family:'Public Sans',sans-serif;font-size:13px;font-weight:600;padding:9px 18px;border-radius:10px;border:none;background:#20D6C3;color:#06172E;cursor:pointer}.rpbar .ghost{background:transparent;border:1px solid #2e4a63;color:#cfe0ee}.rpwrap{display:flex;justify-content:center;padding:24px 14px}.rpwrap>div{box-shadow:0 10px 50px rgba(0,0,0,0.5)}.acc-btn:hover{background:rgba(var(--wash),0.04)!important}.gap-item:hover{background:rgba(var(--wash),0.05)}'+
     '@keyframes acspin{to{transform:rotate(360deg)}}.rep-ring{transform-box:fill-box;transform-origin:center}.rep-a{animation:acspin 70s linear infinite}.rep-b{animation:acspin 48s linear infinite reverse}.rep-c{animation:acspin 90s linear infinite}.rep-d{animation:acspin 36s linear infinite reverse}'+
     '@media print{.rpbar{display:none}.rpwrap{padding:0}.rpwrap>div{box-shadow:none}.acc-panel{display:block!important}.rep-ring{animation:none}@page{size:A4;margin:0}}</style></head><body>'+
     '<div class="rpbar"><button class="ghost" onclick="window.close()">&#10005;&nbsp; Close report</button><button class="ghost" onclick="jdAll(true)">Expand all</button><button class="ghost" onclick="jdAll(false)">Collapse all</button><span style="color:#8ba0b6;font-size:12px;align-self:center;margin-left:4px">For the PDF, use the <strong style="color:#cfe0ee">PDF</strong> button on the calculator</span></div>'+
