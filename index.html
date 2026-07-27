@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-29l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2902,7 +2902,7 @@ function renderScenarios(){
    the flight-versus-rest distinction: firing is just a dock change with further
    to travel. The loop stops itself once it arrives and nothing is moving. */
 (function(){
-  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0;
+  var tile=null, dock=null, x=0, y=0, running=false, snap=true, lockUntil=0, armed=false;
   var REDUCED=matchMedia('(prefers-reduced-motion:reduce)');
   function node(){
     if(!tile){
@@ -2916,18 +2916,26 @@ function renderScenarios(){
   /* Where the tile wants to be: centred on its dock, clamped into the viewport so
      it stays visible while you work inside a long section — the dock of the step
      you are reading is usually scrolled off the top. */
+  /* X comes from the page column, never from the dock: some docks resolve to a
+     step chip, which sits ON the card, and the tile was landing on top of the
+     label. The margin is the tile's lane — it only ever moves up and down it. */
   function pointFor(el){
     var r=el.getBoundingClientRect();
+    var page=document.querySelector('.page');
+    var pr=page?page.getBoundingClientRect():{left:24};
     var h=document.querySelector('header');
     var top=(h?h.getBoundingClientRect().height:62)+14;
-    return {x:Math.max(6,r.left+r.width/2-6.5),
+    return {x:Math.max(6,pr.left+2),
             y:Math.max(top,Math.min(r.top+r.height/2-6.5,innerHeight-26))};
   }
   /* One easing step. Split out from the loop so a dock change can place the tile
      SYNCHRONOUSLY: correctness must not depend on requestAnimationFrame, which is
      throttled in a hidden or backgrounded tab. rAF only smooths the travel. */
   function step(){
-    if(!dock||!dock.isConnected){ if(tile)tile.classList.remove('lit'); return true; }
+    /* Nothing to point at until you have chosen something: the tile is the answer
+       to "where did that take me", so it has no business on screen before the
+       first selection. */
+    if(!armed||!dock||!dock.isConnected){ if(tile)tile.classList.remove('lit'); return true; }
     var t=node(), p=pointFor(dock);
     if(snap||REDUCED.matches){ x=p.x; y=p.y; snap=false; }
     else { x+=(p.x-x)*0.16; y+=(p.y-y)*0.16; }
@@ -2967,6 +2975,11 @@ function renderScenarios(){
   };
   window.fireTile=function(target){
     var d=dockFor(target); if(!d)return;
+    if(!armed){                       // first selection: start the flight at the logo
+      var n=document.querySelector('.lg-live')||document.querySelector('.logo-mark-img');
+      if(n){ var lr=n.getBoundingClientRect(); x=lr.left; y=lr.top; snap=false; }
+      armed=true;
+    }
     tileDock(d);
     var host=d.parentElement;
     if(host){ host.classList.remove('tile-hit'); void host.offsetWidth;
