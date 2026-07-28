@@ -1730,7 +1730,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30f</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -4747,7 +4747,7 @@ function levyBoardCover(d){
   var ask='Approve <b style="color:#fff">'+fmt(d.planCost)+'</b> to train <b style="color:#fff">'+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</b>'+(teams>1?(' across <b style="color:#fff">'+teams+' teams</b>'):'')+' over <b style="color:#fff">'+d.years+' year'+(d.years!==1?'s':'')+'</b>. <b style="color:#2DD4B2">'+fmt(d.levyCovered)+'</b> is levy-funded; employer cash exposure is <b style="color:'+(empCash?'#E0A43B':'#2DD4B2')+'">'+fmt(empCash)+'</b>'+(d.otjCost?(', plus <b style="color:#fff">'+fmt(d.otjCost)+'</b> of off-the-job staff time'):'')+'.';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:6px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
     '<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">The numbers</div><div class="lvy-figs" style="margin-bottom:16px">'+figs+'</div>'+
     '<div class="lvy-sec">Risk assessment</div><div class="lvy-risk" style="margin-bottom:16px">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div>'+
@@ -4952,7 +4952,7 @@ function levyNonLevyPage(d){
       ('No transfers secured yet. Raising up to '+fmt(s.target)+' in levy transfers would reduce your '+fmt(f.employer)+' investment toward £0.'));
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:6px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
     '<div style="background:rgba(74,163,232,0.07);border:1px solid rgba(74,163,232,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">How this plan is paid for</div><div class="lvy-figs" style="margin-bottom:15px">'+figs+'</div>'+
     '<div class="lvy-sec">Fundraising &mdash; levy transfers</div><div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin:6px 0 15px">'+frLine+'</div>'+
@@ -4994,7 +4994,7 @@ function levyDeliveryPage(d){
   }
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Delivery Report &mdash; Apprenticeship Progress</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">SYNCHRONISED FROM YOUR TRACKER</div></div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:6px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">SYNCHRONISED FROM YOUR TRACKER</div></div></div>'+
     '<div class="lvy-sec">Snapshot</div><div class="lvy-figs" style="margin-bottom:14px">'+figs+'</div>'+
     '<div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin-bottom:15px">'+achLine+(overdue?(' <b style="color:#e0607a">'+overdue+'</b> live learner'+(overdue!==1?'s are':' is')+' past the planned end date.'):'')+'</div>'+
     '<div class="lvy-sec">Learners</div>'+
@@ -5028,7 +5028,7 @@ function levyQarPage(d){
   }).join('');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:6px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
     '<div style="display:flex;align-items:center;gap:26px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.25);border-radius:12px;padding:16px 22px;margin-bottom:16px">'+
       '<div><div style="font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;color:'+col+';line-height:1">'+q.qar.toFixed(1)+'%</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+q.achieved+' achieved of '+q.leavers+' leaver'+(q.leavers!==1?'s':'')+'</div></div>'+
       '<div style="flex:1;font-size:13px;color:#c7d6e2;line-height:1.6">'+(above?'<b style="color:#2DD4B2">&#9650; '+Math.abs(delta).toFixed(1)+' pts above</b>':'<b style="color:#e0607a">&#9660; '+Math.abs(delta).toFixed(1)+' pts below</b>')+' the national rate of <b style="color:#fff">'+N.overall+'%</b> ('+N.year+'), against a government target of '+N.target+'%.<br><span style="color:#7e95ab">Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'</span></div></div>'+
@@ -5094,7 +5094,7 @@ function levyPage1(d,framing){
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
       '<div class="lvy-head"><div><div class="lvy-title">Affordability Report</div></div>'+
-        '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px">'+goalChip+'<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
+        '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:6px">'+goalChip+'<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(var(--wash),0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
