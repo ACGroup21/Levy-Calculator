@@ -1302,7 +1302,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
       <span><strong>From August 2026 you have half as long to spend your levy.</strong> Anything you declare from then expires after <strong>12 months</strong> instead of 24, so funds you have not committed inside a year go back to the Treasury. <span style="color:var(--text3)">Declarations made before August 2026 keep their 24-month window; this tool applies the correct one per declaration date automatically.</span></span>
     </div>
-    <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
+    <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
   <!-- FUNDING ROUTE: levy vs non-levy -->
@@ -1544,7 +1544,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
             <input type="date" id="inp-epa" aria-label="End-point assessment date" oninput="updateDurReadout();renderLearnerCost()">
           </div>
         </div>
-        <div id="durReadout" style="font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
+        <div id="durReadout" style="font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.04em;line-height:1.4;margin:7px 0 0;min-height:14px;color:#7e95ab"></div>
         <details style="margin:9px 0 2px;grid-column:1/-1">
           <summary style="cursor:pointer;font-size:12px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:7px"><span style="color:#2DD4B2">&#128101;</span>Age mix <span style="color:var(--text3)">— optional; unlocks employer NI relief (under-25s) &amp; the L7 age gate &#9662;</span></summary>
           <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
@@ -1730,7 +1730,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30d</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2526,7 +2526,7 @@ function onStandardChange(){
 function lcCell(lab,val,sub,col,tone){
   return '<div class="'+(tone?'tone-'+tone:'')+'" style="background:rgba(var(--wash),0.025);border:1px solid rgba(var(--wash),0.07);border-radius:10px;padding:9px 11px;min-width:0">'+
     '<div style="font-size:11px;color:var(--text3);margin-bottom:3px">'+lab+'</div>'+
-    '<div style="font-family:\'JetBrains Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
+    '<div style="font-family:\'Roboto Mono\',monospace;font-size:16px;color:'+col+'">'+val+'</div>'+
     '<div style="font-size:10px;color:var(--text3);margin-top:3px;line-height:1.4">'+sub+'</div></div>';
 }
 // #20 slice 1: cost for a single learner on the selected standard — reuses the engine's rates, before adding to the plan
@@ -2617,7 +2617,7 @@ function lcPlanStrip(nl,MONEY,GREEN,BLUE,AMBER){
   }
   return '<div style="margin-top:13px;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:14px;padding:13px 16px">'+
     '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:9px">'+
-      '<div style="font-size:12px;color:var(--text2)"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-right:9px">Your plan so far</span>'+impact+'</div>'+
+      '<div style="font-size:12px;color:var(--text2)"><span style="font-family:\'Roboto Mono\',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-right:9px">Your plan so far</span>'+impact+'</div>'+
       '<span style="font-size:12px;font-weight:700;color:'+chipCol+';border:1px solid '+chipCol+';border-radius:99px;padding:2px 11px;white-space:nowrap">'+chipTxt+'</span>'+
     '</div>'+
     '<div style="height:8px;border-radius:6px;background:rgba(var(--wash),0.08);overflow:hidden"><div style="height:100%;width:'+barPct+'%;background:'+barCol+';transition:width .25s"></div></div>'+
@@ -3759,7 +3759,7 @@ function renderRulesRef(){
   var rows=fundingRulesRef().map(function(r){
     return '<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:16px;padding:9px 0;border-top:1px solid rgba(var(--wash),0.06)">'+
       '<div><div style="font-weight:600;color:var(--text);font-size:13px">'+r.label+'</div><div style="font-size:12px;color:var(--text3);line-height:1.45;margin-top:2px">'+r.detail+'</div></div>'+
-      '<div style="text-align:right;white-space:nowrap"><div style="font-family:\'JetBrains Mono\',monospace;color:var(--teal);font-size:13px">'+r.value+'</div><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+r.eff+'</div></div>'+
+      '<div style="text-align:right;white-space:nowrap"><div style="font-family:\'Roboto Mono\',monospace;color:var(--teal);font-size:13px">'+r.value+'</div><div style="font-size:10px;color:var(--text3);margin-top:3px;font-family:\'Roboto Mono\',monospace">'+r.eff+'</div></div>'+
     '</div>';
   }).join('');
   el.innerHTML='<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:14px;padding:6px 16px 14px;margin-top:8px">'+rows+
@@ -3797,7 +3797,7 @@ function renderProjWorking(d){
   var totalInc=d.income.reduce(function(a,b){return a+b;},0);
   html+=row('Closing balance = '+fmt(d.bals[d.M-1])+' <span style="color:var(--text3);font-weight:400">· opening + income − drawdown</span>',
     'Opening '+fmt(levyData.balance)+', plus '+fmt(totalInc)+' levy income, less the training / EPA / unit amounts above, over '+d.M+' months. The balance is floored at £0 — in any exhausted month the shortfall becomes co-investment, not a negative pot.');
-  pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
+  pw.innerHTML='<details style="margin-top:12px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:\'Roboto Mono\',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">How these figures are calculated &#9662;</span></summary>'+
     '<div style="background:rgba(var(--wash),0.02);border:1px solid rgba(var(--wash),0.08);border-radius:14px;padding:4px 16px 12px;margin-top:8px">'+html+
     '<div style="margin-top:11px;font-size:11px;color:var(--text3);border-top:1px solid rgba(var(--wash),0.06);padding-top:9px">Every rate above is read from the funding rulebook (see “Funding rules applied” near the top). Figures use the data you provided'+(scnDataAck?'.':' — not yet confirmed.')+'</div>'+
   '</div></details>';
@@ -4299,9 +4299,9 @@ function renderAffordLadder(coInvest,expiry){
   var cards=rungs.map(function(r){
     var on=(r.n-1===rec), open=(ladderOpen===r.n), hl=on||open;
     return '<div onclick="toggleLadderRung('+r.n+')" title="Tap for detail" style="flex:1;min-width:0;cursor:pointer;background:rgba(var(--wash),0.03);border:1px solid '+(hl?r.accent:'rgba(var(--wash),0.09)')+';border-radius:14px;padding:13px 15px;'+(hl?'box-shadow:0 0 0 1px '+r.accent+' inset':'')+';transition:border-color .15s">'+
-      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:6px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:10px;font-family:\'JetBrains Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'<span style="margin-left:auto;display:block;width:9px;height:9px;border-radius:50%;background:'+(open?r.accent:'transparent')+';border:1.5px solid '+r.accent+';box-shadow:'+(open?'0 0 8px '+r.accent+', 0 0 3px '+r.accent:'none')+';transition:background .2s,box-shadow .2s"></span></div>'+
+      '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><span style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:'+r.accent+';border:1px solid '+r.accent+';border-radius:6px;padding:1px 5px">RUNG '+r.n+'</span>'+(on?'<span style="font-size:10px;font-family:\'Roboto Mono\',monospace;color:'+r.accent+';letter-spacing:.05em">◀ START HERE</span>':'')+'<span style="margin-left:auto;display:block;width:9px;height:9px;border-radius:50%;background:'+(open?r.accent:'transparent')+';border:1.5px solid '+r.accent+';box-shadow:'+(open?'0 0 8px '+r.accent+', 0 0 3px '+r.accent:'none')+';transition:background .2s,box-shadow .2s"></span></div>'+
       '<div style="font-weight:700;color:var(--text);font-size:14px">'+r.type+'</div>'+
-      '<div style="font-family:\'JetBrains Mono\',monospace;font-size:18px;color:'+r.accent+';margin:5px 0">'+fmt(r.cost)+'<span style="font-size:11px;color:#7e95ab"> /learner</span></div>'+
+      '<div style="font-family:\'Roboto Mono\',monospace;font-size:18px;color:'+r.accent+';margin:5px 0">'+fmt(r.cost)+'<span style="font-size:11px;color:#7e95ab"> /learner</span></div>'+
       '<div style="font-size:12px;color:#aebecb;line-height:1.5"><div>⏱ '+r.dur+' · co-invest '+r.coinv+'</div><div style="margin-top:3px">'+r.builds+'</div></div>'+
       '<div style="font-size:10px;color:#7e95ab;margin-top:7px;font-style:italic">'+r.note+'</div>'+
     '</div>';
@@ -4631,7 +4631,7 @@ function renderNonLevy(){
     return;
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
-  var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
     fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
     fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
@@ -4729,7 +4729,7 @@ function levyBoardCover(d){
       ? {word:'Approve with conditions',col:'#E0A43B',note:'Approve subject to a co-investment budget of '+fmt(d.coInvest)+' over '+d.years+' years.'}
       : {word:'Approve',col:'#2DD4B2',note:d.coInvest>0?('Approve &mdash; co-investment of '+fmt(d.coInvest)+' is modest against the '+fmt(d.planCost)+' plan.'):'Approve &mdash; your levy funds this plan in full.'});
   // ── figures ──
-  var fig=function(lab,val,col){return '<div style="flex:1;min-width:120px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:120px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figs=fig('Total commitment',fmt(d.planCost))
     +fig('Levy-funded',fmt(d.levyCovered),'#2DD4B2')
     +fig('Employer cash',empCash?fmt(empCash):'£0',empCash?'#E0A43B':'#2DD4B2')
@@ -4738,17 +4738,17 @@ function levyBoardCover(d){
   // ── allocation ──
   var alloc;
   if(rfTotal>0){
-    var arows=ringfences.filter(function(r){return +r.amount>0;}).map(function(r){var pct=d.levyAvail>0?(+r.amount/d.levyAvail*100):0;return '<div style="display:flex;justify-content:space-between;font-size:12px;color:#c7d6e2;padding:3px 0"><span>'+((r.name&&r.name.trim())||'Unnamed reservation')+'</span><span style="font-family:\'JetBrains Mono\',monospace">'+fmt(+r.amount)+' <span style="color:#7e95ab">('+pct.toFixed(0)+'%)</span></span></div>';}).join('');
-    alloc='<div class="lvy-sec">Levy allocation</div><div style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:11px 15px">'+arows+'<div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:#fff;border-top:1px solid rgba(var(--wash),0.14);margin-top:6px;padding-top:6px"><span>Ring-fenced total &middot; '+fmt(avail)+' left for the plan</span><span style="font-family:\'JetBrains Mono\',monospace">'+fmt(rfTotal)+'</span></div></div>';
+    var arows=ringfences.filter(function(r){return +r.amount>0;}).map(function(r){var pct=d.levyAvail>0?(+r.amount/d.levyAvail*100):0;return '<div style="display:flex;justify-content:space-between;font-size:12px;color:#c7d6e2;padding:3px 0"><span>'+((r.name&&r.name.trim())||'Unnamed reservation')+'</span><span style="font-family:\'Roboto Mono\',monospace">'+fmt(+r.amount)+' <span style="color:#7e95ab">('+pct.toFixed(0)+'%)</span></span></div>';}).join('');
+    alloc='<div class="lvy-sec">Levy allocation</div><div style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:11px 15px">'+arows+'<div style="display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;color:#fff;border-top:1px solid rgba(var(--wash),0.14);margin-top:6px;padding-top:6px"><span>Ring-fenced total &middot; '+fmt(avail)+' left for the plan</span><span style="font-family:\'Roboto Mono\',monospace">'+fmt(rfTotal)+'</span></div></div>';
   } else {
     alloc='<div class="lvy-sec">Levy allocation</div><div style="font-size:12.5px;color:#8ba0b6;background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.1);border-radius:10px;padding:11px 15px">No departmental ring-fences set &mdash; the full '+fmt(d.levyAvail)+' pot is available to this plan.</div>';
   }
   // ── ask ──
   var ask='Approve <b style="color:#fff">'+fmt(d.planCost)+'</b> to train <b style="color:#fff">'+d.heads+' apprentice'+(d.heads!==1?'s':'')+'</b>'+(teams>1?(' across <b style="color:#fff">'+teams+' teams</b>'):'')+' over <b style="color:#fff">'+d.years+' year'+(d.years!==1?'s':'')+'</b>. <b style="color:#2DD4B2">'+fmt(d.levyCovered)+'</b> is levy-funded; employer cash exposure is <b style="color:'+(empCash?'#E0A43B':'#2DD4B2')+'">'+fmt(empCash)+'</b>'+(d.otjCost?(', plus <b style="color:#fff">'+fmt(d.otjCost)+'</b> of off-the-job staff time'):'')+'.';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
-      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
-    '<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Board Report &mdash; Apprenticeship Levy</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; '+d.years+'-YEAR HORIZON</div></div></div>'+
+    '<div style="background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">The numbers</div><div class="lvy-figs" style="margin-bottom:16px">'+figs+'</div>'+
     '<div class="lvy-sec">Risk assessment</div><div class="lvy-risk" style="margin-bottom:16px">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div>'+
     alloc+
@@ -4935,7 +4935,7 @@ function setReportFraming(f){
 function levyNonLevyPage(d){
   var f=(typeof nonLevyFunding==='function')?nonLevyFunding():null; if(!f||!f.totalCount)return '';
   var s=nlState(f), fmt=lvK, BLUE='#4aa3e8', rate=f.has25?'25%':'5%';
-  var fig=function(lab,val,col){return '<div style="flex:1;min-width:116px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:116px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figs=fig('Total training investment',fmt(f.totalBand))+fig('Government funds',fmt(s.gov),BLUE)+fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':'#7e95ab')+fig('Your investment',fmt(s.residual),s.residual>0.5?'#E0A43B':'#2DD4B2')+fig('Off-the-job time',fmt(f.otj));
   var ask='Approve <b style="color:#fff">'+fmt(s.residual)+'</b> of employer investment to train <b style="color:#fff">'+f.totalCount+' apprentice'+(f.totalCount!==1?'s':'')+'</b>. The government funds <b style="color:'+BLUE+'">'+fmt(s.gov)+'</b> (95%, and 100% of '+f.fullyFunded+' aged 16&ndash;21)'+(s.transfers>0.5?('; <b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured via levy transfer'):'')+(f.otj?('; plus <b style="color:#fff">'+fmt(f.otj)+'</b> of off-the-job staff time'):'')+'.';
   var apprs=(programmes||[]).filter(function(p){return p.type!=='unit';}), CAP=5, shown=apprs.slice(0,CAP), moreP=apprs.length-shown.length;
@@ -4951,9 +4951,9 @@ function levyNonLevyPage(d){
     (s.transfers>0.5?('<b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured of '+fmt(s.target)+' &mdash; your investment '+fmt(f.employer)+' &rarr; <b style="color:'+(s.residual>0.5?'#E0A43B':'#2DD4B2')+'">'+fmt(s.residual)+'</b>. A further '+fmt(Math.max(0,s.target-s.raised))+' in transfers would take it to £0.'):
       ('No transfers secured yet. Raising up to '+fmt(s.target)+' in levy transfers would reduce your '+fmt(f.employer)+' investment toward £0.'));
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
-      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
-    '<div style="background:rgba(74,163,232,0.07);border:1px solid rgba(74,163,232,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Apprenticeship Funding Report &mdash; Non-levy Employer</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">FOR APPROVAL &middot; INDICATIVE</div></div></div>'+
+    '<div style="background:rgba(74,163,232,0.07);border:1px solid rgba(74,163,232,0.3);border-radius:12px;padding:15px 20px;margin-bottom:15px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.12em;color:#7e95ab;margin-bottom:7px">THE ASK</div><div style="font-size:16px;line-height:1.6;color:#c7d6e2">'+ask+'</div></div>'+
     '<div class="lvy-sec">How this plan is paid for</div><div class="lvy-figs" style="margin-bottom:15px">'+figs+'</div>'+
     '<div class="lvy-sec">Fundraising &mdash; levy transfers</div><div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin:6px 0 15px">'+frLine+'</div>'+
     '<div class="lvy-sec">Programmes</div>'+
@@ -4969,7 +4969,7 @@ function levyDeliveryPage(d){
   var by={in_progress:0,gateway:0,achieved:0,withdrawn:0,paused:0};
   delivery.forEach(function(x){by[x.status]=(by[x.status]||0)+1;});
   var leavers=by.achieved+by.withdrawn, overdue=delivery.filter(function(x){return (x.status==='in_progress'||x.status==='gateway')&&iso.test(x.plannedEnd)&&x.plannedEnd<todayIso;}).length;
-  var fig=function(lab,val,col){return '<div style="flex:1;min-width:96px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:96px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figs=fig('Learners',delivery.length)+fig('On programme',by.in_progress+by.gateway,'#E0A43B')+fig('Achieved',by.achieved,'#2DD4B2')+fig('Withdrawn',by.withdrawn,by.withdrawn?'#e0607a':'#2DD4B2')+fig('Overdue',overdue,overdue?'#e0607a':'#2DD4B2');
   var CAP=10, rowsShown=delivery.slice(0,CAP), more=delivery.length-rowsShown.length;
   var smeta={in_progress:['On programme','#E0A43B'],gateway:['At gateway','#a78bfa'],achieved:['Achieved','#2DD4B2'],withdrawn:['Withdrawn','#e0607a'],paused:['Paused','#E0A43B']};
@@ -4993,8 +4993,8 @@ function levyDeliveryPage(d){
     achLine='No learners have left yet &mdash; an achievement rate (QAR) becomes available once cohorts complete.';
   }
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Delivery Report &mdash; Apprenticeship Progress</div></div>'+
-      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">SYNCHRONISED FROM YOUR TRACKER</div></div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Delivery Report &mdash; Apprenticeship Progress</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">SYNCHRONISED FROM YOUR TRACKER</div></div></div>'+
     '<div class="lvy-sec">Snapshot</div><div class="lvy-figs" style="margin-bottom:14px">'+figs+'</div>'+
     '<div style="font-size:12.5px;color:#c7d6e2;line-height:1.6;margin-bottom:15px">'+achLine+(overdue?(' <b style="color:#e0607a">'+overdue+'</b> live learner'+(overdue!==1?'s are':' is')+' past the planned end date.'):'')+'</div>'+
     '<div class="lvy-sec">Learners</div>'+
@@ -5012,7 +5012,7 @@ function levyDeliveryPage(d){
 function levyQarPage(d){
   var q=computeQAR(); if(!q||!q.leavers)return '';
   var N=QAR_NATIONAL, above=q.qar>=N.overall, col=q.qar>=N.overall?'#2DD4B2':(q.qar>=N.overall-8?'#E0A43B':'#e0607a'), delta=q.qar-N.overall;
-  var fig=function(lab,val,c,sub){return '<div style="flex:1;min-width:120px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'#fff')+'">'+val+'</div>'+(sub?'<div style="font-size:10px;color:#7e95ab;margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  var fig=function(lab,val,c,sub){return '<div style="flex:1;min-width:120px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'#fff')+'">'+val+'</div>'+(sub?'<div style="font-size:10px;color:#7e95ab;margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs=fig('Retention',(q.retention!=null?q.retention.toFixed(0)+'%':'—'),'#fff',q.completers+' of '+q.leavers+' stayed')
     +fig('Pass rate',(q.pass!=null?q.pass.toFixed(0)+'%':'—'),'#fff',q.achieved+' of '+q.completers+' passed')
     +fig('Invested in non-achievers',(q.atRisk>0?fmt(q.atRisk):'£0'),q.atRisk>0?'#e0607a':'#2DD4B2',(q.withdrawn+q.failed)+' did not achieve')
@@ -5027,8 +5027,8 @@ function levyQarPage(d){
       '<td style="padding:5px 10px;text-align:right;color:#9fb2c6;white-space:nowrap">'+r.bench.toFixed(1)+'%'+(r.benchIsLevel?'':' *')+'</td></tr>';
   }).join('');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
-      '<div style="text-align:right"><div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Achievement Rate (QAR) &mdash; Your Cohort</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px"><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">INDICATIVE &middot; FROM YOUR TRACKER</div></div></div>'+
     '<div style="display:flex;align-items:center;gap:26px;background:rgba(45,212,178,0.05);border:1px solid rgba(45,212,178,0.25);border-radius:12px;padding:16px 22px;margin-bottom:16px">'+
       '<div><div style="font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;color:'+col+';line-height:1">'+q.qar.toFixed(1)+'%</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+q.achieved+' achieved of '+q.leavers+' leaver'+(q.leavers!==1?'s':'')+'</div></div>'+
       '<div style="flex:1;font-size:13px;color:#c7d6e2;line-height:1.6">'+(above?'<b style="color:#2DD4B2">&#9650; '+Math.abs(delta).toFixed(1)+' pts above</b>':'<b style="color:#e0607a">&#9660; '+Math.abs(delta).toFixed(1)+' pts below</b>')+' the national rate of <b style="color:#fff">'+N.overall+'%</b> ('+N.year+'), against a government target of '+N.target+'%.<br><span style="color:#7e95ab">Trend '+N.trend.map(function(t){return t.y+' '+t.r+'%';}).join(' &rarr; ')+'</span></div></div>'+
@@ -5051,7 +5051,7 @@ function levyPage1(d,framing){
   var rfNames=(rfTotal>0)?ringfences.filter(function(r){return +r.amount>0;}).map(function(r){return (r.name&&r.name.trim())||'unnamed';}).join(', '):'';
   var rfOver=(rfTotal>0)&&(rfPlan>rfAvail+0.5), rfGap=rfOver?(rfPlan-rfAvail):0;
   var goalChip=(scnGoal&&scnGoal.key)?'<span style="display:inline-flex;align-items:center;gap:7px;font-size:11px"><span style="width:7px;height:7px;border-radius:50%;background:#2DD4B2;box-shadow:0 0 9px #2DD4B2,0 0 4px #2DD4B2"></span><span style="color:#2DD4B2;text-shadow:0 0 9px rgba(45,212,178,0.75);font-weight:700;letter-spacing:.02em">Goal</span><span style="color:#c7d6e2">&nbsp;'+scnGoal.label+'</span></span>':'';
-  var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'JetBrains Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
+  var fig=function(lab,val,col){return '<div style="flex:1;min-width:130px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figures=fin
     ? fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('Total plan cost',lvK(d.planCost))+fig('Levy-funded',lvK(d.levyCovered),'#2DD4B2')+fig('Employer co-investment',d.coInvest?lvK(d.coInvest):'£0',d.coInvest?'#E0A43B':'#2DD4B2')+fig('Funds at risk of expiry',d.expiry?lvK(d.expiry):'£0',d.expiry?'#e0607a':'#2DD4B2')+(rfTotal>0?fig('Avail. after ring-fence',lvK(rfAvail),rfOver?'#e0607a':'#E0A43B'):fig('Account balance',lvK(d.balance)))
     : fig('Total levy ('+d.years+'y)',lvK(d.levyAvail),'#2DD4B2')+fig('People developed',String(d.heads),'#a78bfa')+fig('Programmes',String(d.progCount))+fig('Subjects',String(d.subjectCount),'#a78bfa')+fig('Investment in skills',lvK(d.planCost),'#2DD4B2')+(rfTotal>0?fig('Avail. after ring-fence',lvK(rfAvail),rfOver?'#e0607a':'#E0A43B'):fig('Levy per head',lvK(d.perHead)));
@@ -5093,8 +5093,8 @@ function levyPage1(d,framing){
   var decideStrip='<div class="lvy-decide"><div class="lvy-decide-rec"><span class="lvy-decide-t">RECOMMENDATION</span>'+rec+'</div><div class="lvy-risk">'+riskItem('Financial',finRisk)+riskItem('Delivery',delivRisk)+riskItem('Compliance',compRisk)+'</div></div>';
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
-      '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:36px;display:block;margin-bottom:9px"><div class="lvy-title">Affordability Report</div></div>'+
-        '<div style="text-align:right">'+goalChip+'<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
+      '<div class="lvy-head"><div><div class="lvy-title">Affordability Report</div></div>'+
+        '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:34px;display:inline-block;margin-bottom:10px">'+goalChip+'<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(var(--wash),0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
@@ -5159,8 +5159,8 @@ function levyPage2(d,framing){
   }
   var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Detail &amp; Action</div></div>'+
-      '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Detail &amp; Action</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">Programme breakdown</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Learners</th><th class="r">Band</th><th class="r">Training (80%)</th><th class="r">EPA (20%)</th><th class="r">Start &rarr; EPA</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="lvy-move"><div class="lvy-move-t">&#128640; A movement forward</div><div class="lvy-body">'+move+'</div></div>'+
@@ -5199,8 +5199,8 @@ function levyPage3(d,framing){
     ? 'The levy covers the training fee. The larger commitment is usually the paid time apprentices spend off the job ('+Math.round(d.otjHrsWk)+' hrs/week &middot; '+d.otjFTE.toFixed(1)+' FTE) — set an hourly rate in the Plan section to cost it.'
     : 'The levy covers the training fee; the larger commitment is often the <strong style="color:#fff">'+Math.round(d.otjHrsWk)+' hours a week</strong> of paid time apprentices spend off the job ('+d.otjFTE.toFixed(1)+' FTE of capacity). '+(fin?'It is real cost, not just levy spend — factor it into the business case.':'Plan release and backfill so delivery does not strain the team.');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
-    '<div class="lvy-head"><div><img src="'+brandLogo()+'" style="height:32px;display:block;margin-bottom:8px"><div class="lvy-title">Cost &amp; Delivery</div></div>'+
-      '<div style="font-family:\'JetBrains Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
+    '<div class="lvy-head"><div><div class="lvy-title">Cost &amp; Delivery</div></div>'+
+      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+selfFundNote+niNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
@@ -5278,7 +5278,7 @@ function renderProjection(){
   const cTipBg=_lt?'rgba(255,255,255,0.97)':'rgba(5,12,24,0.95)', cTipBorder=_lt?'rgba(37,99,235,0.25)':'rgba(45,212,178,0.3)', cTipTitle=_lt?'#1f2f4a':'#2DD4B2', cTipBody=_lt?'#4a5a70':'#8fb8cc';
   const cAxis=_lt?'rgba(15,27,46,0.12)':'rgba(45,212,178,0.15)', cTick=_lt?'#5a6a80':'#7fa3ba', cTickDim=_lt?'#7a889a':'#3d6880', cBalTick=_lt?'#c2603c':'#a78bfa', cBalBorder=_lt?'rgba(194,96,60,0.3)':'rgba(167,139,250,0.3)';
   if(projChart)projChart.destroy();
-  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:cLine,borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:cUnits,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:cBal,borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:cTipBg,borderColor:cTipBorder,borderWidth:1,titleColor:cTipTitle,bodyColor:cTipBody,titleFont:{family:'JetBrains Mono',size:11},bodyFont:{family:'JetBrains Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'JetBrains Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'JetBrains Mono'},color:cBalTick},grid:{drawOnChartArea:false},border:{color:cBalBorder}}}}});
+  projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:cLine,borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:cUnits,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:cBal,borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:cTipBg,borderColor:cTipBorder,borderWidth:1,titleColor:cTipTitle,bodyColor:cTipBody,titleFont:{family:'Roboto Mono',size:11},bodyFont:{family:'Roboto Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'Roboto Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'Roboto Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cBalTick},grid:{drawOnChartArea:false},border:{color:cBalBorder}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length, coMonths=coSet.size, reserveMonths=tot.filter((s,i)=>s>income[i]&&!coSet.has(i)).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
