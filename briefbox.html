@@ -259,11 +259,16 @@ input:focus,select:focus,button:focus-visible{outline:2px solid var(--cyan);outl
 
 <script>
 /* ── Where the label and the file go ─────────────────────────────────────────
-   ENDPOINT is the form service you post to — pick one that accepts file
-   attachments and forwards to your inbox, then paste its URL here.
-   While it is empty the box still validates and confirms, so the page can be
-   shown to anyone without sending real learner data anywhere. */
-var ENDPOINT = '';        /* e.g. 'https://formspree.io/f/xxxxxxxx' */
+   ENDPOINT is the Brief Box's own endpoint — the Google Apps Script web app in
+   briefbox-endpoint.gs, running in Arthur Curtis's own account. Paste its /exec
+   URL here once it is deployed.
+
+   No form service sits in between on purpose: a brief is a learner's personal
+   data, and every hosted form service would have made itself a processor of it.
+
+   While ENDPOINT is empty the box validates and confirms without sending, so
+   the page can be shown to anyone safely. */
+var ENDPOINT = '';        /* the /exec URL from Deploy → Web app */
 var MAX_MB   = 10;
 
 var STD = [["L2 Accounts or finance assistant",7000,12,2],["L2 Adult care worker",4500,12,2],["L2 Aviation customer service operative",3500,12,2],["L2 Aviation ground operative",3000,12,2],["L2 Baker",9000,18,2],["L2 Butcher",10000,18,2],["L2 Commis chef",9000,12,2],["L2 Community activator coach",6000,18,2],["L2 Credit controller and collector",5000,12,2],["L2 Customer service practitioner",3500,12,2],["L2 Express delivery operative",4000,12,2],["L2 Express delivery sortation hub operative",4000,12,2],["L2 Fishmonger",13000,18,2],["L2 Food and beverage team member",6000,12,2],["L2 Funeral team member",4000,12,2],["L2 Healthcare science assistant",8000,14,2],["L2 Healthcare support worker",5000,8,2],["L2 Hospitality accommodation team member",6000,12,2],["L2 Housing and property management assistant",3000,12,2],["L2 Junior estate agent",4000,12,2],["L2 Large goods vehicle (LGV) driver C + E",8000,13,2],["L2 Leisure team member",5000,18,2],["L2 Marina and boatyard operative",10000,18,2],["L2 Passenger transport driver - bus and coach or tram",8000,12,2],["L2 Passenger transport operative",6000,12,2],["L2 Pharmacy services assistant",5000,12,2],["L2 Playworker",5000,18,2],["L2 Port operative",8000,12,2],["L2 Production chef",7000,12,2],["L2 Removals operative",5000,12,2],["L2 Retailer",5000,14,2],["L2 Seafarer (deck rating)",10000,18,2],["L2 Supply chain warehouse operative",5000,12,2],["L2 Trade supplier",4000,12,2],["L2 Traffic operator",6000,12,2],["L2 Urban driver",8000,12,2],["L3 Advanced butcher",12000,18,3],["L3 Advertising and media executive",11000,18,3],["L3 Ambulance support worker (emergency, urgent and non-urgent)",7000,13,3],["L3 Animal technologist",10000,24,3],["L3 Assistant accountant",12000,15,3],["L3 Aviation flight operations coordinator",8000,18,3],["L3 Aviation ground specialist",6000,18,3],["L3 Aviation movement specialist",7000,18,3],["L3 Bid and proposal co-ordinator",8000,24,3],["L3 Boatmaster",25000,24,3],["L3 Business administrator",5000,18,3],["L3 Cabin crew",5000,12,3],["L3 Chef de partie",10000,18,3],["L3 Clinical coder",5000,18,3],["L3 Community health and wellbeing worker",7000,12,3],["L3 Community sport and health officer",9000,16,3],["L3 Compliance and risk officer",11000,15,3],["L3 Customer service specialist",4000,15,3],["L3 Cyber security technician",11000,18,3],["L3 Data technician",13000,24,3],["L3 Dental nurse",8000,18,3],["L3 Digital device repair technician",11000,21,3],["L3 Digital support technician",13000,15,3],["L3 Event assistant",9000,18,3],["L3 Financial services administrator",10000,12,3],["L3 Financial services customer adviser",11000,18,3],["L3 Food industry technologist",18000,24,3],["L3 Fundraiser",8000,18,3],["L3 Funeral director",4500,12,3],["L3 Hospitality supervisor",4000,12,3],["L3 Housing and property management",7000,18,3],["L3 HR support",4500,18,3],["L3 Improvement technician",4000,14,3],["L3 Information communications technician",15000,18,3],["L3 Insurance practitioner",8000,12,3],["L3 International freight forwarding specialist",9000,18,3],["L3 Investment operations technician",9000,18,3],["L3 IT solutions technician",15000,18,3],["L3 IT technical salesperson",12000,12,3],["L3 Laboratory technician",21000,24,3],["L3 Lead adult care worker",4000,18,3],["L3 Lead baker",9000,24,3],["L3 Learning and development practitioner",6000,18,3],["L3 Leisure duty manager",5000,18,3],["L3 Library, information and archive services assistant",6000,18,3],["L3 Metrology technician",24000,36,3],["L3 Mortgage adviser",9000,12,3],["L3 Mortuary technician",13000,18,3],["L3 Motor finance specialist",6000,24,3],["L3 Multi-channel marketer",11000,18,3],["L3 Network cable installer",11000,15,3],["L3 Officer of the watch (near coastal)",15000,36,3],["L3 Optical assistant 2022",8000,18,3],["L3 Outdoor activity instructor",6000,12,3],["L3 Paralegal",11000,24,3],["L3 Pastry chef",11000,18,3],["L3 Payroll administrator",10000,18,3],["L3 Peer worker",5000,15,3],["L3 Pensions administrator",9000,18,3],["L3 Personal trainer",4000,15,3],["L3 Pharmacy technician (integrated)",8000,24,3],["L3 Procurement and supply assistant",6000,18,3],["L3 Prosthetic and orthotic technician",6000,18,3],["L3 Public service operational delivery officer",2500,12,3],["L3 Radio network technician",19000,24,3],["L3 Rail infrastructure operator",15000,18,3],["L3 Recruiter",7000,18,3],["L3 Safeguarding support officer",7000,18,3],["L3 Senior credit controller and debt collection specialist",13000,18,3],["L3 Senior healthcare support worker",9000,24,3],["L3 Senior production chef",4500,12,3],["L3 Small commercial vessel crewmember",22000,24,3],["L3 Software development technician",15000,18,3],["L3 Sporting excellence professional",10000,18,3],["L3 Supply chain practitioner (fast-moving consumer goods (FMCG))",15000,30,3],["L3 Train driver",21000,12,3],["L3 Transport and warehouse operations supervisor",5000,12,3],["L3 Transport scheduler",8000,18,3],["L3 Travel consultant",7000,12,3],["L3 Youth support worker",4500,18,3],["L4 Actuarial technician",15000,24,4],["L4 Applications support lead",17000,24,4],["L4 Artificial intelligence (AI) and automation practitioner",18000,18,4],["L4 Associate ambulance practitioner",15000,18,4],["L4 Associate project manager",7000,18,4],["L4 Aviation operations manager",7000,18,4],["L4 Business analyst",18000,18,4],["L4 Buying and merchandising assistant",6000,18,4],["L4 Children, young people and families practitioner",6000,24,4],["L4 Community energy specialist",6000,24,4],["L4 Corporate responsibility and sustainability practitioner",14000,36,4],["L4 Cyber security technologist (2021)",18000,24,4],["L4 Data analyst",15000,24,4],["L4 Data protection and information governance practitioner",10000,18,4],["L4 DevOps engineer",17000,24,4],["L4 Digital accessibility specialist",16000,24,4],["L4 Digital community manager",13000,24,4],["L4 Digital forensic technician",18000,24,4],["L4 Digital product manager",18000,24,4],["L4 Domestic and sexual abuse support worker",8000,18,4],["L4 Early intervention practitioner",5000,18,4],["L4 Employability practitioner",6000,24,4],["L4 Governance officer",11000,18,4],["L4 Healthcare science associate",16000,24,4],["L4 Hospitality manager",6000,18,4],["L4 Hygiene specialist",12000,24,4],["L4 Information manager",7000,24,4],["L4 Insurance professional",15000,24,4],["L4 Internal audit technician",10000,18,4],["L4 Investment operations specialist",9000,18,4],["L4 Junior management consultant",9000,24,4],["L4 Legal technician - conveyancing technician or probate technician",10000,24,4],["L4 Mammography associate",10000,12,4],["L4 Market research executive",8000,18,4],["L4 Marketing executive",6000,15,4],["L4 Network engineer",19000,24,4],["L4 Oral health practitioner",9000,14,4],["L4 Orthodontic therapist",18000,13,4],["L4 Paraplanner and financial planner",13000,24,4],["L4 Passenger transport operations manager",12000,18,4],["L4 Policy officer",6000,18,4],["L4 Port marine operations officer",12000,24,4],["L4 Procurement and supply chain practitioner",10000,18,4],["L4 Professional accounting technician",12000,18,4],["L4 Professional taxation technician",15000,24,4],["L4 Public relations and communications assistant",11000,14,4],["L4 Quality practitioner",6000,14,4],["L4 Regulatory compliance officer",9000,24,4],["L4 Retail manager",5000,12,4],["L4 Revenues and welfare benefits practitioner",7000,12,4],["L4 Sales executive",6000,18,4],["L4 School business professional",6000,18,4],["L4 Senior culinary chef",9000,24,4],["L4 Senior housing and property management",9000,18,4],["L4 Ship’s master – less than 500 gross tonnage near coastal",27000,48,4],["L4 Software developer",18000,24,4],["L4 Software tester",18000,24,4],["L4 Sports coach",9000,18,4],["L5 Advanced paralegal",18000,24,5],["L5 Air traffic controller",27000,15,5],["L5 Assistant practitioner (health)",14000,24,5],["L5 Associate continuing healthcare practitioner",10000,24,5],["L5 Children, young people and families manager",6000,24,5],["L5 Clinical dental technician",18000,24,5],["L5 Dairy technologist",26000,36,5],["L5 Data engineer",19000,24,5],["L5 Dental technician",22000,36,5],["L5 Digital learning designer",16000,24,5],["L5 Embalmer",20000,36,5],["L5 Health play specialist",15000,24,5],["L5 Hearing aid dispenser",13000,24,5],["L5 Improvement specialist",9000,14,5],["L5 Leader in adult care",7000,18,5],["L5 Learning and development consultant business partner",7000,18,5],["L5 Marine pilot",18000,30,5],["L5 Nursing associate (NMC 2018)",15000,24,5],["L5 Payroll assistant manager",11000,24,5],["L5 People professional",11000,22,5],["L5 Technician scientist",21000,36,5],["L5 Vision rehabilitation specialist",17000,24,5],["L6 Accounting finance manager",27000,36,6],["L6 Assistant buyer and merchandiser",10000,24,6],["L6 Biomedical scientist",27000,36,6],["L6 Business to business sales professional (integrated degree)",21000,36,6],["L6 Career development professional",9000,24,6],["L6 Chartered legal executive",27000,60,6],["L6 Clinical trials specialist (degree)",26000,60,6],["L6 Costs lawyer",21000,48,6],["L6 Creative digital design professional (integrated degree)",25000,36,6],["L6 Cyber security technical professional (integrated degree)",24000,48,6],["L6 Data scientist (integrated degree)",19000,36,6],["L6 Diagnostic radiographer",24000,36,6],["L6 Dietitian",24000,48,6],["L6 Digital and technology solutions professional",27000,48,6],["L6 Digital marketer (integrated degree)",21000,36,6],["L6 Digital user experience (UX) professional (integrated degree)",24000,48,6],["L6 Dispensing optician",23000,36,6],["L6 Enhanced clinical practitioner",7000,18,6],["L6 Environmental health practitioner (integrated degree)",22000,48,6],["L6 Express delivery manager (degree)",22000,36,6],["L6 Financial services professional",18000,42,6],["L6 Food industry technical professional (integrated degree)",27000,48,6],["L6 Geoscientist (integrated degree)",27000,60,6],["L6 Healthcare science practitioner (integrated degree)",27000,36,6],["L6 Licensed conveyancer or licensed probate practitioner",18000,56,6],["L6 Machine learning engineer",22000,24,6],["L6 Marketing manager",9000,24,6],["L6 Midwife (2019 NMC standards) (Integrated degree)",26000,48,6],["L6 Occupational therapist",24000,48,6],["L6 Operating department practitioner",26000,48,6],["L6 Orthoptist",25000,36,6],["L6 Paramedic",27000,36,6],["L6 Physiotherapist",24000,48,6],["L6 Podiatrist",24000,48,6],["L6 Professional economist (integrated degree)",23000,42,6],["L6 Project manager (integrated degree)",22000,48,6],["L6 Prosthetist and orthotist",24000,48,6],["L6 Psychological wellbeing practitioner",9000,12,6],["L6 Public health practitioner - integrated degree",20000,36,6],["L6 Registered nurse degree (NMC 2018)",26000,48,6],["L6 Retail leadership (integrated degree)",22000,48,6],["L6 Scientist",27000,60,6],["L6 Senior compliance and risk specialist",23000,36,6],["L6 Senior insurance professional",26000,36,6],["L6 Senior procurement and supply chain professional",18000,30,6],["L6 Service designer",15000,24,6],["L6 Social researcher",24000,42,6],["L6 Social worker (integrated degree)",24000,36,6],["L6 Sonographer (integrated degree)",24000,36,6],["L6 Speech and language therapist",26000,48,6],["L6 Supply chain leadership professional (integrated degree)",21000,48,6],["L6 Therapeutic radiographer",24000,36,6],["L6 Trading standards professional",22000,36,6],["L6 Youth worker",20000,36,6],["L7 Accountancy or taxation professional",21000,36,7],["L7 Actuary",18000,39,7],["L7 Advanced clinical practitioner (integrated degree)",12000,36,7],["L7 Advanced digital forensic professional",27000,36,7],["L7 Artificial intelligence (AI) data specialist",17000,24,7],["L7 Arts therapist",19000,24,7],["L7 Barrister",27000,72,7],["L7 Bioinformatics scientist (degree)",18000,30,7],["L7 Chartered legal executive litigator and advocate",27000,66,7],["L7 Clinical associate in psychology (CAP) (integrated degree)",16000,18,7],["L7 Clinical pharmacology scientist (integrated degree)",18000,30,7],["L7 Clinical scientist",20000,36,7],["L7 Community nurse specialist practitioner (NMC 2022)",14000,24,7],["L7 Digital and technology solutions specialist (integrated degree)",21000,18,7],["L7 Doctor (Degree)",27000,60,7],["L7 Game programmer",19000,24,7],["L7 Health and care intelligence specialist",17000,36,7],["L7 Internal audit professional",17000,36,7],["L7 Medical statistician",17000,30,7],["L7 Operational research specialist",14000,24,7],["L7 Play therapist",20000,36,7],["L7 Regulatory affairs specialist",21000,30,7],["L7 Research scientist",18000,30,7],["L7 Senior investment and commercial banking professional",18000,18,7],["L7 Senior leader",14000,24,7],["L7 Senior people professional",19000,36,7],["L7 Senior professional economist (integrated degree)",11000,24,7],["L7 Soil scientist",21000,24,7],["L7 Solicitor",27000,72,7],["L7 Spatial data specialist",18000,24,7],["L7 Specialist community public health nurse (NMC 2022)",14000,18,7],["L7 Sustainability business specialist (integrated degree)",11000,24,7],["L7 Systems thinking practitioner",18000,30,7]];
@@ -383,6 +388,18 @@ function subject(){
   return '[BRIEF] '+$('co').value.trim()+' — '+$('pg').value.replace(/^L\d\s/,'')+' — '+who;
 }
 
+/* Apps Script cannot parse multipart/form-data, so the file travels as base64
+   in a JSON body. Sent as text/plain deliberately: it keeps the request "simple"
+   in CORS terms, so the browser never fires a preflight the script cannot answer. */
+function readAsBase64(f){
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){ res(String(r.result).split(',')[1]); };
+    r.onerror=function(){ rej(r.error); };
+    r.readAsDataURL(f);
+  });
+}
+
 $('pb').addEventListener('submit',function(e){
   e.preventDefault();
   if($('website').value) return;              /* honeypot: a bot filled it in */
@@ -416,20 +433,31 @@ $('pb').addEventListener('submit',function(e){
 
   if(!ENDPOINT){ postThrough(collected); return; }  /* demo mode */
 
-  var fd=new FormData();
-  fd.append('name',      $('nm').value.trim());
-  fd.append('email',     $('em').value.trim());
-  fd.append('company',   $('co').value.trim());
-  fd.append('programme', $('pg').value);
-  fd.append('brief',     file, file.name);
-  fd.append('_subject',  subject());
-
-  fetch(ENDPOINT,{method:'POST',body:fd,headers:{Accept:'application/json'}})
-    .then(function(r){ if(!r.ok) throw new Error(r.status); postThrough(collected); })
-    .catch(function(){
-      show('e-all',true);
-      go.disabled=false; go.textContent='Post it';
+  readAsBase64(file).then(function(b64){
+    return fetch(ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({
+        name:      $('nm').value.trim(),
+        email:     $('em').value.trim(),
+        company:   $('co').value.trim(),
+        programme: $('pg').value,
+        filename:  file.name,
+        mime:      file.type || 'application/octet-stream',
+        file:      b64,
+        website:   $('website').value        /* honeypot travels too */
+      })
     });
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(!res || !res.ok) throw new Error((res&&res.error)||'failed');
+    postThrough(collected);
+  })
+  .catch(function(){
+    show('e-all',true);
+    go.disabled=false; go.textContent='Post it';
+  });
 });
 
 $('again').addEventListener('click',function(){
