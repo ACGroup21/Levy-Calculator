@@ -1730,7 +1730,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30d</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30e</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5160,7 +5160,7 @@ function levyPage2(d,framing){
   var move='<div>'+moveLead+'</div><div style="margin-top:9px;font-weight:600;color:#fff">Next move:</div><ol class="lvy-ol">'+moveList.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>';
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Detail &amp; Action</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
+      '<div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:block;margin:0 0 8px auto">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">Programme breakdown</div>'+
     '<table class="lvy-table"><thead><tr><th>Programme</th><th class="r">Learners</th><th class="r">Band</th><th class="r">Training (80%)</th><th class="r">EPA (20%)</th><th class="r">Start &rarr; EPA</th></tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div class="lvy-move"><div class="lvy-move-t">&#128640; A movement forward</div><div class="lvy-body">'+move+'</div></div>'+
@@ -5200,7 +5200,7 @@ function levyPage3(d,framing){
     : 'The levy covers the training fee; the larger commitment is often the <strong style="color:#fff">'+Math.round(d.otjHrsWk)+' hours a week</strong> of paid time apprentices spend off the job ('+d.otjFTE.toFixed(1)+' FTE of capacity). '+(fin?'It is real cost, not just levy spend — factor it into the business case.':'Plan release and backfill so delivery does not strain the team.');
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
     '<div class="lvy-head"><div><div class="lvy-title">Cost &amp; Delivery</div></div>'+
-      '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
+      '<div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;text-align:right"><img src="'+brandLogo()+'" style="height:30px;display:block;margin:0 0 8px auto">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW &middot; '+d.years+'-YEAR HORIZON</div></div>'+
     '<div class="lvy-sec">True cost of ownership</div>'+trueRow+coNote+selfFundNote+niNote+
     '<div class="lvy-body" style="margin-top:14px;max-width:840px">'+narr+'</div>'+
     '<div class="lvy-sec" style="margin-top:18px">Cost &amp; off-the-job, per programme</div>'+
