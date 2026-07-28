@@ -519,21 +519,14 @@ button{font-family:var(--sans);cursor:pointer}
 
    Fixed position, so it crosses the SCREEN rather than the document — some jumps
    are 7,000px and nothing can travel that visibly. */
-/* The logo's detached node reaches out and returns when you choose something —
-   the whole confirmation, in the header, using the mark's own vocabulary. It
-   cannot collide with anything on the page because it never leaves the header. */
-/* The SVG clips to its viewBox by default, and the node sits 10 user units from
-   that edge — so a 26-unit reach slid straight out of the box and was cut off
-   rather than travelling. overflow:visible lets it leave the box; the distance is
-   held to 20 units (~9px on screen) so it stops short of the wordmark, which sits
-   12px away. */
-.logo-mark-img{overflow:visible}
-@keyframes lgReach{
-  0%{transform:translateX(0)}
-  42%{transform:translateX(20px)}
-  100%{transform:translateX(0)}}
-.lg-live.reach,.lg-halo.reach{animation:lgReach .72s cubic-bezier(.35,0,.25,1)}
-@media(prefers-reduced-motion:reduce){.lg-live.reach,.lg-halo.reach{animation:none}}
+/* The selection marker: a cyan tile in the margin that fades in where you were
+   sent and fades out again. Fixed position so it is measured against the screen,
+   never the document. */
+#markTile{position:fixed;z-index:306;width:13px;height:13px;border-radius:3px;
+  background:#00C3DD;box-shadow:0 0 12px rgba(0,195,221,.8),0 0 3px rgba(0,195,221,1);
+  opacity:0;pointer-events:none;transition:opacity .22s ease}
+#markTile.on{opacity:1}
+@media(prefers-reduced-motion:reduce){#markTile{transition:none}}
 /* the hover lift has to stay ahead of the resting glow or pointing at a card
    would read as less prominent than leaving it alone */
 @media(hover:hover){
@@ -1730,7 +1723,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30g</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2902,28 +2895,43 @@ function renderScenarios(){
   setTimeout(boot,300);
   window.repaintSpine=boot;    // sections show and hide as data loads
 })();
-/* ── Selection gesture ───────────────────────────────────────────────────────
-   The travelling tile is gone. It needed landing slots, dock resolution, a lock
-   against the scroll pass, settle detection and a fade timer — a great deal of
-   machinery for a confirmation, and every version of it read as clutter
-   somewhere on the page.
+/* ── Selection marker ────────────────────────────────────────────────────────
+   Pick something from the menu and a cyan tile appears in the left margin beside
+   it, then fades. No flight, no logo animation — the earlier versions each had a
+   moving part that drew the eye away from the thing you had just asked to see,
+   which is the opposite of what a locator is for.
 
-   The logo does the job instead: the detached cyan node reaches away from the F
-   and comes back. One class toggle, no geometry, and it uses the mark's own
-   vocabulary — the same node the splash screen hops. */
+   It sits in the margin lane, so it never covers a label, and it is the only
+   element on screen that moves. */
 (function(){
-  var t=null;
-  window.logoReach=function(){
-    var live=document.querySelector('.lg-live'), halo=document.querySelector('.lg-halo');
-    if(!live)return;
-    [live,halo].forEach(function(el){ if(!el)return;
-      el.classList.remove('reach'); void el.getBoundingClientRect(); el.classList.add('reach'); });
-    clearTimeout(t);
-    t=setTimeout(function(){ [live,halo].forEach(function(el){ if(el)el.classList.remove('reach'); }); },780);
+  var tile=null, hide=null;
+  function node(){
+    if(!tile){
+      tile=document.createElement('div');
+      tile.id='markTile';
+      tile.setAttribute('aria-hidden','true');
+      document.body.appendChild(tile);
+    }
+    return tile;
+  }
+  window.markTile=function(target){
+    if(!target)return;
+    var t=node(), r=target.getBoundingClientRect();
+    var page=document.querySelector('.page');
+    var pr=page?page.getBoundingClientRect():{left:24};
+    var h=document.querySelector('header');
+    var top=(h?h.getBoundingClientRect().height:62)+14;
+    var y=Math.max(top,Math.min(r.top+10,innerHeight-30));
+    t.style.left=Math.max(6,pr.left+2)+'px';
+    t.style.top=y+'px';
+    t.classList.remove('on'); void t.offsetWidth; t.classList.add('on');
+    clearTimeout(hide);
+    hide=setTimeout(function(){ t.classList.remove('on'); },1900);
   };
-  /* the old entry points survive as thin shims so no caller needs editing */
-  window.showFuncArrow=function(){ logoReach(); };
-  window.fireTile=function(){ logoReach(); };
+  /* every jump already routes through here */
+  window.showFuncArrow=function(el){ markTile(el); };
+  window.fireTile=function(el){ markTile(el); };
+  window.logoReach=function(){};       // retired: the mark no longer animates
   window.restTile=function(){};
   window.buildTileSlots=function(){ return 0; };
 })();
