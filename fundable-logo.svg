@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1200"
+   height="360"
+   viewBox="0 0 1200 360"
+   version="1.1"
+   id="svg7"
+   sodipodi:docname="fundable_logo_source.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1" />
+  <defs
+     id="defs2">
+    <linearGradient
+       id="cyanGrad"
+       x1="0"
+       y1="0"
+       x2="1"
+       y2="1">
+      <stop
+         offset="0"
+         stop-color="#18d8ed"
+         id="stop1" />
+      <stop
+         offset="1"
+         stop-color="#04a8d6"
+         id="stop2" />
+    </linearGradient>
+    <filter
+       id="softShadow"
+       x="-20%"
+       y="-20%"
+       width="140%"
+       height="140%">
+      <feDropShadow
+         dx="0"
+         dy="3"
+         stdDeviation="3"
+         flood-color="#000000"
+         flood-opacity="0.35" />
+    </filter>
+  </defs>
+  <g
+     transform="translate(45,35)"
+     id="g7">
+    <rect
+       x="0"
+       y="0"
+       width="86"
+       height="86"
+       rx="12"
+       fill="#ffffff"
+       stroke="#d6d6d6"
+       stroke-width="2"
+       id="rect2" />
+    <rect
+       x="98"
+       y="0"
+       width="86"
+       height="86"
+       rx="12"
+       fill="#ffffff"
+       stroke="#d6d6d6"
+       stroke-width="2"
+       id="rect3" />
+    <rect
+       x="0"
+       y="98"
+       width="86"
+       height="86"
+       rx="12"
+       fill="#ffffff"
+       stroke="#d6d6d6"
+       stroke-width="2"
+       id="rect4" />
+    <rect
+       x="0"
+       y="196"
+       width="86"
+       height="86"
+       rx="12"
+       fill="#ffffff"
+       stroke="#d6d6d6"
+       stroke-width="2"
+       id="rect5" />
+    <rect
+       x="196"
+       y="98"
+       width="86"
+       height="86"
+       rx="12"
+       fill="url(#cyanGrad)"
+       id="rect6" />
+    <rect
+       x="102"
+       y="132"
+       width="94"
+       height="18"
+       rx="9"
+       fill="url(#cyanGrad)"
+       id="rect7" />
+  </g>
+  <path
+     d="m 399.82812,165.79395 v 20.01171 h 33.09278 v 10.46485 H 399.82812 V 220 h -13.54003 v -64.6709 h 47.68847 v 10.46485 z m 82.7754,55.12402 q -13.35645,0 -20.47071,-6.51758 -7.06836,-6.51758 -7.06836,-18.63477 V 155.3291 h 13.54004 v 39.38086 q 0,7.66504 3.62598,11.6582 3.67187,3.94727 10.74023,3.94727 7.25196,0 11.15332,-4.13086 3.90137,-4.17676 3.90137,-11.93359 V 155.3291 h 13.54004 v 39.74805 q 0,12.30078 -7.61914,19.09375 -7.57324,6.74707 -21.34277,6.74707 z M 574.97168,220 546.79004,170.2002 q 0.82617,7.25195 0.82617,11.6582 V 220 h -12.02539 v -64.6709 h 15.46777 l 28.59473,50.21289 q -0.82617,-6.93066 -0.82617,-12.62207 V 155.3291 h 12.02539 V 220 Z m 98.15137,-32.81738 q 0,10.00586 -3.94727,17.4873 -3.90137,7.43555 -11.10742,11.38281 Q 650.9082,220 641.63672,220 h -26.16211 v -64.6709 h 23.4082 q 16.33985,0 25.29004,8.26172 8.9502,8.21582 8.9502,23.5918 z m -13.63184,0 q 0,-10.41895 -5.41601,-15.88086 -5.41602,-5.50781 -15.46778,-5.50781 h -9.59277 v 43.74121 h 11.47461 q 8.7207,0 13.86133,-6.0127 5.14062,-6.01269 5.14062,-16.33984 z M 741.07324,220 735.33594,203.47656 H 710.68848 L 704.95117,220 h -13.54004 l 23.5918,-64.6709 h 15.97266 l 23.5,64.6709 z m -8.7666,-26.71289 -6.37988,-18.58887 -2.9375,-9.40918 q -0.73438,2.66211 -1.37696,4.77344 -0.64257,2.11133 -7.89453,23.22461 z m 100.2627,8.26172 q 0,8.8125 -6.60938,13.63183 Q 819.35059,220 807.60059,220 h -32.3584 v -64.6709 h 29.60449 q 11.8418,0 17.90039,4.13086 6.10449,4.08496 6.10449,12.11719 0,5.50781 -3.07519,9.31738 -3.0293,3.76367 -9.27149,5.09473 7.84864,0.91797 11.9336,4.95703 4.13086,3.99316 4.13086,10.60254 z m -13.58594,-1.05567 q 0,-9.08789 -13.03516,-9.08789 h -17.16601 v 18.54297 h 17.67089 q 6.51758,0 9.50098,-2.34082 3.0293,-2.38672 3.0293,-7.11426 z m -3.76367,-27.08007 q 0,-4.36036 -2.79981,-6.19629 -2.7539,-1.83594 -8.21582,-1.83594 h -15.42187 v 16.01855 h 15.51367 q 5.7373,0 8.30762,-1.97363 2.61621,-2.01953 2.61621,-6.01269 z M 855.12598,220 v -64.6709 h 13.54004 v 54.20606 h 34.69921 V 220 Z m 69.41894,0 v -64.6709 h 50.85547 v 10.46485 h -37.31543 v 16.24804 h 34.51563 v 10.46485 h -34.51563 v 17.02832 h 39.19727 V 220 Z"
+     id="text7"
+     style="font-weight:700;font-size:94px;font-family:Arimo, Arial, sans-serif;letter-spacing:12;fill:#ffffff;stroke:#d8d8d8;stroke-width:0.6;paint-order:stroke fill"
+     aria-label="FUNDABLE" />
+</svg>
