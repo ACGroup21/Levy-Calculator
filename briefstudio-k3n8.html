@@ -831,6 +831,13 @@ function buildGuide(){
   toast('Building the section plan…');
   ask(u,GUIDE_SHAPE).then(function(o){
     if(!o.sections||!o.sections.length)throw new Error('No sections came back.');
+    /* A truncated reply is the bridge's one real hazard — a short paste would
+       silently replace a plan you built. Make the trade explicit. */
+    var had=G.sections.length;
+    if(had&&o.sections.length<had&&!confirm(
+      'That reply has '+o.sections.length+' sections; the guide currently has '+had+'.\n\n'
+      +'Replace all '+had+'? If the reply was cut off, cancel and ask Claude to continue.'))
+      {toast('Kept the '+had+' sections you had.');return}
     var known=Object.keys(G.ksb),dropped=0;
     G.sections=o.sections.map(function(s){
       var c=(s.codes||[]).map(function(x){return String(x).toUpperCase().replace(/\s/g,'')})
@@ -840,7 +847,7 @@ function buildGuide(){
         crit:s.crit||[],pass:s.pass||[],dist:s.dist||[]};
     });
     render();
-    toast(dropped?('Built '+G.sections.length+' sections — dropped '+dropped+' KSB codes that are not in the standard.')
+    toast(dropped?('Built '+G.sections.length+' sections — dropped '+dropped+' KSB code'+(dropped===1?'':'s')+' not in the standard.')
                 :('Built '+G.sections.length+' sections.'));
   }).catch(function(e){if(e.message!=='cancelled')toast(e.message)});
 }
