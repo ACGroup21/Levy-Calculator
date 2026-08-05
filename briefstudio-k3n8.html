@@ -746,7 +746,8 @@ function shapeHint(o,ind){
   if(o&&typeof o==='object'){
     return '{\n'+Object.keys(o).map(function(k){return ind+'  "'+k+'": '+shapeHint(o[k],ind+'  ')}).join(',\n')+'\n'+ind+'}';
   }
-  return String(o);
+  if(typeof o==='number')return '0';
+  return '"<'+String(o)+'>"';
 }
 
 function parseReply(s){
