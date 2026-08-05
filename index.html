@@ -1199,12 +1199,19 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
    is the exception — a switch that is 44px tall stops looking like a switch, so
    it keeps its shape and gains the hit area through a transparent inset instead. */
 @media(max-width:560px){
-  .ksb-tag,.epa-chip,.ksb-badge,.led-badge,.fmode-q,.step-chip,.nav-grp{font-size:12px}
-  label{font-size:12px}
+  .ksb-tag,.epa-chip,.ksb-badge,.led-badge,.fmode-q,.step-chip{font-size:12px}
   th,td{font-size:12px}
+  /* these two carry their own rules at a higher specificity than a bare tag */
+  .field label{font-size:12px}
+  .nav-list .nav-grp{font-size:12px}
+  label{font-size:12px}
 
+  /* The global control floor is 24px and the header buttons pin themselves to 26
+     with !important, so matching that weight is the only way through. */
+  button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-height:44px}
+  #clearAllBtn,#hdrSaveBtn,#navBurger{min-height:44px!important;min-width:44px!important}
   header button{min-height:44px;min-width:44px}
-  .btn-clear,button.on{min-height:44px}
+  .btn-clear,.btn-demo,button.on{min-height:44px}
   .theme-switch{position:relative}
   .theme-switch::after{content:'';position:absolute;inset:-9px;border-radius:99px}
   footer a{display:inline-block;padding:7px 0}
@@ -1745,7 +1752,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30m</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
