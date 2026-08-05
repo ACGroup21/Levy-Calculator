@@ -835,7 +835,7 @@ function buildGuide(){
        silently replace a plan you built. Make the trade explicit. */
     var had=G.sections.length;
     if(had&&o.sections.length<had&&!confirm(
-      'That reply has '+o.sections.length+' sections; the guide currently has '+had+'.\n\n'
+      'That reply has '+o.sections.length+' section'+(o.sections.length===1?'':'s')+'; the guide currently has '+had+'.\n\n'
       +'Replace all '+had+'? If the reply was cut off, cancel and ask Claude to continue.'))
       {toast('Kept the '+had+' sections you had.');return}
     var known=Object.keys(G.ksb),dropped=0;
