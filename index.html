@@ -1187,6 +1187,28 @@ button,select,input:not([type=checkbox]):not([type=radio]):not([type=file]){min-
 .theme-switch .ts-thumb svg{position:absolute;width:12px;height:12px;transition:opacity .18s}
 .theme-switch[aria-checked="true"] .ts-sun,
 .theme-switch[aria-checked="false"] .ts-moon{opacity:0}
+
+/* ── Phone pass 1: legibility and reach ──────────────────────────────────────
+   The app is desktop-first, and its small type is a 10px mono label scale that
+   reads fine at arm's length on a monitor and not at all in the hand. 402 of the
+   421 sub-12px elements come from the stylesheet, and 322 of those are one class
+   — so a breakpoint over eight selectors carries almost all of it.
+
+   Tap targets follow the same logic: the header controls were 24-34px tall. 44px
+   is the smallest a thumb hits reliably, so buttons grow to it. The theme switch
+   is the exception — a switch that is 44px tall stops looking like a switch, so
+   it keeps its shape and gains the hit area through a transparent inset instead. */
+@media(max-width:560px){
+  .ksb-tag,.epa-chip,.ksb-badge,.led-badge,.fmode-q,.step-chip,.nav-grp{font-size:12px}
+  label{font-size:12px}
+  th,td{font-size:12px}
+
+  header button{min-height:44px;min-width:44px}
+  .btn-clear,button.on{min-height:44px}
+  .theme-switch{position:relative}
+  .theme-switch::after{content:'';position:absolute;inset:-9px;border-radius:99px}
+  footer a{display:inline-block;padding:7px 0}
+}
 @media(prefers-reduced-motion:reduce){.theme-switch .ts-thumb{transition:none}
   .theme-switch .ts-thumb svg{transition:none}}
 
@@ -1723,7 +1745,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
