@@ -4088,6 +4088,27 @@ function removeRingfence(i){if(typeof ringfences==='undefined'||!ringfences)retu
 function toggleRingfenceApply(){var chk=document.getElementById('rf-apply');ringfenceApply=chk?!!chk.checked:false;renderRingfences();saveState();if(programmes.length&&typeof renderProjection==='function')renderProjection();}
 let progExpanded=false;
 function toggleProgList(){progExpanded=!progExpanded;renderProgrammes();}
+/* One programme's own cost, on the same basis as the plan total: the training
+   price plus the wage cost of the hours spent off the floor. Returns which rate
+   it used, so the UI can say whether the figure is this learner's or the plan's
+   blended average — a number you cannot trace is worse than no number. */
+function programmeTrueCost(p){
+  if(!p)return null;
+  var otjMap=planCfg.otj||{}, payRate=planCfg.rate||0;
+  var ownWage=(+p.wage>0), rate=ownWage?+p.wage:payRate;
+  var count=(+p.count||0), price=(+p.cost||0)*count;
+  var hrs, weeks;
+  if(p.type==='unit'){ weeks=Math.max(1,+p.weeks||4); hrs=(+p.hours||0)*count; }
+  else{
+    var oh=(+p.otj>0)?+p.otj:(otjMap[progLevel(p)]||6);
+    weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
+    hrs=oh*weeks*count;
+  }
+  var otj=Math.round(hrs*rate);
+  return {price:price, otjHours:hrs, rate:rate, rateFromLearner:ownWage,
+          rateKnown:rate>0, otjCost:otj, trueCost:price+otj, weeks:weeks, count:count};
+}
+
 function renderProgrammes(){
   const pt=document.getElementById('progTable');
   pt.classList.toggle('hidden',!programmes.length);
@@ -4417,10 +4438,15 @@ function levyReportData(){
   // Off-the-job / true cost — apprenticeship: otj[level] x weeks x count x rate; unit: delivery hours x count x rate
   var otjMap=planCfg.otj||{}, payRate=planCfg.rate||0, weekHrs=planCfg.hours||37.5;
   var otjCost=0, otjHrsWk=0, otjFTE=0;
+  // A programme may carry its own wage and off-the-job hours. Both are optional
+  // and fall back to the plan figures, so a plan with none set costs exactly what
+  // it costed before — a Level 7 leader and a Level 2 operative only stop sharing
+  // one blended rate once someone says otherwise.
   programmes.forEach(function(p){
-    if(p.type==='unit'){var uh=(+p.hours||0),uw=Math.max(1,+p.weeks||4),uc=(+p.count||0);otjCost+=uh*uc*payRate;otjHrsWk+=(uh/uw)*uc;otjFTE+=(uh/uw)*uc/weekHrs;return;}
-    var oh=otjMap[progLevel(p)]||6, weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
-    otjCost+=oh*weeks*(+p.count||0)*payRate; otjHrsWk+=oh*(+p.count||0); otjFTE+=oh*(+p.count||0)/weekHrs;
+    var rate=(+p.wage>0)?+p.wage:payRate;
+    if(p.type==='unit'){var uh=(+p.hours||0),uw=Math.max(1,+p.weeks||4),uc=(+p.count||0);otjCost+=uh*uc*rate;otjHrsWk+=(uh/uw)*uc;otjFTE+=(uh/uw)*uc/weekHrs;return;}
+    var oh=(+p.otj>0)?+p.otj:(otjMap[progLevel(p)]||6), weeks=Math.max(1,Math.round((new Date(p.epa)-new Date(p.start))/(7*864e5)));
+    otjCost+=oh*weeks*(+p.count||0)*rate; otjHrsWk+=oh*(+p.count||0); otjFTE+=oh*(+p.count||0)/weekHrs;
   });
   // Employer NIC relief on under-25 apprentices (0% ST→AUST). Salary est = plan hourly rate x weekly hours x 52. gov.uk 2025-26.
   var niSalary=(planCfg.rate||0)*(planCfg.hours||37.5)*52;
