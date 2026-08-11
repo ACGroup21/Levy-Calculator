@@ -573,6 +573,10 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-fair-q input{margin-top:2px;accent-color:var(--teal);flex-shrink:0}
 .jd-verdict{font-size:12px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
 .jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12px;color:var(--text2);line-height:1.5}
+.jd-uploads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.jd-uploads .jd-upload{margin-bottom:0;display:flex;align-items:center;justify-content:center}
+.jd-upload small{display:block;margin-top:3px;font-size:10.5px;opacity:.72}
+@media(max-width:560px){.jd-uploads{grid-template-columns:1fr}}
 .jd-upload{margin-bottom:1rem;padding:13px 15px;border:1.5px dashed rgba(167,139,250,0.4);border-radius:10px;text-align:center;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s}
 .jd-upload:hover{border-color:var(--purple);background:rgba(167,139,250,0.06);color:var(--text)}
 /* best-moves (recommendations) panel */
@@ -1739,9 +1743,15 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <input type="text" id="jd-search" class="standard-search" placeholder="🔍  Search standards (e.g. data, nurse, project)…" oninput="buildJdSelect(this.value)" style="margin-bottom:8px">
       <select id="jd-standard"></select>
     </div>
+    <div class="jd-uploads">
     <div class="jd-upload" id="jdDrop" onclick="document.getElementById('jdFile').click()">
-      <span id="jdDropText">&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop</span>
+      <span id="jdDropText">&#8682;&nbsp; Job description<small>.txt, .pdf or .docx &middot; or drag &amp; drop</small></span>
       <input type="file" id="jdFile" accept=".txt,.pdf,.docx,text/plain" style="display:none">
+    </div>
+    <div class="jd-upload" id="stdDrop" onclick="document.getElementById('stdFile').click()">
+      <span id="stdDropText">&#8682;&nbsp; Standard<small>Skills England page saved as PDF</small></span>
+      <input type="file" id="stdFile" accept=".pdf,.txt,.docx" style="display:none">
+    </div>
     </div>
     <div class="field"><label>Job description</label><textarea id="jd-text" aria-label="Job description text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(var(--wash),0.03);border:1px solid rgba(167,139,250,0.25);border-radius:10px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
     <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
@@ -1752,7 +1762,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30q</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30r</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -2393,6 +2403,7 @@ function processKSBData(data){
       dur:ks.duration_months||18,
       level:ks.level||0,
       roles:ks.roles||inferredRoles,
+      ref:ks.reference_number||'',
       ksbs:ks.ksbs||null,
       occupation_summary:ks.occupation_summary||'',
       ifate_url:ks.ifate_url||'',
@@ -6088,6 +6099,111 @@ function downloadJDReport(btn,large){
 
 // JD file upload — extract text from .txt / .pdf / .docx, then analyse
 function setJdDropText(t){const el=document.getElementById('jdDropText');if(el)el.innerHTML=t;}
+function setStdDropText(t){const el=document.getElementById('stdDropText');if(el)el.innerHTML=t;}
+
+/* ── Loading a standard from its own document ────────────────────────────────
+   The JD Matcher can only list standards it has KSBs for, so 63 of the 322 in
+   the library are unreachable no matter how the picker is built. This is the way
+   in: save the standard's page from Skills England as a PDF and drop it here.
+
+   Two things make the parse reliable rather than hopeful:
+   - only codes followed by a colon count. Every standard page also carries a
+     duty-mapping block listing bare codes (K1 K2 K3 ...), which would otherwise
+     yield a full set of empty KSBs.
+   - pdf.js joins text with spaces, so there are no line breaks to anchor on. The
+     text is split on the code pattern itself and each description runs to the
+     next code, with the following section heading trimmed off the last of each
+     block — otherwise K25 ends with the word "Skills". */
+function parseStandardDoc(t){
+  const out={ref:'',name:'',level:0,dur:0,band:0,knowledge:[],skills:[],behaviours:[]};
+  let m;
+  if(m=/Reference:\s*(ST\d+)/i.exec(t))                 out.ref=m[1].toUpperCase();
+  if(m=/Level:\s*(\d+)/i.exec(t))                       out.level=+m[1];
+  if(m=/Typical duration:\s*(\d+)\s*month/i.exec(t))    out.dur=+m[1];
+  if(m=/Maximum funding:\s*\u00a3?\s*([\d,]+)/i.exec(t)) out.band=+m[1].replace(/,/g,'');
+
+  let flat=String(t).replace(/\s+/g,' ');
+  flat=flat.replace(/\d{2}\/\d{2}\/\d{4},\s*\d{2}:\d{2}/g,' ')   // page timestamp
+           .replace(/https?:\/\/\S+/g,' ')                        // page URL
+           .replace(/\b\d{1,2}\s*\/\s*\d{1,2}\b/g,' ');           // page numbers
+
+  const RX=/\b([KSB])(\d{1,3})\s*:\s*/g, hits=[];
+  let h; while((h=RX.exec(flat))!==null) hits.push({kind:h[1],num:h[2],from:RX.lastIndex,at:h.index});
+  const TAIL=/\s*(Knowledge|Skills|Behaviours|Qualifications|Professional recognition|Version log|Duties)\s*$/;
+  const BUCKET={K:'knowledge',S:'skills',B:'behaviours'};
+  hits.forEach((x,i)=>{
+    let d=flat.slice(x.from, i+1<hits.length?hits[i+1].at:flat.length);
+    if(i+1===hits.length){
+      const cut=/\b(Qualifications|Professional recognition|Version log|Duties)\b/.exec(d);
+      if(cut)d=d.slice(0,cut.index);
+    }
+    d=d.replace(TAIL,'').replace(/\s+/g,' ').replace(/^[\s.;]+|[\s.;]+$/g,'');
+    if(d)out[BUCKET[x.kind]].push({code:x.kind+x.num,description:d});
+  });
+
+  if(m=/^\s*([A-Za-z][A-Za-z0-9 ,'&()\/-]{2,70}?)\s*Reference:/m.exec(t)) out.name=m[1].trim();
+  return out;
+}
+
+/* Fold a parsed standard into STANDARDS. If we already know it, fill the gap in
+   place rather than adding a second copy of the same standard to the picker. */
+function loadStandardFromDoc(p,fname){
+  const total=p.knowledge.length+p.skills.length+p.behaviours.length;
+  if(!total){setStdDropText('&#9888; No KSBs found &mdash; is that the standard page saved as PDF?');return;}
+  const ksbs={knowledge:p.knowledge,skills:p.skills,behaviours:p.behaviours};
+  let idx=-1;
+  if(p.ref)idx=STANDARDS.findIndex(s=>(s.ref||'').toUpperCase()===p.ref);
+  if(idx<0&&p.name){
+    const want=p.name.toLowerCase();
+    idx=STANDARDS.findIndex(s=>String(s.name||'').toLowerCase().replace(/^l\d+\s+/,'')===want);
+  }
+  let label;
+  if(idx>=0){
+    const s=STANDARDS[idx];
+    s.ksbs=ksbs;
+    if(!s.band&&p.band)s.band=p.band;
+    if(!s.dur&&p.dur)s.dur=p.dur;
+    label=s.name;
+  }else{
+    const nm='L'+(p.level||'?')+' '+(p.name||(p.ref||'Uploaded standard'));
+    STANDARDS.splice(STANDARDS.length-1,0,{name:nm,band:p.band||0,dur:p.dur||18,
+      level:p.level||0,roles:[],ref:p.ref||'',ksbs:ksbs,occupation_summary:'',
+      ifate_url:'',fundable:true,cstatus:''});
+    idx=STANDARDS.length-2;label=nm;
+  }
+  buildJdSelect();
+  const sel=document.getElementById('jd-standard');
+  if(sel){sel.value=String(idx);sel.dispatchEvent(new Event('change'));}
+  setStdDropText('&#10003; '+label+(p.ref?' ('+p.ref+')':'')+'<small>'+total+' KSBs loaded for this session</small>');
+  try{if(document.getElementById('jd-text').value.trim())analyseJD();}catch(e){}
+}
+
+function handleStdFile(file){
+  if(!file)return;
+  const name=file.name.toLowerCase();
+  setStdDropText('&#8635; Reading '+file.name+'&hellip;');
+  const done=txt=>{try{loadStandardFromDoc(parseStandardDoc(txt||''),file.name);}
+                   catch(e){setStdDropText('&#9888; Could not read that standard.');}};
+  const fail=m=>setStdDropText('&#9888; '+m);
+  try{
+    if(name.endsWith('.txt')){const r=new FileReader();r.onload=e=>done(e.target.result);r.readAsText(file);}
+    else if(name.endsWith('.pdf')){
+      if(!window.pdfjsLib)return fail('PDF reader not available.');
+      const r=new FileReader();r.onload=e=>{
+        pdfjsLib.getDocument({data:new Uint8Array(e.target.result)}).promise.then(async pdf=>{
+          let txt='';
+          for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i);const c=await pg.getTextContent();txt+=c.items.map(it=>it.str).join(' ')+'\n';}
+          done(txt);
+        }).catch(()=>fail('Could not read that PDF.'));
+      };r.readAsArrayBuffer(file);
+    }
+    else if(name.endsWith('.docx')){
+      if(!window.mammoth)return fail('Word reader not available.');
+      const r=new FileReader();r.onload=e=>{mammoth.extractRawText({arrayBuffer:e.target.result}).then(res=>done(res.value)).catch(()=>fail('Could not read that Word file.'));};r.readAsArrayBuffer(file);
+    }
+    else fail('Use the standard saved as .pdf, .docx or .txt.');
+  }catch(err){fail('Could not read the file.');}
+}
 function handleJdFile(file){
   if(!file)return;const name=file.name.toLowerCase(),ta=document.getElementById('jd-text');
   setJdDropText(`&#8635; Reading ${file.name}…`);
@@ -6579,6 +6695,13 @@ if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudfl
     dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--purple)';});
     dz.addEventListener('dragleave',()=>{dz.style.borderColor='';});
     dz.addEventListener('drop',e=>{e.preventDefault();dz.style.borderColor='';if(e.dataTransfer.files[0])handleJdFile(e.dataTransfer.files[0]);});
+  }
+  const sf=document.getElementById('stdFile'),sz=document.getElementById('stdDrop');
+  if(sf)sf.addEventListener('change',e=>{if(e.target.files[0])handleStdFile(e.target.files[0]);});
+  if(sz){
+    sz.addEventListener('dragover',e=>{e.preventDefault();sz.style.borderColor='var(--purple)';});
+    sz.addEventListener('dragleave',()=>{sz.style.borderColor='';});
+    sz.addEventListener('drop',e=>{e.preventDefault();sz.style.borderColor='';if(e.dataTransfer.files[0])handleStdFile(e.dataTransfer.files[0]);});
   }
 })();
 
