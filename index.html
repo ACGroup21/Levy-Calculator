@@ -1752,7 +1752,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30q</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -4728,8 +4728,8 @@ var lvyBg=(function(){
   function frame(){
     var lk=LINK*DPR;ctx.clearRect(0,0,w,h);
     for(var i=0;i<nodes.length;i++){var n=nodes[i];n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;}
-    for(var i=0;i<nodes.length;i++)for(var j=i+1;j<nodes.length;j++){var a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<lk){var o=(1-d/lk)*0.13;ctx.strokeStyle='rgba(45,212,178,'+o.toFixed(3)+')';ctx.lineWidth=DPR*0.55;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}
-    for(var i=0;i<nodes.length;i++){var n=nodes[i];ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.fillStyle='rgba(120,210,196,0.5)';ctx.fill();}
+    /* links removed - loose, unconnected stars, as the app background and the JD reports */
+    for(var i=0;i<nodes.length;i++){var n=nodes[i];ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,7);ctx.fillStyle='rgba(120,210,196,0.55)';ctx.fill();ctx.beginPath();ctx.arc(n.x,n.y,n.r*2.8,0,7);ctx.fillStyle='rgba(120,210,196,0.055)';ctx.fill();}
     for(var i=0;i<motes.length;i++){var m=motes[i];m.y+=m.vy;if(m.y<0){m.y=h;m.x=Math.random()*w;}ctx.beginPath();ctx.arc(m.x,m.y,m.r,0,7);ctx.fillStyle='rgba(167,139,250,'+m.a.toFixed(2)+')';ctx.fill();}
     raf=requestAnimationFrame(frame);
   }
@@ -5821,7 +5821,7 @@ function jdBuildReport(){
   '<div style="position:relative;z-index:2;border-top:1px solid rgba(var(--wash),0.08);display:flex;align-items:center;padding:16px 46px;margin-top:auto;color:#7e93a8;font-size:11px"><img src="'+FUNDABLE_MARK+'" alt="" style="height:16px;margin-right:12px;opacity:.9"><span style="flex:1">Fundable by Arthur Curtis Education · JD Matcher · indicative keyword analysis, not a compliance verdict</span></div>';
   return el;
 }
-var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,j,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++)for(j=i+1;j<N.length;j++){var a=N[i],b=N[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);if(d<150){ctx.strokeStyle="rgba(58,200,230,"+((1-d/150)*0.5)+")";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}}ctx.fillStyle="rgba(95,224,238,0.85)";for(i=0;i<N.length;i++){ctx.beginPath();ctx.arc(N[i].x,N[i].y,1.8,0,7);ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
+var JD_NETJS='(function(){var cv=document.getElementById("repNet");if(!cv)return;var host=cv.parentNode,W=1040,H=Math.max((host&&host.offsetHeight)||1471,1471);cv.width=W;cv.height=H;var ctx=cv.getContext("2d"),N=[],i,n=Math.round(W*H/15000);for(i=0;i<n;i++)N.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.28,vy:(Math.random()-0.5)*0.28,r:Math.random()*1.6+0.7,ph:Math.random()*6.283,sp:0.012+Math.random()*0.023,hh:Math.round((Math.random()<0.12?190:168)+(Math.random()-0.5)*22)});function f(){ctx.clearRect(0,0,W,H);for(i=0;i<N.length;i++){var a=N[i];a.x+=a.vx;a.y+=a.vy;if(a.x<0||a.x>W)a.vx*=-1;if(a.y<0||a.y>H)a.vy*=-1;}for(i=0;i<N.length;i++){var a=N[i];a.ph+=a.sp;var gl=0.5+0.5*Math.sin(a.ph);ctx.beginPath();ctx.arc(a.x,a.y,a.r,0,7);ctx.fillStyle="hsla("+a.hh+",72%,55%,"+(0.30+0.45*gl).toFixed(3)+")";ctx.fill();ctx.beginPath();ctx.arc(a.x,a.y,a.r*2.8,0,7);ctx.fillStyle="hsla("+a.hh+",75%,65%,"+(0.05*gl).toFixed(3)+")";ctx.fill();}window.__repRAF=requestAnimationFrame(f);}f();})();';
 /* The JD report builds a standalone document, so it needs its own copy of the
    faces. Rather than embedding another 80KB of base64, it lifts the @font-face
    rules straight out of the app's stylesheet at generation time — one source,
