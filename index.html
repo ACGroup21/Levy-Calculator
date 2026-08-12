@@ -579,6 +579,23 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12px;color:var(--text2);line-height:1.5}
 /* A programme opens to show what it costs this employer, for these learners.
    The row is the summary; the drawer is the truth behind the number. */
+/* The pack: several roles' match reports gathered into one document. The levy
+   reports already bundle through the picker; the matcher runs one role at a time,
+   so this is the only place that needed a way to collect. */
+.jdpack{margin-top:14px;border:1px solid rgba(123,97,255,0.28);border-radius:12px;
+  background:rgba(123,97,255,0.05);padding:13px 15px}
+.jdpack h4{margin:0 0 9px;font-size:12px;font-weight:700;color:var(--text2);
+  letter-spacing:.04em;display:flex;align-items:center;gap:8px}
+.jdpack h4 .n{font-family:var(--mono);font-size:10px;background:rgba(123,97,255,0.22);
+  color:#c4b5fd;border-radius:99px;padding:2px 8px}
+.jdp-item{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;
+  border-top:1px solid rgba(var(--wash),0.07)}
+.jdp-item:first-of-type{border-top:0}
+.jdp-item .r{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.jdp-item .s{font-family:var(--mono);font-size:11px;color:var(--text3);flex:0 0 auto}
+.jdp-item button{background:none;border:0;color:var(--text3);cursor:pointer;font-size:14px;padding:0 3px}
+.jdp-item button:hover{color:var(--red)}
+.jdp-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:11px}
 .prog-open{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .prog-open:hover{color:var(--teal)}
 .prog-open .pe-chev{display:inline-block;margin-right:6px;color:var(--text3);
@@ -1788,7 +1805,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30y</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5859,8 +5876,100 @@ function analyseJD(){
       <button class="btn-clear" onclick="downloadReportHTML()">&#11015; Save HTML</button>
       <button class="btn-clear" onclick="downloadJDReport(this)">&#128424;&nbsp; Print / Save PDF</button>
       <button class="btn-clear" onclick="downloadJDReport(this,true)" title="Larger text, more pages — for readability/accessibility">&#128424;&nbsp; Large-text PDF</button>
-    </div>`;
+      <button class="btn-clear" onclick="jdAddToPack()" title="Collect this match, then export several roles as one document">&#43;&nbsp; Add to pack</button>
+    </div>
+    <div id="jdPackBox"></div>`;
+  setTimeout(renderJdPack,0);
 }
+/* ── The report pack ─────────────────────────────────────────────────────────
+   A match lives in lastJD, one at a time. To put several roles in one document
+   we keep snapshots and replay each through the existing page builder, so the
+   pack is assembled by exactly the code that builds a single report — there is
+   no second renderer to drift out of step. Session-only, like the matches. */
+var jdPack=[];
+
+function jdRoleLabel(){
+  if(!lastJD)return '';
+  /* The JD's own first line is the role's name as the employer writes it.
+     lastJD.roleTitle is whatever the matcher detected in the prose - it once
+     labelled a role "supporting" - so it is the fallback, not the first choice. */
+  var t=(document.getElementById('jd-text')||{}).value||'';
+  var first=t.split(/\n/).map(function(l){return l.trim();}).filter(Boolean)[0]||'';
+  if(first&&first.length<=70&&!/[.!?]$/.test(first))return first;
+  if(lastJD.roleTitle)return lastJD.roleTitle;
+  return first.slice(0,60)||'Untitled role';
+}
+
+function jdAddToPack(){
+  if(!lastJD){alert('Run a match first.');return;}
+  var snap=JSON.parse(JSON.stringify(lastJD));
+  snap.__label=jdRoleLabel();
+  /* Same role against the same standard twice is a replacement, not a second
+     copy — you are refining it, not collecting duplicates. */
+  var at=jdPack.findIndex(function(x){return x.__label===snap.__label&&x.stdName===snap.stdName;});
+  if(at>=0)jdPack[at]=snap; else jdPack.push(snap);
+  renderJdPack();
+}
+function jdRemoveFromPack(i){ jdPack.splice(i,1); renderJdPack(); }
+function jdClearPack(){ jdPack=[]; renderJdPack(); }
+
+function renderJdPack(){
+  var el=document.getElementById('jdPackBox'); if(!el)return;
+  if(!jdPack.length){el.innerHTML='';return;}
+  var items=jdPack.map(function(p,i){
+    return '<div class="jdp-item"><span class="r">'+escHtml(p.__label||'Role')+
+      ' <span style="color:var(--text3)">&middot; '+escHtml(p.stdName||'')+'</span></span>'+
+      '<span class="s">'+(p.score||0)+'%</span>'+
+      '<button type="button" onclick="jdRemoveFromPack('+i+')" aria-label="Remove from pack" title="Remove">&times;</button></div>';
+  }).join('');
+  el.innerHTML='<div class="jdpack"><h4>Report pack <span class="n">'+jdPack.length+' role'+
+    (jdPack.length!==1?'s':'')+'</span></h4>'+items+
+    '<div class="jdp-actions">'+
+      '<button class="btn-add" onclick="jdExportPack(this)">&#128424;&nbsp; Export pack as one PDF</button>'+
+      '<button class="btn-clear" onclick="jdClearPack()">Clear pack</button>'+
+    '</div></div>';
+}
+
+/* Build every role's pages into a single document. lastJD is swapped for each in
+   turn and put back afterwards, so the matcher is left exactly as it was found. */
+function jdExportPack(btn){
+  if(!jdPack.length){alert('Add at least one match to the pack.');return;}
+  if(!window.html2canvas||!window.jspdf){alert('Report libraries not available.');return;}
+  var keep=lastJD, txt=btn?btn.innerHTML:null;
+  function restore(){lastJD=keep;jdSetPageMode(false);if(btn){btn.disabled=false;btn.innerHTML=txt;}}
+  if(btn){btn.disabled=true;btn.innerHTML='&#9203;&nbsp; Building&hellip;';}
+  var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  return ready.then(function(){
+    jdSetPageMode(false);
+    var host=document.createElement('div');
+    host.style.cssText='position:absolute;left:-20000px;top:0';
+    document.body.appendChild(host);
+    var all=[];
+    jdPack.forEach(function(entry){
+      lastJD=entry;
+      jdBuildPdfPages().forEach(function(p){host.appendChild(p);all.push(p);});
+    });
+    all.forEach(function(p){jdPdfFinalize(p);});
+    var doc=new window.jspdf.jsPDF({unit:'pt',orientation:'landscape',format:'a4'});
+    var pw=842,ph=595,seq=Promise.resolve();
+    all.forEach(function(p,idx){
+      seq=seq.then(function(){
+        return html2canvas(p,{scale:2.0,backgroundColor:'#06172E',useCORS:true,logging:false,
+          windowWidth:+p.getAttribute('data-w'),windowHeight:+p.getAttribute('data-h')})
+        .then(function(c){
+          if(idx>0)doc.addPage('a4','landscape');
+          doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
+        });
+      });
+    });
+    return seq.then(function(){
+      if(document.body.contains(host))document.body.removeChild(host);
+      doc.save('JD-Matcher-pack-'+jdPack.length+'-roles.pdf');
+      restore();
+    });
+  }).catch(function(e){restore();alert('Could not build the pack: '+e.message);});
+}
+
 const JD_THRESHOLD=50;
 const JD_FAIR_Q=[
   'This is the full, current job description (not a short summary).',
