@@ -1732,7 +1732,10 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div style="margin-top:14px">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
           <span style="font-size:12px;color:var(--text3)">Include in the report:</span>
-          <button type="button" id="reportSelectAll" onclick="toggleSelectAllReports()" style="font-family:inherit;font-size:12px;color:var(--teal);background:none;border:1px solid rgba(45,212,178,0.3);border-radius:6px;padding:4px 11px;cursor:pointer">Select all</button>
+          <span style="display:flex;gap:7px">
+            <button type="button" id="reportSelectAll" onclick="selectAllReports()" style="font-family:inherit;font-size:12px;background:none;border-radius:6px;padding:4px 11px;cursor:pointer;color:var(--teal);border:1px solid rgba(45,212,178,0.3)">Select all</button>
+            <button type="button" id="reportClearSel" onclick="clearReportSel()" style="font-family:inherit;font-size:12px;background:none;border-radius:6px;padding:4px 11px;cursor:pointer;color:var(--text3);border:1px solid rgba(var(--wash),0.18)">Clear</button>
+          </span>
         </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
         <div id="brandPack" style="margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)"></div>
@@ -1785,7 +1788,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30w</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5078,17 +5081,29 @@ function syncReportSel(){
   document.querySelectorAll('#reportPicker input[data-part]').forEach(function(c){reportSel[c.getAttribute('data-part')]=c.checked;});
   updateReportNote();updateSelectAllLabel();
 }
+function reportBoxes(){
+  return [].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
+}
+function selectAllReports(){
+  var b=reportBoxes(); if(!b.length)return;
+  b.forEach(function(x){x.checked=true;}); syncReportSel();
+}
+function clearReportSel(){
+  var b=reportBoxes(); if(!b.length)return;
+  b.forEach(function(x){x.checked=false;}); syncReportSel();
+}
+/* Kept so any older call site still works. */
 function toggleSelectAllReports(){
-  var boxes=[].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
-  if(!boxes.length)return;
-  var allOn=boxes.every(function(b){return b.checked;});
-  boxes.forEach(function(b){b.checked=!allOn;});
-  syncReportSel();
+  var b=reportBoxes(); if(!b.length)return;
+  b.every(function(x){return x.checked;})?clearReportSel():selectAllReports();
 }
 function updateSelectAllLabel(){
-  var btn=document.getElementById('reportSelectAll');if(!btn)return;
-  var boxes=[].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
-  btn.textContent=(boxes.length&&boxes.every(function(b){return b.checked;}))?'Clear all':'Select all';
+  var all=document.getElementById('reportSelectAll'), clr=document.getElementById('reportClearSel');
+  var b=reportBoxes(), on=b.filter(function(x){return x.checked;}).length;
+  if(all){ all.disabled=(!b.length||on===b.length);
+           all.style.opacity=all.disabled?'.4':''; all.style.cursor=all.disabled?'default':'pointer'; }
+  if(clr){ clr.disabled=(on===0);
+           clr.style.opacity=clr.disabled?'.4':''; clr.style.cursor=clr.disabled?'default':'pointer'; }
 }
 function updateReportNote(){
   var el=document.getElementById('reportPickerNote');if(!el)return;
@@ -5263,7 +5278,7 @@ function levyPage1(d,framing){
   return '<div class="lvy-page" data-w="1123" data-h="794">'+
     '<div class="lvy-inner">'+
       '<div class="lvy-head"><div><div class="lvy-title">Affordability Report</div></div>'+
-        '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:21px;display:inline-block;margin-bottom:6px">'+goalChip+'<div style="text-align:right"><img src="'+brandLogo()+'" style="height:21px;display:inline-block;margin-bottom:8px"></div><div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
+        '<div style="text-align:right"><img src="'+brandLogo()+'" style="height:21px;display:inline-block;margin-bottom:6px">'+goalChip+'<div style="font-family:\'Roboto Mono\',monospace;font-size:10px;color:#7e95ab;margin-top:6px">'+(fin?'FINANCE / SLT':'HR / L&amp;D')+' VIEW · '+d.years+'-YEAR HORIZON</div></div></div>'+
       decideStrip+
       '<div class="lvy-verdict" style="border-color:'+rag.col+'66"><div><div style="font-size:12px;color:'+rag.col+';font-weight:600;margin-bottom:3px">'+rag.label+'</div><div style="font-size:13px;color:#c7d6e2;max-width:560px;line-height:1.5">'+narrative+'</div></div>'+
         '<div style="text-align:right;border-left:1px solid rgba(var(--wash),0.12);padding-left:22px;margin-left:18px"><div style="font-size:34px;font-weight:800;color:'+rag.col+';line-height:1">'+h.num+'</div><div style="font-size:11px;color:#8ba0b6;margin-top:2px">'+h.lab+'</div><div style="font-size:11px;color:#7e95ab;margin-top:3px">'+h.sub+'</div></div></div>'+
