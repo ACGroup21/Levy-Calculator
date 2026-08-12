@@ -573,6 +573,24 @@ button{font-family:var(--sans);cursor:pointer}
 .jd-fair-q input{margin-top:2px;accent-color:var(--teal);flex-shrink:0}
 .jd-verdict{font-size:12px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(245,166,35,0.2);color:var(--text3)}
 .jd-bridge-item{display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(var(--wash),0.05);font-size:12px;color:var(--text2);line-height:1.5}
+/* A programme opens to show what it costs this employer, for these learners.
+   The row is the summary; the drawer is the truth behind the number. */
+.prog-open{background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.prog-open:hover{color:var(--teal)}
+.prog-open .pe-chev{display:inline-block;margin-right:6px;color:var(--text3);
+  transition:transform .15s;font-size:10px}
+.prog-open[aria-expanded="true"] .pe-chev{transform:rotate(90deg);color:var(--teal)}
+.pe-wrap{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;
+  padding:13px 4px 15px;border-top:1px solid rgba(var(--wash),0.08)}
+.pe-f label{display:block;font-size:11px;color:var(--text3);margin-bottom:5px}
+.pe-f input{width:130px;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);
+  border-radius:9px;padding:8px 11px;color:var(--text);font-size:13px;font-family:inherit}
+.pe-out{flex:1 1 240px;min-width:220px;font-size:12px;color:var(--text3);line-height:1.55}
+.pe-out b{color:var(--text);font-size:15px;font-family:var(--mono)}
+.pe-src{display:inline-block;margin-top:4px;font-size:11px}
+.pe-src.own{color:var(--teal)}
+.pe-src.plan{color:var(--amber)}
+@media(max-width:560px){.pe-f input{width:100%}.pe-out{flex-basis:100%}}
 .jd-uploads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
 .jd-uploads .jd-upload{margin-bottom:0;display:flex;align-items:center;justify-content:center}
 .jd-upload small{display:block;margin-top:3px;font-size:10.5px;opacity:.72}
@@ -1762,7 +1780,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30r</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30s</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -4109,6 +4127,70 @@ function programmeTrueCost(p){
           rateKnown:rate>0, otjCost:otj, trueCost:price+otj, weeks:weeks, count:count};
 }
 
+/* Which programme's drawer is open. One at a time — this is a reading surface,
+   not a spreadsheet. */
+var progEditOpen=-1;
+
+function toggleProgEdit(i){
+  progEditOpen=(progEditOpen===i)?-1:i;
+  renderProgrammes();
+}
+
+/* Typing must not re-render the table, or the field loses focus mid-number. The
+   model, the readout and the projection update; the table stays put. */
+function setProgWage(i,v){
+  var p=programmes[i]; if(!p)return;
+  var n=parseFloat(String(v).replace(/[£,\s]/g,''));
+  if(n>0)p.wage=n; else delete p.wage;
+  paintProgEdit(i); renderProjection(); saveState();
+}
+function setProgOtj(i,v){
+  var p=programmes[i]; if(!p)return;
+  var n=parseFloat(v);
+  if(n>0)p.otj=n; else delete p.otj;
+  paintProgEdit(i); renderProjection(); saveState();
+}
+
+function paintProgEdit(i){
+  var el=document.getElementById('peOut'+i), p=programmes[i];
+  if(!el||!p)return;
+  var t=programmeTrueCost(p);
+  if(!t.rateKnown){
+    el.innerHTML='<b>&mdash;</b><br>Set an hourly wage here, or a blended rate on the plan, '+
+                 'and the off-the-job time gets costed.';
+    return;
+  }
+  var per=t.count>1?(' &middot; '+fmt(Math.round(t.trueCost/t.count))+' per learner'):'';
+  el.innerHTML='<b>'+fmt(t.trueCost)+'</b> true cost'+per+
+    '<br>'+fmt(t.price)+' training &nbsp;+&nbsp; '+fmt(t.otjCost)+' off-the-job'+
+    ' <span style="opacity:.8">('+Math.round(t.otjHours).toLocaleString()+' hrs &times; &pound;'+t.rate+'/hr)</span>'+
+    '<span class="pe-src '+(t.rateFromLearner?'own':'plan')+'">'+
+      (t.rateFromLearner?'&#9679; this learner&rsquo;s wage'
+                        :'&#9679; the plan&rsquo;s blended rate &mdash; set a wage for a true figure')+
+    '</span>';
+}
+
+/* The drawer. Unit programmes carry their delivery hours already, so they get the
+   wage alone; an apprenticeship also gets its off-the-job hours. */
+function progEditRow(p,i){
+  if(progEditOpen!==i)return '';
+  var otjMap=planCfg.otj||{}, defOtj=(p.type==='unit')?null:(otjMap[progLevel(p)]||6);
+  var f='<div class="pe-f"><label>Hourly wage</label>'+
+        '<input type="number" min="0" step="0.5" value="'+(p.wage||'')+'" '+
+        'placeholder="'+(planCfg.rate?('plan: \u00a3'+planCfg.rate):'set a rate')+'" '+
+        'aria-label="Hourly wage for this programme" '+
+        'oninput="setProgWage('+i+',this.value)"></div>';
+  if(defOtj!==null){
+    f+='<div class="pe-f"><label>Off-the-job hours a week</label>'+
+       '<input type="number" min="0" step="0.5" value="'+(p.otj||'')+'" '+
+       'placeholder="level default: '+defOtj+'" '+
+       'aria-label="Off-the-job hours a week for this programme" '+
+       'oninput="setProgOtj('+i+',this.value)"></div>';
+  }
+  return '<tr class="prog-edit-row"><td colspan="10"><div class="pe-wrap">'+f+
+         '<div class="pe-out" id="peOut'+i+'"></div></div></td></tr>';
+}
+
 function renderProgrammes(){
   const pt=document.getElementById('progTable');
   pt.classList.toggle('hidden',!programmes.length);
@@ -4118,14 +4200,15 @@ function renderProgrammes(){
     if(p.type==='unit'){
       const m1=p.cost*RULEBOOK.unit.m1*p.count,m2=p.cost*RULEBOOK.unit.m2*p.count;
       const ub='<span class="badge" style="background:rgba(123,97,255,0.15);color:var(--purple);border:1px solid rgba(123,97,255,0.3)">';
-      return`<tr${hide}><td class="td-name">${p.name}&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+      return`<tr${hide}><td class="td-name"><button type="button" class="prog-open" aria-expanded="${progEditOpen===i}" onclick="toggleProgEdit(${i})" title="Edit learner cost"><span class="pe-chev">&#9654;</span>${p.name}</button>&nbsp;${ub}UNIT</span></td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(m1)}&nbsp;${ub}30%</span></td><td class="r mono">${fmt(m2)}&nbsp;${ub}70%</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td>${p.weeks}w delivery</td><td class="r mono" style="color:var(--text3)">milestones</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>${progEditRow(p,i)}`;
     }
     const dur=mBetween(p.start,p.epa),mo=(p.cost*RULEBOOK.draw.training/dur)*p.count;
     const std=STANDARDS.find(s=>s.name===p.name);
     const hasKSB=std&&std.ksbs?'&nbsp;<span class="badge badge-ksb">KSB</span>':'';
     const exB=p.imported?'&nbsp;<span class="badge" style="background:rgba(224,164,59,0.15);color:#E0A43B;border:1px solid rgba(224,164,59,0.35)" title="Imported from your ESFA transactions — dates estimated, review">EXISTING</span>':'';
-    return`<tr${hide}><td class="td-name">${p.name}${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td class="dt">${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>`;
+    return`<tr${hide}><td class="td-name"><button type="button" class="prog-open" aria-expanded="${progEditOpen===i}" onclick="toggleProgEdit(${i})" title="Edit learner cost"><span class="pe-chev">&#9654;</span>${p.name}</button>${hasKSB}${exB}</td><td class="r mono">${fmt(p.cost)}</td><td class="r mono" style="color:var(--money)">${fmt(p.cost*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.training*p.count)}</td><td class="r mono">${fmt(p.cost*RULEBOOK.draw.epa*p.count)}&nbsp;<span class="badge badge-epa">EPA</span></td><td class="r mono"><span class="cnt-step"><button type="button" class="cnt-btn" onclick="changeProgCount(${i},-1)"${p.count<=1?' disabled':''} title="Fewer learners" aria-label="Fewer learners">&minus;</button><span class="cnt-n">${p.count}</span><button type="button" class="cnt-btn" onclick="changeProgCount(${i},1)" title="More learners" aria-label="More learners">+</button></span></td><td class="dt">${fmtD(p.start)}</td><td class="dt">${fmtD(p.epa)}</td><td class="r mono">${fmt(mo)}/mo</td><td><button class="btn-rm" aria-label="Remove this programme" title="Remove programme" onclick="removeProg(${i})">&#10005;</button></td></tr>${progEditRow(p,i)}`;
   }).join('');
+  if(progEditOpen>=0)setTimeout(function(){paintProgEdit(progEditOpen);},0);
   if(many)rows+=`<tr class="prog-more"><td colspan="10" style="text-align:center;padding:9px 0 3px"><button type="button" onclick="toggleProgList()" style="background:rgba(var(--wash),0.03);border:1px solid rgba(var(--wash),0.15);color:var(--text2);border-radius:10px;padding:6px 16px;font-size:12px;font-family:inherit;cursor:pointer">${progExpanded?('▴ Show first '+LIMIT):('▾ Show all '+programmes.length+' — '+(programmes.length-LIMIT)+' more')}</button></td></tr>`;
   document.getElementById('progBody').innerHTML=rows;
   if(typeof renderRingfences==='function')renderRingfences();
