@@ -1760,6 +1760,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label>
       <input type="text" id="jd-search" class="standard-search" placeholder="🔍  Search standards (e.g. data, nurse, project)…" oninput="buildJdSelect(this.value)" style="margin-bottom:8px">
       <select id="jd-standard"></select>
+      <div id="jdRecallNote" style="font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5"></div>
     </div>
     <div class="jd-uploads">
     <div class="jd-upload" id="jdDrop" onclick="document.getElementById('jdFile').click()">
@@ -1780,7 +1781,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5727,18 +5728,37 @@ function jdMatch(stmt,tokens){
 function buildJdSelect(query){
   const sel=document.getElementById('jd-standard');if(!sel)return;
   const q=(query||'').trim().toLowerCase();
-  let withK=STANDARDS.map((s,i)=>({s,i})).filter(x=>x.s.ksbs);
-  if(q)withK=withK.filter(x=>x.s.name.toLowerCase().includes(q)||(x.s.roles||[]).some(r=>r.includes(q)));
+  /* Identical recall: every standard the Programmes picker offers appears here
+     too. The ones with no KSBs are marked, not hidden — a standard that silently
+     vanishes from one place and not another reads as missing from the library,
+     when it is only missing its KSBs. Marked, it is findable, and the marker
+     says what to do about it. */
+  let all=STANDARDS.map((s,i)=>({s,i})).filter(x=>x.s.name!=='Other / custom');
+  if(q)all=all.filter(x=>x.s.name.toLowerCase().includes(q)||(x.s.roles||[]).some(r=>r.includes(q)));
+  const needs=all.filter(x=>!x.s.ksbs).length;
   sel.innerHTML='';
-  const ph=document.createElement('option');ph.value='';ph.textContent=withK.length?(q?`${withK.length} match${withK.length!==1?'es':''} — select…`:'Select a standard…'):'No standards match';ph.disabled=true;ph.selected=true;sel.appendChild(ph);
-  const levels=[...new Set(withK.map(x=>x.s.level))].sort((a,b)=>a-b);
+  const ph=document.createElement('option');ph.value='';
+  ph.textContent=all.length
+    ? (q?`${all.length} match${all.length!==1?'es':''} — select…`:'Select a standard…')
+    : 'No standards match';
+  ph.disabled=true;ph.selected=true;sel.appendChild(ph);
+  const levels=[...new Set(all.map(x=>x.s.level))].sort((a,b)=>a-b);
   levels.forEach(l=>{
-    const items=withK.filter(x=>x.s.level===l).sort((a,b)=>a.s.name.localeCompare(b.s.name));
+    const items=all.filter(x=>x.s.level===l).sort((a,b)=>a.s.name.localeCompare(b.s.name));
     if(!items.length)return;
     const og=document.createElement('optgroup');og.label=`──  Level ${l}  ──`;
-    items.forEach(({s,i})=>{const o=document.createElement('option');o.value=i;o.textContent=s.name;og.appendChild(o);});
+    items.forEach(({s,i})=>{
+      const o=document.createElement('option');o.value=i;
+      o.textContent=s.ksbs?s.name:(s.name+'   ·   add its KSBs');
+      og.appendChild(o);
+    });
     sel.appendChild(og);
   });
+  const note=document.getElementById('jdRecallNote');
+  if(note)note.innerHTML=needs
+    ? `<span style="color:var(--amber)">&#9679;</span> ${needs} of these ${all.length} have no KSBs stored. `+
+      `Pick one and it will tell you what to drop in.`
+    : '';
 }
 function jdRoleMatch(std,jd){
   if(!std)return {match:'none',title:''};
@@ -5755,7 +5775,21 @@ function jdRoleMatch(std,jd){
 function analyseJD(){
   const sel=document.getElementById('jd-standard'),res=document.getElementById('jd-results');
   const std=STANDARDS[parseInt(sel.value)],jd=document.getElementById('jd-text').value;
-  if(!std||!std.ksbs){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Select a standard with KSB data first.</p>';return;}
+  if(!std){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Select a standard first.</p>';return;}
+  if(!std.ksbs){
+    /* The standard exists and is fundable; we simply hold no KSBs for it, and
+       there is nothing to match a job description against. Say so, and point at
+       the box that fixes it, rather than leaving a dead end. */
+    res.innerHTML='<div style="margin-top:12px;padding:13px 15px;border:1px solid rgba(224,164,59,0.35);'+
+      'border-radius:10px;background:rgba(224,164,59,0.06);font-size:13px;line-height:1.6;color:var(--text2)">'+
+      '<strong style="color:var(--text)">No KSBs stored for '+escHtml(std.name)+'.</strong><br>'+
+      'It is a real, fundable standard &mdash; the library just has no Knowledge, Skills and Behaviours '+
+      'for it, so there is nothing to match a job description against.<br>'+
+      '<span style="color:var(--text3)">Open the standard on Skills England, save the page as a PDF, '+
+      'and drop it into the <strong style="color:var(--text2)">Standard</strong> box above. '+
+      'The match will run straight after.</span></div>';
+    return;
+  }
   if(jd.trim().length<25){res.innerHTML='<p style="color:var(--amber);font-size:13px;margin-top:12px">Paste a fuller job description to analyse (a sentence or two minimum).</p>';return;}
   const tokens=jdTokens(jd);
   const groups=[['knowledge','K','Knowledge'],['skills','S','Skills'],['behaviours','B','Behaviours']];
