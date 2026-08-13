@@ -585,7 +585,7 @@ button{font-family:var(--sans);cursor:pointer}
 /* Which standard fits this role — the matcher run backwards. */
 .jdfit{margin-top:14px;border:1px solid rgba(0,195,221,0.28);border-radius:12px;
   background:rgba(0,195,221,0.05);padding:13px 15px}
-.jdfit h4{margin:0 0 4px;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em}
+.jdfit h4{margin:0 0 4px;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em;display:flex;align-items:center}
 .jdfit .sub{font-size:11.5px;color:var(--text3);margin-bottom:10px;line-height:1.5}
 .jdf-row{display:flex;align-items:center;gap:11px;padding:8px 0;
   border-top:1px solid rgba(var(--wash),0.07)}
@@ -1820,12 +1820,13 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <div id="jdFitBox"></div>
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn-demo" onclick="jdDemo()">&#9654;&nbsp; See a sample report</button><span style="font-size:12px;color:var(--text3)">Loads a sample standard + JD and opens the report</span></div>
     <div id="jd-results"></div>
+    <div id="jdPackBox"></div>
   </div>
 </div>
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31i</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5898,7 +5899,7 @@ function analyseJD(){
       <button class="btn-clear" onclick="downloadJDReport(this,true)" title="Larger text, more pages — for readability/accessibility">&#128424;&nbsp; Large-text PDF</button>
       <button class="btn-clear" onclick="jdAddToPack()" title="Collect this match, then export several roles as one document">&#43;&nbsp; Add to pack</button>
     </div>
-    <div id="jdPackBox"></div>`;
+`;
   setTimeout(renderJdPack,0);
 }
 /* ── The report pack ─────────────────────────────────────────────────────────
@@ -5918,7 +5919,9 @@ var jdPack=[];
    outranks raw keyword coverage: "recruiter" appearing in the job description is
    stronger evidence than a handful of shared words. */
 function jdRankStandards(jdText,topN){
-  var tokens=jdTokens(jdText), idf=jdIdf(), out=[], tooThin=0;
+  var tokens=jdTokens(jdText), out=[], tooThin=0;
+  var qv=jdVec(jdTf(jdText)), qn=jdNorm(qv);
+  var titleToks=jdTitleToks(jdTitleLine(jdText));
   STANDARDS.forEach(function(s,i){
     if(!s.ksbs||s.name==='Other / custom')return;
     var total=0,covered=0;
@@ -5930,31 +5933,125 @@ function jdRankStandards(jdText,topN){
     });
     if(!total)return;
     /* A standard with a handful of KSBs cannot support a coverage claim — one
-       match in three is 33% and means nothing. Rank only what can be judged. */
+       match in three is 33% and means nothing. */
     if(total<MIN_KSBS_TO_RANK){tooThin++;return;}
 
-    /* Relevance, not overlap. Words like "stakeholder", "data" or "communication"
-       appear in nearly every standard, so matching them is no evidence at all;
-       words that appear in few standards are diagnostic. Each shared word is
-       weighted by how rare it is across the library, and the total is damped by
-       the standard's own size so a sprawling standard cannot win on bulk alone. */
-    var stdToks=jdStdTokens(i), rel=0, shared=0;
-    stdToks.forEach(function(t){
-      if(!tokens.has(t))return;
-      shared++; rel+=(idf.w[t]||idf.max);
-    });
-    rel=rel/Math.sqrt(stdToks.size||1);
+    /* Cosine similarity over tf-idf, which fixes two things a plainer measure
+       got badly wrong on a real job description:
+
+       - A word said once weighed as much as a word said twenty times. A customer
+         service role at a surgical device company mentions "musculoskeletal" once
+         in its About Us; those rare words dominated and returned six healthcare
+         standards. Sublinear term frequency puts the weight on what the role
+         actually does repeatedly.
+       - Nothing normalised for size, so standards with 200+ KSBs shared
+         vocabulary with everything and always won. Cosine divides by each
+         vector's own length, so a long standard has no advantage. */
+    var sv=jdStdVec(i), dot=0;
+    for(var t in qv){ if(sv[t])dot+=qv[t]*sv[t]; }
+    var rel=dot/((qn*jdStdNorm(i))||1);
 
     out.push({i:i,name:s.name,level:s.level,band:s.band,total:total,covered:covered,
-              score:Math.round(covered/total*100),rel:rel,shared:shared});
+              score:Math.round(covered/total*100),rel:rel,title:jdTitleScore(s.name,titleToks)});
   });
-  out.sort(function(a,b){return b.rel-a.rel||b.covered-a.covered||a.name.localeCompare(b.name);});
+  /* A title match leads, because it is the strongest evidence available and the
+     one a person would use first. Content similarity orders everything else, and
+     separates standards whose titles match equally well. */
+  out.sort(function(a,b){return (b.title-a.title)||(b.rel-a.rel)||b.covered-a.covered||a.name.localeCompare(b.name);});
   return {ranked:out.slice(0,topN||6),considered:out.length,tooThin:tooThin};
 }
 
 var MIN_KSBS_TO_RANK=8;
 
-/* Every standard's KSB text as a token set, built once. */
+/* ── Job title vs standard name ──────────────────────────────────────────────
+   Content similarity alone cannot find the right standard, and the reason is
+   structural: a job description describes tasks ("process incoming orders",
+   "resolve shipping problems") while a standard describes competences
+   ("satisfaction", "proactivity", "emotion"). The words that would identify the
+   match — customer, service — are exactly the words too common to carry weight.
+
+   The title is the bridge. "Customer Service Representative" against "Customer
+   service specialist" is obvious to a person and cheap to compute. This is
+   deliberately restricted to the JD's TITLE LINE: an earlier version compared
+   the whole body and matched "data" inside "data protection", putting Data
+   analyst top of a recruiter role. */
+var JD_TITLE_GENERIC=/^(representative|specialist|practitioner|assistant|officer|operative|technician|coordinator|ordinator|administrator|professional|consultant|adviser|advisor|executive|engineer|worker|leader|supervisor|apprentice|senior|associate|support|manager|management|degree|integrated|standards|level|apprenticeship|trainee|junior|lead|head|and|the|for|with|role|job|title)$/i;
+
+function jdTitleLine(t){
+  var lines=String(t).split(/\n/).map(function(x){return x.trim();});
+  var isLabel=function(x){return /:\s*$/.test(x)||x.length>80;};
+  /* A "Title:" label may carry its value on the same line or the next one —
+     Word documents routinely put it on the next. Taking the same line only
+     returned the literal string "Title:" and the strongest ranking signal
+     never fired. */
+  for(var i=0;i<lines.length;i++){
+    var m=/^(job[ \t]*)?title[ \t]*:[ \t]*(.*)$/i.exec(lines[i]);
+    if(!m)continue;
+    if(m[2]&&m[2].trim())return m[2].trim();
+    for(var j=i+1;j<lines.length&&j<=i+3;j++){
+      if(lines[j]&&!isLabel(lines[j]))return lines[j];
+    }
+  }
+  /* otherwise the first real line that is not itself a label */
+  for(var k=0;k<lines.length;k++){ if(lines[k]&&!isLabel(lines[k]))return lines[k]; }
+  return '';
+}
+function jdTitleToks(str){
+  var out=new Set();
+  String(str).toLowerCase().split(/[^a-z]+/).forEach(function(w){
+    if(w.length>2&&!JD_TITLE_GENERIC.test(w))out.add(jdStem(w));
+  });
+  return out;
+}
+/* What share of the standard's distinctive name does the job title carry?
+   Both must contribute — a single shared word out of four is not a match. */
+function jdTitleScore(stdName,titleToks){
+  if(!titleToks.size)return 0;
+  var b=jdTitleToks(String(stdName).replace(/^L\d+\s*/i,'').replace(/\(.*?\)/g,''));
+  if(!b.size)return 0;
+  var hit=0; b.forEach(function(t){ if(titleToks.has(t))hit++; });
+  if(!hit)return 0;
+  var sc=hit/b.size;
+  return sc>=0.5?sc:0;
+}
+
+/* token -> count, so repetition counts for something */
+function jdTf(t){
+  var c=Object.create(null);
+  jdRawTokens(t).forEach(function(w){c[w]=(c[w]||0)+1;});
+  return c;
+}
+/* jdTokens() de-duplicates; ranking needs the full stream */
+function jdRawTokens(t){
+  return String(t).toLowerCase().split(/[^a-z]+/)
+    .filter(function(w){return w.length>3&&!JD_STOP.has(w);}).map(jdStem);
+}
+/* sublinear tf x idf */
+function jdVec(tf){
+  var idf=jdIdf(), v=Object.create(null);
+  for(var t in tf){ v[t]=(1+Math.log(tf[t]))*(idf.w[t]||idf.max); }
+  return v;
+}
+function jdNorm(v){ var n=0; for(var t in v)n+=v[t]*v[t]; return Math.sqrt(n)||1; }
+
+var _jdStdVec=null,_jdStdNorm=null;
+function jdBuildStdVecs(){
+  if(_jdStdVec)return;
+  _jdStdVec=[];_jdStdNorm=[];
+  STANDARDS.forEach(function(s,i){
+    if(!s||!s.ksbs){_jdStdVec[i]=Object.create(null);_jdStdNorm[i]=1;return;}
+    var txt='';
+    ['knowledge','skills','behaviours'].forEach(function(k){
+      (s.ksbs[k]||[]).forEach(function(it){txt+=' '+(it.description||'');});
+    });
+    var v=jdVec(jdTf(txt));
+    _jdStdVec[i]=v;_jdStdNorm[i]=jdNorm(v);
+  });
+}
+function jdStdVec(i){ jdBuildStdVecs(); return _jdStdVec[i]||Object.create(null); }
+function jdStdNorm(i){ jdBuildStdVecs(); return _jdStdNorm[i]||1; }
+
+/* Every standard's KSB text as a token set — used to build the idf table. */
 var _jdStdTok=null;
 function jdStdTokens(i){
   if(!_jdStdTok){
@@ -5970,7 +6067,7 @@ function jdStdTokens(i){
   return _jdStdTok[i]||new Set();
 }
 
-/* How rare is each word across the library? Built once, reused for every ranking. */
+/* How rare is each word across the library? Built once. */
 var _jdIdf=null;
 function jdIdf(){
   if(_jdIdf)return _jdIdf;
@@ -5990,7 +6087,10 @@ function jdSuggestStandards(){
   var box=document.getElementById('jdFitBox');if(!box)return;
   var jd=(document.getElementById('jd-text')||{}).value||'';
   if(jd.trim().length<25){
-    box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?</h4>'+
+    box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?'+
+    '<button type="button" onclick="jdClearFit()" title="Dismiss" aria-label="Dismiss suggestions" '+
+    'style="margin-left:auto;background:none;border:0;color:var(--text3);cursor:pointer;font-size:15px;padding:0 2px">&times;</button>'+
+    '</h4>'+
       '<div class="sub">Paste a fuller job description first &mdash; a sentence or two minimum.</div></div>';
     return;
   }
@@ -6002,12 +6102,16 @@ function jdSuggestStandards(){
       '<span class="jdf-nm"><div class="t">'+escHtml(x.name)+'</div>'+
       '<div class="m">'+x.covered+' of '+x.total+' KSBs'+
         (x.band?' &middot; &pound;'+x.band.toLocaleString():'')+
+        (x.title?' &middot; <span class="role">job title matches</span>':'')+
         ''+
       '</div></span>'+
       '<span class="jdf-sc" style="color:'+col+'">'+x.score+'%<em>coverage</em></span>'+
       '<button type="button" onclick="jdUseStandard('+x.i+')">Open</button></div>';
   }).join('');
-  box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?</h4>'+
+  box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?'+
+    '<button type="button" onclick="jdClearFit()" title="Dismiss" aria-label="Dismiss suggestions" '+
+    'style="margin-left:auto;background:none;border:0;color:var(--text3);cursor:pointer;font-size:15px;padding:0 2px">&times;</button>'+
+    '</h4>'+
     '<div class="sub">Ranked across '+r.considered+' standards'+
     (r.tooThin?' ('+r.tooThin+' with too few KSBs to judge were set aside)':'')+
     '. Ordered by how distinctive the shared language is &mdash; words that appear in nearly '+
@@ -6015,6 +6119,8 @@ function jdSuggestStandards(){
     'is the same KSB coverage a full match reports. Indicative, not a compliance verdict &mdash; '+
     'a shortlist to open and check, not an answer.</div>'+rows+'</div>';
 }
+
+function jdClearFit(){var b=document.getElementById('jdFitBox');if(b)b.innerHTML='';}
 
 function jdUseStandard(i){
   var sel=document.getElementById('jd-standard');if(!sel)return;
@@ -6073,34 +6179,70 @@ function jdExportPack(btn){
   if(!window.html2canvas||!window.jspdf){alert('Report libraries not available.');return;}
   var keep=lastJD, txt=btn?btn.innerHTML:null;
   function restore(){lastJD=keep;jdSetPageMode(false);if(btn){btn.disabled=false;btn.innerHTML=txt;}}
-  if(btn){btn.disabled=true;btn.innerHTML='&#9203;&nbsp; Building&hellip;';}
+  function say(m){if(btn)btn.innerHTML=m;}
+  if(btn)btn.disabled=true;
+  say('&#9203;&nbsp; Preparing&hellip;');
+
   var ready=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
   return ready.then(function(){
     jdSetPageMode(false);
+
+    /* One page at a time, in and out of the DOM.
+       The first version built every page of every role up front and captured them
+       together: fourteen A4 landscape pages at 2x is roughly 200MB of canvas held
+       at once, which froze the tab for 23 seconds on two roles and would run a
+       longer pack out of memory. Each page is now appended, captured, and removed
+       before the next one is built, with a frame yielded between so the tab stays
+       alive and the collected canvases can actually be released. */
     var host=document.createElement('div');
     host.style.cssText='position:absolute;left:-20000px;top:0';
     document.body.appendChild(host);
-    var all=[];
-    jdPack.forEach(function(entry){
-      lastJD=entry;
-      jdBuildPdfPages().forEach(function(p){host.appendChild(p);all.push(p);});
-    });
-    all.forEach(function(p){jdPdfFinalize(p);});
+
     var doc=new window.jspdf.jsPDF({unit:'pt',orientation:'landscape',format:'a4'});
-    var pw=842,ph=595,seq=Promise.resolve();
-    all.forEach(function(p,idx){
-      seq=seq.then(function(){
-        return html2canvas(p,{scale:2.0,backgroundColor:'#06172E',useCORS:true,logging:false,
-          windowWidth:+p.getAttribute('data-w'),windowHeight:+p.getAttribute('data-h')})
-        .then(function(c){
-          if(idx>0)doc.addPage('a4','landscape');
-          doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
-        });
-      });
+    var pw=842,ph=595,first=true;
+
+    /* count the pages up front so progress can be honest about the total */
+    var plan=[];
+    jdPack.forEach(function(entry,ri){
+      lastJD=entry;
+      plan.push({entry:entry,role:ri,count:jdBuildPdfPages().length});
     });
-    return seq.then(function(){
+    var totalPages=plan.reduce(function(a,p){return a+p.count;},0), done=0;
+
+    /* setTimeout, not requestAnimationFrame: rAF does not fire in a hidden tab,
+       so switching away mid-export would stall the whole pack indefinitely. */
+    function breathe(){return new Promise(function(r){setTimeout(r,0);});}
+
+    function doRole(ri){
+      if(ri>=jdPack.length)return Promise.resolve();
+      lastJD=jdPack[ri];
+      var pages=jdBuildPdfPages();
+      function doPage(pi){
+        if(pi>=pages.length)return Promise.resolve();
+        var p=pages[pi];
+        host.appendChild(p);
+        jdPdfFinalize(p);
+        return html2canvas(p,{scale:2.0,backgroundColor:'#06172E',useCORS:true,logging:false,
+            windowWidth:+p.getAttribute('data-w'),windowHeight:+p.getAttribute('data-h')})
+          .then(function(c){
+            if(!first)doc.addPage('a4','landscape');
+            first=false;
+            doc.addImage(c.toDataURL('image/jpeg',0.92),'JPEG',0,0,pw,ph);
+            /* let the page and its canvas go before building the next */
+            c.width=c.height=0;
+            if(p.parentNode)p.parentNode.removeChild(p);
+            done++;
+            say('&#9203;&nbsp; Page '+done+' of '+totalPages+'&hellip;');
+            return breathe();
+          })
+          .then(function(){return doPage(pi+1);});
+      }
+      return doPage(0).then(function(){return doRole(ri+1);});
+    }
+
+    return doRole(0).then(function(){
       if(document.body.contains(host))document.body.removeChild(host);
-      doc.save('JD-Matcher-pack-'+jdPack.length+'-roles.pdf');
+      doc.save('JD-Matcher-pack-'+jdPack.length+'-role'+(jdPack.length!==1?'s':'')+'.pdf');
       restore();
     });
   }).catch(function(e){restore();alert('Could not build the pack: '+e.message);});
@@ -6126,7 +6268,10 @@ function clearJD(){
   buildJdSelect('');
   document.getElementById('jd-text').value='';
   document.getElementById('jd-results').innerHTML='';
-  setJdDropText('&#8682;&nbsp; Upload a JD file (.txt, .pdf, .docx) or drag &amp; drop');
+  /* the ranked suggestions belong to the JD that produced them */
+  var fit=document.getElementById('jdFitBox'); if(fit)fit.innerHTML='';
+  setJdDropText('&#8682;&nbsp; Job description<small>.txt, .pdf or .docx &middot; or drag &amp; drop</small>');
+  setStdDropText('&#8682;&nbsp; Standard<small>Skills England page saved as PDF</small>');
   lastJD=null;
 }
 var JD_DEMO_TEXT="Recruitment Team Leader. Lead and manage a small team to source, attract, screen and place candidates. Build and manage client and stakeholder relationships, run the recruitment process and lifecycle, set priorities and allocate work. Monitor performance against targets, manage budgets and resources, ensure compliance with legislation and data protection, and promote equality, diversity and inclusion. Coach and develop team members, communicate with stakeholders, present updates, and use data to drive continuous improvement.";
