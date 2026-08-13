@@ -582,6 +582,25 @@ button{font-family:var(--sans);cursor:pointer}
 /* The pack: several roles' match reports gathered into one document. The levy
    reports already bundle through the picker; the matcher runs one role at a time,
    so this is the only place that needed a way to collect. */
+/* Which standard fits this role — the matcher run backwards. */
+.jdfit{margin-top:14px;border:1px solid rgba(0,195,221,0.28);border-radius:12px;
+  background:rgba(0,195,221,0.05);padding:13px 15px}
+.jdfit h4{margin:0 0 4px;font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.04em}
+.jdfit .sub{font-size:11.5px;color:var(--text3);margin-bottom:10px;line-height:1.5}
+.jdf-row{display:flex;align-items:center;gap:11px;padding:8px 0;
+  border-top:1px solid rgba(var(--wash),0.07)}
+.jdf-row:first-of-type{border-top:0}
+.jdf-rank{font-family:var(--mono);font-size:11px;color:var(--text3);width:16px;flex:0 0 auto}
+.jdf-nm{flex:1;min-width:0}
+.jdf-nm .t{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jdf-nm .m{font-family:var(--mono);font-size:10.5px;color:var(--text3);margin-top:2px}
+.jdf-nm .m .role{color:var(--teal)}
+.jdf-sc{font-family:var(--mono);font-size:14px;font-weight:700;flex:0 0 auto;width:58px;text-align:right}
+.jdf-sc em{display:block;font-style:normal;font-weight:400;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:1px}
+.jdf-row button{flex:0 0 auto;font-family:inherit;font-size:11.5px;background:none;
+  border:1px solid rgba(0,195,221,0.35);color:var(--cyan);border-radius:7px;
+  padding:5px 11px;cursor:pointer}
+.jdf-row button:hover{background:rgba(0,195,221,0.10)}
 .jdpack{margin-top:14px;border:1px solid rgba(123,97,255,0.28);border-radius:12px;
   background:rgba(123,97,255,0.05);padding:13px 15px}
 .jdpack h4{margin:0 0 9px;font-size:12px;font-weight:700;color:var(--text2);
@@ -1797,7 +1816,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
     </div>
     <div class="field"><label>Job description</label><textarea id="jd-text" aria-label="Job description text" placeholder="…or paste the full job description here" style="width:100%;min-height:140px;resize:vertical;background:rgba(var(--wash),0.03);border:1px solid rgba(167,139,250,0.25);border-radius:10px;color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.6;padding:11px"></textarea></div>
-    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
+    <div style="display:flex;gap:10px;margin-top:12px"><button class="btn-add" onclick="analyseJD()" style="flex:1">&#9670;&nbsp; Analyse coverage</button><button class="btn-clear" onclick="jdSuggestStandards()" title="Rank every standard against this job description">&#9662;&nbsp; Which standard fits?</button><button class="btn-clear" onclick="clearJD()">Clear</button></div>
+    <div id="jdFitBox"></div>
     <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="btn-demo" onclick="jdDemo()">&#9654;&nbsp; See a sample report</button><span style="font-size:12px;color:var(--text3)">Loads a sample standard + JD and opens the report</span></div>
     <div id="jd-results"></div>
   </div>
@@ -1805,7 +1825,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-30y</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31c</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5887,6 +5907,122 @@ function analyseJD(){
    pack is assembled by exactly the code that builds a single report — there is
    no second renderer to drift out of step. Session-only, like the matches. */
 var jdPack=[];
+
+/* ── Which standard fits this role? ──────────────────────────────────────────
+   The matcher answers "does this role fit THIS standard". Asked the other way
+   round it answers a question employers actually have, and which is otherwise
+   guessed at: given the job, which standard should it go on?
+
+   Same scoring as a single match, run across the library, so a role that ranks
+   first here scores identically when you open it properly. A title match
+   outranks raw keyword coverage: "recruiter" appearing in the job description is
+   stronger evidence than a handful of shared words. */
+function jdRankStandards(jdText,topN){
+  var tokens=jdTokens(jdText), idf=jdIdf(), out=[], tooThin=0;
+  STANDARDS.forEach(function(s,i){
+    if(!s.ksbs||s.name==='Other / custom')return;
+    var total=0,covered=0;
+    ['knowledge','skills','behaviours'].forEach(function(k){
+      (s.ksbs[k]||[]).forEach(function(it){
+        total++;
+        if(jdMatch(it.description||'',tokens).covered)covered++;
+      });
+    });
+    if(!total)return;
+    /* A standard with a handful of KSBs cannot support a coverage claim — one
+       match in three is 33% and means nothing. Rank only what can be judged. */
+    if(total<MIN_KSBS_TO_RANK){tooThin++;return;}
+
+    /* Relevance, not overlap. Words like "stakeholder", "data" or "communication"
+       appear in nearly every standard, so matching them is no evidence at all;
+       words that appear in few standards are diagnostic. Each shared word is
+       weighted by how rare it is across the library, and the total is damped by
+       the standard's own size so a sprawling standard cannot win on bulk alone. */
+    var stdToks=jdStdTokens(i), rel=0, shared=0;
+    stdToks.forEach(function(t){
+      if(!tokens.has(t))return;
+      shared++; rel+=(idf.w[t]||idf.max);
+    });
+    rel=rel/Math.sqrt(stdToks.size||1);
+
+    out.push({i:i,name:s.name,level:s.level,band:s.band,total:total,covered:covered,
+              score:Math.round(covered/total*100),rel:rel,shared:shared});
+  });
+  out.sort(function(a,b){return b.rel-a.rel||b.covered-a.covered||a.name.localeCompare(b.name);});
+  return {ranked:out.slice(0,topN||6),considered:out.length,tooThin:tooThin};
+}
+
+var MIN_KSBS_TO_RANK=8;
+
+/* Every standard's KSB text as a token set, built once. */
+var _jdStdTok=null;
+function jdStdTokens(i){
+  if(!_jdStdTok){
+    _jdStdTok=STANDARDS.map(function(s){
+      if(!s||!s.ksbs)return new Set();
+      var txt='';
+      ['knowledge','skills','behaviours'].forEach(function(k){
+        (s.ksbs[k]||[]).forEach(function(it){txt+=' '+(it.description||'');});
+      });
+      return jdTokens(txt);
+    });
+  }
+  return _jdStdTok[i]||new Set();
+}
+
+/* How rare is each word across the library? Built once, reused for every ranking. */
+var _jdIdf=null;
+function jdIdf(){
+  if(_jdIdf)return _jdIdf;
+  var df=Object.create(null), n=0;
+  STANDARDS.forEach(function(s,i){
+    if(!s||!s.ksbs)return;
+    n++;
+    jdStdTokens(i).forEach(function(t){df[t]=(df[t]||0)+1;});
+  });
+  var w=Object.create(null), max=Math.log((n+1)/1);
+  Object.keys(df).forEach(function(t){w[t]=Math.log((n+1)/(df[t]+1));});
+  _jdIdf={w:w,max:max,n:n};
+  return _jdIdf;
+}
+
+function jdSuggestStandards(){
+  var box=document.getElementById('jdFitBox');if(!box)return;
+  var jd=(document.getElementById('jd-text')||{}).value||'';
+  if(jd.trim().length<25){
+    box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?</h4>'+
+      '<div class="sub">Paste a fuller job description first &mdash; a sentence or two minimum.</div></div>';
+    return;
+  }
+  var r=jdRankStandards(jd,6);
+  if(!r.ranked.length){box.innerHTML='';return;}
+  var rows=r.ranked.map(function(x,n){
+    var col=x.score>=70?'#2DD4B2':x.score>=50?'var(--cyan)':x.score>=30?'var(--amber)':'#ec5a72';
+    return '<div class="jdf-row"><span class="jdf-rank">'+(n+1)+'</span>'+
+      '<span class="jdf-nm"><div class="t">'+escHtml(x.name)+'</div>'+
+      '<div class="m">'+x.covered+' of '+x.total+' KSBs'+
+        (x.band?' &middot; &pound;'+x.band.toLocaleString():'')+
+        ''+
+      '</div></span>'+
+      '<span class="jdf-sc" style="color:'+col+'">'+x.score+'%<em>coverage</em></span>'+
+      '<button type="button" onclick="jdUseStandard('+x.i+')">Open</button></div>';
+  }).join('');
+  box.innerHTML='<div class="jdfit"><h4>Which standard fits this role?</h4>'+
+    '<div class="sub">Ranked across '+r.considered+' standards'+
+    (r.tooThin?' ('+r.tooThin+' with too few KSBs to judge were set aside)':'')+
+    '. Ordered by how distinctive the shared language is &mdash; words that appear in nearly '+
+    'every standard count for little, words that appear in few count for a lot. The percentage '+
+    'is the same KSB coverage a full match reports. Indicative, not a compliance verdict &mdash; '+
+    'a shortlist to open and check, not an answer.</div>'+rows+'</div>';
+}
+
+function jdUseStandard(i){
+  var sel=document.getElementById('jd-standard');if(!sel)return;
+  sel.value=String(i);
+  analyseJD();
+  var res=document.getElementById('jd-results');
+  if(res&&res.scrollIntoView)res.scrollIntoView({block:'nearest'});
+}
 
 function jdRoleLabel(){
   if(!lastJD)return '';
