@@ -1826,7 +1826,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31i</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);border:1px solid var(--border);border-radius:99px;padding:5px 13px;opacity:.8">Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong></span></div>
 </footer>
 
@@ -5920,7 +5920,9 @@ var jdPack=[];
    stronger evidence than a handful of shared words. */
 function jdRankStandards(jdText,topN){
   var tokens=jdTokens(jdText), out=[], tooThin=0;
-  var qv=jdVec(jdTf(jdText)), qn=jdNorm(qv);
+  /* relevance reads the duties; coverage still reads the whole document, so the
+     percentage shown is the one a full match reports */
+  var qv=jdVec(jdTf(jdRoleText(jdText))), qn=jdNorm(qv);
   var titleToks=jdTitleToks(jdTitleLine(jdText));
   STANDARDS.forEach(function(s,i){
     if(!s.ksbs||s.name==='Other / custom')return;
@@ -5996,6 +5998,41 @@ function jdTitleLine(t){
   for(var k=0;k<lines.length;k++){ if(lines[k]&&!isLabel(lines[k]))return lines[k]; }
   return '';
 }
+/* ── The part of a job description that is about the job ─────────────────────
+   Seven job descriptions from one employer shared roughly 40% of their text —
+   the same About Us, Our Values, Physical Demands and equal-opportunities
+   boilerplate. Ranked on the whole document, that shared material is most of
+   what the maths sees: "Employability practitioner" appeared in the top five of
+   six of them, and a surgical device company's About Us pulled up Doctor and
+   Healthcare science associate.
+
+   A person reads the duties and skips the About Us. These headings are
+   conventional enough to do the same. If nothing recognisable is found the whole
+   text is used, so an unstructured JD is no worse off than before. */
+var JD_DROP_SECTION=/^(about (us|the company|globus|our company)|company (overview|profile|information)|who we are|our (values|culture|mission|story|team)|values|culture|physical (demands|requirements)|work environment|equal (employment|opportunit)|eeo|diversity|inclusion|benefits|what we offer|package|other duties|disclaimer|note|travel( requirements)?|salary|hours of work|location)\b/i;
+
+function jdRoleText(t){
+  var lines=String(t).split(/\n/);
+  var keep=[], dropping=false, dropped=0;
+  for(var i=0;i<lines.length;i++){
+    var raw=lines[i], l=raw.trim();
+    /* a heading is a short line, usually ending in a colon */
+    var isHeading=l.length>0&&l.length<=60&&(/:\s*$/.test(l)||/^[A-Z][A-Za-z ,&/'-]{2,58}$/.test(l));
+    if(isHeading){
+      var bare=l.replace(/:\s*$/,'').trim();
+      if(JD_DROP_SECTION.test(bare)){dropping=true;dropped++;continue;}
+      dropping=false;
+      continue;                 /* headings themselves carry no role vocabulary */
+    }
+    if(!dropping)keep.push(raw);
+  }
+  var out=keep.join('\n').trim();
+  /* if the filter found nothing to drop, or stripped almost everything, keep the
+     original — a heuristic that empties the document is worse than none */
+  if(!dropped||out.length<Math.max(200,String(t).length*0.15))return String(t);
+  return out;
+}
+
 function jdTitleToks(str){
   var out=new Set();
   String(str).toLowerCase().split(/[^a-z]+/).forEach(function(w){
