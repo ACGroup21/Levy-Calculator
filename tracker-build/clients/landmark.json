@@ -1,0 +1,22 @@
+{
+  "clientId": "landmark",
+  "brand": {
+    "clientName": "Landmark Group",
+    "appTitle": "Apprentice Tracker",
+    "tagline": "Learner reviews & progress · Landmark Group",
+    "intro": "Log apprentice progress reviews — they feed the tracker & dashboard.",
+    "footerName": "Landmark Apprentice Tracker",
+    "version": "v0.21 · build 2026-07-06e",
+    "logoAlt": "Landmark",
+    "logo": "keep"
+  },
+  "provider": {
+    "name": "OneFile",
+    "org": "Ginger Nut Training",
+    "heading": "Provider data — OneFile (Ginger Nut Training)",
+    "importLabel": "↑ Import OneFile CSV",
+    "cardLabel": "OneFile · Ginger Nut"
+  },
+  "standards": ["ST0384", "ST0070", "ST0795"],
+  "demo": "keep"
+}

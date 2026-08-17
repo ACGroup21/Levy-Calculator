@@ -1,0 +1,31 @@
+{
+  "clientId": "meridian",
+  "brand": {
+    "clientName": "Meridian Care",
+    "appTitle": "Apprentice Tracker",
+    "tagline": "Learner reviews & progress · Meridian Care",
+    "intro": "Log apprentice progress reviews — they feed the tracker & dashboard.",
+    "footerName": "Meridian Care Apprentice Tracker",
+    "version": "v0.21 · build 2026-07-06e",
+    "logoAlt": "Meridian Care",
+    "logo": null
+  },
+  "provider": {
+    "name": "Bud",
+    "org": "Care Skills Partnership",
+    "heading": "Provider data — Bud (Care Skills Partnership)",
+    "importLabel": "↑ Import Bud CSV",
+    "cardLabel": "Bud · Care Skills"
+  },
+  "standards": ["ST0005", "ST0007"],
+  "demo": {
+    "reviews": [
+      {"id": "m-a1", "present": {"learner": true, "coach": true, "manager": false}, "learner": "Sarah Doyle", "prog": "L2 Adult Care Worker", "date": "2026-05-10", "coach": "You", "assessMode": "agree", "em": "In progress", "otj": "20", "otjc": "90", "otjt": "240", "ksbs": "K1 duty of care; S3 person-centred support", "assign": "Care plan workbook in progress", "well": "Confident with residents", "chal": "Medication module pending", "well2": "", "actions": "Complete medication module", "next": "2026-07-10"},
+      {"id": "m-j1", "present": {"learner": true, "coach": true, "manager": true}, "learner": "James Obi", "prog": "L2 Adult Care Worker", "date": "2026-05-12", "coach": "You", "assessMode": "own", "ownrag": "behind", "ownreason": "Placement disruption set evidence back this cycle.", "em": "Not started", "otj": "10", "otjc": "40", "otjt": "240", "ksbs": "K4 safeguarding responsibilities", "assign": "Induction workbook", "well": "Engaged in sessions", "chal": "Functional skills not started", "well2": "Requested extra study support", "actions": "Enrol on functional skills English", "next": "2026-06-20"}
+    ],
+    "provider": {
+      "sarah doyle": {"learner": "Sarah Doyle", "aim": "Adult Care Worker (Level 2)", "progress": 38, "target": 42, "deviation": -4, "completion": "01/09/2026", "nextreview": "10/07/2026", "unitsDone": 4, "unitsTotal": 9, "tasks": 6},
+      "james obi": {"learner": "James Obi", "aim": "Adult Care Worker (Level 2)", "progress": 18, "target": 35, "deviation": -17, "completion": "15/11/2026", "nextreview": "20/06/2026", "unitsDone": 1, "unitsTotal": 9, "tasks": 11}
+    }
+  }
+}
