@@ -179,9 +179,25 @@
   #phMeta{margin:0 0 18px;padding-bottom:14px;border-bottom:3px solid var(--orange)}
   #phMeta .ph-t{font-size:20px;font-weight:700;color:var(--ink)}
   #phMeta .ph-m{font-size:12px;color:var(--text2);margin-top:4px}
+  /* single-review printable form (MS-Forms style) — hidden except when printing one review */
+  #reviewPrint{display:none}
+  .pr-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--purple);padding-bottom:9px;margin-bottom:6px}
+  .pr-brand{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--ink)}
+  .pr-doc{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)}
+  .pr-lead{font-size:15px;color:var(--ink);margin:10px 0 16px}
+  .pr-name{font-weight:700}
+  .pr-sec{margin-bottom:13px;break-inside:avoid}
+  .pr-sec h3{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin:0 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px}
+  .pr-field{margin-bottom:9px;break-inside:avoid}
+  .pr-q{font-size:12px;color:var(--text2);margin-bottom:2px}
+  .pr-a{font-size:13.5px;color:var(--ink);white-space:pre-wrap;line-height:1.45}
+  .pr-foot{margin-top:16px;font-size:10.5px;color:var(--text3);border-top:1px solid var(--line);padding-top:8px}
   @media print{
     @page{margin:13mm}
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    /* printing a single review: hide the whole app, show only the review form */
+    body.print-review .wrap{display:none!important}
+    body.print-review #reviewPrint{display:block}
     /* report on white paper — flip vars back to light for readability */
     :root{--ink:#1F1C40;--text:#2a2846;--text2:#565478;--text3:#6f6d8a;--panel:#fff;--panelb:#d7d4e6;--line:#e6e4f0;
       --red:#c2415c;--green:#0f7d45;--gold:#8a6410;--purple:#C2533F}  /* darken semantic + accent for AA on white paper */
@@ -360,6 +376,7 @@
     <div style="margin-top:12px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="56 11 351 181" role="img" aria-label="AC Digital" style="display:block;flex:none;width:28px;height:14px;color:var(--text2)"><g fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"><path d="M68 180 L149 23 L232 180"/><path d="M395 37.3 A81.5 81.5 0 1 0 395 169.7"/></g><circle cx="149.5" cy="173" r="13.5" fill="#1596D2"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong> &middot; part of Arthur&nbsp;Curtis&nbsp;Group</span></div>
   </div>
 </div>
+<div id="reviewPrint"></div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -379,7 +396,7 @@ const CONFIG={
     tagline:'Learner reviews & progress · Landmark Group',
     intro:'Log apprentice progress reviews — they feed the tracker & dashboard.',
     footerName:'Landmark Apprentice Tracker',
-    version:'v0.21 · build 2026-07-06e',
+    version:'v0.22 · build 2026-07-06f',
     logoAlt:'Landmark',
     logo:null,                                      // null = keep the <img id="brandLogo"> in the HTML
   },
@@ -529,7 +546,7 @@ function renderList(){
   el.innerHTML=reviews.slice().reverse().map(r=>
     '<div class="rev-row"><div><span class="rev-name">'+esc(r.learner)+'</span>'+(r.prog?' <span class="rev-meta">· '+esc(r.prog)+'</span>':'')+'</div>'+
     '<span class="rev-meta">'+(r.date||'—')+'</span>'+assessChip(r)+
-    '<span><button class="link" onclick="editReview(\''+r.id+'\')">edit</button> &nbsp; <button class="link del" onclick="delReview(\''+r.id+'\')">delete</button></span></div>').join('');
+    '<span><button class="link" onclick="printReview(\''+r.id+'\')">print</button> &nbsp; <button class="link" onclick="editReview(\''+r.id+'\')">edit</button> &nbsp; <button class="link del" onclick="delReview(\''+r.id+'\')">delete</button></span></div>').join('');
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
@@ -861,6 +878,29 @@ function loadDemo(){reviews=DEMO.reviews.map(r=>Object.assign({},r));provider=JS
   renderTabs();renderList();updateProvState();renderDashboard();window.scrollTo({top:0,behavior:'smooth'});}
 function clearAll(){if(!confirm('Clear ALL reviews and provider data?'))return;reviews=[];provider={};ksbCov={};editId=null;persist();persistProv();persistKsb();
   resetForm();renderTabs();renderList();updateProvState();renderDashboard();}
+
+// ===== Print a single review as a clean form (MS-Forms style), embedded — no external service =====
+function prField(q,a){a=(a==null||String(a).trim()==='')?'—':a;return '<div class="pr-field"><div class="pr-q">'+esc(q)+'</div><div class="pr-a">'+esc(a)+'</div></div>';}
+function buildReviewPrintHTML(r){
+  var present=[];if(r.present){if(r.present.learner)present.push('Learner');if(r.present.coach)present.push('Coach / trainer');if(r.present.manager)present.push('Line manager');}
+  var a=coachAssess(r);
+  var assessTxt=a.mode==='own'?('Own view: '+ragLabel(a.rag)+(a.reason?' — '+a.reason:'')):('Agree with '+CONFIG.provider.name);
+  var h='<div class="pr-head"><div class="pr-brand">'+esc(CONFIG.brand.clientName)+'</div><div class="pr-doc">Apprentice Learner Review</div></div>';
+  h+='<div class="pr-lead"><span class="pr-name">'+esc(r.learner||'—')+'</span>'+(r.prog?' &middot; '+esc(r.prog):'')+(r.date?' &middot; '+fmtDate(r.date):'')+'</div>';
+  h+='<div class="pr-sec"><h3>Review details</h3>'+prField('Reviewer / coach',r.coach)+prField('Review date',fmtDate(r.date))+prField('Present at review',present.join(', '))+'</div>';
+  h+='<div class="pr-sec"><h3>Coach assessment</h3>'+prField('Assessment',assessTxt)+'</div>';
+  if(r.prevActionsReview&&r.prevActionsReview.length){
+    var rows=r.prevActionsReview.map(function(x){return '<div class="pr-field"><div class="pr-q">'+esc(x.text)+'</div><div class="pr-a">'+esc(x.status||'—')+'</div></div>';}).join('');
+    h+='<div class="pr-sec"><h3>Follow-through since last review'+(r.prevReviewDate?' ('+esc(fmtDate(r.prevReviewDate))+')':'')+'</h3>'+rows+'</div>';
+  }
+  h+='<div class="pr-sec"><h3>Progress detail</h3>'+prField('English & maths',r.em)+prField('Off-the-job — this period (hrs)',r.otj)+prField('Off-the-job — cumulative (hrs)',r.otjc)+prField('Off-the-job — target (hrs)',r.otjt)+prField('KSBs / units covered this period',r.ksbs)+prField('Assignments',r.assign)+'</div>';
+  h+='<div class="pr-sec"><h3>Reflection</h3>'+prField('What’s going well',r.well)+prField('Challenges / barriers',r.chal)+prField('Wellbeing / support needs',r.well2)+'</div>';
+  h+='<div class="pr-sec"><h3>Actions</h3>'+prField('Targets / actions before next review',r.actions)+prField('Next review date',fmtDate(r.next))+'</div>';
+  h+='<div class="pr-foot">'+esc(CONFIG.brand.footerName)+' &middot; prepared by Arthur Curtis Education</div>';
+  return h;
+}
+function printReview(id){var r=reviews.find(function(x){return x.id===id;});if(!r)return;document.getElementById('reviewPrint').innerHTML=buildReviewPrintHTML(r);document.body.classList.add('print-review');window.print();}
+window.addEventListener('afterprint',function(){document.body.classList.remove('print-review');});
 
 function exportPDF(){
   active='dashboard';document.getElementById('tab-reviews').style.display='none';document.getElementById('tab-dashboard').style.display='';
