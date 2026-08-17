@@ -370,6 +370,7 @@
    change clientId (isolates their data), list their standards. A generator
    will automate this in Phase 3.
    ═══════════════════════════════════════════════════════════════════════════ */
+//<<CONFIG>> — generator replaces this whole block per client
 const CONFIG={
   clientId:'landmark',                              // localStorage namespace — keep stable per client
   brand:{
@@ -391,6 +392,7 @@ const CONFIG={
   },
   standards:['ST0384','ST0070','ST0795'],           // ST codes = ksb-library keys (generator embeds only these)
 };
+//<</CONFIG>>
 const PV=CONFIG.provider.name;
 function applyConfig(){
   const b=CONFIG.brand,txt=(id,v)=>{const e=document.getElementById(id);if(e&&v!=null)e.textContent=v;};
@@ -833,6 +835,7 @@ function renderDashboard(){
 }
 
 // ===== Demo data (a realistic 5-learner cohort, both sources) =====
+//<<DEMO>> — client demo cohort (generator replaces this block per client)
 const DEMO={
   reviews:[
     {id:'demo-p1',present:{learner:true,coach:true,manager:false},learner:'Preetii Sharma',prog:'L3 Team Leader',date:'2026-01-02',coach:'You',assessMode:'agree',em:'In progress',otj:'22',otjc:'120',otjt:'329',ksbs:'K2 leading teams; S4 delivering results',assign:'Assignment 1 submitted',well:'Confident presenting',chal:'Time management alongside BAU',well2:'',actions:'Draft assignment 2',next:'2026-02-03'},
@@ -852,6 +855,7 @@ const DEMO={
     'chloe bennett':{learner:'Chloe Bennett',aim:'Team Leader Apprenticeship Standard (January 2025)',progress:90,target:85,deviation:5,completion:'01/04/2026',nextreview:'22/08/2026',unitsDone:8,unitsTotal:8,tasks:0}
   }
 };
+//<</DEMO>>
 function loadDemo(){reviews=DEMO.reviews.map(r=>Object.assign({},r));provider=JSON.parse(JSON.stringify(DEMO.provider));persist();persistProv();
   active='dashboard';document.getElementById('tab-reviews').style.display='none';document.getElementById('tab-dashboard').style.display='';
   renderTabs();renderList();updateProvState();renderDashboard();window.scrollTo({top:0,behavior:'smooth'});}
