@@ -64,8 +64,14 @@ That's it. Open `dist/acme-tracker.html`, click **Load demo cohort** to sanity-c
     "cardLabel": "OneFile · Ginger Nut"
   },
   "standards": ["ST0384"],            // REQUIRED. ST codes the cohort is on (see below).
-  "demo": "keep"                      // "keep" = template's demo, or {reviews:[…],provider:{…}},
+  "demo": "keep",                     // "keep" = template's demo, or {reviews:[…],provider:{…}},
                                       // or a filename, or null for an empty demo.
+  "palette": {                        // OPTIONAL. Omit -> the default Landmark navy/coral.
+    "bg": "#0A211F",                  //   dark brand background (must be LOW luminance)
+    "accent": "#57C9B6",              //   brand accent (headings, links, buttons)
+    "secondary": "#EAB05A"            //   second colour (progress bars + background glow)
+    // bg2 / accentDark / accentPrint are auto-derived; you can override any of them.
+  }
 }
 ```
 
@@ -111,9 +117,13 @@ python build-library.py              # scraper output -> ksb-library.json (257 s
 
 - **Data isolation** is by `clientId` — keys are `<clientId>_reviews_v1`, `<clientId>_provider_v1`,
   `<clientId>_summary_notes_v1`, `<clientId>_ksb_v1`. Keep `clientId` unique and stable.
-- **Palette is shared** (the validated Landmark navy/coral). Per-client colours are a planned
-  follow-up — each new palette needs a WCAG-AA contrast check (screen **and** the white report),
-  so don't just drop in arbitrary brand colours yet.
+- **Per-client palettes are validated.** Set `palette` in the config and the generator checks
+  **every** text/background combination against WCAG AA — on the client's screen background *and*
+  on the white report — and **refuses to build** if any fail. So you can't ship an unreadable
+  brand colour. The report accent is auto-darkened to stay legible on white.
+  - The background **must be dark** (low luminance). A common trap: a teal/green bg looks dark but
+    its green channel lifts luminance — the validator will reject it and tell you which greys fail.
+    Preview a palette without generating: `python palette.py clients/<id>.json`.
 - **Logo** is embedded at generate time, so a client's file never carries another client's logo.
 - **PII / GDPR:** trackers hold real learner data in the browser on the device. Share the **PDF
   report** externally (read-only), keep the JSON/CSV working-data internal. Cloud sync is a
@@ -124,6 +134,7 @@ python build-library.py              # scraper output -> ksb-library.json (257 s
 | File | What it is |
 |---|---|
 | `generate-client.py` | the generator: master + `clients/<id>.json` → `dist/<id>-tracker.html` |
+| `palette.py` | resolves + WCAG-AA-validates a client palette; emits the `:root` blocks |
 | `build-library.py` | builds `ksb-library.json` from the apprenticeship scraper |
 | `build-ksb.py` | extracts a KSB subset for given ST codes (used by the generator) |
 | `ksb-library.json` | master KSB reference — 257 standards, keyed by ST code |
