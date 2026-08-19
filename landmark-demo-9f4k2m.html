@@ -8,24 +8,27 @@
 <style>
   /* ▓▓ BRAND PALETTE — client config (the generator swaps these per client; run a
      WCAG-AA contrast check when changing them). Currently: Landmark navy/coral. ▓▓ */
+  /*<<PALETTE>>*/
   :root{
     --bg:#1F1C40; --bg2:#171533; --panel:rgba(255,255,255,0.05); --panelb:rgba(255,255,255,0.14); --line:rgba(255,255,255,0.09);
     --ink:#FFFFFF; --text:#E7E6F0; --text2:#ABA9C7; --text3:#9C99BF;  /* text3 raised to meet WCAG AA (≥4.5:1) on panels */
     --purple:#E8725D; --purple-d:#C2533F; --blue:#8E8CC4;   /* --purple = coral accent */
     --orange:#E8725D; --orange-d:#C2533F;
+    --accent-rgb:232,114,93; --accent2-rgb:142,140,196;   /* accent + secondary glow as r,g,b for rgba() */
     --gold:#E0A43B; --red:#ef7189; --green:#4fd18b;  /* red raised for AA on cards */
     --serif:Georgia,'Times New Roman',serif;
     --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
   }
+  /*<</PALETTE>>*/
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);
     color:var(--text);font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5;padding:26px 22px 60px}
   body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;
     background:
-      radial-gradient(40% 42% at 12% 16%, rgba(232,114,93,0.20), transparent 60%),
-      radial-gradient(44% 46% at 88% 14%, rgba(142,140,196,0.16), transparent 60%),
-      radial-gradient(46% 46% at 82% 88%, rgba(232,114,93,0.12), transparent 62%),
-      radial-gradient(42% 42% at 16% 92%, rgba(142,140,196,0.12), transparent 60%);
+      radial-gradient(40% 42% at 12% 16%, rgba(var(--accent-rgb),0.20), transparent 60%),
+      radial-gradient(44% 46% at 88% 14%, rgba(var(--accent2-rgb),0.16), transparent 60%),
+      radial-gradient(46% 46% at 82% 88%, rgba(var(--accent-rgb),0.12), transparent 62%),
+      radial-gradient(42% 42% at 16% 92%, rgba(var(--accent2-rgb),0.12), transparent 60%);
     animation:drift 22s ease-in-out infinite alternate;}
   @keyframes drift{
     0%{transform:translate3d(0,0,0) scale(1)}
@@ -39,7 +42,7 @@
   .brand .rule{width:1px;height:30px;background:var(--panelb)}
   h1{font-family:var(--serif);font-size:25px;font-weight:600;margin:0;letter-spacing:0;color:var(--ink)}
   .brand .tag{color:var(--text3);font-size:12.5px;margin-top:1px}
-  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--orange);background:rgba(232,114,93,0.12);border:1px solid rgba(232,114,93,0.4);border-radius:99px;padding:5px 12px}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--orange);background:rgba(var(--accent-rgb),0.12);border:1px solid rgba(var(--accent-rgb),0.4);border-radius:99px;padding:5px 12px}
   .intro{color:var(--text2);font-size:13.5px;margin:14px 0 18px}
 
   .tabs{display:flex;gap:8px;border-bottom:1px solid var(--panelb);margin-bottom:22px}
@@ -60,7 +63,7 @@
     border-radius:9px;padding:9px 11px;color:var(--ink);font-size:13.5px;font-family:inherit}
   select option{color:#111;background:#fff}
   textarea{min-height:64px;resize:vertical;line-height:1.5}
-  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(232,114,93,0.22)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.22)}
   input::placeholder,textarea::placeholder{color:var(--text3)}
   .checks{display:flex;gap:16px;flex-wrap:wrap;padding-top:4px}
   .checks label{display:flex;align-items:center;gap:7px;color:var(--text);font-size:13px;cursor:pointer}
@@ -85,8 +88,8 @@
     border-radius:99px;padding:8px 15px;cursor:pointer;line-height:1;
     border:1px solid var(--panelb);background:rgba(255,255,255,0.05);color:var(--text);transition:all .15s}
   .pill:hover{border-color:var(--purple);color:var(--purple)}
-  .pill.accent{color:var(--orange);background:rgba(232,114,93,0.12);border-color:rgba(232,114,93,0.42)}
-  .pill.accent:hover{background:rgba(232,114,93,0.20);color:var(--orange)}
+  .pill.accent{color:var(--orange);background:rgba(var(--accent-rgb),0.12);border-color:rgba(var(--accent-rgb),0.42)}
+  .pill.accent:hover{background:rgba(var(--accent-rgb),0.20);color:var(--orange)}
   .pill.danger:hover{border-color:var(--red);color:var(--red)}
 
   .rev-list{margin-top:4px}
@@ -164,7 +167,7 @@
   .mini{font-size:11px;color:var(--text3)}
   .sched{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
   .dchip{font-family:var(--mono);font-size:11.5px;padding:3px 9px;border-radius:6px;background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--panelb)}
-  .dchip.next{background:rgba(232,114,93,0.14);border:1px dashed var(--orange);color:var(--orange);font-weight:600}
+  .dchip.next{background:rgba(var(--accent-rgb),0.14);border:1px dashed var(--orange);color:var(--orange);font-weight:600}
   .themes{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
   .tbox{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
   .tbox h4{margin:0 0 6px;font-size:10.5px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
@@ -199,8 +202,10 @@
     body.print-review .wrap{display:none!important}
     body.print-review #reviewPrint{display:block}
     /* report on white paper — flip vars back to light for readability */
+    /*<<PALETTE-PRINT>>*/
     :root{--ink:#1F1C40;--text:#2a2846;--text2:#565478;--text3:#6f6d8a;--panel:#fff;--panelb:#d7d4e6;--line:#e6e4f0;
-      --red:#c2415c;--green:#0f7d45;--gold:#8a6410;--purple:#C2533F}  /* darken semantic + accent for AA on white paper */
+      --red:#c2415c;--green:#0f7d45;--gold:#8a6410;--purple:#C2533F;--orange:#C2533F}  /* darken semantic + accent for AA on white paper */
+    /*<</PALETTE-PRINT>>*/
     body{background:#fff;padding:0;font-size:12px}
     body::before{display:none}
     .wrap{max-width:100%}
@@ -372,7 +377,7 @@
   <div class="foot">
     Reviews are saved <b>on this device</b> (browser storage) for now — export JSON to feed the dashboard. Distributed capture (learners self-submitting, like MS Forms) is a later decision — that needs a shared store. Holds learner data: keep it on a trusted device.
     <div style="margin-top:10px">Demo · <button class="link" onclick="loadDemo()">Load demo cohort</button> &nbsp;·&nbsp; <button class="link del" onclick="clearAll()">Clear all data</button></div>
-    <div id="brandFooter" style="opacity:.7;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.22 &middot; build 2026-07-06f &middot; Arthur Curtis Education</div>
+    <div id="brandFooter" style="opacity:.7;font-size:11px;margin-top:12px;letter-spacing:.04em">Landmark Apprentice Tracker &middot; v0.23 &middot; build 2026-08-19a &middot; Arthur Curtis Education</div>
     <div style="margin-top:12px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="56 11 351 181" role="img" aria-label="AC Digital" style="display:block;flex:none;width:28px;height:14px;color:var(--text2)"><g fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"><path d="M68 180 L149 23 L232 180"/><path d="M395 37.3 A81.5 81.5 0 1 0 395 169.7"/></g><circle cx="149.5" cy="173" r="13.5" fill="#1596D2"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;Digital</strong> &middot; part of Arthur&nbsp;Curtis&nbsp;Group</span></div>
   </div>
 </div>
@@ -396,7 +401,7 @@ const CONFIG={
     tagline:'Learner reviews & progress · Landmark Group',
     intro:'Log apprentice progress reviews — they feed the tracker & dashboard.',
     footerName:'Landmark Apprentice Tracker',
-    version:'v0.22 · build 2026-07-06f',
+    version:'v0.23 · build 2026-08-19a',
     logoAlt:'Landmark',
     logo:null,                                      // null = keep the <img id="brandLogo"> in the HTML
   },

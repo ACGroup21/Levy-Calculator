@@ -17,6 +17,11 @@
     "importLabel": "↑ Import Bud CSV",
     "cardLabel": "Bud · Care Skills"
   },
+  "palette": {
+    "bg": "#0A211F",
+    "accent": "#57C9B6",
+    "secondary": "#EAB05A"
+  },
   "standards": ["ST0005", "ST0007"],
   "demo": {
     "reviews": [
