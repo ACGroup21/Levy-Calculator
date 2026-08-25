@@ -424,6 +424,41 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Provenance: click any figure to see how it was made ─────────────────── */
+:root{--prov-bg:#0f1826;--prov-line:rgba(45,212,178,.34);--prov-dash:rgba(45,212,178,.42)}
+:root[data-theme="light"]{--prov-bg:#ffffff;--prov-line:rgba(10,110,134,.32);--prov-dash:rgba(10,110,134,.42)}
+.prov{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;
+  line-height:inherit;letter-spacing:inherit;border-bottom:1px dashed var(--prov-dash)}
+.prov:hover,.prov[aria-expanded="true"]{border-bottom-color:var(--teal);border-bottom-style:solid}
+.prov:focus-visible{outline:2px solid var(--teal);outline-offset:3px;border-radius:3px}
+.provpop{position:fixed;z-index:400;width:min(370px,calc(100vw - 20px));background:var(--prov-bg);
+  border:1px solid var(--prov-line);border-radius:12px;padding:13px 15px 12px;
+  box-shadow:0 26px 64px -22px rgba(0,0,0,.75);font-size:13px;color:var(--text);
+  font-family:var(--sans),system-ui,sans-serif;text-align:left}
+.prov-hd{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px}
+.prov-hd h4{margin:0;font-family:'Roboto Mono',monospace;font-size:10.5px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--teal);font-weight:700;flex:1}
+.prov-x{background:none;border:0;color:var(--text3);font-size:17px;line-height:1;cursor:pointer;padding:0 2px}
+.prov-x:hover{color:var(--text)}
+.prov-x:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+.prov-calc{font-family:'Roboto Mono',monospace;font-size:12px}
+.prov-row{display:flex;justify-content:space-between;gap:14px;padding:3px 0;color:var(--text3)}
+.prov-row b{color:var(--text);font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap}
+.prov-row.is-total{border-top:1px solid var(--border);margin-top:4px;padding-top:6px;color:var(--text2)}
+.prov-row.is-total b{font-weight:700;color:var(--teal)}
+.prov-rule{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);
+  font-size:12.5px;line-height:1.55;color:var(--text2)}
+.prov-rule b{color:var(--text)}
+.prov-est{margin-top:8px;font-size:12px;color:var(--text3);font-style:italic}
+.prov-src{margin-top:9px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:11.5px}
+.prov-src a{color:var(--text2)}
+.prov-stamp{display:inline-flex;align-items:center;gap:6px;font-family:'Roboto Mono',monospace;
+  font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+.prov-stamp:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.prov-warn{margin-bottom:9px;padding:8px 10px;border-radius:8px;font-size:12.5px;line-height:1.5;
+  background:rgba(255,90,90,.09);border:1px solid rgba(255,90,90,.34);border-left-width:3px;color:var(--text)}
+@media (prefers-reduced-motion: no-preference){.provpop{animation:provIn .13s ease-out}}
+@keyframes provIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 .metric{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;position:relative;overflow:hidden;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:border-color .2s,box-shadow .2s}
 .metric::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(45,212,178,0.4),transparent)}
 .metric:hover{border-color:var(--border2);box-shadow:0 0 20px rgba(45,212,178,0.06)}
@@ -1884,7 +1919,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31x</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01b</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -2847,6 +2882,281 @@ const LevyEngine=(function(){
   };
 })();
 let levyData={monthlyAvg:0,balance:0,byMonth:[]};
+/* ═══ PROVENANCE — click any figure to see how it was made ═══════════════════
+   Flagship 1 of the world-class rescope (2026-08-25). Turns show-the-working
+   from a panel you expand into a question you can ask of ONE number: the
+   arithmetic behind THIS figure, the rule that governed it, and the date that
+   rule was last checked against gov.uk.
+
+   THE DESIGN RULE THAT MATTERS: a builder must RECOMPUTE from live state and
+   never restate a literal. Every builder returns `result`; before the panel
+   renders, that result is reconciled against the figure actually on screen.
+   If they disagree the panel SAYS SO instead of presenting a tidy fiction —
+   an unverifiable working is worse than no working at all, because it looks
+   like proof. This is the whole point of the feature.
+--------------------------------------------------------------------------- */
+var PROVDATA = {};                       // render-time capture, for figures whose
+function provSet(k, v) { PROVDATA[k] = v; }   // inputs are local to a render fn
+
+/* wrap a figure so it can be interrogated. Keyboard-reachable by construction. */
+function pv(key, inner, label) {
+  return '<button type="button" class="prov" data-prov="' + key + '" aria-expanded="false"' +
+    (label ? ' aria-label="' + label + ', show how this figure was made"' : '') +
+    '>' + inner + '</button>';
+}
+
+function provNum(txt) {
+  var n = String(txt == null ? '' : txt).replace(/[^0-9.\-]/g, '');
+  return n === '' ? NaN : parseFloat(n);
+}
+
+var PROV_SRC = { name: 'gov.uk — Apprenticeship funding rules', url: RULEBOOK.source };
+
+var PROV = {
+
+  /* ---- levy position ---------------------------------------------------- */
+  balance: function () {
+    var inc = 0, paid = 0, n = 0;
+    (levyData.byMonth || []).forEach(function (m) { inc += (+m.income || 0); paid += (+m.paid || 0); n++; });
+    return {
+      title: 'Account balance',
+      steps: [['Levy declared plus top-up, ' + n + ' month' + (n !== 1 ? 's' : ''), fmt(inc)],
+              ['Less drawn for training', paid > 0 ? '−' + fmt(paid) : fmt(0)],
+              ['= Balance', fmt(levyData.balance)]],
+      result: levyData.balance,
+      check: inc - paid,
+      rule: 'Every levy declaration is credited to your apprenticeship service account with a ' +
+            Math.round(RULEBOOK.topUpRate * 100) + '% government top-up, and debited as training is drawn.'
+    };
+  },
+
+  monthlyAvg: function () {
+    var inc = 0, n = (levyData.byMonth || []).length;
+    (levyData.byMonth || []).forEach(function (m) { inc += (+m.income || 0); });
+    return {
+      title: 'Average monthly income',
+      steps: [['Total income into the account', fmt(inc)],
+              ['÷ months of data', String(n)],
+              ['= Average per month', fmt(levyData.monthlyAvg)]],
+      result: levyData.monthlyAvg,
+      check: n ? inc / n : 0,
+      rule: 'Income is your declared levy plus the ' + Math.round(RULEBOOK.topUpRate * 100) +
+            '% top-up. Averaged over the months present in your data, so a partial year averages only those months.'
+    };
+  },
+
+  annualLevy: function () {
+    var a = levyData.monthlyAvg * 12;
+    return {
+      title: 'Projected annual levy',
+      steps: [['Average monthly income', fmt(levyData.monthlyAvg)],
+              ['× 12 months', '12'],
+              ['= Projected for a year', fmt(a)]],
+      result: a,
+      check: levyData.monthlyAvg * 12,
+      rule: 'A straight-line projection from your average month. It assumes your pay bill holds steady — ' +
+            'if headcount or pay moves, so does this.',
+      estimate: true
+    };
+  },
+
+  maxGift: function () {
+    var a = levyData.monthlyAvg * 12, cap = a * RULEBOOK.transferCapPct;
+    return {
+      title: 'Maximum you can gift',
+      steps: [['Projected annual levy', fmt(a)],
+              ['× transfer cap ' + Math.round(RULEBOOK.transferCapPct * 100) + '%', String(RULEBOOK.transferCapPct)],
+              ['= Most you may transfer', fmt(cap)]],
+      result: cap,
+      check: a * RULEBOOK.transferCapPct,
+      rule: 'An employer may transfer up to ' + Math.round(RULEBOOK.transferCapPct * 100) +
+            '% of their annual levy funds to other employers. The receiving employer gets 100% of the funding band.'
+    };
+  },
+
+  /* ---- projection ------------------------------------------------------- */
+  trainDraw: function () {
+    var d = PROVDATA.proj || {};
+    return {
+      title: 'Training drawn over ' + (d.years || projYears) + ' years',
+      steps: [['Committed to training', fmt((d.tT || 0) + (d.tE || 0))],
+              ['× practical-period share ' + Math.round(RULEBOOK.draw.training * 100) + '%', String(RULEBOOK.draw.training)],
+              ['= Drawn in monthly instalments', fmt(d.tT || 0)]],
+      result: d.tT,
+      check: ((d.tT || 0) + (d.tE || 0)) * RULEBOOK.draw.training,
+      rule: Math.round(RULEBOOK.draw.training * 100) + '% of each negotiated price is drawn in equal monthly ' +
+            'instalments across the practical period. The remaining ' + Math.round(RULEBOOK.draw.epa * 100) +
+            '% is held back until end-point assessment is complete.'
+    };
+  },
+
+  epaPay: function () {
+    var d = PROVDATA.proj || {};
+    return {
+      title: 'End-point assessment payments',
+      steps: [['Committed to training', fmt((d.tT || 0) + (d.tE || 0))],
+              ['× EPA share ' + Math.round(RULEBOOK.draw.epa * 100) + '%', String(RULEBOOK.draw.epa)],
+              ['= Released on completion', fmt(d.tE || 0)]],
+      result: d.tE,
+      check: ((d.tT || 0) + (d.tE || 0)) * RULEBOOK.draw.epa,
+      rule: 'The final ' + Math.round(RULEBOOK.draw.epa * 100) + '% of each price is released only when the ' +
+            'apprentice completes end-point assessment — so it lands as events, not as a monthly line.'
+    };
+  },
+
+  /* ---- non-levy co-investment ------------------------------------------- */
+  nlTotal: function () {
+    var d = PROVDATA.nl || {}, f = d.f || {};
+    var ffCount = +f.fullyFunded || 0;                                  // a COUNT, not an amount
+    var ffMoney = Math.max(0, (+f.totalBand || 0) - (+f.coFundedBands || 0)); // the band value behind it
+    var steps = [['Apprenticeships planned', String(f.totalCount || 0)]];
+    if (ffCount > 0) {
+      steps.push(['Co-funded bands', fmt(f.coFundedBands || 0)]);
+      steps.push(['Bands for ' + ffCount + ' fully-funded apprentice' + (ffCount !== 1 ? 's' : ''), fmt(ffMoney)]);
+    }
+    steps.push(['= Cost of the training itself', fmt(f.totalBand || 0)]);
+    return {
+      title: 'Total training investment',
+      steps: steps,
+      result: f.totalBand,
+      check: ffCount > 0 ? (+f.coFundedBands || 0) + ffMoney : (+f.totalBand || 0),
+      rule: 'Each apprenticeship is funded up to the maximum of its funding band. Anything negotiated above ' +
+            'the band maximum is paid by the employer in full and is not government-funded.'
+    };
+  },
+
+  nlGov: function () {
+    var d = PROVDATA.nl || {}, f = d.f || {}, s = d.s || {};
+    var co = +f.coFundedBands || 0, ff = +f.fullyFunded || 0;
+    var empShare = co ? (+f.employer || 0) / co : 0;      // what THIS plan is charged, not the pre-boundary default
+    var govShare = 1 - empShare;
+    var ffMoney = Math.max(0, (+f.totalBand || 0) - co);
+    var steps = [['Co-funded bands', fmt(co)],
+                 ['× government share ' + Math.round(govShare * 100) + '%', fmt(co * govShare)]];
+    if (ff > 0) steps.push(['+ ' + ff + ' fully funded at 100%', fmt(ffMoney)]);
+    steps.push(['= Government contribution', fmt(s.gov || 0)]);
+    return {
+      title: 'Funded by government',
+      steps: steps,
+      result: s.gov,
+      check: co * govShare + ffMoney,
+      rule: 'Government funds ' + Math.round((1 - RULEBOOK.coInvest.before) * 100) + '% of a co-funded band for ' +
+            'apprenticeships starting before August 2026, and ' + Math.round((1 - RULEBOOK.coInvest.from) * 100) +
+            '% from that point. It funds 100% for an apprentice aged 16–21 at their start date, and for a ' +
+            '22–24 year old with an EHCP or a care-leaver history.'
+    };
+  },
+
+  nlYourInv: function () {
+    var d = PROVDATA.nl || {}, f = d.f || {}, s = d.s || {};
+    var co = +f.coFundedBands || 0, ff = +f.fullyFunded || 0, tr = +s.transfers || 0;
+    var empShare = co ? (+f.employer || 0) / co : 0;
+    var ffMoney = Math.max(0, (+f.totalBand || 0) - co);
+    var steps = [['Bands you must co-fund', fmt(co)]];
+    if (ff > 0) steps.push([ff + ' fully funded, you pay nothing on', fmt(ffMoney)]);
+    steps.push(['× your share ' + Math.round(empShare * 100) + '%', fmt(co * empShare)]);
+    if (tr > 0) steps.push(['Less transfers raised', '−' + fmt(tr)]);
+    steps.push(['= Your cash', fmt(s.residual || 0)]);
+    return {
+      title: 'Your co-investment',
+      steps: steps,
+      result: s.residual,
+      check: Math.max(0, co * empShare - tr),
+      rule: 'A non-levy employer co-invests ' + Math.round(RULEBOOK.coInvest.before * 100) + '% of the band, ' +
+            'rising to ' + Math.round(RULEBOOK.coInvest.from * 100) + '% for apprenticeships starting from August 2026. ' +
+            'Fully-funded apprentices carry no co-investment at all, and a transfer received covers the band in full.'
+    };
+  }
+};
+
+/* ---- the panel ------------------------------------------------------------ */
+var provOpenBtn = null;
+
+function provClose() {
+  var p = document.getElementById('provPop');
+  if (p) p.remove();
+  if (provOpenBtn) { provOpenBtn.setAttribute('aria-expanded', 'false'); provOpenBtn = null; }
+}
+
+function provRender(btn) {
+  var key = btn.getAttribute('data-prov'), build = PROV[key];
+  var wasOpen = (provOpenBtn === btn);
+  provClose();
+  if (wasOpen || !build) return;              // second click closes
+
+  var d;
+  try { d = build(); }
+  catch (e) { d = { title: 'Working unavailable', steps: [], rule: '', failed: e.message }; }
+
+  /* reconcile the working against the figure actually on screen */
+  var shown = provNum(btn.textContent), warn = '';
+  if (isFinite(shown) && isFinite(d.result) && Math.abs(d.result - shown) > 1.5) {
+    warn = '<div class="prov-warn">This working does not reconcile to the figure shown (' +
+           fmt(d.result) + ' vs ' + fmt(shown) + '). Trust the figure, not this panel, and report it.</div>';
+  }
+  /* and reconcile the STEPS against the answer - a total can be right while a
+     line of the working is nonsense, which is exactly how the fully-funded
+     count once got rendered as three pounds. */
+  if (!warn && isFinite(d.check) && isFinite(d.result) && Math.abs(d.check - d.result) > 1.5) {
+    warn = '<div class="prov-warn">The steps above do not add up to ' + fmt(d.result) +
+           ' (they give ' + fmt(d.check) + '). The figure is right; this explanation is not. ' +
+           'Please report it.</div>';
+  }
+  if (d.failed) warn = '<div class="prov-warn">Could not rebuild this figure: ' + d.failed + '</div>';
+
+  var rows = (d.steps || []).map(function (s, i) {
+    var last = (i === d.steps.length - 1);
+    return '<div class="prov-row' + (last ? ' is-total' : '') + '"><span>' + s[0] + '</span><b>' + s[1] + '</b></div>';
+  }).join('');
+
+  var pop = document.createElement('div');
+  pop.id = 'provPop';
+  pop.className = 'provpop';
+  pop.setAttribute('role', 'dialog');
+  pop.setAttribute('aria-label', d.title + ' — how this figure was made');
+  pop.innerHTML =
+    '<div class="prov-hd"><h4>' + d.title + '</h4>' +
+      '<button type="button" class="prov-x" aria-label="Close">×</button></div>' +
+    warn + '<div class="prov-calc">' + rows + '</div>' +
+    (d.estimate ? '<div class="prov-est">This is a projection, not a figure from your data.</div>' : '') +
+    '<div class="prov-rule"><b>The rule:</b> ' + (d.rule || '') + '</div>' +
+    '<div class="prov-src"><a href="' + PROV_SRC.url + '" target="_blank" rel="noopener">' + PROV_SRC.name + '</a>' +
+      '<span class="prov-stamp">rules verified ' + RULEBOOK.asOf + '</span></div>';
+
+  document.body.appendChild(pop);
+
+  /* position under the figure, clamped into the viewport */
+  var r = btn.getBoundingClientRect(), pr = pop.getBoundingClientRect();
+  var left = Math.min(Math.max(8, r.left), window.innerWidth - pr.width - 8);
+  /* the header is fixed, so a panel that flips upward has to clear it or it
+     slides underneath and reads as a rendering fault */
+  var hdr = document.querySelector('header');
+  var floor = (hdr && getComputedStyle(hdr).position === 'fixed')
+                ? hdr.getBoundingClientRect().bottom + 8 : 8;
+  var top = r.bottom + 10;
+  if (top + pr.height > window.innerHeight - 8) {
+    var above = r.top - pr.height - 10;
+    top = (above >= floor) ? above : Math.min(floor, window.innerHeight - pr.height - 8);
+    if (top < floor) top = floor;
+  }
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+
+  btn.setAttribute('aria-expanded', 'true');
+  provOpenBtn = btn;
+  pop.querySelector('.prov-x').addEventListener('click', function () { provClose(); btn.focus(); });
+}
+
+document.addEventListener('click', function (e) {
+  var btn = e.target.closest ? e.target.closest('.prov') : null;
+  if (btn) { e.preventDefault(); provRender(btn); return; }
+  if (!(e.target.closest && e.target.closest('#provPop'))) provClose();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && provOpenBtn) { var b = provOpenBtn; provClose(); b.focus(); }
+});
+window.addEventListener('resize', provClose);
+window.addEventListener('scroll', provClose, true);
 let programmes=[];let projChart=null;let projYears=3;
 
 // ── persistence (survive page refresh) ──
@@ -4081,10 +4391,10 @@ function renderSummary(){
   document.getElementById('levySummary').classList.remove('hidden');
   const annual=levyData.monthlyAvg*12;
   document.getElementById('metricCards').innerHTML=`
-    <div class="metric"><div class="ml">Account balance (est.)</div><div class="mv c-teal">${fmt(levyData.balance)}</div><div class="ms">Total in minus total out</div></div>
-    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${fmt(levyData.monthlyAvg)}</div><div class="ms">Levy declared + 10% top-up</div></div>
-    <div class="metric"><div class="ml">Projected annual levy</div><div class="mv">${fmt(annual)}</div><div class="ms">Monthly avg &times; 12</div></div>
-    <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${fmt(annual*RULEBOOK.transferCapPct)}</div><div class="ms">Statutory transfer cap</div></div>
+    <div class="metric"><div class="ml">Account balance (est.)</div><div class="mv c-teal">${pv('balance',fmt(levyData.balance),'Account balance')}</div><div class="ms">Total in minus total out</div></div>
+    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${pv('monthlyAvg',fmt(levyData.monthlyAvg),'Average monthly income')}</div><div class="ms">Levy declared + 10% top-up</div></div>
+    <div class="metric"><div class="ml">Projected annual levy</div><div class="mv">${pv('annualLevy',fmt(annual),'Projected annual levy')}</div><div class="ms">Monthly avg &times; 12</div></div>
+    <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${pv('maxGift',fmt(annual*RULEBOOK.transferCapPct),'Maximum you can gift')}</div><div class="ms">Statutory transfer cap</div></div>
   `;
 }
 
@@ -4938,11 +5248,12 @@ function renderNonLevy(){
   }
   var s=nlState(f), rate=f.has25?'25%':'5%';
   var fig=function(lab,val,c,sub,id,tone){return '<div class="metric'+(tone?' tone-'+tone:'')+'" style="flex:1 1 0;min-width:128px;padding:0.9rem 1.1rem"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start">'+lab+'</div><div'+(id?' id="'+id+'"':'')+' style="font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'var(--text)')+'">'+val+'</div>'+(sub?'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+sub+'</div>':'')+'</div>';};
+  provSet('nl',{f:f,s:s,rate:rate});
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
-    fig('Total training investment',fmt(f.totalBand),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
-    fig('Government funds',fmt(s.gov),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
+    fig('Total training investment',pv('nlTotal',fmt(f.totalBand),'Total training investment'),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
+    fig('Government funds',pv('nlGov',fmt(s.gov),'Government funds'),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
     fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers','fund')+
-    fig('Your investment',s.residual<0.5?'£0':fmt(s.residual),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv','cash')+
+    fig('Your investment',pv('nlYourInv',s.residual<0.5?'£0':fmt(s.residual),'Your investment'),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv','cash')+
     (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time','','cash'):'')+
   '</div>'+'<div class="tone-key"><span><i class="kf"></i>funded for you</span><span><i class="kc"></i>your cash</span></div>';
   var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
@@ -5606,9 +5917,10 @@ function renderProjection(){
   projChart=new Chart(document.getElementById('projChart'),{type:'bar',data:{labels,datasets:[{label:'Levy income',data:income,type:'line',fill:false,borderColor:cLine,borderWidth:2,pointRadius:0,tension:0,order:0},{label:'80% training',data:ts,backgroundColor:tc,stack:'s',order:1},{label:'20% EPA',data:es,backgroundColor:ec,stack:'s',order:1},{label:'Units',data:us,backgroundColor:cUnits,stack:'s',order:1},{label:'Levy balance',data:bals,type:'line',yAxisID:'y1',fill:false,borderColor:cBal,borderWidth:1.5,borderDash:[5,4],pointRadius:0,tension:0.25,order:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:cTipBg,borderColor:cTipBorder,borderWidth:1,titleColor:cTipTitle,bodyColor:cTipBody,titleFont:{family:'Roboto Mono',size:11},bodyFont:{family:'Roboto Mono',size:11},callbacks:{label:c=>c.dataset.label+': '+fmt(c.parsed.y)}}},settings:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:18,maxRotation:45,font:{size:10,family:'Roboto Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cTickDim},grid:{color:'transparent'},border:{color:cAxis}}},scales:{x:{stacked:true,ticks:{autoSkip:true,maxTicksLimit:12,maxRotation:45,font:{size:10,family:'Roboto Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y:{stacked:false,beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cTick},grid:{color:'transparent'},border:{color:cAxis}},y1:{position:'right',beginAtZero:true,ticks:{callback:v=>'£'+Math.round(v/1000)+'k',font:{size:10,family:'Roboto Mono'},color:cBalTick},grid:{drawOnChartArea:false},border:{color:cBalBorder}}}}});
   const sf=tot.filter((s,i)=>s>income[i]).length, coMonths=coSet.size, reserveMonths=tot.filter((s,i)=>s>income[i]&&!coSet.has(i)).length;
   const tE=es.reduce((a,b)=>a+b,0),tT=ts.reduce((a,b)=>a+b,0);
+  provSet('proj',{tT:tT,tE:tE,years:projYears});
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
-  document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${fmt(tT)}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${fmt(tE)}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
+  document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${pv('trainDraw',fmt(tT),'Training drawn')}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${pv('epaPay',fmt(tE),'End-point assessment payments')}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
   renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderWhatIf();renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
