@@ -177,6 +177,45 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
 .bar{height:9px;border-radius:99px;background:rgba(150,190,225,.12);overflow:hidden;margin:9px 0 4px}
 .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px}
 
+/* 9 — apprenticeship primer */
+.prim{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.prim .steps{flex:1 1 210px;min-width:196px;display:flex;flex-direction:column;gap:2px}
+.pstep{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;cursor:pointer;
+  font-size:13.5px;background:none;border:0;color:inherit;font:inherit;text-align:left;width:100%}
+.pstep .pn{font-family:var(--mono);font-size:9.5px;color:var(--text3);width:14px;flex:0 0 auto}
+.pstep.on{background:rgba(0,195,221,.12)}
+.pstep.on .pn{color:var(--cyan)}
+.pstep.seen .pn:after{content:" \2713"}
+.prim .body{flex:1 1 320px;min-width:280px;background:rgba(0,195,221,.05);
+  border:1px solid rgba(0,195,221,.26);border-radius:12px;padding:15px 16px}
+.prim .body h4{margin:0 0 8px;font-size:15.5px;color:var(--text)}
+.prim .body p{margin:0 0 10px;font-size:13.5px;color:var(--text2);line-height:1.6}
+.prim .drives{border-top:1px solid var(--line);padding-top:10px;font-size:12.5px;color:var(--text3)}
+.prim .drives b{color:var(--teal);font-family:var(--mono);font-size:13px}
+.prim-bar{height:3px;border-radius:99px;background:rgba(150,190,225,.12);margin:12px 0 0;overflow:hidden}
+.prim-bar>i{display:block;height:100%;background:var(--cyan);border-radius:99px;transition:width .25s}
+
+/* 10 — journey builder */
+.jrn{background:rgba(0,0,0,.26);border:1px solid var(--line);border-radius:12px;padding:20px 18px 14px}
+.track{position:relative;height:78px;margin:20px 0 6px}
+.track .rail{position:absolute;left:0;right:0;top:26px;height:3px;background:rgba(150,190,225,.16);border-radius:99px}
+.track .done{position:absolute;left:0;top:26px;height:3px;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px;transition:width .4s ease}
+.node{position:absolute;top:19px;transform:translateX(-50%);text-align:center}
+.node i{display:block;width:11px;height:11px;border-radius:50%;background:var(--line2);
+  border:2px solid var(--ink,#08111f);margin:0 auto;position:relative;z-index:2}
+.node.reached i{background:var(--teal)}
+.node span{display:block;margin-top:9px;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--text3);white-space:nowrap}
+.node.reached span{color:var(--text2)}
+.mark{position:absolute;top:-14px;transform:translateX(-50%);z-index:3;transition:left .4s ease}
+.mark b{display:block;font-family:var(--mono);font-size:10px;background:var(--raise);color:var(--text);
+  border:1px solid var(--line2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.mark:after{content:"";display:block;width:2px;height:12px;background:var(--line2);margin:1px auto 0}
+.mark.risk b{border-color:rgba(255,176,32,.5);color:#FFB020}
+.jrn-ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.jrn-src{margin-top:10px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:7px}
+.jrn-src:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);flex:0 0 auto}
+
 /* roadmap table */
 .rm{border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-top:18px}
 .rmr{display:grid;grid-template-columns:22px 1.25fr 2fr auto;gap:12px;padding:12px 15px;border-bottom:1px solid var(--line);font-size:13.5px;align-items:start}
@@ -418,6 +457,55 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
         </div>
         <p class="note">This is the inverse of the current engine, and it is the same arithmetic run the
           other way. It turns the tool from a spreadsheet into an adviser.</p>
+      </div>
+    </div>
+
+    <!-- 9 -->
+    <div class="demo">
+      <div class="hd">
+        <div class="tag">09 &middot; First run &middot; asked for</div>
+        <h3>Teach apprenticeships, not the buttons</h3>
+        <p>I had argued against an onboarding tour, and for a <em>UI</em> tour I still would.
+          This is the other job: a first-timer does not know what a standard is, what a band is, or why
+          co-investment exists &mdash; and no amount of fixing the first screen teaches a domain. SLT and
+          HR are frequently first-timers.</p>
+      </div>
+      <div class="stage">
+        <div class="try">Try it &mdash; walk the concepts</div>
+        <div class="prim">
+          <div class="steps" id="primSteps"></div>
+          <div class="body" id="primBody"></div>
+        </div>
+        <div class="prim-bar"><i id="primBar" style="width:0%"></i></div>
+        <p class="note">Each concept ends on the figure it drives, so the primer is not a separate lesson
+          &mdash; it is the plan, explained. Skippable and resumable; a returning user should never be
+          taught the same thing twice.</p>
+      </div>
+    </div>
+
+    <!-- 10 -->
+    <div class="demo">
+      <div class="hd">
+        <div class="tag">10 &middot; Separate mini app &middot; scoped</div>
+        <h3>The journey, with a plain progress marker</h3>
+        <p>A generator: milestones in, a shareable page out. Not part of Fundable &mdash; an avatar next
+          to a funding figure costs you the credibility the whole tool is built on. It earns its place by
+          reading <em>real</em> progress from a tracker export rather than being coloured in by hand.</p>
+      </div>
+      <div class="stage">
+        <div class="try">Try it &mdash; switch view, then advance the data</div>
+        <div class="jrn">
+          <div class="jrn-ctl">
+            <button class="btn" id="jrnView">Cohort of 5 &rarr; one learner</button>
+            <button class="btn" id="jrnStep">Load next tracker export</button>
+          </div>
+          <div class="track" id="jrnTrack"></div>
+          <div class="jrn-src" id="jrnSrc"></div>
+        </div>
+        <p class="note">Milestones come from the standard&rsquo;s own duration and gateway, so the path is
+          generated rather than drawn. <b>Progress is read, never set.</b> A second place to record where a
+          learner is would become a second version of the truth, and the tracker export is the one that
+          counts.</p>
       </div>
     </div>
   </section>
@@ -741,6 +829,82 @@ function solve(){
 $('sBudget').addEventListener('input',solve);
 $('sPeople').addEventListener('input',solve);
 solve();
+
+/* ── 9. apprenticeship primer ────────────────────────────────────────────── */
+var PRIMER=[
+ {t:'What an apprenticeship actually is',
+  b:'Not a course you buy. It is a job with structured training attached, lasting at least 12 months, '+
+    'against a national <b>standard</b> that says what someone must be able to do by the end.',
+  d:'Sets which standard your people go on',v:'322 standards'},
+ {t:'The funding band',
+  b:'Every standard sits in a band with a maximum. Government will fund up to that maximum and not a '+
+    'penny more \u2014 anything you negotiate above it, you pay in full yourself.',
+  d:'Caps what funding can cover',v:'\u00a35,000 max'},
+ {t:'Where the money comes from',
+  b:'If your pay bill is over \u00a33m you pay the levy \u2014 0.5% of the bill, less a \u00a315,000 '+
+    'allowance \u2014 and government adds 10% on top. Below \u00a33m you do not pay it, and government '+
+    'funds most of each band instead.',
+  d:'Decides levy or co-investment',v:'+10% top-up'},
+ {t:'Why unused levy disappears',
+  b:'Funds expire if you do not commit them. Money that entered your account 24 months ago goes back to '+
+    'the Treasury \u2014 and from August 2026 that window halves to 12 months.',
+  d:'Drives the expiry warning',v:'24 \u2192 12 months'},
+ {t:'Off-the-job time is the real cost',
+  b:'An apprentice must spend a fifth of their contracted hours training rather than producing. Nobody '+
+    'funds that. It is usually larger than the training fee, and it is why the fee alone understates it.',
+  d:'The gap between fee and true cost',v:'20% of hours'},
+ {t:'End-point assessment',
+  b:'They finish by being independently assessed. Until that passes the apprenticeship is not complete, '+
+    'and the final 20% of the price is not released.',
+  d:'Why 20% lands late',v:'20% held back'}
+];
+var primAt=0, primSeen={};
+function primDraw(){
+  primSeen[primAt]=1;
+  $('primSteps').innerHTML=PRIMER.map(function(p,i){
+    return '<button type="button" class="pstep'+(i===primAt?' on':'')+(primSeen[i]?' seen':'')+
+      '" data-i="'+i+'"><span class="pn">'+(i+1)+'</span>'+p.t+'</button>';}).join('');
+  var p=PRIMER[primAt];
+  $('primBody').innerHTML='<h4>'+p.t+'</h4><p>'+p.b+'</p>'+
+    '<div class="drives">In your plan this drives <b>'+p.v+'</b> &mdash; '+p.d+'.</div>';
+  var n=Object.keys(primSeen).length;
+  $('primBar').style.width=Math.round(n/PRIMER.length*100)+'%';
+}
+$('primSteps').addEventListener('click',function(e){
+  var b=e.target.closest('.pstep'); if(!b)return; primAt=+b.dataset.i; primDraw();});
+primDraw();
+
+/* ── 10. journey builder ─────────────────────────────────────────────────── */
+var MILES=['Start','3-month review','Off-the-job on track','Gateway','EPA','Achieved'];
+/* positions are READ from a tracker export, never set here */
+var EXPORTS=[
+ {label:'OneFile export, 14 Jun',people:[{n:'J. Smith',at:1.3},{n:'A. Khan',at:1.0},{n:'R. Obi',at:0.8},
+   {n:'M. Doyle',at:1.4},{n:'T. Ellis',at:0.6,risk:true}]},
+ {label:'OneFile export, 12 Sep',people:[{n:'J. Smith',at:2.6},{n:'A. Khan',at:2.2},{n:'R. Obi',at:2.1},
+   {n:'M. Doyle',at:2.8},{n:'T. Ellis',at:1.1,risk:true}]},
+ {label:'OneFile export, 09 Dec',people:[{n:'J. Smith',at:3.9},{n:'A. Khan',at:3.4},{n:'R. Obi',at:3.2},
+   {n:'M. Doyle',at:4.2},{n:'T. Ellis',at:1.9,risk:true}]}
+];
+var jrnIdx=0, jrnSolo=false;
+function jrnDraw(){
+  var ex=EXPORTS[jrnIdx], people=jrnSolo?ex.people.slice(0,1):ex.people;
+  var span=MILES.length-1;
+  var lead=people.reduce(function(a,p){return Math.max(a,p.at);},0);
+  var html='<div class="rail"></div><div class="done" style="width:'+(lead/span*100).toFixed(1)+'%"></div>';
+  html+=MILES.map(function(m,i){
+    var pct=i/span*100;
+    return '<div class="node'+(lead>=i?' reached':'')+'" style="left:'+pct+'%"><i></i><span>'+m+'</span></div>';
+  }).join('');
+  html+=people.map(function(p,i){
+    return '<div class="mark'+(p.risk?' risk':'')+'" style="left:'+(p.at/span*100).toFixed(1)+
+      '%;top:'+(-14 - (jrnSolo?0:i*17))+'px"><b>'+p.n+'</b></div>';}).join('');
+  $('jrnTrack').innerHTML=html;
+  $('jrnSrc').textContent='Positions read from '+ex.label+' \u2014 nothing on this page is hand-set.';
+  $('jrnView').textContent=jrnSolo?'One learner \u2192 cohort of 5':'Cohort of 5 \u2192 one learner';
+}
+$('jrnView').addEventListener('click',function(){jrnSolo=!jrnSolo;jrnDraw();});
+$('jrnStep').addEventListener('click',function(){jrnIdx=(jrnIdx+1)%EXPORTS.length;jrnDraw();});
+jrnDraw();
 </script>
 </body>
 </html>
