@@ -627,9 +627,9 @@ button{font-family:var(--sans);cursor:pointer}
 .jdf-sc{font-family:var(--mono);font-size:14px;font-weight:700;flex:0 0 auto;width:58px;text-align:right}
 .jdf-sc em{display:block;font-style:normal;font-weight:400;font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin-top:1px}
 .jdf-row button{flex:0 0 auto;font-family:inherit;font-size:11.5px;background:none;
-  border:1px solid rgba(0,195,221,0.35);color:var(--cyan);border-radius:7px;
-  padding:5px 11px;cursor:pointer}
-.jdf-row button:hover{background:rgba(0,195,221,0.10)}
+  border:1px solid currentColor;color:var(--teal);border-radius:7px;
+  padding:5px 11px;cursor:pointer;opacity:.92}
+.jdf-row button:hover{background:rgba(var(--wash),0.10);opacity:1}
 .jdpack{margin-top:14px;border:1px solid rgba(123,97,255,0.28);border-radius:12px;
   background:rgba(123,97,255,0.05);padding:13px 15px}
 .jdpack h4{margin:0 0 9px;font-size:12px;font-weight:700;color:var(--text2);
@@ -1873,7 +1873,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31u</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -6226,7 +6226,7 @@ function jdSuggestStandards(){
   var r=jdRankStandards(jd,6);
   if(!r.ranked.length){box.innerHTML='';return;}
   var rows=r.ranked.map(function(x,n){
-    var col=x.score>=70?'#2DD4B2':x.score>=50?'var(--cyan)':x.score>=30?'var(--amber)':'#ec5a72';
+    var col=x.score>=50?'var(--teal)':x.score>=30?'var(--amber)':'var(--red)';
     return '<div class="jdf-row"><span class="jdf-rank">'+(n+1)+'</span>'+
       '<span class="jdf-nm"><div class="t">'+escHtml(x.name)+'</div>'+
       '<div class="m">'+x.covered+' of '+x.total+' KSBs'+
