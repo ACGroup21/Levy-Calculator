@@ -2113,7 +2113,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01p</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01r</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -5957,6 +5957,20 @@ function renderCapacity(d){
   }
 }
 // ── What-if: compare the same people planned differently, each costed end-to-end by the real engine ──
+/* How many people actually finish inside the projection window, and when the
+   first of them does. Read from each variant's own EPA dates - the money rows
+   can be identical for two plans that deliver capability a year apart, and
+   without this the table calls that a tie. */
+function _wiOutcome(ps){
+  var now=mKey(today), end=now+(projYears*12), q=0, first=null;
+  (ps||[]).forEach(function(p){
+    if(!p.epa)return;
+    var e=mKey(p.epa);
+    if(e<=end) q+=(+p.count||0);
+    if(first===null||e<first) first=e;
+  });
+  return {qualified:q, firstEpa:(first===null?Infinity:first)};
+}
 function _wiWith(variant,fn){var save=programmes;programmes=variant;try{return fn();}finally{programmes=save;}}
 function _wiShift(iso,months){if(!iso)return iso;var d=new Date(iso);d.setMonth(d.getMonth()+months);return d.toISOString().slice(0,10);}
 function whatIfScenarios(){
@@ -5971,7 +5985,9 @@ function renderWhatIf(){
   if(!programmes.length){el.innerHTML='<div style="font-size:12px;color:var(--text3)">Add programmes to compare options.</div>';return;}
   var scens=whatIfScenarios().map(function(s){
     var d=_wiWith(s.t(programmes.map(function(p){return Object.assign({},p);})),levyReportData);
-    return {name:s.name,note:s.note,coInvest:d.coInvest||0,empCash:(d.coInvest||0)+(d.selfFundCost||0),expiry:d.expiry||0,endBal:d.endBal||0,planCost:d.planCost||0};
+    var o=_wiOutcome(s.t(programmes.map(function(p){return Object.assign({},p);})));
+    return {name:s.name,note:s.note,coInvest:d.coInvest||0,empCash:(d.coInvest||0)+(d.selfFundCost||0),expiry:d.expiry||0,endBal:d.endBal||0,planCost:d.planCost||0,
+            qualified:o.qualified,firstEpa:o.firstEpa};
   });
   var col=function(f){return scens.map(f);};
   var span=function(a){return Math.max.apply(null,a)-Math.min.apply(null,a);};
@@ -5982,10 +5998,22 @@ function renderWhatIf(){
   scens.forEach(function(s,i){var m=(goal==='expiry')?s.expiry:s.empCash;if(m<recBest-0.5){recBest=m;recIdx=i;}});
   var cell=function(v,best){return '<td class="wi-c'+(best?' wi-best':'')+'">'+fmt(Math.round(v))+'</td>';};
   var head='<tr><th class="wi-h"></th>'+scens.map(function(s,i){return '<th class="wi-h'+(i===recIdx?' wi-rec':'')+'">'+s.name+(i===recIdx?'<span class="wi-tag">recommended</span>':'')+'</th>';}).join('')+'</tr>';
-  var row=function(lab,key,lowIsBest){var vals=col(function(s){return s[key];});var sp=span(vals);var best=lowIsBest?Math.min.apply(null,vals):Math.max.apply(null,vals);return '<tr><td class="wi-l">'+lab+'</td>'+scens.map(function(s){return cell(s[key],sp>0.5&&s[key]===best);}).join('')+'</tr>';};
-  var rows=row('Co-investment','coInvest',true)+row('Employer cash','empCash',true)+row('At risk of expiry','expiry',true)+row('End balance','endBal',false);
+  /* compare at the precision actually shown. Two figures a few pence apart round
+     to the same pound, and flagging one of them as better than an identical-looking
+     number reads as a fault in the table. */
+  var row=function(lab,key,lowIsBest,fmtFn){
+    var rnd=function(v){return fmtFn?v:Math.round(v);};
+    var vals=col(function(s){return rnd(s[key]);});var sp=span(vals);
+    var best=lowIsBest?Math.min.apply(null,vals):Math.max.apply(null,vals);
+    return '<tr><td class="wi-l">'+lab+'</td>'+scens.map(function(s){
+      var isBest=sp>0.5&&rnd(s[key])===best;
+      return fmtFn ? ('<td class="wi-c'+(isBest?' wi-best':'')+'">'+fmtFn(s[key])+'</td>')
+                   : cell(s[key],isBest);}).join('')+'</tr>';};
+  var rows=row('Co-investment','coInvest',true)+row('Employer cash','empCash',true)+row('At risk of expiry','expiry',true)+row('End balance','endBal',false)
+    +row('Qualified in '+projYears+'y','qualified',false,function(v){return String(v);})
+    +row('First completion','firstEpa',true,function(v){return isFinite(v)?mkLbl(v):'\u2014';});
   var notes='<div class="wi-notes">'+scens.map(function(s){return '<div><b style="color:var(--text)">'+s.name+'</b> &mdash; '+s.note+'</div>';}).join('')+'</div>';
-  el.innerHTML='<div class="wi-scroll"><table class="wi-tbl">'+head+rows+'</table></div>'+notes+'<div class="wi-foot">Every figure is recomputed by the real engine for that plan &mdash; the training investment ('+fmt(Math.round(scens[0].planCost))+') is unchanged; only the timing differs. Illustrative &mdash; the actual phasing is yours to set.</div>';
+  el.innerHTML='<div class="wi-scroll"><table class="wi-tbl">'+head+rows+'</table></div>'+notes+'<div class="wi-foot">Every figure is recomputed by the real engine for that plan &mdash; the training investment ('+fmt(Math.round(scens[0].planCost))+') is unchanged; only the timing differs \u2014 which is why two options can cost the same and still deliver capability months apart. Illustrative &mdash; the actual phasing is yours to set.</div>';
 }
 // "Your best moves" — fuses the scattered advisor hints into ONE ranked, engine-costed panel.
 // Each move's £ impact is recomputed by the real co-invest engine (simCoInvest); ranked by saving, goal first.
