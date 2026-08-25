@@ -424,6 +424,35 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Inverse solver: budget + headcount → plan ─────────────────────────── */
+.slv-card{margin-top:14px}
+.slv-grid{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+.slv-in{flex:1 1 250px;min-width:230px}
+.slv-lab{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}
+.slv-lab b{color:var(--text);font-family:'Roboto Mono',monospace;font-size:13.5px;font-weight:700}
+.slv-in input[type=range]{width:100%;accent-color:var(--teal)}
+.slv-in input[type=number]{width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);
+  border:1px solid var(--field-line);border-radius:10px;padding:8px 10px;color:var(--text);
+  font-size:13px;font-family:inherit}
+.slv-out{flex:1 1 330px;min-width:290px;background:rgba(45,212,178,.06);
+  border:1px solid rgba(45,212,178,.28);border-radius:12px;padding:15px 16px}
+.slv-head{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.slv-big{font-size:19px;font-weight:700;color:var(--teal);line-height:1.28;text-wrap:balance}
+.slv-bar{height:8px;border-radius:99px;background:rgba(var(--wash),.12);overflow:hidden;margin:10px 0 4px}
+.slv-bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--blue,#3E86E0));border-radius:99px}
+.slv-p{margin:6px 0 0;font-size:13.5px;line-height:1.55;color:var(--text2)}
+.slv-p b{color:var(--text)}
+.slv-dim{color:var(--text3)}
+.slv-warn{margin-top:11px;padding:9px 11px;border-radius:9px;font-size:13px;line-height:1.55;
+  background:rgba(224,164,59,.1);border:1px solid rgba(224,164,59,.36);border-left-width:3px;color:var(--text)}
+.slv-otj{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);
+  font-size:12.5px;line-height:1.55;color:var(--text3)}
+.slv-otj b{color:var(--money)}
+.slv-foot{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--text3)}
+.slv-empty{font-size:13px;color:var(--text3)}
+.slv-added{margin-bottom:10px;padding:8px 10px;border-radius:8px;font-size:12.5px;
+  background:rgba(45,212,178,.12);border:1px solid rgba(45,212,178,.4);color:var(--text)}
 /* ── Rules changelog ─────────────────────────────────────────────────────── */
 .rc-wrap,.rc-log{margin-top:10px}
 .rc-hd{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;
@@ -1549,6 +1578,28 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <div id="goalConfirm" style="margin-top:12px;font-size:13px;color:var(--text3)"></div>
   </div>
 
+
+  <!-- INVERSE SOLVER: budget + headcount → plan -->
+  <div class="card slv-card" id="sec-solve">
+    <div class="step-row" style="margin-top:0"><span class="step-chip">START</span><span class="step-title" role="heading" aria-level="2">Have a budget instead of a plan?</span></div>
+    <p class="step-sub">Tell it what you control and how many people you want developed &mdash; it works out what that buys. The same arithmetic as everything below, run backwards.</p>
+    <div class="slv-grid">
+      <div class="slv-in">
+        <label class="slv-lab" for="slvBudget">Budget you control &mdash; <b id="slvBudgetV">—</b></label>
+        <input type="number" id="slvBudget" min="0" step="1000" placeholder="e.g. 120000" aria-label="Budget you control, in pounds">
+        <label class="slv-lab" for="slvPeople" style="margin-top:16px">People to develop &mdash; <b id="slvPeopleV">6</b></label>
+        <input type="range" id="slvPeople" min="1" max="40" step="1" value="6">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+          <button type="button" class="btn-demo" onclick="solveRun()">Show me what this buys</button>
+          <button type="button" class="btn-demo" style="background:none;color:var(--text2);border-color:var(--border)" onclick="solveAdopt()">Add it to my plan</button>
+        </div>
+      </div>
+      <div class="slv-out" id="slvOut" role="status" aria-live="polite">
+        <div class="slv-empty">Enter a budget to see what it will buy.</div>
+      </div>
+    </div>
+  </div>
+
   <!-- STEP 1: LEVY CSV -->
   <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title" role="heading" aria-level="2">Upload ESFA Levy Transactions</span></div>
   <p class="step-sub levy-only">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
@@ -1940,7 +1991,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01c</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01f</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3178,6 +3229,12 @@ document.addEventListener('keydown', function (e) {
 });
 window.addEventListener('resize', provClose);
 window.addEventListener('scroll', provClose, true);
+document.addEventListener('DOMContentLoaded',function(){
+  var b=document.getElementById('slvBudget'), p=document.getElementById('slvPeople');
+  if(b) b.addEventListener('input',solveSync);
+  if(p) p.addEventListener('input',solveSync);
+  if(typeof solveSync==='function') solveSync();
+});
 /* ═══ RULES CHANGELOG — which rule moved, and what it did to THIS plan ══════
    Flagship 2 of the world-class rescope (2026-08-25).
 
@@ -3300,6 +3357,179 @@ function rulesChangelogHtml() {
     'exactly which of these constants moved and what it did to your figures. That comparison is ' +
     'computed from a snapshot taken when the plan was saved, not from a written history.</p>' +
     '</div>';
+}
+
+/* ═══ INVERSE SOLVER — give it the budget, get the plan ═════════════════════
+   Flagship 3 of the world-class rescope (2026-08-25).
+
+   Every employer conversation opens the same way: THIS much money, THESE
+   people, what can we do? The app has always needed the answer before it
+   would show the maths. This runs the same arithmetic backwards.
+
+   Two things the UX Lab sketch got wrong and this does not:
+
+   1. A POUND MEANS DIFFERENT THINGS IN THE TWO MODES. For a levy payer the
+      budget buys bands outright. For a non-levy employer the same pound is
+      co-investment, so at 25% it commits four times as much training. A
+      solver that ignores the funding route is off by a factor of four, and
+      it would be off in the direction that flatters.
+
+   2. RECOMMENDING THE PRICIEST BAND THAT FITS IS WRONG. Levy expires. An
+      answer that commits a fraction of the budget and strands the rest is
+      the wrong answer however neatly it fits, so idle money is named and a
+      second move offered rather than a tidy single result.
+
+   Off-the-job time is deliberately NOT spent from the budget - nobody funds
+   it - but it is carved out and shown, because a plan that ignores it is the
+   plan that fails. See dont-string-along.
+--------------------------------------------------------------------------- */
+var solveState = { budget: 0, people: 0, ran: false };
+
+function solveRate() {
+  /* the co-investment rate a start TODAY would actually attract */
+  try { return coInvRate(mKey(new Date())); }
+  catch (e) { return RULEBOOK.coInvest.from; }
+}
+
+/* what one learner on this standard costs the EMPLOYER'S budget */
+function solveCostPer(std) {
+  if (fundingMode === 'nonlevy') return (+std.band || 0) * solveRate();
+  return (+std.band || 0);            // levy payer commits the band from the pot
+}
+
+function solveOtj(std, people) {
+  try {
+    var otjMap = (planCfg && planCfg.otj) || {}, rate = (planCfg && planCfg.rate) || 0;
+    if (!rate) return null;
+    var hrs = otjMap[std.level] || 6;                   // hours per week by level
+    var weeks = Math.round((+std.dur || 12) * 4.33);
+    return { hours: hrs * weeks * people, cost: hrs * weeks * people * rate };
+  } catch (e) { return null; }
+}
+
+function solveCandidates() {
+  var list = (typeof STANDARDS !== 'undefined' ? STANDARDS : STANDARDS_BASE) || [];
+  return list.filter(function (s) { return (+s.band > 0) && (+s.dur > 0); });
+}
+
+function solveRun() {
+  var budget = Math.max(0, +(document.getElementById('slvBudget') || {}).value || 0);
+  var people = Math.max(1, Math.round(+(document.getElementById('slvPeople') || {}).value || 1));
+  /* keep the labels honest whatever set the inputs - typing fires solveSync,
+     but a programmatic or restored value would otherwise leave them stale */
+  var bv=document.getElementById('slvBudgetV'), pv2=document.getElementById('slvPeopleV');
+  if(bv) bv.textContent = budget ? fmt(budget) : '—';
+  if(pv2) pv2.textContent = people;
+  solveState = { budget: budget, people: people, ran: true };
+  var out = document.getElementById('slvOut');
+  if (!out) return;
+  if (!budget) { out.innerHTML = '<div class="slv-empty">Enter a budget to see what it will buy.</div>'; return; }
+
+  var cands = solveCandidates();
+  if (!cands.length) { out.innerHTML = '<div class="slv-empty">No funded standards are loaded.</div>'; return; }
+
+  var perHead = budget / people;
+  var fits = cands.filter(function (s) { return solveCostPer(s) <= perHead; });
+
+  /* nothing fits: say how far the budget DOES reach rather than failing */
+  if (!fits.length) {
+    var cheapest = cands.reduce(function (a, b) { return solveCostPer(b) < solveCostPer(a) ? b : a; });
+    var canDo = Math.floor(budget / solveCostPer(cheapest));
+    out.innerHTML =
+      '<div class="slv-head">At this budget</div>' +
+      '<div class="slv-big">' + (canDo > 0 ? canDo + ' ' + (canDo === 1 ? 'person' : 'people') : 'Not yet') + '</div>' +
+      '<p class="slv-p">' + fmt(perHead) + ' each is below every funding band' +
+      (fundingMode === 'nonlevy' ? ' even at ' + Math.round(solveRate() * 100) + '% co-investment' : '') + '. ' +
+      (canDo > 0
+        ? 'The furthest it reaches is <b>' + canDo + '</b> on <b>' + escHtml(cheapest.name) + '</b> at ' +
+          fmt(solveCostPer(cheapest)) + ' each.'
+        : 'The cheapest standard is <b>' + escHtml(cheapest.name) + '</b> at ' + fmt(solveCostPer(cheapest)) +
+          ' per person.') + '</p>' + solveFootnote();
+    return;
+  }
+
+  /* best fit = the most substantial programme the budget covers for everyone */
+  var best = fits.reduce(function (a, b) { return solveCostPer(b) > solveCostPer(a) ? b : a; });
+  var spend = solveCostPer(best) * people, left = budget - spend, idle = budget ? left / budget : 0;
+  /* the useful second move is headcount on the programme just chosen, not a
+     pivot to the cheapest thing in the library to mop up the remainder */
+  var per = solveCostPer(best);
+  var couldDo = per > 0 ? Math.floor(budget / per) : 0;
+  var otj = solveOtj(best, people);
+
+  var html =
+    '<div class="slv-head">Best fit</div>' +
+    '<div class="slv-big">' + escHtml(best.name) + '</div>' +
+    '<div class="slv-bar"><i style="width:' + Math.min(100, spend / budget * 100).toFixed(1) + '%"></i></div>' +
+    '<p class="slv-p">' + people + ' ' + (people === 1 ? 'person' : 'people') + ' at ' + fmt(solveCostPer(best)) +
+    ' each &mdash; <b>' + fmt(spend) + '</b> of your ' + fmt(budget) + ' committed' +
+    (fundingMode === 'nonlevy'
+      ? ', which is ' + Math.round(solveRate() * 100) + '% co-investment on ' + fmt((+best.band || 0) * people) +
+        ' of training.'
+      : '.') +
+    '<br><span class="slv-dim">' + best.dur + ' months each.</span></p>';
+
+  /* idle money is a finding, not a footnote */
+  if (idle >= 0.25) {
+    html += '<div class="slv-warn"><b>' + fmt(left) + '</b> &mdash; ' + Math.round(idle * 100) +
+      '% of your budget &mdash; would sit unused' +
+      (fundingMode === 'nonlevy' ? '.' : ', and levy expires ' + RULEBOOK.expiryMonths.from +
+        ' months after it lands for anything declared from August 2026.') +
+      (couldDo > people
+        ? ' The constraint here is headcount, not money: this budget covers <b>' + couldDo +
+          '</b> on the same programme, not ' + people + '.'
+        : '') + '</div>';
+  } else {
+    html += '<p class="slv-p slv-dim">' + fmt(left) + ' left over &mdash; ' + Math.round(idle * 100) + '% idle.' +
+      (couldDo > people ? ' Enough for ' + (couldDo - people) + ' more on this programme.' : '') + '</p>';
+  }
+
+  /* the cost nobody funds */
+  if (otj && otj.cost > 0) {
+    html += '<div class="slv-otj"><b>' + fmt(otj.cost) + '</b> of off-the-job time on top &mdash; ' +
+      Math.round(otj.hours).toLocaleString() + ' hours across the ' + people +
+      '. No one funds this; it is your people not producing, and it is usually larger than the training fee.</div>';
+  }
+
+  out.innerHTML = html + solveFootnote();
+}
+
+function solveFootnote() {
+  return '<div class="slv-foot">' +
+    (fundingMode === 'nonlevy'
+      ? 'Costed as a non-levy employer at ' + Math.round(solveRate() * 100) + '% co-investment. ' +
+        'A 16–21 year old is funded in full, so an early-careers plan goes further than this.'
+      : 'Costed as a levy payer committing the band from your account. Co-investment applies only where the ' +
+        'account cannot cover a monthly draw.') +
+    ' Band maximums from the funding rulebook, verified ' + escHtml(String(RULEBOOK.asOf)) + '.</div>';
+}
+
+function solveSync() {
+  var b = document.getElementById('slvBudget'), p = document.getElementById('slvPeople');
+  if (b) document.getElementById('slvBudgetV').textContent = b.value ? fmt(+b.value) : '—';
+  if (p) document.getElementById('slvPeopleV').textContent = p ? p.value : '';
+  if (solveState.ran) solveRun();
+}
+
+/* adopting the answer is the point - otherwise it is a calculator inside a calculator */
+function solveAdopt() {
+  if (!solveState.ran) return;
+  var cands = solveCandidates(), perHead = solveState.budget / solveState.people;
+  var fits = cands.filter(function (s) { return solveCostPer(s) <= perHead; });
+  if (!fits.length) return;
+  var best = fits.reduce(function (a, b) { return solveCostPer(b) > solveCostPer(a) ? b : a; });
+  var start = new Date(); start.setMonth(start.getMonth() + 1);
+  var epa = new Date(start.getTime()); epa.setMonth(epa.getMonth() + (+best.dur || 12));
+  var iso = function (d) { return d.toISOString().slice(0, 10); };
+  programmes.push({ name: best.name, cost: +best.band || 0, count: solveState.people,
+                    start: iso(start), epa: iso(epa) });
+  if (typeof renderProgrammes === 'function') renderProgrammes();
+  if (typeof renderPlan === 'function') renderPlan();
+  if (typeof saveState === 'function') saveState();
+  var o = document.getElementById('slvOut');
+  if (o) o.insertAdjacentHTML('afterbegin',
+    '<div class="slv-added">Added ' + solveState.people + ' × ' + escHtml(best.name) +
+    ' to your programmes. Everything below now reflects it.</div>');
 }
 
 function rulesMountChangelog() {
