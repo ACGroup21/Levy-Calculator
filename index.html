@@ -683,6 +683,11 @@ button{font-family:var(--sans);cursor:pointer}
    on the elements, so the override has to carry the same weight. */
 input[type=text],input[type=number],input[type=date],input[type=email],
 input[type=search],select,textarea{border-color:var(--field-line)!important}
+/* Light mode already pins field borders with its own !important rule at a higher
+   specificity, so matching that weight is the only way through - the plain
+   selector above never reached it. */
+:root[data-theme="light"] input,:root[data-theme="light"] select,
+:root[data-theme="light"] textarea{border-color:var(--field-line)!important}
 .jd-uploads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
 .jd-uploads .jd-upload{margin-bottom:0;display:flex;align-items:center;justify-content:center}
 .jd-upload small{display:block;margin-top:3px;font-size:10.5px;opacity:.72}
@@ -1879,7 +1884,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31w</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -2864,7 +2869,7 @@ let RULES_VERSION=RULEBOOK.version;
    figures Fundable was missing. */
 RULEBOOK.__source='baked';
 (function(){
-  var RB_URL='https://acgroup21.github.io/ac-funding-data/funding-rules.json';
+  var RB_URL='https://raw.githubusercontent.com/ACGroup21/ACGroup21-ac-funding-data/main/funding-rules.json';
   function pk(o,p){return p.split('.').reduce(function(a,k){return a==null?a:a[k];},o);}
   function apply(c){
     var lv=pk(c,'levy.rate.value'),al=pk(c,'levy.allowance.value'),tu=pk(c,'levy.topUp.value');
