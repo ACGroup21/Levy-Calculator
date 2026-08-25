@@ -2022,7 +2022,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01k</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -4632,25 +4632,42 @@ function qarYears(rows){
    every in-learning record, which inflated the rate by shrinking the
    denominator. They are now counted, and reported separately so the number is
    explicable. */
+/* How much of the practical period was actually delivered before the learner
+   stopped. Measured from the tracker's own dates where they exist; the midpoint
+   is a fallback and is reported as one, never silently averaged. */
+function qarDrawnShare(x, nowMk){
+  var st = x.start ? mKey(x.start) : null;
+  var pe = x.plannedEnd ? mKey(x.plannedEnd) : null;
+  var ae = x.actualEnd ? mKey(x.actualEnd) : null;
+  if(st===null || pe===null || pe<=st) return {share:0.5, assumed:true};
+  var end = (ae!==null) ? ae : nowMk;
+  var sh = (end - st) / (pe - st);
+  if(!isFinite(sh)) return {share:0.5, assumed:true};
+  return {share: Math.max(0, Math.min(1, sh)), assumed:false};
+}
 function computeQAR(rows,yr){
   rows=rows||delivery||[];
   if(yr!==undefined&&yr!==null)rows=rows.filter(function(x){return hybridEndYear(x)===yr;});
-  var achieved=0,withdrawn=0,failed=0,live=0,overdue=0,atRisk=0;
+  var achieved=0,withdrawn=0,failed=0,live=0,overdue=0,atRisk=0,atRiskAssumed=0;
   var nowMk=(function(){var d=new Date();return d.getFullYear()*12+d.getMonth();})();
   rows.forEach(function(x){
     var isFail=/fail/i.test(x.outcome||'');
     if(x.status==='achieved')achieved++;
     else if(isFail){failed++;atRisk+=(+x.price||+x.stdBand||0);}
-    else if(x.status==='withdrawn'){withdrawn++;atRisk+=(+x.price||+x.stdBand||0);}
+    else if(x.status==='withdrawn'){withdrawn++;
+      var dw=qarDrawnShare(x,nowMk); if(dw.assumed)atRiskAssumed++;
+      atRisk+=(+x.price||+x.stdBand||0)*RULEBOOK.draw.training*dw.share;}
     else {
       var pe=x.plannedEnd?mKey(x.plannedEnd):null;
-      if(pe!==null&&pe<nowMk){ overdue++; atRisk+=(+x.price||+x.stdBand||0); }  // overdue continuing = leaver
+      if(pe!==null&&pe<nowMk){ overdue++;
+        var dv=qarDrawnShare(x,nowMk); if(dv.assumed)atRiskAssumed++;
+        atRisk+=(+x.price||+x.stdBand||0)*RULEBOOK.draw.training*dv.share; }  // overdue continuing = leaver
       else live++;                                                              // genuinely still in learning
     }
   });
   var completers=achieved+failed, leavers=completers+withdrawn+overdue;
   return {achieved:achieved,withdrawn:withdrawn,failed:failed,live:live,overdue:overdue,
-    completers:completers,leavers:leavers,atRisk:atRisk,
+    completers:completers,leavers:leavers,atRisk:atRisk,atRiskAssumed:atRiskAssumed,
     qar:leavers?achieved/leavers*100:null, retention:leavers?completers/leavers*100:null,
     pass:completers?achieved/completers*100:null, total:rows.length};
 }
@@ -4732,7 +4749,7 @@ function renderQAR(){
   var decomp='<div style="display:flex;gap:22px;margin-top:12px;flex-wrap:wrap">'+
     '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Retention</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.retention!=null?q.retention.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+q.completers+' of '+q.leavers+' stayed to the end</div></div>'+
     '<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Pass rate</div><div style="font-size:16px;font-weight:700;color:var(--text)">'+(q.pass!=null?q.pass.toFixed(0)+'%':'&mdash;')+'</div><div style="font-size:11px;color:var(--text3)">'+q.achieved+' of '+q.completers+' who finished passed</div></div>'+
-    (q.atRisk>0?'<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Invested in non-achievers</div><div style="font-size:16px;font-weight:700;color:var(--red)">'+fmt(q.atRisk)+'</div><div style="font-size:11px;color:var(--text3)">'+(q.withdrawn+q.failed)+' learner'+((q.withdrawn+q.failed)!==1?'s':'')+' did not achieve</div></div>':'')+
+    (q.atRisk>0?'<div><div style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)">Invested in non-achievers</div><div style="font-size:16px;font-weight:700;color:var(--red)">'+fmt(q.atRisk)+'</div><div style="font-size:11px;color:var(--text3)">'+(q.withdrawn+q.failed)+' learner'+((q.withdrawn+q.failed)!==1?'s':'')+' did not achieve · instalments counted only to the point each left'+(q.atRiskAssumed>0?', '+q.atRiskAssumed+' estimated':'')+'</div></div>':'')+
     '</div>';
   // per-standard, lowest first
   var byStd=qarByStandard(), drag='';
@@ -6414,7 +6431,7 @@ function levyQarPage(d){
   var fig=function(lab,val,c,sub){return '<div style="flex:1;min-width:120px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(c||'#fff')+'">'+val+'</div>'+(sub?'<div style="font-size:10px;color:#7e95ab;margin-top:2px">'+sub+'</div>':'')+'</div>';};
   var figs=fig('Retention',(q.retention!=null?q.retention.toFixed(0)+'%':'—'),'#fff',q.completers+' of '+q.leavers+' stayed')
     +fig('Pass rate',(q.pass!=null?q.pass.toFixed(0)+'%':'—'),'#fff',q.achieved+' of '+q.completers+' passed')
-    +fig('Invested in non-achievers',(q.atRisk>0?fmt(q.atRisk):'£0'),q.atRisk>0?'#e0607a':'#2DD4B2',(q.withdrawn+q.failed)+' did not achieve')
+    +fig('Invested in non-achievers',(q.atRisk>0?fmt(q.atRisk):'£0'),q.atRisk>0?'#e0607a':'#2DD4B2',(q.withdrawn+q.failed)+' did not achieve · counted to the point each left')
     +fig('Still on programme',q.live,'#E0A43B','excluded until they leave');
   var byStd=qarByStandard(), CAP=8, shown=byStd.slice(0,CAP), moreS=byStd.length-shown.length;
   var rows=shown.map(function(r){var c=r.qar>=r.bench?'#2DD4B2':'#e0607a';
