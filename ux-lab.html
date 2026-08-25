@@ -197,20 +197,20 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
 
 /* 10 — journey builder */
 .jrn{background:rgba(0,0,0,.26);border:1px solid var(--line);border-radius:12px;padding:20px 18px 14px}
-.track{position:relative;height:78px;margin:20px 0 6px}
-.track .rail{position:absolute;left:0;right:0;top:26px;height:3px;background:rgba(150,190,225,.16);border-radius:99px}
-.track .done{position:absolute;left:0;top:26px;height:3px;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px;transition:width .4s ease}
-.node{position:absolute;top:19px;transform:translateX(-50%);text-align:center}
+.track{position:relative;height:172px;margin:14px 0 6px;--rail:118px}
+.track .rail{position:absolute;left:0;right:0;top:var(--rail);height:3px;background:rgba(150,190,225,.16);border-radius:99px}
+.track .done{position:absolute;left:0;top:var(--rail);height:3px;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px;transition:width .4s ease}
+.node{position:absolute;top:calc(var(--rail) - 7px);transform:translateX(-50%);text-align:center}
 .node i{display:block;width:11px;height:11px;border-radius:50%;background:var(--line2);
   border:2px solid var(--ink,#08111f);margin:0 auto;position:relative;z-index:2}
 .node.reached i{background:var(--teal)}
 .node span{display:block;margin-top:9px;font-family:var(--mono);font-size:8.5px;letter-spacing:.07em;
   text-transform:uppercase;color:var(--text3);white-space:nowrap}
 .node.reached span{color:var(--text2)}
-.mark{position:absolute;top:-14px;transform:translateX(-50%);z-index:3;transition:left .4s ease}
+.mark{position:absolute;transform:translateX(-50%);z-index:3;transition:left .4s ease,top .4s ease}
 .mark b{display:block;font-family:var(--mono);font-size:10px;background:var(--raise);color:var(--text);
   border:1px solid var(--line2);border-radius:99px;padding:2px 8px;white-space:nowrap}
-.mark:after{content:"";display:block;width:2px;height:12px;background:var(--line2);margin:1px auto 0}
+.mark:after{content:"";display:block;width:2px;height:var(--stem,12px);background:var(--line2);margin:0 auto}
 .mark.risk b{border-color:rgba(255,176,32,.5);color:#FFB020}
 .jrn-ctl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .jrn-src{margin-top:10px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:7px}
@@ -895,9 +895,13 @@ function jrnDraw(){
     var pct=i/span*100;
     return '<div class="node'+(lead>=i?' reached':'')+'" style="left:'+pct+'%"><i></i><span>'+m+'</span></div>';
   }).join('');
+  /* stack downward from the top and stretch each stem to the rail, so a bigger
+     cohort makes the track denser rather than climbing out of it */
+  var RAIL=118, ROW=20, LBL=18;
   html+=people.map(function(p,i){
+    var top=(jrnSolo?RAIL-44:i*ROW);
     return '<div class="mark'+(p.risk?' risk':'')+'" style="left:'+(p.at/span*100).toFixed(1)+
-      '%;top:'+(-14 - (jrnSolo?0:i*17))+'px"><b>'+p.n+'</b></div>';}).join('');
+      '%;top:'+top+'px;--stem:'+Math.max(4,RAIL-top-LBL)+'px"><b>'+p.n+'</b></div>';}).join('');
   $('jrnTrack').innerHTML=html;
   $('jrnSrc').textContent='Positions read from '+ex.label+' \u2014 nothing on this page is hand-set.';
   $('jrnView').textContent=jrnSolo?'One learner \u2192 cohort of 5':'Cohort of 5 \u2192 one learner';
