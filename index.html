@@ -272,6 +272,10 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
 @media(max-width:1220px){
   .led-nav .led-badge{font-size:8.5px;padding:1px 4px;min-width:0;letter-spacing:.03em}
   .led-nav button{gap:5px}
+  /* The FUNDABLE wordmark is 102px of pure identity, and at these widths the nav
+     is short by a few. The mark itself stays, so the brand is still present -
+     navigation earns the space ahead of a repeat of the name in the tab title. */
+  .logo-text{display:none}
 }
 /* No dots-only tier. A row of unlabelled rings tells you nothing about where you
    are, so the names never come off - the nav scrolls sideways instead when the bar
@@ -1869,7 +1873,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31s</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -2845,7 +2849,52 @@ const PLAN_KEY_LEGACY='ac_levy_plan_v1'; // legacy plan (migrated → SCEN_KEY)
    from it. goal/talent are reserved slots for the elements that attach next.
    meta.rulesVersion stamps which funding-rules era produced the figures. */
 const SCEN_KEY='ac_scenario_v1';
-const RULES_VERSION=RULEBOOK.version;
+let RULES_VERSION=RULEBOOK.version;
+/* ---- canonical shared rulebook ---------------------------------------------
+   Refresh RULEBOOK from the single source of truth (ACGroup21/ac-funding-data);
+   the const RULEBOOK above is the OFFLINE FALLBACK. LevyEngine holds RULEBOOK by
+   reference, so in-place mutation flows through the whole engine. Constants only.
+   Safe before the repo exists (404 -> baked). Also gains the incentives + L7
+   figures Fundable was missing. */
+RULEBOOK.__source='baked';
+(function(){
+  var RB_URL='https://acgroup21.github.io/ac-funding-data/funding-rules.json';
+  function pk(o,p){return p.split('.').reduce(function(a,k){return a==null?a:a[k];},o);}
+  function apply(c){
+    var lv=pk(c,'levy.rate.value'),al=pk(c,'levy.allowance.value'),tu=pk(c,'levy.topUp.value');
+    if(!(isFinite(lv)&&isFinite(al)&&isFinite(tu)))throw new Error('canonical missing core values');
+    function s(p,f){var v=pk(c,p);if(v!==undefined)f(v);}
+    s('levy.rate.value',function(v){RULEBOOK.levyRate=v;});
+    s('levy.allowance.value',function(v){RULEBOOK.levyAllowance=v;});
+    s('levy.topUp.value',function(v){RULEBOOK.topUpRate=v;});
+    s('expiry.boundaryMonthKey',function(v){RULEBOOK.boundaryMk=v;});
+    s('ni.employerRate.value',function(v){RULEBOOK.ni.empRate=v;});
+    s('ni.secondaryThreshold.value',function(v){RULEBOOK.ni.secThreshold=v;});
+    s('ni.apprenticeUpperThreshold.value',function(v){RULEBOOK.ni.aust=v;});
+    s('delivery.drawTraining.value',function(v){RULEBOOK.draw.training=v;});
+    s('delivery.drawEpa.value',function(v){RULEBOOK.draw.epa=v;});
+    s('delivery.transferCapPct.value',function(v){RULEBOOK.transferCapPct=v;});
+    s('coInvest.employerBefore.value',function(v){RULEBOOK.coInvest.before=v;});
+    s('coInvest.employerFrom.value',function(v){RULEBOOK.coInvest.from=v;});
+    s('expiry.monthsBefore.value',function(v){RULEBOOK.expiryMonths.before=v;});
+    s('expiry.monthsFrom.value',function(v){RULEBOOK.expiryMonths.from=v;});
+    s('delivery.apprenticeshipMinMonths',function(v){RULEBOOK.apprenticeshipMinMonths=v;});
+    s('benchmarks.nationalAchievementRate.value',function(v){RULEBOOK.achievementBenchmark=v;});
+    s('units',function(u){RULEBOOK.unit={coInvest:u.coInvest,m1:u.m1,m2:u.m2,minHours:u.minHours,maxHours:u.maxHours};});
+    RULEBOOK.incentives={employerPayment:pk(c,'incentives.employerPayment.value'),hiringPayment:pk(c,'incentives.hiringPayment.value'),hiringPaymentFrom:pk(c,'incentives.hiringPayment.from'),careLeaverBursary:pk(c,'incentives.careLeaverBursary.value'),learningSupportMonthly:pk(c,'incentives.learningSupportMonthly.value')};
+    RULEBOOK.level7={fundedMaxAge:pk(c,'level7.fundedMaxAge'),careLeaverEhcpMaxAge:pk(c,'level7.careLeaverEhcpMaxAge')};
+    s('meta.version',function(v){RULEBOOK.version=v;RULES_VERSION=v;});
+    s('meta.asOf',function(v){RULEBOOK.asOf=v;});
+    RULEBOOK.__source='canonical';RULEBOOK.__canonical=c;
+  }
+  if(typeof fetch!=='function')return;
+  fetch(RB_URL).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(c){apply(c);
+      try{if(window.console&&console.debug)console.debug('[Fundable] funding rules: canonical '+RULEBOOK.version);}catch(e){}
+      try{window.dispatchEvent(new CustomEvent('ac:rules',{detail:{source:'canonical',version:RULEBOOK.version}}));}catch(e){}})
+    .catch(function(err){RULEBOOK.__source='baked';
+      try{if(window.console&&console.warn)console.warn('[Fundable] funding rules: baked fallback — '+(err&&err.message));}catch(e){}});
+})();
 const SCEN_SCHEMA=1;
 let scnGoal=null, scnTalent=null, scnId=null, lastGoalCtx=null, scnCohortMin=null, scnDataAck=null, lastDataFindings=[];
 let ringfences=[], ringfenceApply=false;
