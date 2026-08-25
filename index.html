@@ -649,6 +649,14 @@ button{font-family:var(--sans);cursor:pointer}
 .pe-src.own{color:var(--teal)}
 .pe-src.plan{color:var(--amber)}
 @media(max-width:560px){.pe-f input{width:100%}.pe-out{flex-basis:100%}}
+/* Visible only to assistive tech: real content, positioned out of view rather
+   than display:none, which would hide it from screen readers too. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.skip-link{position:absolute;left:-9999px;top:0;z-index:400;background:var(--teal);
+  color:#04121f;font-family:var(--sans);font-size:14px;font-weight:700;
+  padding:11px 18px;border-radius:0 0 10px 0;text-decoration:none}
+.skip-link:focus{left:0}
 .jd-uploads{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
 .jd-uploads .jd-upload{margin-bottom:0;display:flex;align-items:center;justify-content:center}
 .jd-upload small{display:block;margin-top:3px;font-size:10.5px;opacity:.72}
@@ -1366,6 +1374,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 <canvas class="constellation" id="constellation" aria-hidden="true"></canvas>
 <div class="dot-grid"></div><div class="vignette"></div>
 
+<a class="skip-link" href="#mainContent">Skip to the calculator</a>
 <header>
   <div class="hdr-side" style="gap:8px">
   <div class="logo-row">
@@ -1397,7 +1406,8 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   </div>
 </header>
 
-<div class="page">
+<h1 class="sr-only">Fundable — apprenticeship levy and funding calculator</h1>
+<div class="page" role="main" id="mainContent">
   <div style="padding-top:1.5rem">
     <div class="rule-banner">
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
@@ -1437,7 +1447,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   </details>
 
   <!-- STEP 00: GOAL -->
-  <div class="step-row" id="sec-goal"><span class="step-chip">START</span><span class="step-title">Plan to Achieve</span></div>
+  <div class="step-row" id="sec-goal"><span class="step-chip">START</span><span class="step-title" role="heading" aria-level="2">Plan to Achieve</span></div>
   <p class="step-sub">Your goal shapes how the calculator prioritises its recommendations &nbsp;&middot;&nbsp; change it any time by clicking the Goal tab in the top menu</p>
   <div class="card">
     <div id="goalGrid" class="goal-grid"></div>
@@ -1453,7 +1463,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   </div>
 
   <!-- STEP 1: LEVY CSV -->
-  <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title">Upload ESFA Levy Transactions</span></div>
+  <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title" role="heading" aria-level="2">Upload ESFA Levy Transactions</span></div>
   <p class="step-sub levy-only">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
   <div class="card levy-only">
     <div class="upload-zone" id="dropzone" onclick="document.getElementById('csvFile').click()">
@@ -1492,7 +1502,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
   <!-- STEP 01 (non-levy): Funding — replaces the levy card in non-levy mode -->
   <div id="sec-funding" class="nonlevy-only">
-    <div class="step-row"><span class="step-chip">STEP 01</span><span class="step-title">Funding <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; how this plan is paid for</span></span></div>
+    <div class="step-row"><span class="step-chip">STEP 01</span><span class="step-title" role="heading" aria-level="2">Funding <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; how this plan is paid for</span></span></div>
     <div id="nonLevyPanel"></div>
   </div>
 
@@ -1548,7 +1558,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
   <div id="ksbDevPanel" style="display:none">
-  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title">Load Standards &amp; KSB Data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span><span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span></div>
+  <div class="step-row"><span class="step-chip ksb">KSB</span><span class="step-title" role="heading" aria-level="2">Load Standards &amp; KSB Data <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— developer mode</span></span><span class="ksb-badge" id="ksbBadge">&#10024; KSBs loaded</span></div>
   <p class="step-sub">Upload the JSON file from your IfATE standards scraper. The co-pilot will match your talent objectives to actual Knowledge, Skills &amp; Behaviours.</p>
   <div class="card" style="border-color:rgba(167,139,250,0.2)">
     <div class="upload-zone ksb-zone" id="ksbDropzone" onclick="document.getElementById('ksbFile').click()">
@@ -1587,7 +1597,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
     <div class="divider"></div>
 
-    <div class="step-row" id="sec-programmes"><span class="step-chip">STEP 02</span><span class="step-title">Add Apprenticeship Programmes</span></div>
+    <div class="step-row" id="sec-programmes"><span class="step-chip">STEP 02</span><span class="step-title" role="heading" aria-level="2">Add Apprenticeship Programmes</span></div>
     <p class="step-sub">Select a standard — funding band and EPA date are pre-filled. <strong>A fifth of the cost is held back until they pass</strong>, so someone who leaves part-way still costs you everything drawn to that point. <span style="color:var(--text3)">80% drawn monthly across the practical period, 20% released at end-point assessment.</span></p>
     <div class="card" id="deptBudgetCard">
       <details>
@@ -1706,7 +1716,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <div class="divider"></div>
 
     <div id="projectionSection" class="hidden levy-only">
-      <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title">Affordability Projection</span><div class="proj-range" id="projRange"><button data-y="1" onclick="setProjYears(1)">1 year</button><button data-y="2" onclick="setProjYears(2)">2 years</button><button data-y="3" class="on" onclick="setProjYears(3)">3 years</button></div></div>
+      <div class="step-row"><span class="step-chip">STEP 03</span><span class="step-title" role="heading" aria-level="2">Affordability Projection</span><div class="proj-range" id="projRange"><button data-y="1" onclick="setProjYears(1)">1 year</button><button data-y="2" onclick="setProjYears(2)">2 years</button><button data-y="3" class="on" onclick="setProjYears(3)">3 years</button></div></div>
       <div id="goalEmphasis"></div>
       <div class="legend">
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#1a88c0"></span>80% training draw</span>
@@ -1735,7 +1745,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div id="affordLadder"></div>
 
       <div id="epaList" class="hidden" style="margin-top:1.5rem">
-        <div class="step-row" style="padding-top:0;margin-bottom:.75rem"><span class="step-chip">EPA</span><span class="step-title" style="font-size:14px">Completion Payment Schedule</span></div>
+        <div class="step-row" style="padding-top:0;margin-bottom:.75rem"><span class="step-chip">EPA</span><span class="step-title" role="heading" aria-level="2" style="font-size:14px">Completion Payment Schedule</span></div>
         <div class="card"><div class="sw"><table style="min-width:480px">
           <thead><tr><th>Month</th><th>Programme</th><th class="r">Learners</th><th class="r">20% due</th><th class="r">Levy income</th><th>Status</th></tr></thead>
           <tbody id="epaBody"></tbody>
@@ -1743,7 +1753,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       </div>
 
       <div class="divider"></div>
-      <div class="step-row"><span class="step-chip">GIFT</span><span class="step-title">Transfer / Gifting Suggestion</span></div>
+      <div class="step-row"><span class="step-chip">GIFT</span><span class="step-title" role="heading" aria-level="2">Transfer / Gifting Suggestion</span></div>
       <div class="metrics" id="giftMetrics"></div>
       <div id="giftExpiryRec" class="gift-rec" style="display:none"></div>
       <div id="giftSocialValue" class="gift-rec gift-sv" style="display:none"></div>
@@ -1752,7 +1762,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
     <div id="planSection" class="hidden">
       <div class="divider"></div>
-      <div class="step-row"><span class="step-chip plan">PLAN</span><span class="step-title">Things to Consider Before You Start <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— workforce impact &amp; timing</span></span></div>
+      <div class="step-row"><span class="step-chip plan">PLAN</span><span class="step-title" role="heading" aria-level="2">Things to Consider Before You Start <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— workforce impact &amp; timing</span></span></div>
       <p class="step-sub">The levy pays the training fee. Your business absorbs the <strong>time</strong> — off-the-job (OTJ) hours pull people off the floor. This estimates that overlay cost, checks it against your team's capacity, and suggests when to start around your peak seasons.</p>
       <div class="card">
         <div class="plan-inputs">
@@ -1776,7 +1786,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
     <div id="sec-reports">
       <div class="divider"></div>
-      <div class="step-row"><span class="step-chip">STEP 04</span><span class="step-title">Reports <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; build a master report or just the board cover</span></span></div>
+      <div class="step-row"><span class="step-chip">STEP 04</span><span class="step-title" role="heading" aria-level="2">Reports <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;&mdash; build a master report or just the board cover</span></span></div>
       <details class="card" id="reportsCard">
         <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
           <span style="flex:1;font-size:13px;color:var(--text2)">Tick the reports you need and build one master document &mdash; or generate just the board cover. Everything is assembled from the data you&rsquo;ve entered; nothing leaves your browser.</span>
@@ -1814,11 +1824,11 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
   <!-- JD MATCHER — always visible (KSB-based, independent of levy data) -->
   <div class="divider"></div>
-  <div class="step-row" id="sec-jd"><span class="step-chip jd">JD</span><span class="step-title">JD Matcher <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard, and what is left to develop?</span></span></div>
+  <div class="step-row" id="sec-jd"><span class="step-chip jd">JD</span><span class="step-title" role="heading" aria-level="2">JD Matcher <span style="font-size:13px;font-weight:400;color:var(--text3)">&nbsp;— does a role's JD map to the standard, and what is left to develop?</span></span></div>
   <p class="step-sub">Pick a standard, then paste or upload a job description. See which Knowledge, Skills &amp; Behaviours the role covers, where the gaps are, and what workplace exposure would develop them.</p>
   <div class="card">
     <div class="field" style="margin-bottom:1rem"><label>Apprenticeship standard</label>
-      <input type="text" id="jd-search" class="standard-search" placeholder="🔍  Search standards (e.g. data, nurse, project)…" oninput="buildJdSelect(this.value)" style="margin-bottom:8px">
+      <input type="text" id="jd-search" class="standard-search" aria-label="Search apprenticeship standards" placeholder="🔍  Search standards (e.g. data, nurse, project)…" oninput="buildJdSelect(this.value)" style="margin-bottom:8px">
       <select id="jd-standard"></select>
       <div id="jdRecallNote" style="font-size:11.5px;color:var(--text3);margin-top:6px;line-height:1.5"></div>
     </div>
@@ -1843,7 +1853,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31o</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -1854,7 +1864,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <!-- burger function menu + pointing arrow -->
 <div class="nav-back" id="navBack" onclick="closeNav()"></div>
-<nav class="nav-drawer" id="navDrawer" aria-label="All functions" aria-hidden="true">
+<nav class="nav-drawer" id="navDrawer" aria-label="All functions" aria-hidden="true" inert>
   <div class="nav-head"><b>&#9776;&nbsp; All functions</b><button class="nav-x" onclick="closeNav()" aria-label="Close">&times;</button></div>
   <div class="nav-list" id="navList"></div>
 </nav>
@@ -4726,8 +4736,8 @@ function buildNavDrawer(){
     }).join('');
   }).join('');
 }
-function openNav(){document.getElementById('navBack').classList.add('open');document.getElementById('navDrawer').classList.add('open');document.getElementById('navDrawer').setAttribute('aria-hidden','false');}
-function closeNav(){document.getElementById('navBack').classList.remove('open');document.getElementById('navDrawer').classList.remove('open');document.getElementById('navDrawer').setAttribute('aria-hidden','true');}
+function openNav(){document.getElementById('navBack').classList.add('open');var d=document.getElementById('navDrawer');d.classList.add('open');d.setAttribute('aria-hidden','false');d.removeAttribute('inert');}
+function closeNav(){document.getElementById('navBack').classList.remove('open');var d=document.getElementById('navDrawer');d.classList.remove('open');d.setAttribute('aria-hidden','true');d.setAttribute('inert','');}
 // Arrow tracks the target through the (smooth) scroll, then settles + holds 2.5s + fades.
 function showFuncArrow(el){
   // the locator arrow is replaced by the travelling tile; keeping the old entry
