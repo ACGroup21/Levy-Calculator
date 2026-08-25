@@ -428,9 +428,16 @@ button{font-family:var(--sans);cursor:pointer}
 .sw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
 @media(max-width:980px){.sw-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.sw-grid{grid-template-columns:1fr}}
+/* a button vertically CENTRES its content, so a card whose description runs to
+   one line while its neighbours run to two drops its title below theirs. Pin the
+   content to the top so the titles line up whatever the descriptions do. */
 .sw-card{background:rgba(var(--wash),0.04);border:1px solid var(--border);border-radius:11px;
-  padding:13px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s,background .15s}
+  padding:13px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;
+  transition:border-color .15s,background .15s}
 .sw-card:hover{border-color:rgba(45,212,178,.45)}
+.sw-card b{transition:color .15s}
+.sw-card:hover b,.sw-card:focus-visible b,.sw-card[aria-pressed="true"] b{color:var(--teal)}
 .sw-card:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 .sw-card[aria-pressed="true"]{border-color:var(--teal);background:rgba(45,212,178,.09)}
 .sw-card b{display:block;font-size:14px;color:var(--text);margin-bottom:3px}
@@ -2074,7 +2081,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01m</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
