@@ -424,6 +424,23 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── What this rests on: sourced vs assumed ─────────────────────── */
+.est-lede{margin:2px 0 12px;font-size:13px;line-height:1.6;color:var(--text2)}
+.est-lede b{color:var(--text)}
+.est-row{display:grid;grid-template-columns:74px 150px 1fr;gap:6px 12px;padding:9px 0;
+  border-bottom:1px solid var(--border);font-size:12.5px;align-items:start}
+.est-row:last-child{border-bottom:0}
+.est-flag{font-family:'Roboto Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:99px;padding:3px 7px;text-align:center;white-space:nowrap}
+.est-flag.is-src{background:rgba(45,212,178,.13);color:var(--teal);border:1px solid rgba(45,212,178,.34)}
+.est-flag.is-est{background:rgba(224,164,59,.13);color:#E0A43B;border:1px solid rgba(224,164,59,.38)}
+.est-k{color:var(--text);font-weight:600}
+.est-v{font-family:'Roboto Mono',monospace;font-size:12px;color:var(--text2);grid-column:3}
+.est-n{grid-column:2 / -1;color:var(--text3);font-size:12px;line-height:1.55}
+@media(max-width:720px){.est-row{grid-template-columns:74px 1fr}.est-v,.est-n{grid-column:2}}
+.est-chip{display:inline-block;font-family:'Roboto Mono',monospace;font-size:8px;letter-spacing:.09em;
+  text-transform:uppercase;vertical-align:super;margin-left:5px;padding:1px 5px;border-radius:99px;
+  background:rgba(224,164,59,.14);color:#E0A43B;border:1px solid rgba(224,164,59,.36);cursor:help}
 /* ── Inverse solver: budget + headcount → plan ─────────────────────────── */
 .slv-card{margin-top:14px}
 .slv-grid{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
@@ -1529,6 +1546,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <span style="color:var(--teal);font-size:15px;flex-shrink:0;margin-top:1px">&#9432;</span>
       <span><strong>From August 2026 you have half as long to spend your levy.</strong> Anything you declare from then expires after <strong>12 months</strong> instead of 24, so funds you have not committed inside a year go back to the Treasury. <span style="color:var(--text3)">Declarations made before August 2026 keep their 24-month window; this tool applies the correct one per declaration date automatically.</span></span>
     </div>
+    <details id="estDetails" style="margin-top:8px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">HOW SURE IS THIS</span><span style="color:var(--teal)">What this plan rests on &#9662;</span></summary><div id="estBody" style="margin-top:10px"></div></details>
     <details id="rulesDetails" style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:9px"><span style="font-family:'Roboto Mono',monospace;font-size:11px;letter-spacing:.08em;color:var(--text3)">SHOW THE WORKING</span><span style="color:var(--teal)">Funding rules applied &amp; sources &#9662;</span></summary><div id="rulesRef"></div></details>
   </div>
 
@@ -1991,7 +2009,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01f</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01g</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3383,6 +3401,149 @@ function rulesChangelogHtml() {
    it - but it is carved out and shown, because a plan that ignores it is the
    plan that fails. See dont-string-along.
 --------------------------------------------------------------------------- */
+/* ═══ WHAT THIS RESTS ON — marking the estimates ════════════════════════════
+   A price you typed and a band pulled from Skills England are rendered
+   identically today. They are not the same claim, and a report that cannot
+   tell them apart cannot be honest about its own certainty.
+
+   The uncomfortable finding this surfaces: off-the-job time is usually the
+   LARGEST cost in the plan, and it is computed from two figures that ship as
+   defaults - £18/hour and 6 hours a week. Untouched, they are assumptions
+   wearing the clothes of facts.
+
+   Detection is by comparison against the shipped defaults, and the wording is
+   chosen to stay true either way: "still at the default" is accurate whether
+   the number was inherited or deliberately chosen, where "you didn't set
+   this" would be a guess.
+--------------------------------------------------------------------------- */
+var EST_DEFAULTS = { rate: 18, otj: 6 };
+
+function estWageIsDefault() {
+  try { return (+((planCfg || {}).rate) === EST_DEFAULTS.rate); } catch (e) { return true; }
+}
+function estOtjIsDefault() {
+  try {
+    var m = (planCfg || {}).otj || {}, ks = Object.keys(m);
+    if (!ks.length) return true;
+    return ks.every(function (k) { return +m[k] === EST_DEFAULTS.otj; });
+  } catch (e) { return true; }
+}
+function estLevyIsEstimated() {
+  try { return !!(levyData && levyData.estimated); } catch (e) { return false; }
+}
+function estHasLevyData() {
+  try { return !!(levyData && levyData.byMonth && levyData.byMonth.length); } catch (e) { return false; }
+}
+
+/* every programme priced at its band maximum is carrying the band, not a
+   negotiated price - worth separating, because one is a cap and the other is
+   a deal someone actually struck */
+function estPricing() {
+  var atBand = 0, negotiated = 0, unknown = 0;
+  try {
+    var lib = (typeof STANDARDS !== 'undefined' ? STANDARDS : STANDARDS_BASE) || [];
+    (programmes || []).forEach(function (p) {
+      var std = null;
+      for (var i = 0; i < lib.length; i++) { if (lib[i].name === p.name) { std = lib[i]; break; } }
+      if (!std || !std.band) { unknown++; return; }
+      if (+p.cost === +std.band) atBand++; else negotiated++;
+    });
+  } catch (e) {}
+  return { atBand: atBand, negotiated: negotiated, unknown: unknown };
+}
+
+function estAgeMixSet() {
+  try { return (programmes || []).some(function (p) { return p.age && ((+p.age.y||0)+(+p.age.m||0)+(+p.age.o||0) > 0); }); }
+  catch (e) { return false; }
+}
+
+/* the registry: sourced = traceable to a file or the rulebook; assumed = not */
+function estAssumptions() {
+  var a = [], pr = estPricing();
+
+  if (!estHasLevyData()) {
+    a.push({ k: 'Levy income', v: 'not provided yet', sourced: false,
+             note: 'Nothing is costed against a real account until you upload the ESFA transactions or estimate from payroll.' });
+  } else if (estLevyIsEstimated()) {
+    a.push({ k: 'Levy income', v: 'estimated from your pay bill', sourced: false,
+             note: '0.5% of the pay bill less the £15,000 allowance, plus the 10% top-up. A real ESFA export will differ, often by a little.' });
+  } else {
+    a.push({ k: 'Levy income', v: 'from your ESFA transactions', sourced: true,
+             note: 'Read from the file you uploaded — the same figures the apprenticeship service shows.' });
+  }
+
+  if (pr.atBand + pr.negotiated + pr.unknown > 0) {
+    if (pr.negotiated === 0) {
+      a.push({ k: 'Programme prices', v: 'all at the band maximum', sourced: false,
+               note: 'The band is a cap, not a price. Until you enter what a provider actually quoted, this is the most it could cost rather than what it will.' });
+    } else {
+      a.push({ k: 'Programme prices', v: pr.negotiated + ' negotiated, ' + pr.atBand + ' at band maximum',
+               sourced: pr.atBand === 0,
+               note: pr.atBand === 0 ? 'Every programme carries a price you entered.'
+                                     : pr.atBand + ' still sit at the band cap rather than a quoted price.' });
+    }
+    a.push({ k: 'Funding bands & durations', v: 'from the Skills England register', sourced: true,
+             note: 'Band maximum and typical duration for each standard, refreshed from the published register.' });
+  }
+
+  /* fmt() rounds to the pound, which quietly loses the .50 on a wage - in a
+     panel about honesty that is the wrong thing to round away */
+  var wg = +((planCfg || {}).rate) || 0;
+  var wgTxt = '£' + (wg % 1 ? wg.toFixed(2) : String(wg));
+  a.push({ k: 'Hourly wage', v: wgTxt + ' an hour' + (estWageIsDefault() ? ' — still the default' : ''),
+           sourced: !estWageIsDefault(),
+           note: estWageIsDefault()
+             ? 'This ships as £18 and drives the off-the-job cost, which is usually the largest figure in the plan. Set it to your real rate and that number moves a long way.'
+             : 'Set by you, so the off-the-job cost reflects your actual pay.' });
+
+  a.push({ k: 'Off-the-job hours', v: estOtjIsDefault() ? '6 hours a week — still the default' : 'set per level',
+           sourced: !estOtjIsDefault(),
+           note: estOtjIsDefault()
+             ? 'Six hours a week is a working assumption, not a rule. The requirement is a proportion of contracted hours, and your provider will plan it differently.'
+             : 'Set per level, so the time cost matches how your provider actually delivers.' });
+
+  a.push({ k: 'Apprentice ages', v: estAgeMixSet() ? 'entered per programme' : 'not entered', sourced: estAgeMixSet(),
+           note: estAgeMixSet()
+             ? 'Drives National Insurance relief for under-25s and full funding for 16–21 year olds.'
+             : 'Without ages, no NI relief and no 16–21 full funding are applied — so this plan may be costing you more on paper than in practice.' });
+
+  a.push({ k: 'Funding rules', v: 'rulebook ' + RULEBOOK.version, sourced: true,
+           note: 'Verified against gov.uk on ' + RULEBOOK.asOf + '. Every rate, cap and threshold comes from here.' });
+
+  return a;
+}
+
+/* a small honest mark for a figure that rests on an assumption */
+function estMark(reason) {
+  return '<span class="est-chip" title="' + String(reason).replace(/"/g, '&quot;') +
+         '" aria-label="Estimate: ' + String(reason).replace(/"/g, '&quot;') + '">est</span>';
+}
+
+function estRender() {
+  var host = document.getElementById('estBody');
+  if (!host) return;
+  var a = estAssumptions();
+  var assumed = a.filter(function (r) { return !r.sourced; }).length;
+  host.innerHTML =
+    '<p class="est-lede">' +
+      (assumed === 0
+        ? 'Every figure below traces to a file you provided or to the funding rulebook.'
+        : '<b>' + assumed + ' of ' + a.length + '</b> rest on an assumption rather than something you supplied. ' +
+          'That is not a fault — it is what lets you model before the details exist — but a report should say so.') +
+    '</p>' +
+    a.map(function (r) {
+      return '<div class="est-row"><span class="est-flag ' + (r.sourced ? 'is-src' : 'is-est') + '">' +
+        (r.sourced ? 'sourced' : 'assumed') + '</span>' +
+        '<span class="est-k">' + r.k + '</span>' +
+        '<span class="est-v">' + r.v + '</span>' +
+        '<span class="est-n">' + r.note + '</span></div>';
+    }).join('');
+}
+
+function estMount() {
+  try { estRender(); } catch (e) {}
+}
+
 var solveState = { budget: 0, people: 0, ran: false };
 
 function solveRate() {
@@ -3890,11 +4051,14 @@ function scnClearStale(){
 /* keep the changelog attached to the rules reference however that panel is
    (re)rendered - it is the same question asked from the other direction */
 (function(){
-  var mount=function(){ try{ if(typeof rulesMountChangelog==='function') rulesMountChangelog(); }catch(e){} };
+  var mount=function(){ try{ if(typeof rulesMountChangelog==='function') rulesMountChangelog(); }catch(e){}
+                        try{ if(typeof estMount==='function') estMount(); }catch(e){} };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(mount,300);});
   else setTimeout(mount,300);
   var d=document.getElementById('rulesDetails');
   if(d) d.addEventListener('toggle',function(){ if(d.open) mount(); });
+  var e=document.getElementById('estDetails');
+  if(e) e.addEventListener('toggle',function(){ if(e.open) mount(); });
 })();
 function scnStaleNotice(sc){
   var w=document.getElementById('scnStale'); if(!w)return;
@@ -4790,7 +4954,7 @@ function renderSummary(){
   const annual=levyData.monthlyAvg*12;
   document.getElementById('metricCards').innerHTML=`
     <div class="metric"><div class="ml">Account balance (est.)</div><div class="mv c-teal">${pv('balance',fmt(levyData.balance),'Account balance')}</div><div class="ms">Total in minus total out</div></div>
-    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${pv('monthlyAvg',fmt(levyData.monthlyAvg),'Average monthly income')}</div><div class="ms">Levy declared + 10% top-up</div></div>
+    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${pv('monthlyAvg',fmt(levyData.monthlyAvg),'Average monthly income')}${estLevyIsEstimated()?estMark('Estimated from your pay bill, not read from an ESFA export.'):''}</div><div class="ms">Levy declared + 10% top-up</div></div>
     <div class="metric"><div class="ml">Projected annual levy</div><div class="mv">${pv('annualLevy',fmt(annual),'Projected annual levy')}</div><div class="ms">Monthly avg &times; 12</div></div>
     <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${pv('maxGift',fmt(annual*RULEBOOK.transferCapPct),'Maximum you can gift')}</div><div class="ms">Statutory transfer cap</div></div>
   `;
@@ -5652,7 +5816,7 @@ function renderNonLevy(){
     fig('Government funds',pv('nlGov',fmt(s.gov),'Government funds'),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
     fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers','fund')+
     fig('Your investment',pv('nlYourInv',s.residual<0.5?'£0':fmt(s.residual),'Your investment'),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv','cash')+
-    (f.otj>0?fig('Off-the-job time',fmt(f.otj),'var(--text2)','your staff time','','cash'):'')+
+    (f.otj>0?fig('Off-the-job time',fmt(f.otj)+((typeof estWageIsDefault==='function'&&(estWageIsDefault()||estOtjIsDefault()))?estMark('Built on the default £18 an hour and 6 hours a week — set your own in the plan card and this moves.'):''),'var(--text2)','your staff time','','cash'):'')+
   '</div>'+'<div class="tone-key"><span><i class="kf"></i>funded for you</span><span><i class="kc"></i>your cash</span></div>';
   var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
