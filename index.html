@@ -424,6 +424,18 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Completion-adjusted cost ─────────────────────────────────── */
+.ca-grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:2px}
+.ca-fig{flex:1 1 0;min-width:152px;background:var(--glass);border:1px solid var(--border);
+  border-radius:10px;padding:0.9rem 1.1rem}
+.ca-l{font-family:'Roboto Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text3);margin-bottom:5px;line-height:1.45;min-height:2.9em;display:flex;align-items:flex-start}
+.ca-v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.ca-s{font-size:11px;color:var(--text3);margin-top:2px;line-height:1.45}
+.ca-note{margin-top:12px;font-size:12.5px;line-height:1.6;color:var(--text2)}
+.ca-note b{color:var(--text)}
+.ca-ass{display:block;margin-top:7px;font-size:11.5px;line-height:1.55;color:var(--text3);
+  border-left:2px solid rgba(224,164,59,.5);padding-left:9px}
 /* ── What this rests on: sourced vs assumed ─────────────────────── */
 .est-lede{margin:2px 0 12px;font-size:13px;line-height:1.6;color:var(--text2)}
 .est-lede b{color:var(--text)}
@@ -1711,6 +1723,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
   </details>
   <div id="qarSection"></div>
+  <div id="caCard"></div>
 
   <!-- KSB UPLOAD — developer only, hidden from employers, toggle with Ctrl+Shift+K -->
   <div id="ksbDevPanel" style="display:none">
@@ -2009,7 +2022,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01h</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3416,6 +3429,124 @@ function rulesChangelogHtml() {
    the number was inherited or deliberately chosen, where "you didn't set
    this" would be a guess.
 --------------------------------------------------------------------------- */
+/* ═══ COMPLETION-ADJUSTED COST ══════════════════════════════════════════════
+   Every figure in this app assumes everyone finishes. Nationally about 65%
+   do. A plan costed on 100% completion is not the plan that will happen.
+
+   VERIFIED AGAINST GOV.UK (technical funding guide, checked 2026-08-25)
+   before any of this was written, because the direction of the adjustment
+   depends entirely on it:
+
+     - monthly instalments STOP when an apprentice withdraws, and no
+       instalment is calculated for the final part-month
+     - the 20% completion payment is released ONLY on completion, so it is
+       never paid for someone who does not achieve
+
+   So a non-completer costs LESS than a completer and delivers nothing. The
+   naive version of this feature - multiply the plan by 0.65 - gets the
+   direction of the money wrong AND misses the point. The figure that moves
+   is COST PER ACHIEVEMENT, and it moves up.
+
+   The one thing that cannot be derived is WHEN someone leaves. That is an
+   assumption, it is stated on the panel, and it is registered with the
+   estimate machinery rather than hidden.
+--------------------------------------------------------------------------- */
+var CA_EXIT_POINT = 0.5;   // non-completers assumed to leave at the midpoint
+
+/* their own cohort rate if the tracker data supports one, else the national benchmark */
+function caRate() {
+  try {
+    if (typeof computeQAR === 'function') {
+      var q = computeQAR();
+      if (q && q.leavers > 0 && q.qar != null) {
+        return { r: q.qar / 100, own: true, leavers: q.leavers };
+      }
+    }
+  } catch (e) {}
+  return { r: +RULEBOOK.achievementBenchmark || 0.654, own: false, leavers: null };
+}
+
+function caCompute() {
+  var starts = 0, price = 0, otj = 0;
+  (programmes || []).forEach(function (p) {
+    var t = programmeTrueCost(p);
+    if (!t) return;
+    starts += (+t.count || 0);
+    price += (+t.price || 0);
+    otj += (+t.otjCost || 0);
+  });
+  if (!starts) return null;
+
+  var rr = caRate(), r = Math.max(0, Math.min(1, rr.r));
+  var achievers = starts * r, nonAch = starts - achievers;
+
+  var pricePer = price / starts, otjPer = otj / starts;
+  /* a completer: the full negotiated price (80% instalments + the 20% on
+     completion) plus their full off-the-job time */
+  var perAchiever = pricePer + otjPer;
+  /* a non-completer: instalments only, stopped part-way, and no completion
+     payment at all - plus the off-the-job time already spent, which nobody
+     refunds */
+  var perNonAch = pricePer * RULEBOOK.draw.training * CA_EXIT_POINT + otjPer * CA_EXIT_POINT;
+
+  var planned = starts * perAchiever;                 // what the app shows today
+  var expected = achievers * perAchiever + nonAch * perNonAch;
+  var wasted = nonAch * perNonAch;                    // buys no qualification
+  var costPerAch = achievers > 0 ? expected / achievers : null;
+
+  return { starts: starts, rate: r, own: rr.own, leavers: rr.leavers,
+           achievers: achievers, nonAch: nonAch,
+           planned: planned, expected: expected, wasted: wasted,
+           costPerStart: planned / starts, costPerAch: costPerAch,
+           otjWasted: nonAch * otjPer * CA_EXIT_POINT };
+}
+
+function caRender() {
+  var host = document.getElementById('caCard');
+  if (!host) return;
+  var c = caCompute();
+  if (!c) { host.innerHTML = ''; return; }
+  var uplift = c.costPerAch && c.costPerStart ? (c.costPerAch / c.costPerStart - 1) : 0;
+  /* round once, then derive the other half from it - showing 3.8 and 2.3 against
+     a total of 6 reads as an error even though both are correctly rounded */
+  var achShown = Math.round(c.achievers * 10) / 10;
+  var nonShown = Math.round((c.starts - achShown) * 10) / 10;
+  /* and show the rate actually used, not a rounding of it */
+  var rateShown = (Math.round(c.rate * 1000) / 10);
+  rateShown = (rateShown % 1 ? rateShown.toFixed(1) : rateShown.toFixed(0)) + '%';
+
+  var fg = function (lab, val, col, sub) {
+    return '<div class="ca-fig"><div class="ca-l">' + lab + '</div>' +
+      '<div class="ca-v"' + (col ? ' style="color:' + col + '"' : '') + '>' + val + '</div>' +
+      (sub ? '<div class="ca-s">' + sub + '</div>' : '') + '</div>';
+  };
+
+  host.innerHTML =
+    '<div class="card" id="sec-completion" style="margin-top:0.75rem">' +
+      '<div class="step-row" style="margin-top:0"><span class="step-chip">FORECAST</span>' +
+      '<span class="step-title" role="heading" aria-level="2">If they don’t all finish</span></div>' +
+      '<p class="step-sub">Every other figure here assumes all ' + c.starts + ' complete. ' +
+        (c.own
+          ? 'Your own cohort achieves <b>' + rateShown + '</b> (' + c.leavers + ' leavers so far).'
+          : 'Nationally <b>' + rateShown + '</b> do, and you have no delivery data loaded yet, so that is the rate used.') +
+      '</p>' +
+      '<div class="ca-grid">' +
+        fg('Expected achievements', achShown + ' of ' + c.starts, 'var(--teal)',
+           nonShown + ' not expected to achieve') +
+        fg('Cost per start', fmt(c.costPerStart), 'var(--text)', 'what the plan shows today') +
+        fg('Cost per achievement', c.costPerAch ? fmt(c.costPerAch) : '—', 'var(--money)',
+           uplift > 0.001 ? '+' + Math.round(uplift * 100) + '% on cost per start' : 'same as cost per start') +
+        fg('Buys no qualification', fmt(c.wasted), '#E0A43B',
+           'of which ' + fmt(c.otjWasted) + ' is staff time') +
+      '</div>' +
+      '<div class="ca-note">Payments stop when someone withdraws and the 20% completion element is never released, ' +
+        'so your <b>expected spend falls to ' + fmt(c.expected) + '</b> from ' + fmt(c.planned) + ' — but it buys ' +
+        nonShown + ' fewer qualified people. Cheaper is not better here.' +
+        '<span class="ca-ass">Assumes anyone who leaves does so halfway through. When they leave is the one thing ' +
+        'this cannot know, and it moves the training element but not the conclusion.</span></div>' +
+    '</div>';
+}
+
 var EST_DEFAULTS = { rate: 18, otj: 6 };
 
 function estWageIsDefault() {
@@ -3507,6 +3638,14 @@ function estAssumptions() {
              ? 'Drives National Insurance relief for under-25s and full funding for 16–21 year olds.'
              : 'Without ages, no NI relief and no 16–21 full funding are applied — so this plan may be costing you more on paper than in practice.' });
 
+  if (typeof caCompute === 'function' && caCompute()) {
+    var _r = caRate();
+    a.push({ k: 'Completion rate', v: _r.own ? Math.round(_r.r * 100) + '% \u2014 your own cohort'
+                                             : Math.round(_r.r * 100) + '% \u2014 the national rate',
+             sourced: !!_r.own,
+             note: _r.own ? 'Taken from the delivery data you loaded (' + _r.leavers + ' leavers).'
+                          : 'No delivery data loaded, so the national benchmark stands in. Drop a tracker export in and this becomes your own rate. When a leaver actually leaves is assumed to be halfway through.' });
+  }
   a.push({ k: 'Funding rules', v: 'rulebook ' + RULEBOOK.version, sourced: true,
            note: 'Verified against gov.uk on ' + RULEBOOK.asOf + '. Every rate, cap and threshold comes from here.' });
 
@@ -5004,6 +5143,7 @@ function loadNonLevyDemo(){
   if(typeof renderProgrammes==='function')renderProgrammes();
   if(typeof renderProjection==='function')renderProjection();
   renderNonLevy();
+  try{ if(typeof caRender==='function') caRender(); }catch(e){}
   if(typeof saveState==='function')saveState();
 }
 
