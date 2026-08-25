@@ -120,7 +120,12 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
 .cmp .win{color:var(--teal);font-weight:700}
 .cmp .lbl{color:var(--text2)}
 .cmp .num{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--text)}
-@media(max-width:760px){.cmp{grid-template-columns:1fr 1fr;font-size:12.5px}}
+/* Never reflow the columns: a row is one label against three plans, and rewrapping
+   cells into rows they do not belong to destroys the only thing the table shows.
+   Narrow screens scroll it sideways inside its own container instead. */
+.cmpwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.cmpwrap .cmp{min-width:640px}
+@media(max-width:760px){.cmp{font-size:12.5px}}
 
 /* 5 — ledger + undo */
 .ledger{border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -315,14 +320,14 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
           what the last one said.</p>
       </div>
       <div class="stage">
-        <div class="cmp">
+        <div class="cmpwrap"><div class="cmp">
           <div class="hd">&nbsp;</div><div class="hd">As planned</div><div class="hd">Phased</div><div class="hd">Defer 6 months</div>
           <div class="lbl">Starts in year 1</div><div class="num">6</div><div class="num">3</div><div class="num">0</div>
           <div class="lbl">True cost (3y)</div><div class="num">&pound;151,682</div><div class="num">&pound;148,900</div><div class="num">&pound;139,400</div>
           <div class="lbl">Your cash</div><div class="num">&pound;0</div><div class="num">&pound;0</div><div class="num win">&minus;&pound;12,282</div>
           <div class="lbl">Levy left unused</div><div class="num">&pound;20,449</div><div class="num win">&pound;4,100</div><div class="num">&pound;31,880</div>
           <div class="lbl">People trained by 2029</div><div class="num win">6</div><div class="num">6</div><div class="num">4</div>
-        </div>
+        </div></div>
         <p class="note">Green marks the best cell in each row, so the trade-off reads without arithmetic:
           deferring saves cash but wastes levy and trains fewer people. That is the conversation, and
           right now the tool cannot have it.</p>
