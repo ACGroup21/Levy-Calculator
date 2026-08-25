@@ -165,6 +165,8 @@ footer{padding:30px 0 70px;font-family:var(--mono);font-size:10px;letter-spacing
 .solve input[type=range]{width:100%;accent-color:var(--teal)}
 .solve .out{flex:1 1 300px;background:rgba(45,212,178,.06);border:1px solid rgba(45,212,178,.3);border-radius:12px;padding:15px}
 .solve .out .big{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--teal)}
+.solve .out .warn{margin:11px 0 0;font-size:13px;color:var(--text);background:rgba(255,176,32,.09);
+  border:1px solid rgba(255,176,32,.34);border-left-width:3px;border-radius:8px;padding:9px 11px}
 .bar{height:9px;border-radius:99px;background:rgba(150,190,225,.12);overflow:hidden;margin:9px 0 4px}
 .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:99px}
 
@@ -655,10 +657,14 @@ $('doWage').addEventListener('click',function(){
 /* ── 6. report preview ───────────────────────────────────────────────────── */
 var SECTIONS=[['Board summary',1,true],['Affordability',2,true],['Detail & action',1,true],
   ['Cost & delivery',1,false],['Delivery report',2,false],['Achievement rate',1,false]];
-function drawReport(){
+/* Options render ONCE. Rebuilding them on every tick throws keyboard focus to <body>,
+   so a keyboard user loses their place after each section they choose. */
+function drawOpts(){
   $('rpOpts').innerHTML=SECTIONS.map(function(s,i){
     return '<label class="opt"><input type="checkbox" data-i="'+i+'"'+(s[2]?' checked':'')+'> '+
       s[0]+' <span class="muted">&middot; '+s[1]+' pg</span></label>';}).join('');
+}
+function drawReport(){
   var pages=[], n=0;
   SECTIONS.forEach(function(s){ if(!s[2])return;
     for(var k=0;k<s[1];k++){ n++;
@@ -670,7 +676,7 @@ function drawReport(){
 $('rpOpts').addEventListener('change',function(e){
   var i=e.target.dataset.i; if(i===undefined)return;
   SECTIONS[+i][2]=e.target.checked; drawReport();});
-drawReport();
+drawOpts(); drawReport();
 
 /* ── 8. inverse solver ───────────────────────────────────────────────────── */
 var BANDS=[
@@ -699,13 +705,23 @@ function solve(){
     return;
   }
   var spend=best.b*people, left=budget-spend;
+  /* Levy expires 24 months after it lands. A recommendation that strands most of the
+     budget is the wrong recommendation however neatly it fits, so name the idle money
+     and offer the second move rather than reporting a tidy single answer. */
+  var idle=left/budget, extra=Math.floor(left/BANDS[0].b);
   out.innerHTML='<div class="muted" style="font-size:12px;margin-bottom:6px">BEST FIT</div>'+
     '<div class="big">'+best.n.replace(/^L(\d) /,'Level $1 &middot; ')+'</div>'+
     '<div class="bar"><i style="width:'+Math.min(100,spend/budget*100).toFixed(1)+'%"></i></div>'+
     '<p style="margin:6px 0 0;font-size:13.5px">'+people+' learners at '+fmt(best.b)+
-    ' &mdash; <b>'+fmt(spend)+'</b> of your '+fmt(budget)+
-    '.<br><span class="muted">'+fmt(left)+' left over &middot; '+best.m+' months each'+
-    (left>=BANDS[0].b?' &middot; enough for '+Math.floor(left/BANDS[0].b)+' more at Level 2':'')+'</span></p>';
+    ' &mdash; <b>'+fmt(spend)+'</b> of your '+fmt(budget)+' committed.'+
+    '<br><span class="muted">'+best.m+' months each.</span></p>'+
+    (idle>=.25
+      ? '<p class="warn">'+fmt(left)+' &mdash; '+Math.round(idle*100)+'% of the budget &mdash; would sit '+
+        'unused, and levy expires 24 months after it lands.'+
+        (extra>0?' The same money would develop <b>'+extra+' more</b> at Level 2, or move all '+
+          people+' onto a longer programme.':'')+'</p>'
+      : '<p class="muted" style="margin:9px 0 0;font-size:12.5px">'+fmt(left)+' left over &mdash; '+
+        Math.round(idle*100)+'% idle.'+(extra>0?' Enough for '+extra+' more at Level 2.':'')+'</p>');
 }
 $('sBudget').addEventListener('input',solve);
 $('sPeople').addEventListener('input',solve);
