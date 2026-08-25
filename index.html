@@ -259,7 +259,14 @@ body[data-goal="other"]{--goal-accent:#8FB4C6}
    1150px of room). */
 @media(max-width:1260px){.hdr-save .lbl{display:none}.hdr-save{padding:0!important;width:34px;justify-content:center}}
 @media(max-width:1500px){#clearAllBtn .lbl{display:none}#clearAllBtn{padding:0!important;width:34px;justify-content:center}}
-@media(max-width:1220px){.led-nav .lbl{display:none}.led-nav button{padding:6px}}
+/* On a laptop the section NAMES matter more than the step numbers: a column of
+   unlabelled rings tells you nothing about where you are. The numeric badges cost
+   179px across the nav, the names 275px - so below 1220 the badges go and the
+   names stay, and the names only go when even that will not fit.
+   Padding is deliberately not set here: a later unconditional .led-nav button
+   rule would override it anyway. */
+@media(max-width:1220px){.led-nav .led-badge{display:none}}
+@media(max-width:1030px){.led-nav .lbl{display:none}}
 /* Phone: the icon-only LED nav still needs ~337px and overflowed the header.
    Hand navigation to the burger drawer, which already indexes every function. */
 @media(max-width:820px){.led-nav{display:none}}
@@ -1826,7 +1833,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-07-31k</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
