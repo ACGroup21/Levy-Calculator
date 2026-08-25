@@ -424,6 +424,24 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Change ledger ──────────────────────────────────────────── */
+.lg-row{display:grid;grid-template-columns:58px 1fr auto auto;gap:12px;align-items:center;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.lg-row:last-of-type{border-bottom:0}
+.lg-t{font-family:'Roboto Mono',monospace;font-size:11px;color:var(--text3)}
+.lg-w{color:var(--text2);line-height:1.5}
+.lg-mv{font-family:'Roboto Mono',monospace;font-size:12px;white-space:nowrap}
+.lg-up{color:var(--money)}
+.lg-down{color:var(--teal)}
+.lg-flat{color:var(--text3)}
+.lg-undo{background:none;border:1px solid var(--border);border-radius:8px;padding:4px 11px;
+  font:inherit;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap;transition:all .15s}
+.lg-undo:hover{border-color:var(--teal);color:var(--teal)}
+.lg-undo:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.lg-no{font-size:11px;color:var(--text3);white-space:nowrap}
+.lg-empty{font-size:12.5px;color:var(--text3);line-height:1.6}
+.lg-foot{margin-top:10px;font-size:11.5px;color:var(--text3)}
+@media(max-width:720px){.lg-row{grid-template-columns:58px 1fr}.lg-mv,.lg-undo,.lg-no{grid-column:2}}
 /* ── Four ways to start ──────────────────────────────────────── */
 .sw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
 @media(max-width:980px){.sw-grid{grid-template-columns:repeat(2,1fr)}}
@@ -1625,6 +1643,20 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
   </details>
 
+  <!-- What changed -->
+  <details class="card" id="ledgerCard" style="margin-bottom:1.1rem">
+    <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
+      <span style="font-size:15px">&#8617;</span>
+      <span style="flex:1;font-size:13px;color:var(--text2)"><b style="color:var(--text)">What changed</b> &mdash; every edit, what it did to the cost, and how to take it back.</span>
+      <span id="lgCount" style="color:var(--text3);font-size:12px;font-family:'Roboto Mono',monospace"></span>
+      <span style="color:var(--text3);font-size:12px">&#9662;</span>
+    </summary>
+    <div style="margin-top:13px" id="lgBody"></div>
+    <div style="margin-top:12px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)">
+      <button type="button" class="btn-clear" onclick="ledgerClear()">Clear this history</button>
+    </div>
+  </details>
+
   <!-- STEP 00: GOAL -->
   <div class="step-row" id="sec-goal"><span class="step-chip">START</span><span class="step-title" role="heading" aria-level="2">Plan to Achieve</span></div>
   <p class="step-sub">Your goal shapes how the calculator prioritises its recommendations &nbsp;&middot;&nbsp; change it any time by clicking the Goal tab in the top menu</p>
@@ -2081,7 +2113,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01m</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01p</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3320,6 +3352,7 @@ document.addEventListener('keydown', function (e) {
 window.addEventListener('resize', provClose);
 window.addEventListener('scroll', provClose, true);
 document.addEventListener('DOMContentLoaded',function(){
+  try{ if(typeof ledgerRestore==='function'){ ledgerRestore(); ledgerRender(); } }catch(e){}
   var b=document.getElementById('slvBudget'), p=document.getElementById('slvPeople');
   if(b) b.addEventListener('input',solveSync);
   if(p) p.addEventListener('input',solveSync);
@@ -3529,6 +3562,186 @@ function rulesChangelogHtml() {
    ask for total earnings rather than base salary or someone will understate
    it and think they are under the threshold when they are not.
 --------------------------------------------------------------------------- */
+/* ═══ CHANGE LEDGER + UNDO ══════════════════════════════════════════════════
+   "Reset all" was a confirm dialog and a prayer. Every edit should be listed
+   and reversible - which is also exactly what you need when a board asks why
+   the number is different from last month.
+
+   Built by DIFFING the canonical scenario rather than instrumenting every
+   mutation site. saveState() is already called after every change in a 4.8MB
+   file; hooking it once catches everything, including edits made by features
+   that do not exist yet. The cost is that changes are described from their
+   effect rather than announced by their cause, which for this purpose is the
+   more honest direction anyway.
+
+   buildScenario() already carries meta.figures, so each entry can also say
+   what the change did to the true cost - the actual question being asked.
+--------------------------------------------------------------------------- */
+var LEDGER = [], ledgerPrev = null, ledgerMute = false;
+var LEDGER_MAX = 20, LEDGER_KEY = 'ac_ledger_v1';
+
+function ledgerSnap() {
+  try { return JSON.parse(JSON.stringify(buildScenario())); } catch (e) { return null; }
+}
+
+/* keyed by name AND start date: the app allows several cohorts of the same
+   standard, and keying on name alone collapsed them - adding a second cohort
+   was reported as a price change on the first. Editing a start date now reads
+   as a remove plus an add, which is the honest description of it. */
+function ledgerProgKey(p) { return ((p && p.name) || '?') + '|' + ((p && p.start) || ''); }
+function ledgerProgLabel(p) { return (p && p.name) || '?'; }
+
+/* what moved between two scenarios, in plain English */
+function ledgerDescribe(a, b) {
+  var out = [];
+  var pa = (a.programmes || []), pb = (b.programmes || []);
+  var ka = {}, kb = {};
+  pa.forEach(function (p) { ka[ledgerProgKey(p)] = p; });
+  pb.forEach(function (p) { kb[ledgerProgKey(p)] = p; });
+
+  Object.keys(kb).forEach(function (k) {
+    if (!ka[k]) out.push('Added ' + (kb[k].count || 0) + ' × ' + ledgerProgLabel(kb[k]));
+  });
+  Object.keys(ka).forEach(function (k) {
+    if (!kb[k]) { out.push('Removed ' + (ka[k].count || 0) + ' × ' + ledgerProgLabel(ka[k])); return; }
+    var x = ka[k], y = kb[k];
+    if (+x.count !== +y.count) out.push(ledgerProgLabel(y) + ': ' + x.count + ' → ' + y.count + ' learners');
+    if (+x.cost !== +y.cost) out.push(ledgerProgLabel(y) + ': price ' + fmt(+x.cost || 0) + ' → ' + fmt(+y.cost || 0));
+    if ((+x.wage || 0) !== (+y.wage || 0)) out.push(ledgerProgLabel(y) + ': own wage set to ' + fmt(+y.wage || 0) + '/hr');
+    if ((+x.otj || 0) !== (+y.otj || 0)) out.push(ledgerProgLabel(y) + ': off-the-job ' + (+y.otj || 0) + ' h/wk');
+  });
+
+  var la = a.plan || {}, lb = b.plan || {};
+  if ((+la.rate || 0) !== (+lb.rate || 0)) out.push('Hourly wage ' + fmt(+la.rate || 0) + ' → ' + fmt(+lb.rate || 0));
+  if (JSON.stringify(la.otj || {}) !== JSON.stringify(lb.otj || {})) out.push('Off-the-job hours changed');
+
+  if (a.fundingMode !== b.fundingMode) {
+    out.push('Funding route → ' + (b.fundingMode === 'nonlevy' ? 'non-levy employer' : 'levy payer'));
+  }
+  var ga = (a.goal && a.goal.key) || null, gb = (b.goal && b.goal.key) || null;
+  if (ga !== gb && gb) out.push('Goal set');
+
+  var na = ((a.levy || {}).byMonth || []).length, nb = ((b.levy || {}).byMonth || []).length;
+  var ea = !!(a.levy || {}).estimated, eb = !!(b.levy || {}).estimated;
+  if (!na && nb) out.push(eb ? 'Levy estimated from pay bill' : 'Levy data loaded (' + nb + ' months)');
+  else if (na && !nb) out.push('Levy data cleared');
+  else if (na && nb && (Math.round((a.levy || {}).monthlyAvg || 0) !== Math.round((b.levy || {}).monthlyAvg || 0)))
+    out.push(eb && !ea ? 'Levy replaced with an estimate' : 'Levy data replaced');
+
+  if ((+a.transfersRaised || 0) !== (+b.transfersRaised || 0))
+    out.push('Transfers raised ' + fmt(+a.transfersRaised || 0) + ' → ' + fmt(+b.transfersRaised || 0));
+
+  var da = (a.delivery || []).length, db = (b.delivery || []).length;
+  if (da !== db) out.push(db ? 'Tracker report synced (' + db + ' learners)' : 'Tracker data cleared');
+
+  return out;
+}
+
+function ledgerMove(a, b) {
+  var fa = (a.meta || {}).figures, fb = (b.meta || {}).figures;
+  if (!fa || !fb || !isFinite(fa.trueCost) || !isFinite(fb.trueCost)) return null;
+  var d = fb.trueCost - fa.trueCost;
+  return Math.abs(d) < 1 ? 0 : d;
+}
+
+/* the single hook - saveState calls this after every mutation */
+function ledgerNote() {
+  if (ledgerMute) return;
+  var cur = ledgerSnap();
+  if (!cur) return;
+  if (!ledgerPrev) { ledgerPrev = cur; return; }
+  var what = ledgerDescribe(ledgerPrev, cur);
+  if (what.length) {
+    LEDGER.unshift({ t: Date.now(), what: what, move: ledgerMove(ledgerPrev, cur), before: ledgerPrev });
+    if (LEDGER.length > LEDGER_MAX) LEDGER.length = LEDGER_MAX;
+    ledgerPersist();
+    ledgerRender();
+  }
+  ledgerPrev = cur;
+}
+
+function ledgerPersist() {
+  try { localStorage.setItem(LEDGER_KEY, JSON.stringify(LEDGER)); }
+  catch (e) {
+    /* snapshots are the bulk of it - keep the history, lose the older undos */
+    try {
+      var trimmed = LEDGER.map(function (e, i) {
+        return i < 5 ? e : { t: e.t, what: e.what, move: e.move };
+      });
+      localStorage.setItem(LEDGER_KEY, JSON.stringify(trimmed));
+    } catch (e2) {}
+  }
+}
+
+function ledgerRestore() {
+  try {
+    var raw = localStorage.getItem(LEDGER_KEY);
+    if (raw) LEDGER = JSON.parse(raw) || [];
+  } catch (e) { LEDGER = []; }
+}
+
+/* undoing an entry also reverses everything newer, because state is a chain */
+function ledgerUndo(i) {
+  var e = LEDGER[i];
+  if (!e || !e.before) return;
+  ledgerMute = true;
+  try {
+    applyScenario(e.before);
+    if (typeof scnRefresh === 'function') scnRefresh();
+  } catch (err) {} finally { ledgerMute = false; }
+  ledgerPrev = ledgerSnap();
+  LEDGER.splice(0, i + 1);
+  ledgerPersist();
+  ledgerRender();
+}
+
+function ledgerClear() {
+  LEDGER = [];
+  ledgerPersist();
+  ledgerRender();
+}
+
+function ledgerTime(ts) {
+  try {
+    var d = new Date(ts), n = new Date();
+    var sameDay = d.toDateString() === n.toDateString();
+    var hm = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
+    return sameDay ? hm : (d.getDate() + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + hm);
+  } catch (e) { return ''; }
+}
+
+function ledgerRender() {
+  var host = document.getElementById('lgBody');
+  if (!host) return;
+  if (!LEDGER.length) {
+    host.innerHTML = '<div class="lg-empty">Nothing changed yet. Every edit you make from here is listed, ' +
+      'with what it did to the true cost, and can be taken back.</div>';
+    var c0 = document.getElementById('lgCount'); if (c0) c0.textContent = '';
+    return;
+  }
+  var c = document.getElementById('lgCount');
+  if (c) c.textContent = LEDGER.length + ' change' + (LEDGER.length !== 1 ? 's' : '');
+
+  host.innerHTML = LEDGER.map(function (e, i) {
+    var mv = '';
+    if (e.move === 0) mv = '<span class="lg-mv lg-flat">no change</span>';
+    else if (e.move != null) {
+      /* a rising true cost is the employer's money, so it is the unwelcome direction */
+      mv = '<span class="lg-mv ' + (e.move > 0 ? 'lg-up' : 'lg-down') + '">' +
+           (e.move > 0 ? '↑ +' : '↓ −') + fmt(Math.abs(e.move)) + '</span>';
+    }
+    var btn = !e.before
+      ? '<span class="lg-no" title="Saved before this session, so the earlier state is not held">not undoable</span>'
+      : '<button type="button" class="lg-undo" onclick="ledgerUndo(' + i + ')">' +
+        (i === 0 ? 'Undo' : 'Undo to here') + '</button>';
+    return '<div class="lg-row">' +
+      '<span class="lg-t">' + ledgerTime(e.t) + '</span>' +
+      '<span class="lg-w">' + e.what.join('<br>') + '</span>' +
+      mv + btn + '</div>';
+  }).join('') +
+  (LEDGER.length > 1 ? '<div class="lg-foot">Undoing an older entry also reverses everything after it.</div>' : '');
+}
+
 function startPayBillFromHeads() {
   var gv = function (id) {
     var el = document.getElementById(id);
@@ -4472,12 +4685,21 @@ function buildScenario(){
                 rules:(typeof rulesSnapshot==='function'?rulesSnapshot():null)},
           levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode, transfersRaised:transfersRaised};
 }
+function paintPlanInputs(){
+  var set=function(id,v){var el=document.getElementById(id); if(el&&v!==undefined&&v!==null)el.value=v;};
+  try{
+    set('plan-headcount',planCfg.headcount); set('plan-hours',planCfg.hours);
+    set('plan-dip',planCfg.dip);             set('plan-rate',planCfg.rate);
+    if(typeof buildOtjGrid==='function')buildOtjGrid();
+    if(typeof buildMonthGrid==='function')buildMonthGrid();
+  }catch(e){}
+}
 function applyScenario(s){
   if(!s)return;
   if(s.meta&&s.meta.id)scnId=s.meta.id;
   if(s.levy&&s.levy.byMonth)levyData=s.levy;
   if(Array.isArray(s.programmes))programmes=s.programmes;
-  if(s.plan)planCfg={...planCfg,...s.plan,otj:{...planCfg.otj,...(s.plan.otj||{})}};
+  if(s.plan){planCfg={...planCfg,...s.plan,otj:{...planCfg.otj,...(s.plan.otj||{})}};paintPlanInputs();}
   if(s.goal!==undefined)scnGoal=s.goal;
   if(s.talent!==undefined)scnTalent=s.talent;
   if(s.cohortMin!==undefined)scnCohortMin=s.cohortMin;
@@ -4503,6 +4725,7 @@ function saveState(){
   try{
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
     persistScenario(false);
+    try{ if(typeof ledgerNote==='function') ledgerNote(); }catch(e){}
     toggleClearBtn(!!(hasLevy||programmes.length));
     if(typeof markPlanDirty==='function')markPlanDirty();
   }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
