@@ -424,6 +424,27 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Rules changelog ─────────────────────────────────────────────────────── */
+.rc-wrap,.rc-log{margin-top:10px}
+.rc-hd{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--teal);margin-bottom:7px}
+.rc-row{display:flex;justify-content:space-between;gap:14px;padding:5px 0;font-size:12.5px;
+  border-bottom:1px solid var(--border)}
+.rc-row:last-child{border-bottom:0}
+.rc-l{color:var(--text2);flex:1}
+.rc-v{font-family:'Roboto Mono',monospace;white-space:nowrap;color:var(--text3)}
+.rc-v s{text-decoration:line-through;opacity:.72}
+.rc-v b{color:var(--text);font-weight:700}
+.rc-none{margin-top:9px;font-size:12.5px;color:var(--text3);line-height:1.55}
+.rc-log{border-top:1px solid var(--border);padding-top:13px;margin-top:14px}
+.rc-meta{font-family:'Roboto Mono',monospace;font-size:11.5px;color:var(--text3);
+  display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin-bottom:8px}
+.rc-meta b{color:var(--text)}
+.rc-stamp{display:inline-flex;align-items:center;gap:6px;font-size:9.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--teal)}
+.rc-stamp:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal)}
+.rc-p{margin:0 0 9px;font-size:12.5px;line-height:1.58;color:var(--text2)}
+.rc-p.rc-dim{color:var(--text3);margin-top:10px;margin-bottom:0}
 /* ── Provenance: click any figure to see how it was made ─────────────────── */
 :root{--prov-bg:#0f1826;--prov-line:rgba(45,212,178,.34);--prov-dash:rgba(45,212,178,.42)}
 :root[data-theme="light"]{--prov-bg:#ffffff;--prov-line:rgba(10,110,134,.32);--prov-dash:rgba(10,110,134,.42)}
@@ -1919,7 +1940,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01b</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01c</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3157,6 +3178,140 @@ document.addEventListener('keydown', function (e) {
 });
 window.addEventListener('resize', provClose);
 window.addEventListener('scroll', provClose, true);
+/* ═══ RULES CHANGELOG — which rule moved, and what it did to THIS plan ══════
+   Flagship 2 of the world-class rescope (2026-08-25).
+
+   The stale-plan warning already answers "did the number move". It could not
+   answer "why", because nothing recorded what the rules WERE. It is not
+   authored history and must never become a hand-written list of remembered
+   changes: the rulebook constants are snapshotted alongside the figures when a
+   plan is saved, and the changelog is the DIFF of that snapshot against today.
+   Computed, not remembered - so it cannot drift from what the engine did.
+
+   Plans saved before this shipped carry no snapshot. Say so plainly rather
+   than implying nothing moved, exactly as the figures half already does.
+--------------------------------------------------------------------------- */
+
+/* every rulebook constant a plan's money depends on, with how to say it */
+var pctFmt = function (v) { return (Math.round(v * 1000) / 10) + '%'; };
+var moneyFmt = function (v) { return fmt(v); };
+var monthsFmt = function (v) { return v + ' month' + (+v === 1 ? '' : 's'); };
+var plainFmt = function (v) { return String(v); };
+
+var RULE_SPEC = [
+  ['levyRate',              'Levy rate on the pay bill',                    pctFmt],
+  ['levyAllowance',         'Annual levy allowance',                        moneyFmt],
+  ['topUpRate',             'Government top-up on declarations',            pctFmt],
+  ['draw.training',         'Share drawn across the practical period',      pctFmt],
+  ['draw.epa',              'Share held back for end-point assessment',     pctFmt],
+  ['coInvest.before',       'Employer co-investment, before Aug 2026',      pctFmt],
+  ['coInvest.from',         'Employer co-investment, from Aug 2026',        pctFmt],
+  ['expiryMonths.before',   'Funds expire after, before Aug 2026',          monthsFmt],
+  ['expiryMonths.from',     'Funds expire after, from Aug 2026',            monthsFmt],
+  ['transferCapPct',        'Transfer cap on annual levy',                  pctFmt],
+  ['apprenticeshipMinMonths', 'Minimum apprenticeship duration',            monthsFmt],
+  ['achievementBenchmark',  'National achievement rate benchmark',          pctFmt],
+  ['ni.empRate',            'Employer NIC rate',                            pctFmt],
+  ['ni.secThreshold',       'NIC secondary threshold',                      moneyFmt],
+  ['ni.aust',               'Apprentice upper secondary threshold',         moneyFmt],
+  ['unit.coInvest',         'Apprenticeship unit co-investment',            pctFmt],
+  ['unit.m1',               'Unit milestone 1 share',                       pctFmt],
+  ['unit.m2',               'Unit milestone 2 share',                       pctFmt]
+];
+
+function ruleGet(obj, path) {
+  var parts = path.split('.'), v = obj;
+  for (var i = 0; i < parts.length; i++) {
+    if (v == null) return undefined;
+    v = v[parts[i]];
+  }
+  return v;
+}
+
+/* snapshot the constants this plan was costed under */
+function rulesSnapshot() {
+  try {
+    var out = { __version: RULEBOOK.version, __asOf: RULEBOOK.asOf };
+    RULE_SPEC.forEach(function (r) {
+      var v = ruleGet(RULEBOOK, r[0]);
+      if (v !== undefined) out[r[0]] = v;
+    });
+    return out;
+  } catch (e) { return null; }
+}
+
+/* what moved between two snapshots */
+function rulesDiff(was, now) {
+  if (!was || !now) return [];
+  var out = [];
+  RULE_SPEC.forEach(function (r) {
+    var a = was[r[0]], b = now[r[0]];
+    if (a === undefined || b === undefined) return;
+    if (+a === +b) return;
+    out.push({ label: r[1], was: r[2](a), now: r[2](b), rose: (+b > +a) });
+  });
+  return out;
+}
+
+/* the block that goes inside the stale-plan notice */
+function rulesChangedHtml(sc) {
+  var was = sc && sc.meta && sc.meta.rules;
+  if (!was) {
+    return '<div class="rc-none">This plan was saved before Fundable recorded which rules it used, ' +
+           'so the individual changes can’t be listed — only the movement in the figures below.</div>';
+  }
+  var d = rulesDiff(was, rulesSnapshot());
+  if (!d.length) {
+    return '<div class="rc-none">No costed rule changed between these two rulebook versions — ' +
+           'any movement below comes from the plan itself, not from the rules.</div>';
+  }
+  return '<div class="rc-wrap"><div class="rc-hd">' + d.length + ' rule' + (d.length !== 1 ? 's' : '') +
+    ' changed</div>' + d.map(function (r) {
+      return '<div class="rc-row"><span class="rc-l">' + r.label + '</span>' +
+        '<span class="rc-v"><s>' + r.was + '</s> → <b>' + r.now + '</b></span></div>';
+    }).join('') + '</div>';
+}
+
+/* ---- standalone reference: what the rulebook knows is coming ------------- */
+function rulesChangelogHtml() {
+  var b = RULEBOOK.boundaryMk, byr = Math.floor(b / 12), bmo = b % 12;
+  var mon = ['January','February','March','April','May','June','July','August','September','October','November','December'][bmo] || '';
+  var co = RULEBOOK.coInvest, ex = RULEBOOK.expiryMonths;
+  var scheduled = (+co.before !== +co.from) || (+ex.before !== +ex.from);
+  var rows = '';
+  if (+co.before !== +co.from) {
+    rows += '<div class="rc-row"><span class="rc-l">Employer co-investment</span>' +
+      '<span class="rc-v"><s>' + pctFmt(co.before) + '</s> → <b>' + pctFmt(co.from) + '</b></span></div>';
+  }
+  if (+ex.before !== +ex.from) {
+    rows += '<div class="rc-row"><span class="rc-l">Unused funds expire after</span>' +
+      '<span class="rc-v"><s>' + monthsFmt(ex.before) + '</s> → <b>' + monthsFmt(ex.from) + '</b></span></div>';
+  }
+  return '<div class="rc-log">' +
+    '<div class="rc-hd">Funding rules changelog</div>' +
+    '<div class="rc-meta">Rulebook <b>' + escHtml(String(RULEBOOK.version)) + '</b>' +
+      '<span class="rc-stamp">verified ' + escHtml(String(RULEBOOK.asOf)) + '</span></div>' +
+    (scheduled
+      ? '<p class="rc-p">A change is already scheduled and this tool applies it automatically, ' +
+        'per apprenticeship start date rather than per plan — so a plan spanning ' + mon + ' ' + byr +
+        ' is costed under both sets of rules, not whichever one you opened it in.</p>' + rows
+      : '<p class="rc-p">No further rule change is scheduled in the current rulebook.</p>') +
+    '<p class="rc-p rc-dim">When you open a saved plan costed under an older rulebook, Fundable lists ' +
+    'exactly which of these constants moved and what it did to your figures. That comparison is ' +
+    'computed from a snapshot taken when the plan was saved, not from a written history.</p>' +
+    '</div>';
+}
+
+function rulesMountChangelog() {
+  var host = document.getElementById('rulesRef');
+  if (!host) return;
+  var old = document.getElementById('rulesChangelog');
+  if (old) old.remove();
+  var d = document.createElement('div');
+  d.id = 'rulesChangelog';
+  d.innerHTML = rulesChangelogHtml();
+  host.appendChild(d);
+}
 let programmes=[];let projChart=null;let projYears=3;
 
 // ── persistence (survive page refresh) ──
@@ -3502,6 +3657,15 @@ function scnFigures(){
 function scnClearStale(){
   var w=document.getElementById('scnStale'); if(w){ w.innerHTML=''; w.style.display='none'; }
 }
+/* keep the changelog attached to the rules reference however that panel is
+   (re)rendered - it is the same question asked from the other direction */
+(function(){
+  var mount=function(){ try{ if(typeof rulesMountChangelog==='function') rulesMountChangelog(); }catch(e){} };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(mount,300);});
+  else setTimeout(mount,300);
+  var d=document.getElementById('rulesDetails');
+  if(d) d.addEventListener('toggle',function(){ if(d.open) mount(); });
+})();
 function scnStaleNotice(sc){
   var w=document.getElementById('scnStale'); if(!w)return;
   if(!scnRulesStale(sc)){ scnClearStale(); return; }
@@ -3528,6 +3692,9 @@ function scnStaleNotice(sc){
   var body='<b>These figures were saved under '+was+' funding rules.</b> '+
     'The plan has been recalculated on the current '+now+' rules, so what you see now '+
     'may not match the version you sent the client.';
+  /* answer WHY before showing the movement - a figures table on its own tells
+     you the number changed without telling you what changed it */
+  if(typeof rulesChangedHtml==='function'){ try{ body+=rulesChangedHtml(sc); }catch(e){} }
   if(rows){
     body+='<table><thead><tr><th>Figure</th><th>Saved ('+was+')</th><th>Now ('+now+')</th><th>Change</th></tr></thead><tbody>'+rows+'</tbody></table>'+
       '<div style="margin-top:8px;color:var(--text3)">Re-issue any report you have already shared, or re-save this plan to accept the current figures.</div>';
@@ -3547,7 +3714,8 @@ function scnStaleNotice(sc){
 function buildScenario(){
   if(!scnId)scnId=scnNewId();
   return {meta:{schema:SCEN_SCHEMA,app:'ac-levy',rulesVersion:RULES_VERSION,id:scnId,savedAt:Date.now(),
-                figures:(typeof scnFigures==='function'?scnFigures():null)},
+                figures:(typeof scnFigures==='function'?scnFigures():null),
+                rules:(typeof rulesSnapshot==='function'?rulesSnapshot():null)},
           levy:levyData, programmes:programmes, plan:planCfg, goal:scnGoal, talent:scnTalent, cohortMin:scnCohortMin, dataAck:scnDataAck, ringfences:ringfences, ringfenceApply:ringfenceApply, delivery:delivery, fundingMode:fundingMode, transfersRaised:transfersRaised};
 }
 function applyScenario(s){
