@@ -424,6 +424,32 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Four ways to start ──────────────────────────────────────── */
+.sw-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px}
+@media(max-width:980px){.sw-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.sw-grid{grid-template-columns:1fr}}
+.sw-card{background:rgba(var(--wash),0.04);border:1px solid var(--border);border-radius:11px;
+  padding:13px 14px;cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s,background .15s}
+.sw-card:hover{border-color:rgba(45,212,178,.45)}
+.sw-card:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sw-card[aria-pressed="true"]{border-color:var(--teal);background:rgba(45,212,178,.09)}
+.sw-card b{display:block;font-size:14px;color:var(--text);margin-bottom:3px}
+.sw-card span{font-size:12px;color:var(--text3);line-height:1.5}
+.sh-panel{margin-top:14px;background:rgba(45,212,178,.05);border:1px solid rgba(45,212,178,.26);
+  border-radius:12px;padding:15px 16px}
+.sh-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.sh-f{flex:1 1 170px;min-width:160px}
+.sh-f label{display:block;font-size:12px;color:var(--text3);margin-bottom:5px}
+.sh-f input{width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);
+  border:1px solid var(--field-line);border-radius:10px;padding:8px 10px;color:var(--text);
+  font-size:13px;font-family:inherit}
+.sh-note{margin-top:10px;font-size:12px;color:var(--text3);line-height:1.55}
+.sh-out{margin-top:12px;font-size:13.5px;line-height:1.6;color:var(--text2)}
+.sh-pb{font-family:'Roboto Mono',monospace;font-size:15px;color:var(--text3)}
+.sh-pb b{color:var(--teal);font-size:19px;font-weight:700}
+.sh-verdict{margin-top:5px}
+.sh-verdict b{color:var(--text)}
+.sh-dim{color:var(--text3)}
 /* ── Completion-adjusted cost ─────────────────────────────────── */
 .ca-grid{display:flex;gap:12px;flex-wrap:wrap;margin-top:2px}
 .ca-fig{flex:1 1 0;min-width:152px;background:var(--glass);border:1px solid var(--border);
@@ -1633,6 +1659,32 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <!-- STEP 1: LEVY CSV -->
   <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title" role="heading" aria-level="2">Upload ESFA Levy Transactions</span></div>
   <p class="step-sub levy-only">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
+  <div class="card levy-only" id="sec-start">
+    <div class="step-row" style="margin-top:0"><span class="step-chip">START</span><span class="step-title" role="heading" aria-level="2">Where would you like to start?</span></div>
+    <p class="step-sub">Four ways in. You don&rsquo;t need your ESFA export to get a real answer.</p>
+    <div class="sw-grid">
+      <button type="button" class="sw-card" data-k="esfa" aria-pressed="false" onclick="startPick('esfa')">
+        <b>I have an ESFA export</b><span>Drop the CSV in &mdash; your real account, to the penny</span></button>
+      <button type="button" class="sw-card" data-k="paybill" aria-pressed="false" onclick="startPick('paybill')">
+        <b>I know our pay bill</b><span>Estimate the levy from it in one step</span></button>
+      <button type="button" class="sw-card" data-k="heads" aria-pressed="false" onclick="startPick('heads')">
+        <b>I only know our headcount</b><span>Roughly how many people, roughly what they earn</span></button>
+      <button type="button" class="sw-card" data-k="demo" aria-pressed="false" onclick="startPick('demo')">
+        <b>Show me a worked example</b><span>Someone else&rsquo;s numbers, to poke at first</span></button>
+    </div>
+    <div class="sh-panel" id="sh-panel" style="display:none">
+      <div class="sh-row">
+        <div class="sh-f"><label for="sh-heads">People on the payroll</label>
+          <input id="sh-heads" type="number" min="1" step="1" placeholder="e.g. 120" oninput="startPayBillFromHeads()" aria-label="Number of people on the payroll"></div>
+        <div class="sh-f"><label for="sh-avg">Average total earnings each (&pound;/yr)</label>
+          <input id="sh-avg" type="number" min="0" step="500" placeholder="e.g. 34000" oninput="startPayBillFromHeads()" aria-label="Average total earnings per employee per year"></div>
+      </div>
+      <div class="sh-note"><b>Total</b> earnings, not base salary &mdash; the pay bill counts wages, bonuses, commission and overtime,
+        and it counts <b>everyone</b>, including under-21s and apprentices. Part-timers pull the average down, which is correct.</div>
+      <div class="sh-out" id="sh-out"><span class="sh-dim">Enter both to see the estimate.</span></div>
+    </div>
+  </div>
+
   <div class="card levy-only">
     <div class="upload-zone" id="dropzone" onclick="document.getElementById('csvFile').click()">
       <div class="upload-icon">&#8679;</div>
@@ -2022,7 +2074,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01k</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3451,6 +3503,108 @@ function rulesChangelogHtml() {
    assumption, it is stated on the panel, and it is registered with the
    estimate machinery rather than hidden.
 --------------------------------------------------------------------------- */
+/* ═══ FOUR WAYS TO START ════════════════════════════════════════════════════
+   The app opened on an upload box and two collapsed panels. Everything a
+   newcomer needed was already there - it just wasn't offered as a choice, so
+   the implied first question stayed "do you have an ESFA export?" and the
+   honest answer is often no.
+
+   Three of the four routes already existed. The one that did not is the one
+   the UX Lab argued mattered most: someone who knows roughly how many people
+   they employ and roughly what they earn, and nothing else.
+
+   PAY BILL, VERIFIED (gov.uk / HMRC ALM07000, checked 2026-08-26): all
+   payments subject to employer Class 1 SECONDARY NICs - wages, bonuses,
+   commission - and it INCLUDES earnings below the Lower Earnings Limit and
+   Secondary Threshold, and the earnings of under-21s and apprentices under
+   25, even though no secondary NIC is actually due on those. So the pay bill
+   is total gross earnings across the whole workforce, and the input has to
+   ask for total earnings rather than base salary or someone will understate
+   it and think they are under the threshold when they are not.
+--------------------------------------------------------------------------- */
+function startPayBillFromHeads() {
+  var gv = function (id) {
+    var el = document.getElementById(id);
+    return el ? (parseFloat((el.value || '').toString().replace(/[£,\s]/g, '')) || 0) : 0;
+  };
+  var heads = gv('sh-heads'), avg = gv('sh-avg');
+  var out = document.getElementById('sh-out');
+  if (!out) return;
+  if (heads <= 0 || avg <= 0) {
+    out.innerHTML = '<span class="sh-dim">Enter both to see the estimate.</span>';
+    return;
+  }
+  var pb = heads * avg;
+  var annual = LevyEngine.levyFromPayBill(pb);      // the engine, not a second copy of the formula
+  var pays = pb > 3000000;
+  out.innerHTML =
+    '<div class="sh-pb">Estimated pay bill <b>' + fmt(pb) + '</b></div>' +
+    '<div class="sh-verdict">' +
+      (pays
+        ? 'Above &pound;3m, so you <b>pay the levy</b> &mdash; roughly <b>' + fmt(annual) +
+          '</b> a year declared, plus the ' + Math.round(RULEBOOK.topUpRate * 100) + '% top-up.'
+        : 'Below &pound;3m, so you <b>do not pay the levy</b>. Government funds most of each apprenticeship instead ' +
+          'and you co-invest the rest &mdash; the non-levy route.') +
+    '</div>' +
+    '<button type="button" class="btn-demo" style="margin-top:11px" onclick="startUseHeadEstimate()">' +
+      (pays ? 'Use this and continue' : 'Switch me to non-levy and continue') + '</button>';
+}
+
+/* hand the estimate to the route that already knows what to do with it */
+function startUseHeadEstimate() {
+  var gv = function (id) {
+    var el = document.getElementById(id);
+    return el ? (parseFloat((el.value || '').toString().replace(/[£,\s]/g, '')) || 0) : 0;
+  };
+  var pb = gv('sh-heads') * gv('sh-avg');
+  if (pb <= 0) return;
+  if (pb <= 3000000) {
+    if (typeof setFundingMode === 'function') setFundingMode('nonlevy', true);
+    startGo('sec-funding');
+    return;
+  }
+  var f = document.getElementById('est-paybill');
+  if (f) {
+    f.value = Math.round(pb);
+    var d = f.closest('details'); if (d) d.open = true;
+    if (typeof estimateLevyFromPayroll === 'function') estimateLevyFromPayroll();
+  }
+  startGo('levySummary');
+}
+
+function startGo(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var d = el.closest ? el.closest('details') : null;
+  if (d) d.open = true;
+  el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
+
+/* open one route, close the others - a chooser that leaves every door ajar is
+   the wall of options it was meant to replace */
+function startPick(which) {
+  ['esfa', 'paybill', 'heads', 'demo'].forEach(function (k) {
+    var b = document.querySelector('.sw-card[data-k="' + k + '"]');
+    if (b) b.setAttribute('aria-pressed', String(k === which));
+  });
+  var panel = document.getElementById('sh-panel');
+  if (panel) panel.style.display = (which === 'heads') ? '' : 'none';
+
+  if (which === 'esfa') {
+    startGo('dropzone');
+  } else if (which === 'paybill') {
+    var f = document.getElementById('est-paybill');
+    if (f) { var d = f.closest('details'); if (d) d.open = true; f.focus(); startGo('est-paybill'); }
+  } else if (which === 'heads') {
+    var h = document.getElementById('sh-heads');
+    if (h) { h.focus(); }
+    startPayBillFromHeads();
+  } else if (which === 'demo') {
+    if (typeof loadDemo === 'function') loadDemo();
+    startGo('levySummary');
+  }
+}
+
 var CA_EXIT_POINT = 0.5;   // non-completers assumed to leave at the midpoint
 
 /* their own cohort rate if the tracker data supports one, else the national benchmark */
