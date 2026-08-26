@@ -424,6 +424,21 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Report preview ──────────────────────────────────────────── */
+.rv-wrap{margin-top:14px;padding-top:13px;border-top:1px solid rgba(var(--wash),0.08)}
+.rv-row{display:flex;gap:9px;flex-wrap:wrap}
+.rv-pg{width:62px;height:44px;border-radius:5px;border:1px solid var(--border);position:relative;
+  background:linear-gradient(150deg,rgba(var(--wash),.07),rgba(var(--wash),.02));overflow:hidden}
+.rv-pg s{position:absolute;left:5px;top:5px;right:5px;height:3px;background:var(--teal);opacity:.55;
+  border-radius:2px;text-decoration:none}
+.rv-pg i{position:absolute;left:5px;top:13px;right:14px;height:2px;background:rgba(var(--wash),.22);border-radius:2px}
+.rv-pg i:nth-of-type(2){top:19px;right:24px}
+.rv-pg i:nth-of-type(3){top:25px;right:9px}
+.rv-pg b{position:absolute;right:5px;bottom:3px;font-family:'Roboto Mono',monospace;font-size:8px;
+  color:var(--text3);font-weight:400}
+.rv-n{margin-top:9px;font-size:12px;color:var(--text3);line-height:1.5}
+.rv-list{margin:8px 0 0;padding-left:20px;font-size:12px;color:var(--text2);line-height:1.7}
+.rv-empty{font-size:12.5px;color:var(--text3)}
 /* ── Plan pulse ──────────────────────────────────────────────── */
 /* stops short of the right edge so it never sits under the co-pilot button */
 .pu-bar{position:fixed;left:16px;right:104px;bottom:18px;z-index:180;display:flex;align-items:center;
@@ -2119,6 +2134,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
           </span>
         </div>
         <div id="reportPicker" style="display:flex;flex-direction:column;gap:2px"></div>
+        <div id="reportPrev" class="rv-wrap"></div>
         <div id="brandPack" style="margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)"></div>
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:15px;padding-top:14px;border-top:1px solid rgba(var(--wash),0.08)">
           <div class="levy-only" style="display:flex;align-items:center;gap:9px">
@@ -2171,7 +2187,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01u</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01v</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -6982,7 +6998,8 @@ function renderBrandPack(){
     '</div>';
 }
 var reportSel={cover:false,p1:false,p2:false,p3:false,delivery:false,qar:false,nonlevy:false}; // nothing pre-selected — the user ticks what they want
-function renderLevyReport(sel){
+/* The builder, so the preview and the real document come from one place. */
+function levyReportHtml(sel){
   var s=sel||reportSel, d=levyReportData(), levyM=(fundingMode!=='nonlevy');
   var html='';
   if(s.cover&&levyM)html+=levyBoardCover(d);
@@ -6993,7 +7010,43 @@ function renderLevyReport(sel){
   if(s.delivery&&typeof delivery!=='undefined'&&delivery&&delivery.length)html+=levyDeliveryPage(d);
   if(s.qar&&typeof computeQAR==='function'&&computeQAR().leavers>0)html+=levyQarPage(d);
   if(!html)html=(fundingMode==='nonlevy'&&typeof levyNonLevyPage==='function')?(levyNonLevyPage(d)||levyBoardCover(d)):levyBoardCover(d);
-  document.getElementById('levyReportPages').innerHTML=html;
+  return html;
+}
+function renderLevyReport(sel){
+  document.getElementById('levyReportPages').innerHTML=levyReportHtml(sel);
+}
+
+/* Count the pages the CURRENT selection would actually produce, by building the
+   document and reading it - never from a table of remembered page counts. */
+function reportPreview(){
+  var host=document.getElementById('reportPrev'); if(!host)return;
+  var any=false;
+  try{ REPORT_PARTS.forEach(function(p){ if(reportSel[p.k]) any=true; }); }catch(e){}
+  if(!any){
+    host.innerHTML='<div class="rv-empty">Nothing ticked \u2014 no document to build yet.</div>';
+    return;
+  }
+  var pages=[];
+  try{
+    var box=document.createElement('div');
+    box.innerHTML=levyReportHtml(reportSel);
+    [].forEach.call(box.querySelectorAll('.lvy-page'),function(p){
+      var h=p.querySelector('.lvy-title')||p.querySelector('.lvy-head');
+      var t=h?h.textContent.replace(/\s+/g,' ').trim():'';
+      pages.push(t.slice(0,42)||'Page');
+    });
+  }catch(e){}
+  if(!pages.length){
+    host.innerHTML='<div class="rv-empty">Nothing to preview yet.</div>';
+    return;
+  }
+  host.innerHTML='<div class="rv-row">'+pages.map(function(t,i){
+      return '<div class="rv-pg" title="'+String(t).replace(/"/g,'&quot;')+'">'+
+        '<s></s><i></i><i></i><i></i><b>'+(i+1)+'</b></div>';
+    }).join('')+'</div>'+
+    '<div class="rv-n">'+pages.length+' page'+(pages.length!==1?'s':'')+
+    ', assembled top to bottom in this order \u2014 counted from the document itself, not estimated.</div>'+
+    '<ol class="rv-list">'+pages.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ol>';
 }
 // ── Reports hub: pick which pages assemble into the master report (mode-aware) ──
 var REPORT_PARTS=[
@@ -7023,6 +7076,7 @@ function renderReportPicker(){
 function syncReportSel(){
   document.querySelectorAll('#reportPicker input[data-part]').forEach(function(c){reportSel[c.getAttribute('data-part')]=c.checked;});
   updateReportNote();updateSelectAllLabel();
+  try{ reportPreview(); }catch(e){}
 }
 function reportBoxes(){
   return [].slice.call(document.querySelectorAll('#reportPicker input[data-part]:not(:disabled)'));
