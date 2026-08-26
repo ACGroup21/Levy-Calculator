@@ -424,6 +424,30 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Command palette ─────────────────────────────────────────── */
+.pal-wrap{position:fixed;inset:0;z-index:500;background:rgba(3,8,16,.62);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;
+  align-items:flex-start;justify-content:center;padding:12vh 16px 16px}
+.pal{width:min(560px,100%);background:var(--prov-bg);border:1px solid var(--line2,var(--border));
+  border-radius:14px;box-shadow:0 30px 80px -24px rgba(0,0,0,.85);overflow:hidden}
+.pal input{width:100%;box-sizing:border-box;background:none;border:0;border-bottom:1px solid var(--border);
+  padding:15px 17px;color:var(--text);font-family:inherit;font-size:15.5px;outline:none}
+.pal input::placeholder{color:var(--text3)}
+.pal-list{max-height:min(46vh,340px);overflow:auto;padding:6px}
+.pal-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;
+  font-size:13.5px;color:var(--text2);cursor:pointer}
+.pal-item .pal-sec{margin-left:auto;font-family:'Roboto Mono',monospace;font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--text3)}
+.pal-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex:0 0 auto}
+.pal-item.sel{background:rgba(45,212,178,.13);color:var(--text)}
+.pal-item.sel .pal-dot{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.pal-none{padding:14px 12px;font-size:13px;color:var(--text3)}
+.pal-foot{display:flex;gap:14px;flex-wrap:wrap;padding:9px 14px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--text3)}
+.pal-k{font-family:'Roboto Mono',monospace;font-size:10px;border:1px solid var(--border);
+  border-bottom-width:2px;border-radius:5px;padding:1px 5px;color:var(--text2)}
+.pal-hint{margin-left:10px;font-size:11px;color:var(--text3);white-space:nowrap}
+@media(max-width:640px){.pal-hint{display:none}}
 /* ── Change ledger ──────────────────────────────────────────── */
 .lg-row{display:grid;grid-template-columns:58px 1fr auto auto;gap:12px;align-items:center;
   padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
@@ -1521,6 +1545,18 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 </head>
 <body>
 
+<div class="pal-wrap" id="palWrap" style="display:none" onclick="if(event.target===this)palHide()">
+  <div class="pal" role="dialog" aria-modal="true" aria-label="Jump to any function">
+    <input id="palInput" type="text" autocomplete="off" spellcheck="false"
+      placeholder="Jump to anything&hellip;  try &ldquo;jd&rdquo;, &ldquo;expiry&rdquo;, &ldquo;theme&rdquo;"
+      aria-label="Search functions" role="combobox" aria-expanded="true" aria-controls="palList"
+      oninput="palSel=0;palRender()">
+    <div class="pal-list" id="palList" role="listbox" aria-label="Functions"
+      onclick="var t=event.target.closest('.pal-item'); if(t)palChoose(+t.dataset.i)"></div>
+    <div class="pal-foot"><span><span class="pal-k">&uarr;</span> <span class="pal-k">&darr;</span> move</span>
+      <span><span class="pal-k">Enter</span> go</span><span><span class="pal-k">Esc</span> close</span></div>
+  </div>
+</div>
 <div id="splash" role="status" aria-label="Loading Fundable">
   <div class="sp-inner">
     <svg class="sp-mark" viewBox="-40 -40 362 362" xmlns="http://www.w3.org/2000/svg" style="width:auto;height:96px" aria-hidden="true"><defs><linearGradient id="spLink" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18d8ed"/><stop offset="1" stop-color="#04a8d6"/></linearGradient></defs><rect x="102" y="132" width="94" height="18" rx="9" fill="url(#spLink)" opacity=".55"/><rect x="0" y="0" width="86" height="86" rx="12" fill="#eaf3fb"/><rect x="98" y="0" width="86" height="86" rx="12" fill="#eaf3fb"/><rect x="0" y="98" width="86" height="86" rx="12" fill="#eaf3fb"/><rect x="0" y="196" width="86" height="86" rx="12" fill="#eaf3fb"/><rect class="sp-trav" x="196" y="98" width="86" height="86" rx="12" fill="url(#spLink)"/></svg>
@@ -2113,7 +2149,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01r</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01t</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3577,6 +3613,126 @@ function rulesChangelogHtml() {
    buildScenario() already carries meta.figures, so each entry can also say
    what the change did to the true cost - the actual question being asked.
 --------------------------------------------------------------------------- */
+/* ═══ COMMAND PALETTE ═══════════════════════════════════════════════════════
+   The header has fought for space all year - badges shrunk, the wordmark
+   dropped below 1220, the nav still clips under about 1012. Every fix so far
+   has been a workaround for the same problem: the nav is the ONLY route to 28
+   functions, so it has to carry all of them.
+
+   This ends that argument by making the nav a convenience rather than the only
+   way through. Press / or Ctrl-K from anywhere.
+
+   Reuses NAV_INDEX and navJump() rather than keeping a second list. navJump
+   already scrolls, opens collapsed panels and fades in the pointing arrow, so
+   the palette inherits all of it - and any function added to the drawer in
+   future appears here automatically, with no second place to forget.
+--------------------------------------------------------------------------- */
+var PAL_ACTIONS = [
+  { lb: 'Load the worked example', sec: 'App', act: function () { if (typeof loadDemo === 'function') loadDemo(); } },
+  { lb: 'Save this plan', sec: 'App', act: function () { if (typeof scnSaveAs === 'function') scnSaveAs(); } },
+  { lb: 'Switch theme (light / dark)', sec: 'App', act: function () { if (typeof toggleTheme === 'function') toggleTheme(); } },
+  { lb: 'Switch to levy payer', sec: 'App', act: function () { if (typeof setFundingMode === 'function') setFundingMode('levy', true); } },
+  { lb: 'Switch to non-levy employer', sec: 'App', act: function () { if (typeof setFundingMode === 'function') setFundingMode('nonlevy', true); } },
+  { lb: 'Clear saved data', sec: 'App', act: function () { if (typeof clearSaved === 'function') clearSaved(); } }
+];
+
+function palItems() {
+  var out = [];
+  try {
+    (NAV_INDEX || []).forEach(function (g) {
+      (g.items || []).forEach(function (it) { out.push({ lb: it.lb, sec: g.sec, id: it.id }); });
+    });
+  } catch (e) {}
+  return out.concat(PAL_ACTIONS);
+}
+
+/* substring beats initials beats subsequence - so "jd" finds JD Matcher and
+   "rp" finds Report pack without either drowning in loose fuzzy matches */
+function palScore(name, q) {
+  name = String(name).toLowerCase();
+  q = String(q).toLowerCase().trim();
+  if (!q) return 1;
+  var at = name.indexOf(q);
+  if (at >= 0) return 100 - at;
+  var ini = name.split(/[^a-z0-9]+/).filter(Boolean).map(function (w) { return w[0]; }).join('');
+  if (ini.indexOf(q) >= 0) return 60;
+  var i = 0;
+  for (var c = 0; c < name.length && i < q.length; c++) if (name[c] === q[i]) i++;
+  return i === q.length ? 30 : 0;
+}
+
+var palSel = 0, palShown = [], palOpen = false, palReturn = null;
+
+function palRender() {
+  var inp = document.getElementById('palInput'), list = document.getElementById('palList');
+  if (!inp || !list) return;
+  var q = inp.value;
+  palShown = palItems()
+    .map(function (it) { return { it: it, s: palScore(it.lb, q) }; })
+    .filter(function (x) { return x.s > 0; })
+    .sort(function (a, b) { return b.s - a.s; })
+    .map(function (x) { return x.it; })
+    .slice(0, 40);
+  if (palSel >= palShown.length) palSel = 0;
+  list.innerHTML = palShown.length
+    ? palShown.map(function (it, i) {
+        return '<div class="pal-item' + (i === palSel ? ' sel' : '') + '" role="option" id="pal-o' + i + '"' +
+          ' aria-selected="' + (i === palSel ? 'true' : 'false') + '" data-i="' + i + '">' +
+          '<span class="pal-dot"></span>' + it.lb + '<span class="pal-sec">' + it.sec + '</span></div>';
+      }).join('')
+    : '<div class="pal-none">Nothing matches “' + String(q).replace(/</g, '&lt;') + '”</div>';
+  inp.setAttribute('aria-activedescendant', palShown.length ? ('pal-o' + palSel) : '');
+  var sel = list.querySelector('.pal-item.sel');
+  if (sel && sel.scrollIntoView) sel.scrollIntoView({ block: 'nearest' });
+}
+
+function palShow() {
+  if (palOpen) return;
+  palReturn = document.activeElement;
+  var w = document.getElementById('palWrap');
+  if (!w) return;
+  w.style.display = '';
+  palOpen = true;
+  palSel = 0;
+  var inp = document.getElementById('palInput');
+  inp.value = '';
+  palRender();
+  inp.focus();
+}
+
+function palHide() {
+  var w = document.getElementById('palWrap');
+  if (!w) return;
+  w.style.display = 'none';
+  palOpen = false;
+  if (palReturn && palReturn.focus) { try { palReturn.focus(); } catch (e) {} }
+  palReturn = null;
+}
+
+function palChoose(i) {
+  var it = palShown[i];
+  if (!it) return;
+  palHide();
+  if (it.act) { try { it.act(); } catch (e) {} return; }
+  if (typeof navJump === 'function') navJump(it.id);
+}
+
+document.addEventListener('keydown', function (e) {
+  var tag = (document.activeElement && document.activeElement.tagName) || '';
+  var typing = /INPUT|TEXTAREA|SELECT/.test(tag) || (document.activeElement && document.activeElement.isContentEditable);
+
+  if (!palOpen && (e.key === 'k' || e.key === 'K') && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+    e.preventDefault(); palShow(); return;
+  }
+  if (!palOpen && e.key === '/' && !typing) { e.preventDefault(); palShow(); return; }
+  if (!palOpen) return;
+
+  if (e.key === 'Escape') { e.preventDefault(); palHide(); return; }
+  if (e.key === 'ArrowDown') { e.preventDefault(); palSel = Math.min(palSel + 1, palShown.length - 1); palRender(); return; }
+  if (e.key === 'ArrowUp') { e.preventDefault(); palSel = Math.max(palSel - 1, 0); palRender(); return; }
+  if (e.key === 'Enter') { e.preventDefault(); palChoose(palSel); return; }
+});
+
 var LEDGER = [], ledgerPrev = null, ledgerMute = false;
 var LEDGER_MAX = 20, LEDGER_KEY = 'ac_ledger_v1';
 
@@ -6303,7 +6459,13 @@ var NAV_INDEX=[
   {sec:'Forecast',items:[{lb:'Projection chart',id:'projChart'},{lb:'Plan capacity',id:'projCapacity'},{lb:'Show the working',id:'projWorking'},{lb:'Your best moves',id:'bestMoves'},{lb:'Compare options (what-if)',id:'whatIfCard'},{lb:'Shortfall advice',id:'shortfallAdvice'},{lb:'Expiry risk',id:'expiryWarning'},{lb:'Affordability ladder',id:'affordLadder'},{lb:'Completion schedule',id:'epaList'},{lb:'Transfer / gifting',id:'giftMetrics'}]},
   {sec:'Plan',items:[{lb:'Off-the-job planner',id:'planResults'},{lb:'Peaks & troughs calendar',id:'monthGrid'}]},
   {sec:'Reports',items:[{lb:'Report builder',id:'reportsCard'}]},
-  {sec:'Tools',items:[{lb:'JD Matcher',id:'sec-jd'},{lb:'Funding co-pilot',id:'__copilot'}]}
+  {sec:'Tools',items:[{lb:'JD Matcher',id:'sec-jd'},{lb:'Funding co-pilot',id:'__copilot'}]},
+  {sec:'Start',items:[{lb:'Where would you like to start?',id:'sec-start'},
+                      {lb:'Have a budget instead of a plan?',id:'sec-solve'}]},
+  {sec:'Trust',items:[{lb:'What this plan rests on',id:'estDetails'},
+                      {lb:'Funding rules applied & sources',id:'rulesDetails'},
+                      {lb:'What changed (undo an edit)',id:'ledgerCard'},
+                      {lb:'If they don\u2019t all finish',id:'sec-completion'}]}
 ];
 function buildNavDrawer(){
   var el=document.getElementById('navList');if(!el)return;
@@ -6334,6 +6496,10 @@ function navJump(id){
   closeNav();
   if(id==='__copilot'){toggleCopilot();return;}
   var el=document.getElementById(id);if(!el)return;
+  /* open the target itself when it IS a <details>, not just its ancestors -
+     several entries point straight at a collapsible card, and jumping to one
+     that stays shut lands you on a closed lid. */
+  if(el.tagName&&el.tagName.toLowerCase()==='details')el.open=true;
   for(var p=el.parentElement;p;p=p.parentElement){if(p.tagName&&p.tagName.toLowerCase()==='details')p.open=true;}
   if(el.offsetParent===null){var fb=document.getElementById('sec-levy');if(fb)fb.scrollIntoView({behavior:'smooth',block:'start'});return;}
   el.scrollIntoView({behavior:'smooth',block:'center'});
