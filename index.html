@@ -2134,6 +2134,14 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
               <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">Aged 16&ndash;18</label><input id="inp-age1618" aria-label="Learners aged 16 to 18" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid var(--field-line);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
               <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">19&ndash;24, EHC plan or care-experienced</label><input id="inp-ageEhcp" aria-label="Learners aged 19 to 24 with an EHC plan or care experience" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid var(--field-line);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
             </div>
+            <!-- r.133.4: the plan knows the mode, the start date and the ages, but it
+                 cannot know how long someone was already employed. Asked, never guessed. -->
+            <div style="margin-top:12px">
+              <div style="font-size:11.5px;color:var(--text3);line-height:1.5;margin-bottom:9px">
+                And for the <strong style="color:var(--text2)">&pound;2,000 hiring payment</strong> (non-levy only, starts from 1 Oct 2026) &mdash; how many are <strong style="color:var(--text2)">new hires</strong>, employed 90 days or less before the apprenticeship starts?
+              </div>
+              <div><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:4px">New hires aged 16&ndash;24</label><input id="inp-newHires" aria-label="New hires aged 16 to 24, employed 90 days or less before the start" type="number" min="0" placeholder="0" style="width:78px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid var(--field-line);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>
+            </div>
           </div>
         </details>
         <div style="display:flex;align-items:flex-end;gap:10px">
@@ -2325,7 +2333,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02z</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3152,8 +3160,8 @@ function renderLearnerCost(){
     if(nl){
       // NON-LEVY: nothing assumed levy-funded — government funds the whole band for 16-24s
       // (r.214.1) and 95% for 25+ (r.213.2), your cash = co-invest + off-the-job
-      rows=lcCell('Government funds <span style="color:'+BLUE+'">'+(100-pct)+'%</span>',fmt(band-coInv),'up to band max &middot; 100% for 16&ndash;21s',BLUE,'fund')+
-        lcCell('Your co-investment <span style="color:'+MONEY+'">'+pct+'%</span>',fmt(coInv),'22+ learners &middot; £0 for 16&ndash;21s'+(pct<25?' &middot; 25% from Aug 2026':''),MONEY,'cash')+
+      rows=lcCell('Government funds <span style="color:'+BLUE+'">'+(100-pct)+'%</span>',fmt(band-coInv),'up to band max &middot; 100% for 16&ndash;24s',BLUE,'fund')+
+        lcCell('Your co-investment <span style="color:'+MONEY+'">'+pct+'%</span>',fmt(coInv),'25+ learners &middot; £0 for 16&ndash;24s',MONEY,'cash')+
         lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage/plan rate':' &times; £'+rate+'/hr'),AMBER,'cash')+
         lcCell('Your direct cash',noRate?'co-invest '+fmt(coInv):'&asymp;'+fmt(directCash),'co-investment + off-the-job &middot; a levy gift can cover the co-invest',MONEY,'cash');
     }else{
@@ -3265,7 +3273,7 @@ const RULEBOOK={
   topUp:{before:0.10,from:0},
   /* offline fallback - these were only ever set from the canonical rulebook,
      so a failed fetch left them undefined. r.125 / gov.uk, verified 2026-08-26. */
-  incentives:{employerPayment:1000},
+  incentives:{employerPayment:1000,hiringPayment:2000,hiringPaymentFrom:'2026-10-01'},
   levyRate:0.005,                   // apprenticeship levy = 0.5% of annual pay bill
   levyAllowance:15000,              // annual levy allowance (only pay bill > £3m actually pays)
   ni:{empRate:0.15,secThreshold:5000,aust:50270}, // employer NIC: 15%, Secondary Threshold £5k, Apprentice Upper Secondary Threshold £50,270 — 0% employer NIC ST→AUST for under-25 apprentices (gov.uk 2025-26)
@@ -6524,9 +6532,12 @@ function addProgramme(overrides){
     if(aj>a1){alert('Aged 16–18 ('+aj+') cannot exceed the 16–21 count ('+a1+') — 16–18s are part of that band.');return;}
     if(as>(a1-aj)+a2){alert('19–24 with an EHC plan or care experience ('+as+') cannot exceed the 19–24 population you have entered ('+((a1-aj)+a2)+') — that is the 16–21 band less the 16–18s, plus the 22–24s.');return;}
     if(aj+as>count){alert('The '+(aj+as)+' incentive-eligible apprentices exceed the cohort of '+count+'.');return;}
-    if(a1+a2+a3>0){age={y:a1,m:a2,o:a3};if(aj)age.j=aj;if(as)age.s=as;}
+    var ah=parseInt(document.getElementById('inp-newHires').value)||0;
+    if(ah>a1+a2){alert('New hires aged 16–24 ('+ah+') cannot exceed the 16–21 plus 22–24 counts ('+(a1+a2)+') — the hiring payment only covers 16–24 year olds.');return;}
+    if(ah>count){alert('New hires ('+ah+') exceed the cohort of '+count+'.');return;}
+    if(a1+a2+a3>0){age={y:a1,m:a2,o:a3};if(aj)age.j=aj;if(as)age.s=as;if(ah)age.h=ah;}
     sel.value=0;onStandardChange();
-    ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25','inp-age1618','inp-ageEhcp'].forEach(id=>document.getElementById(id).value='');
+    ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25','inp-age1618','inp-ageEhcp','inp-newHires'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('inp-start').value='';document.getElementById('inp-epa').value='';
     updateDurReadout();
   }
@@ -6540,7 +6551,7 @@ function clearProgForm(){
   const ss=document.getElementById('standardSearch');if(ss)ss.value='';
   setLevelFilter('all',document.querySelector('.lvl-pill[data-lvl="all"]'));
   sel.value='';onStandardChange();
-  ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25','inp-age1618','inp-ageEhcp'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['inp-name-custom','inp-cost','inp-count','inp-age1621','inp-age2224','inp-age25','inp-age1618','inp-ageEhcp','inp-newHires'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
   document.getElementById('inp-count').value='1';
   document.getElementById('inp-start').value='';
   document.getElementById('inp-epa').value='';
@@ -7303,7 +7314,9 @@ function navJump(id){
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeNav();});
 // ── FUNDING ROUTE: levy vs non-levy ──
 // Verified vs gov.uk (apprenticeship funding for non-levy employers; technical funding guide from Aug 2025):
-// no levy pot → govt funds 95% / employer co-invests 5% (→ 25% from Aug 2026); 100% funded for 16–21 (from 1 Apr 2024)
+// no levy pot → govt funds 95% / employer co-invests 5% on 25+ only (r.213.2);
+// 100% funded for 16–24 whatever the employer's size (r.214.1). The 25% rate is
+// the levy-short case and never applies to a non-levy employer.
 // and 22–24 with an EHC plan / care experience. Reuses the programme age-mix that drives NI relief + the L7 gate.
 var fundingMode='levy';
 function currentPayBillGuess(){
@@ -7315,7 +7328,7 @@ function currentPayBillGuess(){
 function updateFmodeHint(){
   var el=document.getElementById('fmodeHint');if(!el)return;var pb=currentPayBillGuess(),msg;
   if(fundingMode==='nonlevy'){
-    msg='No levy pot &mdash; the government funds <b>95%</b> of each apprenticeship (<b>100%</b> for 16&ndash;21s); you co-invest the rest.';
+    msg='No levy pot &mdash; the government funds <b>100%</b> for apprentices aged 16&ndash;24, and <b>95%</b> for 25+; you co-invest 5% on those.';
     if(pb&&pb>3000000)msg+=' <span class="warn" title="Worked back from your levy data: annual levy ÷ 0.5% + the £15k allowance.">&#9888; Your levy data implies a pay bill of about &pound;'+(pb/1e6).toFixed(1)+'m &mdash; over &pound;3m, so you would actually pay the levy. Modelling a hypothetical?</span>';
   }else{
     msg='Pay bill over &pound;3m &mdash; your training is paid from levy you have already handed over, so the real question is whether you spend it before it expires. <span style="color:var(--text3)">0.5% levy, drawn from your pot.</span>';
@@ -7372,6 +7385,53 @@ function incentiveTotal(){
 /* has anyone actually been asked? distinguishes "none eligible" from "not told" */
 function incentiveAsked(){
   return (programmes||[]).some(function(p){return p.age&&((+p.age.j||0)+(+p.age.s||0))>0;});
+}
+
+/* ═══ £2,000 HIRING PAYMENT (funding rules 2026-27, r.133-137) ══════════════
+   Non-levy employers only, £2,000 for a NEW apprentice aged 16-24 whose
+   practical period starts from 1 October 2026, who has not been employed by
+   that employer for more than 90 days beforehand (r.133.4). A receiving
+   employer using transferred funds qualifies too (r.134). Paid through the
+   provider in two halves: 50% at 90 days, 50% at 365 days - or 242 days where
+   the standard's typical duration is under 12 months (r.137).
+   The plan knows three of the four conditions; the 90-day one is asked for. */
+var HIRE_FROM_MK = 2026 * 12 + 9;            /* October 2026, r.133.2 */
+
+function hiringRate(){
+  try{ var v=RULEBOOK.incentives&&+RULEBOOK.incentives.hiringPayment; return v>0?v:2000; }
+  catch(e){ return 2000; }
+}
+function hiringCount(p){
+  if(fundingMode!=='nonlevy')return 0;                 /* r.133 - non-levy only */
+  if(!p||p.type==='unit'||!p.age)return 0;
+  if(mKey(p.start)<HIRE_FROM_MK)return 0;              /* r.133.2 */
+  var young=(+p.age.y||0)+(+p.age.m||0);               /* 16-24, r.133.1 */
+  return Math.min(+p.age.h||0, young, +p.count||0);
+}
+/* r.137.2.1: on a standard whose typical duration is 12 months or more, an
+   apprenticeship that finishes in under 12 months forfeits the SECOND £1,000.
+   The plan holds both durations, so it can see this coming. */
+function hiringSecondAtRisk(p){
+  if(!hiringCount(p))return false;
+  var planned=(p.start&&p.epa)?mBetween(p.start,p.epa):0;
+  var typical=0;
+  try{ var st=(typeof STANDARDS!=='undefined'?STANDARDS:STANDARDS_BASE)||[];
+       st.forEach(function(x){ if(x.name===p.name) typical=+x.dur||0; }); }catch(e){}
+  return typical>=12 && planned>0 && planned<12;
+}
+function hiringTotal(){
+  var n=0,risk=0,riskNames={};
+  (programmes||[]).forEach(function(p){
+    var c=hiringCount(p); if(!c)return;
+    n+=c;
+    if(hiringSecondAtRisk(p)){risk+=c;riskNames[p.name]=1;}
+  });
+  return {count:n, value:n*hiringRate(), rate:hiringRate(),
+          atRisk:risk, atRiskNames:Object.keys(riskNames),
+          atRiskValue:risk*hiringRate()/2};
+}
+function hiringAsked(){
+  return (programmes||[]).some(function(p){return p.age&&(+p.age.h||0)>0;});
 }
 
 function nonLevyFunding(){
@@ -7432,7 +7492,7 @@ function renderNonLevy(){
   provSet('nl',{f:f,s:s,rate:rate});
   var figs='<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:0">'+
     fig('Total training investment',pv('nlTotal',fmt(f.totalBand),'Total training investment'),'var(--text)',f.totalCount+' apprenticeship'+(f.totalCount!==1?'s':''))+
-    fig('Government funds',pv('nlGov',fmt(s.gov),'Government funds'),BLUE,'95% + 100% of 16–21s','nlGov','fund')+
+    fig('Government funds',pv('nlGov',fmt(s.gov),'Government funds'),BLUE,'95% + 100% of 16–24s','nlGov','fund')+
     fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':BLUE,'levy gifted to you','nlTransfers','fund')+
     fig('Your investment',pv('nlYourInv',s.residual<0.5?'£0':fmt(s.residual),'Your investment'),s.residual<0.5?BLUE:'var(--money)',rate+' of co-funded bands','nlYourInv','cash')+
     (f.otj>0?fig('Off-the-job time',fmt(f.otj)+((typeof estWageIsDefault==='function'&&(estWageIsDefault()||estOtjIsDefault()))?estMark('Built on the default £18 an hour and 6 hours a week — set your own in the plan card and this moves.'):''),'var(--text2)','your staff time','','cash'):'')+
@@ -7440,7 +7500,7 @@ function renderNonLevy(){
   var giftInput='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 12px"><label style="font-size:12px;color:var(--text3)">I already have a levy gift / transfer secured (&pound;)</label><input id="nlTransferInput" aria-label="Levy gift or transfer secured" type="number" min="0" value="'+(transfersRaised||'')+'" placeholder="e.g. 14000" oninput="setTransfersRaised(this.value)" style="width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit"></div>';
   var fr;
   if(s.target<0.5){
-    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;21, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
+    fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:14px 16px;font-size:12px;color:var(--text2)"><div style="margin-bottom:9px"><b>&#129309; Levy gift / transfer</b> &mdash; all your learners are 16&ndash;24, already 100% government-funded, so a gift isn&rsquo;t needed. Already have one? Enter it below.</div>'+giftInput+'</div>';
   } else {
     fr='<div style="margin-top:14px;background:rgba(62,134,224,0.05);border:1px solid rgba(62,134,224,0.22);border-radius:14px;padding:15px 17px">'+
       ((typeof goalTag==='function')?goalTag('funding','A levy gift serves your goal &mdash; every transfer cuts your investment'):'')+
@@ -7453,22 +7513,43 @@ function renderNonLevy(){
       '<div style="font-size:11px;color:var(--text3);margin-top:10px">Find pledges via the apprenticeship service &ldquo;find funding&rdquo; tool. <span style="color:'+BLUE+'">Arthur Curtis can help you source &amp; secure transfer pledges.</span></div>'+
     '</div>';
   }
+  var hp=hiringTotal();
+  var hire='';
+  if(hp.count>0){
+    hire='<div style="margin-top:14px;background:rgba(45,212,178,0.06);border:1px solid rgba(45,212,178,0.28);border-radius:14px;padding:14px 16px">'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:16px">&#128188;</span>'+
+      '<span style="font-weight:700;color:#2DD4B2">&pound;2,000 hiring payment &mdash; '+fmt(hp.value)+'</span></div>'+
+      '<div style="font-size:12px;color:var(--text2);line-height:1.6">'+
+      '<b>'+hp.count+'</b> new hire'+(hp.count!==1?'s':'')+' aged 16&ndash;24 starting from 1 October 2026, each employed 90 days or less before the start. '+
+      'Paid through your provider in two halves &mdash; <b>50% at 90 days</b>, <b>50% at 12 months</b> &mdash; and it does not touch the training funding above.'+
+      (hp.atRisk>0
+        ? '<div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(var(--wash),0.1);color:var(--amber)">&#9888; <b>'+
+          fmt(hp.atRiskValue)+' of that is at risk.</b> '+hp.atRisk+' of these sit'+(hp.atRisk===1?'s':'')+' on a standard whose typical duration is 12 months or more, but your plan finishes in under 12 &mdash; and the second instalment is not paid when that happens (r.137.2.1). '+
+          escHtml(hp.atRiskNames.join(', '))+'.</div>'
+        : '')+
+      '<div style="margin-top:8px;color:var(--text3);font-size:11.5px">Government reserves the right to change or withdraw this payment with three months&rsquo; notice (r.135). Your apprentice must be on the PAYE scheme attached to your apprenticeship service account (r.133.3).</div>'+
+      '</div></div>';
+  } else if(!hiringAsked() && f.totalCount>0){
+    hire='<div style="margin-top:14px;background:rgba(var(--wash),0.04);border:1px solid var(--border);border-radius:14px;padding:13px 16px;font-size:12px;color:var(--text3);line-height:1.6">'+
+      '<b style="color:var(--text2)">&pound;2,000 a head may be uncounted.</b> From 1 October 2026 non-levy employers get &pound;2,000 for each new apprentice aged 16&ndash;24 who had been employed 90 days or less before starting. '+
+      'Whether someone is a new hire is not something the plan can work out &mdash; add the count on a programme to include it.</div>';
+  }
   var notes='<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:13px">'+
-    (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is counted at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;21 full funding</b>.</div>':'')+
-    '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;21</b> at the start (from 1 Apr 2024), and 22&ndash;24 with an EHC plan or care experience (enter as 16&ndash;21 to apply, or verify eligibility).</div>'+
-    (f.has25?'<div>You are funding <b>a quarter</b> of every band yourself on these starts &mdash; five times the old share. <span style="color:var(--text3)">Co-investment is 25% for starts from Aug 2026, applied by start date.</span></div>':'<div>Starting before August 2026 costs you <b>5%</b> of the band; the same programme started after costs <b>25%</b> &mdash; five times as much of your own cash. <span style="color:var(--text3)">Applied by start date.</span></div>')+
+    (!f.anyAge?'<div style="color:var(--amber)">&#9888; No age mix entered &mdash; every learner is counted at the '+rate+' co-investment. Add each programme&rsquo;s cohort age (Programmes &rarr; age mix) to apply the <b>16&ndash;24 full funding</b>.</div>':'')+
+    '<div>The government funds <b>95%</b> of training &amp; assessment up to the band maximum; <b>100%</b> for apprentices aged <b>16&ndash;24</b> at the start, whatever your size (funding rules 2026&ndash;27, r.214). Care experience and EHC plans no longer change this &mdash; they mattered only under the rule 16&ndash;24 replaced.</div>'+
+    (f.has25?'<div>You are funding <b>a quarter</b> of every band yourself on these starts &mdash; five times the old share. <span style="color:var(--text3)">Co-investment is 25% for starts from Aug 2026, applied by start date.</span></div>':'<div>As a non-levy employer your share is <b>5%</b>, and only on apprentices aged <b>25 or over</b> (r.213.2). The <b>25%</b> rate belongs to levy payers whose account cannot cover a month &mdash; it never applies to you. <span style="color:var(--text3)">Applied by start date.</span></div>')+
     '<div>If you do not start the apprentice inside the reservation window the funding goes and you have to reserve again. <span style="color:var(--text3)">Non-levy employers reserve through the apprenticeship service; each reservation expires if unused.</span></div>'+
   '</div>';
   var working='<details style="margin-top:12px;border-top:1px solid rgba(var(--wash),0.08);padding-top:11px"><summary style="cursor:pointer;font-size:12px;color:var(--text2);list-style:none;user-select:none"><span style="color:'+BLUE+'">&#128200;</span> Show the working &amp; sources</summary>'+
     '<div style="font-size:12px;color:var(--text3);line-height:1.65;margin-top:9px">'+
-    '<div><b style="color:var(--text2)">Your investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–21s) = '+fmt(f.employer)+(s.transfers>0.5?(', less transfers covering '+fmt(s.transfers)+' of bands &rarr; <b>'+fmt(s.residual)+'</b>'):' = <b>'+fmt(f.employer)+'</b>')+'.</div>'+
-    '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–21 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the co-funded places = <b>'+fmt(s.gov)+'</b>.</div>'+
+    '<div><b style="color:var(--text2)">Your investment</b> = &Sigma; band &times; '+rate+' &times; (learners − 16–24s) = '+fmt(f.employer)+(s.transfers>0.5?(', less transfers covering '+fmt(s.transfers)+' of bands &rarr; <b>'+fmt(s.residual)+'</b>'):' = <b>'+fmt(f.employer)+'</b>')+'.</div>'+
+    '<div><b style="color:var(--text2)">Government</b> = 100% of '+f.fullyFunded+' fully-funded 16–24 place'+(f.fullyFunded!==1?'s':'')+' + '+(100-parseInt(rate))+'% of the co-funded places = <b>'+fmt(s.gov)+'</b>.</div>'+
     '<div><b style="color:var(--text2)">Transfers</b> = full-band funding gifted by a levy employer (100% up to the band, sender caps at 50% of their levy, new starts only).</div>'+
     '<div style="margin-top:6px">Sources: <a href="https://www.gov.uk/government/publications/apprenticeship-funding/apprenticeship-funding-for-employers-who-do-not-pay-the-apprenticeship-levy" target="_blank" rel="noopener" style="color:'+BLUE+'">non-levy funding</a> · <a href="https://www.gov.uk/guidance/receive-a-levy-transfer-from-another-business-to-fund-an-apprenticeship" target="_blank" rel="noopener" style="color:'+BLUE+'">receive a transfer</a> (gov.uk) · rules '+RULEBOOK.version+'. Indicative; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
     '</div></details>';
   el.innerHTML='<div class="card" style="margin-top:0.75rem;border-color:rgba(62,134,224,0.3)">'+
     '<div style="display:flex;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(var(--wash),0.08)"><span style="font-size:16px;margin-right:8px">&#127963;&#65039;</span><span style="font-size:12px;color:var(--text3)">Your funding position</span><span style="font-size:11px;color:'+BLUE+';border:1px solid '+BLUE+';border-radius:99px;padding:1px 9px;margin-left:auto">government-backed</span></div>'+
-    figs+fr+notes+working+
+    figs+fr+hire+notes+working+
     '<div style="display:flex;justify-content:flex-end;margin-top:13px;padding-top:11px;border-top:1px solid rgba(var(--wash),0.08)"><button onclick="clearSavedData()" style="font-family:inherit;font-size:12px;color:var(--text3);background:none;border:1px solid rgba(var(--wash),0.15);border-radius:6px;padding:5px 12px;cursor:pointer">Clear plan</button></div>'+
     '</div>';
 }
@@ -7793,17 +7874,17 @@ function levyNonLevyPage(d){
   var s=nlState(f), fmt=lvK, BLUE='#4aa3e8', rate=f.has25?'25%':'5%';
   var fig=function(lab,val,col){return '<div style="flex:1;min-width:116px"><div style="font-family:\'Roboto Mono\',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e95ab;margin-bottom:5px">'+lab+'</div><div style="font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;color:'+(col||'#fff')+'">'+val+'</div></div>';};
   var figs=fig('Total training investment',fmt(f.totalBand))+fig('Government funds',fmt(s.gov),BLUE)+fig('Transfers raised',fmt(s.transfers),s.transfers>0.5?'#2DD4B2':'#7e95ab')+fig('Your investment',fmt(s.residual),s.residual>0.5?'#E0A43B':'#2DD4B2')+fig('Off-the-job time',fmt(f.otj));
-  var ask='Approve <b style="color:#fff">'+fmt(s.residual)+'</b> of employer investment to train <b style="color:#fff">'+f.totalCount+' apprentice'+(f.totalCount!==1?'s':'')+'</b>. The government funds <b style="color:'+BLUE+'">'+fmt(s.gov)+'</b> (95%, and 100% of '+f.fullyFunded+' aged 16&ndash;21)'+(s.transfers>0.5?('; <b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured via levy transfer'):'')+(f.otj?('; plus <b style="color:#fff">'+fmt(f.otj)+'</b> of off-the-job staff time'):'')+'.';
+  var ask='Approve <b style="color:#fff">'+fmt(s.residual)+'</b> of employer investment to train <b style="color:#fff">'+f.totalCount+' apprentice'+(f.totalCount!==1?'s':'')+'</b>. The government funds <b style="color:'+BLUE+'">'+fmt(s.gov)+'</b> (95% on 25+, and 100% of '+f.fullyFunded+' aged 16&ndash;24)'+(s.transfers>0.5?('; <b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured via levy transfer'):'')+(f.otj?('; plus <b style="color:#fff">'+fmt(f.otj)+'</b> of off-the-job staff time'):'')+'.';
   var apprs=(programmes||[]).filter(function(p){return p.type!=='unit';}), CAP=5, shown=apprs.slice(0,CAP), moreP=apprs.length-shown.length;
   var rows=shown.map(function(p){
     var count=+p.count||0,cost=+p.cost||0,r=coInvRate(mKey(p.start)),ff=p.age?Math.min(+p.age.y||0,count):0,coC=Math.max(0,count-ff),inv=cost*r*coC;
     return '<tr style="border-top:1px solid rgba(255,255,255,0.07)">'+
       '<td style="padding:5px 10px;color:#eaf1f7">'+escHtml(p.name||'')+'</td>'+
-      '<td style="padding:5px 10px;text-align:right;color:#c7d6e2">'+count+(ff?(' <span style="color:'+BLUE+';font-size:10px">('+ff+'&times;16–21)</span>'):'')+'</td>'+
+      '<td style="padding:5px 10px;text-align:right;color:#c7d6e2">'+count+(ff?(' <span style="color:'+BLUE+';font-size:10px">('+ff+'&times;16–24)</span>'):'')+'</td>'+
       '<td style="padding:5px 10px;text-align:right;color:#9fb2c6">'+fmt(cost)+'</td>'+
       '<td style="padding:5px 10px;text-align:right;color:'+(inv>0?'#E0A43B':'#2DD4B2')+';font-weight:600">'+(inv>0?fmt(inv):'£0')+'</td></tr>';
   }).join('');
-  var frLine=s.target<0.5?'All learners are 16&ndash;21 &mdash; 100% government-funded; no employer investment.':
+  var frLine=s.target<0.5?'All learners are 16&ndash;24 &mdash; 100% government-funded; no employer investment.':
     (s.transfers>0.5?('<b style="color:#2DD4B2">'+fmt(s.transfers)+'</b> secured of '+fmt(s.target)+' &mdash; your investment '+fmt(f.employer)+' &rarr; <b style="color:'+(s.residual>0.5?'#E0A43B':'#2DD4B2')+'">'+fmt(s.residual)+'</b>. A further '+fmt(Math.max(0,s.target-s.raised))+' in transfers would take it to £0.'):
       ('No transfers secured yet. Raising up to '+fmt(s.target)+' in levy transfers would reduce your '+fmt(f.employer)+' investment toward £0.'));
   return '<div class="lvy-page" data-w="1123" data-h="794"><div class="lvy-inner">'+
@@ -7817,7 +7898,7 @@ function levyNonLevyPage(d){
       '<thead><tr style="background:rgba(255,255,255,0.04);color:#8ba0b6;text-align:left"><th style="padding:7px 10px;font-weight:600">Programme</th><th style="padding:7px 10px;font-weight:600;text-align:right">Learners</th><th style="padding:7px 10px;font-weight:600;text-align:right">Band</th><th style="padding:7px 10px;font-weight:600;text-align:right">Your investment</th></tr></thead>'+
       '<tbody>'+rows+'</tbody></table></div>'+
     (moreP>0?'<div style="font-size:11px;color:#7e95ab;margin-top:8px">+ '+moreP+' more programme'+(moreP!==1?'s':'')+' &mdash; full list in the app.</div>':'')+
-    '<div class="lvy-note"><img src="'+FUNDABLE_MARK+'" alt="" style="height:15px;opacity:.85;vertical-align:middle;margin-right:9px">'+brandCredit()+'Government funds 95% of training &amp; assessment (100% for 16&ndash;21s; 22&ndash;24 EHCP/care); you co-invest '+rate+' (25% from Aug 2026); a levy transfer covers 100%. Table shows your investment before transfers; the figures above are net. Rules '+RULEBOOK.version+' (gov.uk). Indicative &mdash; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
+    '<div class="lvy-note"><img src="'+FUNDABLE_MARK+'" alt="" style="height:15px;opacity:.85;vertical-align:middle;margin-right:9px">'+brandCredit()+'Government funds 100% of training &amp; assessment for apprentices aged 16&ndash;24 (r.214.1) and 95% for 25+ (r.213.2); you co-invest '+rate+' on those. The 25% rate applies only to levy payers with insufficient funds. A levy transfer covers 100%. Table shows your investment before transfers; the figures above are net. Rules '+RULEBOOK.version+' (gov.uk). Indicative &mdash; confirm reservations, transfer pledges &amp; eligibility on your apprenticeship service account.</div>'+
     '</div></div>';
 }
 function levyDeliveryPage(d){
@@ -9932,6 +10013,12 @@ document.addEventListener('keydown',e=>{
     ['£1,000 incentive','eligible count cannot exceed the cohort',incentiveCount({count:2,age:{y:3,m:0,o:0,j:3}}),2,'fund'],
     ['£1,000 incentive','no age data → nothing claimed',incentiveCount({count:5}),0,'fund'],
     ['£1,000 incentive','rate from the rulebook',incentiveRate(),1000,'fund'],
+    ['£2,000 hiring payment','rate from the rulebook',hiringRate(),2000,'fund'],
+    ['£2,000 hiring payment','levy payer → not eligible (r.133)',(function(){var m=fundingMode;fundingMode='levy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),0,'fund'],
+    ['£2,000 hiring payment','non-levy, new hire 16–24, Nov 2026 → eligible',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),1,'fund'],
+    ['£2,000 hiring payment','start before 1 Oct 2026 → not eligible (r.133.2)',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-09-01',epa:'2028-03-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),0,'fund'],
+    ['£2,000 hiring payment','aged 25+ → not eligible (r.133.1)',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:0,m:0,o:1,h:1}});fundingMode=m;return v;})(),0,'fund'],
+    ['£2,000 hiring payment','not flagged a new hire → not eligible (r.133.4)',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:1,m:0,o:0}});fundingMode=m;return v;})(),0,'fund'],
     ['Employer NI relief (under-25)','Salary £22,000 → annual relief',E.niReliefPerYear(22000),2550,'ni'],
     ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',E.niReliefPerYear(60000),6790.5,'ni'],
     ['Projection · co-investment sim','Bal £0 · £1,000 draw · £0 income · pre-Aug ’26 → 5%',E.simCoInvest([0],[1000],mkB,null,0).total,50,'fund'],
@@ -10079,7 +10166,7 @@ if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudfl
 const GOALS=[
   {key:'capability',ic:'&#9678;',lb:'Close a skills gap',sb:'Build capability for a role, team or succession need'},
   {key:'upskill',ic:'&#10138;',lb:'Upskill &amp; retain our people',sb:'Develop and progress existing staff (L3 &rarr; L5 &rarr; L6)'},
-  {key:'recruit',ic:'&#65291;',lb:'Bring in new talent',sb:'An early-careers pipeline &mdash; cheapest for 16&ndash;21s'},
+  {key:'recruit',ic:'&#65291;',lb:'Bring in new talent',sb:'An early-careers pipeline &mdash; 16&ndash;24s are fully funded'},
   {key:'funding',ic:'&#9672;',lb:'Get the most from our funding',sb:'Use levy fully, gift surplus, or fundraise transfers'},
   {key:'cash',ic:'&pound;',lb:'Minimise our investment',sb:'Find the lowest cash / co-investment path'},
   {key:'other',ic:'&#63;',lb:'Not sure yet',sb:'Describe it &mdash; we&rsquo;ll suggest a goal if it fits'}
@@ -10199,7 +10286,7 @@ function renderGoalEmphasis(o){
       break;
     case 'recruit':
       num=String(heads);lab='apprentices to bring in';
-      note='An early-careers pipeline. <strong>16&ndash;21s</strong> are the cheapest route (100% government-funded for non-levy employers), and 16&ndash;18 starts earn a <strong>&pound;1,000</strong> employer incentive. Enter each cohort&rsquo;s age mix to reflect it.';
+      note='An early-careers pipeline. <strong>16&ndash;24s</strong> are the cheapest route (100% government-funded for non-levy employers), and 16&ndash;18 starts earn a <strong>&pound;1,000</strong> employer incentive. Enter each cohort&rsquo;s age mix to reflect it.';
       break;
     case 'funding':{
       const annual=levyData.monthlyAvg*12, cap=annual*RULEBOOK.transferCapPct;
