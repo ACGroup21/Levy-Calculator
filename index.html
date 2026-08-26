@@ -1944,17 +1944,17 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <div style="flex:1;min-width:170px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="est-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromPayroll()" style="white-space:nowrap">Estimate my levy</button>
       </div>
-      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance, plus the 10% top-up. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
+      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">An <strong>estimate</strong>: 0.5% of your annual pay bill above the &pound;15,000 allowance. The 10% top-up ended for new funds from August 2026. New levy payers start with an <strong>empty account that fills monthly</strong> &mdash; leave the balance blank. Confirm against your apprenticeship service account when you have it.</div>
     </details>
     <details style="margin-top:10px;border-top:1px solid rgba(var(--wash),0.07);padding-top:13px">
       <summary style="cursor:pointer;font-size:13px;color:var(--text2);user-select:none;list-style:none;display:flex;align-items:center;gap:8px"><span style="color:var(--teal)">&#128202;</span>Know your levy but not your pay bill? <span style="color:var(--teal)">Work it back &#9662;</span></summary>
       <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end">
-        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;, before 10% top-up)</label><input id="rev-levy" aria-label="Declared levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
+        <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Declared levy (&pound;)</label><input id="rev-levy" aria-label="Declared levy" type="number" min="0" placeholder="e.g. 625" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <div style="min-width:105px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Per</label><select id="rev-period" aria-label="Levy period (per month or per year)" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"><option value="month">month</option><option value="year">year</option></select></div>
         <div style="flex:1;min-width:150px"><label style="display:block;font-size:12px;color:var(--text3);margin-bottom:5px">Current balance (optional)</label><input id="rev-balance" aria-label="Current levy balance" type="number" min="0" placeholder="0 — new payer" style="width:100%;box-sizing:border-box;background:rgba(var(--wash),0.05);border:1px solid rgba(var(--wash),0.15);border-radius:10px;padding:9px 11px;color:var(--text);font-size:13px;font-family:inherit"></div>
         <button class="btn-demo" onclick="estimateLevyFromContributions()" style="white-space:nowrap">Work back my pay bill</button>
       </div>
-      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (before the government&rsquo;s 10% top-up). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
+      <div style="margin-top:11px;font-size:12px;color:var(--text3);line-height:1.55">Reverses the levy formula: <strong>pay bill = (declared levy &divide; 0.5%) + &pound;3,000,000</strong> (adding back the &pound;15,000 allowance). Enter the levy you <strong>declare via PAYE</strong> (the figure you declare, with no top-up added since August 2026). The balance seeds your account&rsquo;s opening pot. An <strong>estimate</strong> &mdash; confirm against your apprenticeship service account.</div>
     </details>
   </div>
 
@@ -2048,7 +2048,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
       <div class="sw" style="margin-top:10px">
         <table style="min-width:580px">
           <colgroup><col style="width:90px"><col style="width:120px"><col style="width:100px"><col style="width:120px"><col style="width:120px"><col style="width:130px"><col style="width:100px"></colgroup>
-          <thead><tr><th>Month</th><th class="r">Levy declared</th><th class="r">10% top-up</th><th class="r">Total income</th><th class="r">Paid from levy</th><th>Expires</th><th class="r">Net</th></tr></thead>
+          <thead><tr><th>Month</th><th class="r">Levy declared</th><th class="r">Top-up</th><th class="r">Total income</th><th class="r">Paid from levy</th><th>Expires</th><th class="r">Net</th></tr></thead>
           <tbody id="monthBody"></tbody>
         </table>
       </div>
@@ -2313,7 +2313,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02l</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02p</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3247,7 +3247,10 @@ const RULEBOOK={
   asOf:'2026-06-24',
   source:'https://www.gov.uk/government/publications/apprenticeship-funding-rules',
   boundaryMk:2026*12+7,             // Aug 2026 rule-change boundary (month-key = year*12 + monthIndex)
-  topUpRate:0.10,                   // 10% government top-up on levy declarations
+  /* The 10% top-up ended on new funds entering accounts from Aug 2026. Funds
+     banked before it kept theirs, so this is boundary-dependent like coInvest
+     and expiryMonths - a flat zero would rewrite history too. */
+  topUp:{before:0.10,from:0},
   levyRate:0.005,                   // apprenticeship levy = 0.5% of annual pay bill
   levyAllowance:15000,              // annual levy allowance (only pay bill > £3m actually pays)
   ni:{empRate:0.15,secThreshold:5000,aust:50270}, // employer NIC: 15%, Secondary Threshold £5k, Apprentice Upper Secondary Threshold £50,270 — 0% employer NIC ST→AUST for under-25 apprentices (gov.uk 2025-26)
@@ -3265,13 +3268,22 @@ const RULEBOOK={
   unit:{coInvest:0.05,m1:0.30,m2:0.70,minHours:30,maxHours:140} // apprenticeship units, live Apr 2026 (reserved for #8)
 };
 // ===== LevyEngine — the pure, DOM-free calculation core (engine/UI separation, started 2026-07-12). Single source of truth for the funding maths; the UI routes through it and the golden-case suite tests it directly. =====
+/* the top-up rate that applied to funds entering the account in month mk.
+   No month given = the forward rule, because everything forecast is forward.
+   Reads RULEBOOK.boundaryMk, not RULE_MK: that const is declared far below and
+   would throw from its temporal dead zone if called during early setup. */
+function topUpAt(mk){
+  return (mk != null && mk < RULEBOOK.boundaryMk) ? RULEBOOK.topUp.before
+                                                  : RULEBOOK.topUp.from;
+}
+
 const LevyEngine=(function(){
   var R=RULEBOOK;
   return {
     levyFromPayBill:function(pb){return Math.max(0,(+pb||0)*R.levyRate-R.levyAllowance);},   // annual declared levy (0.5% − £15k)
     payBillFromLevy:function(l){return ((+l||0)+R.levyAllowance)/R.levyRate;},                // reverse
-    topUp:function(levy){return (+levy||0)*R.topUpRate;},                                     // 10% government top-up
-    accountCredit:function(levy){return (+levy||0)*(1+R.topUpRate);},                         // levy + top-up into the account
+    topUp:function(levy,mk){return (+levy||0)*topUpAt(mk);},                                    // nil from Aug 2026; 10% before it
+    accountCredit:function(levy,mk){return (+levy||0)*(1+topUpAt(mk));},                     // levy + whatever top-up applied that month
     coInvestShare:function(uncovered,fromBoundary){return (+uncovered||0)*(fromBoundary?R.coInvest.from:R.coInvest.before);}, // 5%→25%
     bandTraining:function(band){return (+band||0)*R.draw.training;},                          // 80% over the practical period
     bandEpa:function(band){return (+band||0)*R.draw.epa;},                                    // 20% at EPA
@@ -3324,8 +3336,9 @@ var PROV = {
               ['= Balance', fmt(levyData.balance)]],
       result: levyData.balance,
       check: inc - paid,
-      rule: 'Every levy declaration is credited to your apprenticeship service account with a ' +
-            Math.round(RULEBOOK.topUpRate * 100) + '% government top-up, and debited as training is drawn.'
+      rule: 'Every levy declaration is credited to your apprenticeship service account and debited ' +
+            'as training is drawn. The ' + Math.round(RULEBOOK.topUp.before * 100) + '% government top-up ended for new funds ' +
+            'entering accounts from August 2026, so nothing is added to a declaration now.'
     };
   },
 
@@ -3339,8 +3352,9 @@ var PROV = {
               ['= Average per month', fmt(levyData.monthlyAvg)]],
       result: levyData.monthlyAvg,
       check: n ? inc / n : 0,
-      rule: 'Income is your declared levy plus the ' + Math.round(RULEBOOK.topUpRate * 100) +
-            '% top-up. Averaged over the months present in your data, so a partial year averages only those months.'
+      rule: 'Income is your declared levy. The ' + Math.round(RULEBOOK.topUp.before * 100) + '% top-up ended ' +
+            'for new funds from August 2026, though an imported history may still contain it. ' +
+            'Averaged over the months present in your data, so a partial year averages only those months.'
     };
   },
 
@@ -3594,7 +3608,8 @@ function ageFmt(v) { return v + ' years old'; }
 var RULE_SPEC = [
   ['levyRate',              'Levy rate on the pay bill',                    pctFmt],
   ['levyAllowance',         'Annual levy allowance',                        moneyFmt],
-  ['topUpRate',             'Government top-up on declarations',            pctFmt],
+  ['topUp.before',          'Government top-up, before Aug 2026',           pctFmt],
+  ['topUp.from',            'Government top-up, from Aug 2026',             pctFmt],
   ['draw.training',         'Share drawn across the practical period',      pctFmt],
   ['draw.epa',              'Share held back for end-point assessment',     pctFmt],
   ['coInvest.before',       'Employer co-investment, before Aug 2026',      pctFmt],
@@ -3915,7 +3930,8 @@ function primerSteps() {
     { k: 'money', t: 'Where the money comes from',
       b: 'If your pay bill is over £3m you pay the apprenticeship levy — ' + pct(R.levyRate) +
          ' of the bill, less a ' + fmt(R.levyAllowance) + ' allowance — and government adds ' +
-         pct(R.topUpRate) + ' on top when it reaches your account. Below £3m you pay no levy and government ' +
+         'nothing on top when it reaches your account &mdash; the ' + pct(R.topUp.before) + ' top-up ended ' +
+         'for new funds from August 2026. Below £3m you pay no levy and government ' +
          'funds most of each band instead.',
       f: moneyLine },
     { k: 'expiry', t: 'Unused levy does not wait',
@@ -4351,7 +4367,7 @@ function startPayBillFromHeads() {
     '<div class="sh-verdict">' +
       (pays
         ? 'Above &pound;3m, so you <b>pay the levy</b> &mdash; roughly <b>' + fmt(annual) +
-          '</b> a year declared, plus the ' + Math.round(RULEBOOK.topUpRate * 100) + '% top-up.'
+          '</b> a year declared. The ' + Math.round(RULEBOOK.topUp.before * 100) + '% top-up ended for new funds from August 2026.'
         : 'Below &pound;3m, so you <b>do not pay the levy</b>. Government funds most of each apprenticeship instead ' +
           'and you co-invest the rest &mdash; the non-levy route.') +
     '</div>' +
@@ -4560,7 +4576,7 @@ function estAssumptions() {
              note: 'Nothing is costed against a real account until you upload the ESFA transactions or estimate from payroll.' });
   } else if (estLevyIsEstimated()) {
     a.push({ k: 'Levy income', v: 'estimated from your pay bill', sourced: false,
-             note: '0.5% of the pay bill less the £15,000 allowance, plus the 10% top-up. A real ESFA export will differ, often by a little.' });
+             note: '0.5% of the pay bill less the £15,000 allowance. The 10% top-up ended for new funds from August 2026. A real ESFA export will differ, often by a little.' });
   } else {
     a.push({ k: 'Levy income', v: 'from your ESFA transactions', sourced: true,
              note: 'Read from the file you uploaded — the same figures the apprenticeship service shows.' });
@@ -5127,7 +5143,8 @@ RULEBOOK.__source='baked';
     function s(p,f){var v=pk(c,p);if(v!==undefined)f(v);}
     s('levy.rate.value',function(v){RULEBOOK.levyRate=v;});
     s('levy.allowance.value',function(v){RULEBOOK.levyAllowance=v;});
-    s('levy.topUp.value',function(v){RULEBOOK.topUpRate=v;});
+    s('levy.topUp.value',function(v){RULEBOOK.topUp.from=v;});          /* forward rate */
+    s('levy.topUp.valueBefore',function(v){RULEBOOK.topUp.before=v;});  /* historical */
     s('expiry.boundaryMonthKey',function(v){RULEBOOK.boundaryMk=v;});
     s('ni.employerRate.value',function(v){RULEBOOK.ni.empRate=v;});
     s('ni.secondaryThreshold.value',function(v){RULEBOOK.ni.secThreshold=v;});
@@ -5137,6 +5154,11 @@ RULEBOOK.__source='baked';
     s('delivery.transferCapPct.value',function(v){RULEBOOK.transferCapPct=v;});
     s('coInvest.employerBefore.value',function(v){RULEBOOK.coInvest.before=v;});
     s('coInvest.employerFrom.value',function(v){RULEBOOK.coInvest.from=v;});
+    /* the age-tiered half of the 2026-27 matrix - a single employerFrom cannot
+       express it, because 25% is the levy-short rate and 5% the non-levy one */
+    s('coInvest.employerNonLevyFrom.value',function(v){RULEBOOK.coInvest.nonLevyFrom=v;});
+    s('coInvest.fullyFundedToAge.value',function(v){RULEBOOK.coInvest.fullyFundedToAge=v;});
+    s('coInvest.fullyFundedToAge.valueBefore',function(v){RULEBOOK.coInvest.fullyFundedToAgeBefore=v;});
     s('expiry.monthsBefore.value',function(v){RULEBOOK.expiryMonths.before=v;});
     s('expiry.monthsFrom.value',function(v){RULEBOOK.expiryMonths.from=v;});
     s('delivery.apprenticeshipMinMonths',function(v){RULEBOOK.apprenticeshipMinMonths=v;});
@@ -6164,7 +6186,7 @@ function estimateLevyFromPayroll(){
   var pb=gv('est-paybill');
   if(pb<=0){setStatus('Enter your annual pay bill to estimate your levy.','warn');return;}
   var annualLevy=LevyEngine.levyFromPayBill(pb); // route the UI through the pure engine (byte-identical)
-  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
+  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*topUpAt(), monthlyIncome=monthlyLevy+monthlyTopup;
   var openBal=gv('est-balance');
   var base=mKey(today), byMonth=[];
   for(var i=0;i<12;i++){var mk=base+i, ew=expMo(mk);byMonth.push({month:isoMo(mk),levy:monthlyLevy,topup:monthlyTopup,paid:0,mk:mk,income:monthlyIncome,net:monthlyIncome,ew:ew,expiresLabel:mkLbl(mk+ew)});}
@@ -6174,10 +6196,10 @@ function estimateLevyFromPayroll(){
   document.getElementById('levySummary').classList.remove('hidden');
   if(programmes.length)renderProjection();
   saveState();
-  setStatus('[ESTIMATE] '+(annualLevy>0?('Annual levy ≈ '+fmt(annualLevy)+' ('+fmt(monthlyIncome)+'/mo incl. 10% top-up)'):'Pay bill is below the £3m threshold — no levy is due.')+' Confirm against your ESFA account when available.','ok');
+  setStatus('[ESTIMATE] '+(annualLevy>0?('Annual levy ≈ '+fmt(annualLevy)+' ('+fmt(monthlyIncome)+'/mo)'):'Pay bill is below the £3m threshold — no levy is due.')+' Confirm against your ESFA account when available.','ok');
 }
 
-// Reverse of estimateLevyFromPayroll: known DECLARED levy (before 10% top-up) → work back the annual pay bill, then feed the engine.
+// Reverse of estimateLevyFromPayroll: known DECLARED levy → work back the annual pay bill, then feed the engine.
 function estimateLevyFromContributions(){
   var gv=function(id){return parseFloat((document.getElementById(id).value||'').toString().replace(/[£,\s]/g,''))||0;};
   var lv=gv('rev-levy');
@@ -6185,7 +6207,7 @@ function estimateLevyFromContributions(){
   var annualLevy=(document.getElementById('rev-period').value==='year')?lv:lv*12;
   // reverse the levy formula: annualLevy = payBill×rate − allowance  →  payBill = (annualLevy + allowance) / rate
   var pb=LevyEngine.payBillFromLevy(annualLevy); // route the UI through the pure engine (byte-identical)
-  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*RULEBOOK.topUpRate, monthlyIncome=monthlyLevy+monthlyTopup;
+  var monthlyLevy=annualLevy/12, monthlyTopup=monthlyLevy*topUpAt(), monthlyIncome=monthlyLevy+monthlyTopup;
   var openBal=gv('rev-balance');
   var base=mKey(today), byMonth=[];
   for(var i=0;i<12;i++){var mk=base+i, ew=expMo(mk);byMonth.push({month:isoMo(mk),levy:monthlyLevy,topup:monthlyTopup,paid:0,mk:mk,income:monthlyIncome,net:monthlyIncome,ew:ew,expiresLabel:mkLbl(mk+ew)});}
@@ -6196,7 +6218,7 @@ function estimateLevyFromContributions(){
   document.getElementById('levySummary').classList.remove('hidden');
   if(programmes.length)renderProjection();
   saveState();
-  setStatus('[ESTIMATE] Your annual pay bill works back to ≈ '+fmt(pb)+' (from '+fmt(annualLevy)+' declared levy/yr). Monthly income ≈ '+fmt(monthlyIncome)+' incl. 10% top-up. Confirm against your ESFA account.','ok');
+  setStatus('[ESTIMATE] Your annual pay bill works back to ≈ '+fmt(pb)+' (from '+fmt(annualLevy)+' declared levy/yr). Monthly income ≈ '+fmt(monthlyIncome)+'. Confirm against your ESFA account.','ok');
 }
 
 // ── Data integrity: surface what the parser skipped / coerced, and flag anomalies (the trust front door)
@@ -6256,7 +6278,7 @@ function fundingRulesRef(){
   var b=RULEBOOK, pc=function(x){return Math.round(x*100)+'%';};
   return [
     {label:'Levy calculation',value:'0.5% − £15k',eff:'pay bill > £3m',detail:'The apprenticeship levy is 0.5% of your annual pay bill minus a £15,000 allowance — only employers with a pay bill above £3m pay it. (Used by the estimate-from-payroll option.)'},
-    {label:'Levy top-up',value:'+'+pc(b.topUpRate),eff:'all declarations',detail:'The government adds '+pc(b.topUpRate)+' to every levy declaration before it reaches your account.'},
+    {label:'Levy top-up',value:pc(b.topUp.from),eff:'from Aug 2026',detail:'Removed. The government added '+pc(b.topUp.before)+' to every declaration until August 2026; new funds entering an account now get nothing on top.'},
     {label:'Drawdown split',value:pc(b.draw.training)+' / '+pc(b.draw.epa),eff:'per programme',detail:pc(b.draw.training)+' of each funding band is drawn in equal monthly instalments across the practical period; the final '+pc(b.draw.epa)+' is released on end-point assessment.'},
     {label:'Co-investment',value:pc(b.coInvest.before)+' → '+pc(b.coInvest.from),eff:'boundary Aug 2026',detail:'When the account can’t cover a month, the employer pays this share of the uncovered cost (government pays the rest). Rises from '+pc(b.coInvest.before)+' to '+pc(b.coInvest.from)+' for costs from Aug 2026.'},
     {label:'Fund expiry',value:b.expiryMonths.before+'mo → '+b.expiryMonths.from+'mo',eff:'boundary Aug 2026',detail:'Unused funds expire this many months after declaration ('+b.expiryMonths.before+'mo before Aug 2026, '+b.expiryMonths.from+'mo from), oldest spent first (FIFO).'},
@@ -6320,7 +6342,7 @@ function loadDemo(){
   const levies=[3050,3120,2980,3200,3090,3150,3010,3180,3070,3130,3060,3140];
   const paid=[950,980,920,1050,990,1020,940,1080,1010,970,960,1040];
   const mm={};let tI=0,tO=0;
-  levies.forEach((lv,i)=>{const mk=baseMk+i,mo=isoMo(mk),tp=Math.round(lv*RULEBOOK.topUpRate);mm[mo]={levy:lv,topup:tp,paid:paid[i]};tI+=lv+tp;tO+=paid[i];});
+  levies.forEach((lv,i)=>{const mk=baseMk+i,mo=isoMo(mk),tp=Math.round(lv*topUpAt(mk));mm[mo]={levy:lv,topup:tp,paid:paid[i]};tI+=lv+tp;tO+=paid[i];});
   buildLevyData(mm,tI,tO,0);
   const d=o=>{const x=new Date(today);x.setMonth(x.getMonth()+o);return x.toISOString().slice(0,10);};
   programmes=[
@@ -6380,7 +6402,7 @@ function renderSummary(){
   const annual=levyData.monthlyAvg*12;
   document.getElementById('metricCards').innerHTML=`
     <div class="metric"><div class="ml">Account balance (est.)</div><div class="mv c-teal">${pv('balance',fmt(levyData.balance),'Account balance')}</div><div class="ms">Total in minus total out</div></div>
-    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${pv('monthlyAvg',fmt(levyData.monthlyAvg),'Average monthly income')}${estLevyIsEstimated()?estMark('Estimated from your pay bill, not read from an ESFA export.'):''}</div><div class="ms">Levy declared + 10% top-up</div></div>
+    <div class="metric"><div class="ml">Avg monthly income</div><div class="mv">${pv('monthlyAvg',fmt(levyData.monthlyAvg),'Average monthly income')}${estLevyIsEstimated()?estMark('Estimated from your pay bill, not read from an ESFA export.'):''}</div><div class="ms">Levy declared (no top-up from Aug 2026)</div></div>
     <div class="metric"><div class="ml">Projected annual levy</div><div class="mv">${pv('annualLevy',fmt(annual),'Projected annual levy')}</div><div class="ms">Monthly avg &times; 12</div></div>
     <div class="metric"><div class="ml">Max gift (50%)</div><div class="mv c-amber">${pv('maxGift',fmt(annual*RULEBOOK.transferCapPct),'Maximum you can gift')}</div><div class="ms">Statutory transfer cap</div></div>
   `;
@@ -9581,7 +9603,7 @@ const FUNDING_GUIDANCE=[
   {k:['co-invest','coinvest','co invest','run out','exhaust','empty','not enough','shortfall','5%','25%','top up the cost','out of funds','run short'],src:'rules',
    t:`<strong>Co-investment</strong> — when a month's training cost is more than your levy account holds, you co-invest on the uncovered amount. The employer pays <strong>5%</strong> and the government <strong>95%</strong>. <strong>From 1 Aug 2026</strong>, levy payers who exhaust their pot pay <strong>25%</strong> (government 75%) for continued apprenticeships. Each month is treated <strong>in isolation</strong> — next month's levy surplus cannot retroactively repay an earlier month's co-investment.`},
   {k:['top-up','top up','10%','bonus','government add'],src:'manage',
-   t:`<strong>10% top-up</strong> — the government currently adds 10% to your monthly levy declaration (so £100 declared becomes £110 to spend). This top-up is being <strong>removed from 1 Aug 2026</strong>, so newer funds won't be boosted.`},
+   t:`<strong>The 10% top-up has gone</strong> — until August 2026 the government added 10% to every levy declaration, so £100 declared became £110 to spend. <strong>That ended for new funds from 1 August 2026</strong>: £100 declared is now £100 to spend. Anything already banked before the change keeps the top-up it received.`},
   {k:['expire','expiry','expir','lose','use it or lose','24 month','12 month','rolling','old fund'],src:'manage',
    t:`<strong>Fund expiry</strong> — levy funds expire on a rolling basis if unused: <strong>24 months</strong> after entering the account for older funds, reducing to <strong>12 months</strong> for newer funds (from Aug 2026). Oldest funds are spent first (FIFO).`},
   {k:['transfer','gift','gifting','share','sme','supply chain','partner','charity','50%'],src:'transfer',
@@ -9789,8 +9811,10 @@ document.addEventListener('keydown',e=>{
     ['Levy calculation','Pay bill £2,000,000 (non-levy) → nil',E.levyFromPayBill(2000000),0,'levy'],
     ['Reverse: levy → pay bill','Declared £10,000/yr → pay bill',E.payBillFromLevy(10000),5000000,'levy'],
     ['Reverse: levy → pay bill','Declared £3,000/yr → pay bill',E.payBillFromLevy(3000),3600000,'levy'],
-    ['Government top-up (10%)','Levy £10,000 → account credit',E.accountCredit(10000),11000,'levy'],
-    ['Government top-up (10%)','Levy £250/mo → with top-up',E.accountCredit(250),275,'levy'],
+    ['Government top-up','Levy £10,000 from Aug 2026 → no top-up',E.accountCredit(10000),10000,'levy'],
+    ['Government top-up','Levy £250/mo from Aug 2026 → no top-up',E.accountCredit(250),250,'levy'],
+    ['Government top-up','Levy £10,000 BEFORE Aug 2026 → 10% still applied',E.accountCredit(10000,mkB),11000,'levy'],
+    ['Government top-up','Levy £250/mo before Aug 2026 → 10% still applied',E.accountCredit(250,mkB),275,'levy'],
     ['Co-investment (levy short)','Uncovered £1,000 before Aug 2026 (5%)',E.coInvestShare(1000,false),50,'fund'],
     ['Co-investment (levy short)','Uncovered £1,000 from Aug 2026 (25%)',E.coInvestShare(1000,true),250,'fund'],
     ['Funding-band drawdown','Band £9,000 → 80% training',E.bandTraining(9000),7200,'fund'],
