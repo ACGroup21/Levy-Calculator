@@ -424,6 +424,35 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Apprenticeship primer ────────────────────────────────────── */
+.pr-grid{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+.pr-steps{flex:1 1 226px;min-width:210px;display:flex;flex-direction:column;gap:2px}
+.pr-step{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;cursor:pointer;
+  font-size:13.5px;background:none;border:0;color:var(--text2);font:inherit;text-align:left;width:100%;
+  transition:background .15s,color .15s}
+.pr-step:hover{color:var(--text)}
+.pr-step:focus-visible{outline:2px solid var(--teal);outline-offset:-2px}
+.pr-n{font-family:'Roboto Mono',monospace;font-size:9.5px;color:var(--text3);width:13px;flex:0 0 auto}
+.pr-step.on{background:rgba(45,212,178,.12);color:var(--text)}
+.pr-step.on .pr-n{color:var(--teal)}
+.pr-step.seen .pr-n:after{content:" \2713"}
+.pr-panel{flex:1 1 330px;min-width:290px;background:rgba(45,212,178,.05);
+  border:1px solid rgba(45,212,178,.25);border-radius:12px;padding:15px 16px}
+.pr-panel h4{margin:0 0 8px;font-size:15.5px;color:var(--text)}
+.pr-panel p{margin:0 0 11px;font-size:13.5px;color:var(--text2);line-height:1.62}
+.pr-f{border-top:1px solid var(--border);padding-top:10px;font-size:13px;color:var(--text2);line-height:1.55}
+.pr-f b{color:var(--teal)}
+.pr-fl{display:block;font-family:'Roboto Mono',monospace;font-size:8.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+.pr-nav{display:flex;gap:9px;align-items:center;margin-top:13px;flex-wrap:wrap}
+.pr-b{background:rgba(45,212,178,.1);border:1px solid rgba(45,212,178,.35);border-radius:9px;
+  padding:6px 13px;font:inherit;font-size:12.5px;color:var(--teal);cursor:pointer}
+.pr-b:hover{background:rgba(45,212,178,.18)}
+.pr-b:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.pr-done{font-size:12.5px;color:var(--text3)}
+.pr-bar{height:3px;border-radius:99px;background:rgba(var(--wash),.12);overflow:hidden;margin:13px 0 0}
+.pr-bar>i{display:block;height:100%;background:var(--teal);border-radius:99px;transition:width .25s}
+.pr-meta{margin-top:8px;font-size:11.5px;color:var(--text3)}
 /* ── Report preview ──────────────────────────────────────────── */
 .rv-wrap{margin-top:14px;padding-top:13px;border-top:1px solid rgba(var(--wash),0.08)}
 .rv-row{display:flex;gap:9px;flex-wrap:wrap}
@@ -1768,6 +1797,16 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     </div>
   </div>
 
+
+  <details class="card levy-only" id="primerCard" style="margin-bottom:1.1rem">
+    <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;user-select:none">
+      <span style="font-size:15px">&#127891;</span>
+      <span style="flex:1;font-size:13px;color:var(--text2)"><b style="color:var(--text)">New to apprenticeships?</b> &mdash; the funding model in six short pieces, using your own figures. Skip it if you know this.</span>
+      <span style="color:var(--text3);font-size:12px">&#9662;</span>
+    </summary>
+    <div style="margin-top:14px" id="prBody"></div>
+  </details>
+
   <!-- STEP 1: LEVY CSV -->
   <div class="step-row levy-only" id="sec-levy"><span class="step-chip">STEP 01</span><span class="step-title" role="heading" aria-level="2">Upload ESFA Levy Transactions</span></div>
   <p class="step-sub levy-only">Apprenticeship service &rarr; Finance &rarr; Download transactions &nbsp;&middot;&nbsp; CSV or TSV accepted</p>
@@ -2187,7 +2226,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01v</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01w</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3695,6 +3734,152 @@ var PAL_ACTIONS = [
    The delta is read from the change ledger's own snapshot, so the bar and the
    ledger can never disagree about what just happened.
 --------------------------------------------------------------------------- */
+/* ═══ APPRENTICESHIP PRIMER ═════════════════════════════════════════════════
+   Added at the user's request, correcting an argument of mine. I had said no
+   onboarding tour - and for a tour of the INTERFACE I would still say it, on
+   the grounds that a tour is what you build when the first screen does not
+   explain itself. But someone new to APPRENTICESHIPS does not know what a
+   standard is, what a funding band is, what EPA is, or why co-investment
+   exists, and no amount of fixing the first screen teaches a domain. SLT and
+   HR are frequently first-timers.
+
+   So this teaches the FUNDING MODEL, not the buttons.
+
+   Every figure comes from RULEBOOK or the live plan - never a number typed
+   into the copy. A primer that drifts from the engine is worse than none,
+   because it teaches the wrong thing with the app's authority behind it. Where
+   there is no plan yet it says so rather than reporting zeroes.
+--------------------------------------------------------------------------- */
+var PRIMER_KEY = 'ac_primer_seen_v1';
+var primerAt = 0, primerSeen = {};
+
+function primerLoad() {
+  try { primerSeen = JSON.parse(localStorage.getItem(PRIMER_KEY) || '{}') || {}; }
+  catch (e) { primerSeen = {}; }
+}
+function primerSave() {
+  try { localStorage.setItem(PRIMER_KEY, JSON.stringify(primerSeen)); } catch (e) {}
+}
+
+function primerPlan() {
+  try { return (typeof levyReportData === 'function') ? levyReportData() : null; } catch (e) { return null; }
+}
+function primerHasPlan() {
+  return (typeof programmes !== 'undefined') && programmes.length > 0;
+}
+
+/* rule → what it means for you → the figure it drives in THIS plan */
+function primerSteps() {
+  var R = RULEBOOK, d = primerPlan(), has = primerHasPlan();
+  var pct = function (v) { return Math.round(v * 100) + '%'; };
+  var nStd = 0;
+  try { nStd = (typeof STANDARDS !== 'undefined' ? STANDARDS : STANDARDS_BASE).length; } catch (e) {}
+
+  var bandLine = 'Add a programme and this becomes the cap on yours.';
+  if (has) {
+    try {
+      var top = programmes.reduce(function (a, p) { return (+p.cost > +a.cost) ? p : a; });
+      bandLine = 'Your largest is <b>' + escHtml(top.name) + '</b> at ' + fmt(+top.cost || 0) + '.';
+    } catch (e) {}
+  }
+
+  var moneyLine = (fundingMode === 'nonlevy')
+    ? 'You are set to <b>non-levy</b>, so government funds most of each band and you co-invest the rest.'
+    : ((d && d.annual) ? 'Yours declares about <b>' + fmt(d.annual) + '</b> a year.'
+                       : 'Add your levy data and this becomes your own figure.');
+
+  var expiryLine = (d && d.expiry > 1)
+    ? '<b>' + fmt(d.expiry) + '</b> of your levy is currently forecast to expire unused.'
+    : 'Nothing in your plan is forecast to expire yet.';
+
+  var otjLine = (d && d.otjCost > 0)
+    ? 'In your plan that time is worth <b>' + fmt(d.otjCost) + '</b> — ' +
+      ((d.planCost && d.otjCost > d.planCost) ? 'more than the training fee itself.' : 'on top of the training fee.')
+    : 'Add a programme and this becomes a real figure.';
+
+  var epaLine = (d && d.tE > 0)
+    ? '<b>' + fmt(d.tE) + '</b> of your plan is held back until they pass.'
+    : 'Add a programme and this becomes a real figure.';
+
+  return [
+    { k: 'what', t: 'It is a job, not a course',
+      b: 'An apprenticeship is a real job with structured training attached, lasting at least ' +
+         R.apprenticeshipMinMonths + ' months. What it must teach is set nationally by a <b>standard</b> — ' +
+         'a published description of what someone has to be able to do by the end.',
+      f: 'There are <b>' + nStd + '</b> standards to choose from.' },
+    { k: 'band', t: 'The band is a cap, not a price',
+      b: 'Every standard sits in a funding band. Government will fund up to that maximum and no further, ' +
+         'so anything you negotiate above it comes out of your own pocket in full. Negotiating <i>below</i> ' +
+         'it is where the saving is.',
+      f: bandLine },
+    { k: 'money', t: 'Where the money comes from',
+      b: 'If your pay bill is over £3m you pay the apprenticeship levy — ' + pct(R.levyRate) +
+         ' of the bill, less a ' + fmt(R.levyAllowance) + ' allowance — and government adds ' +
+         pct(R.topUpRate) + ' on top when it reaches your account. Below £3m you pay no levy and government ' +
+         'funds most of each band instead.',
+      f: moneyLine },
+    { k: 'expiry', t: 'Unused levy does not wait',
+      b: 'Levy funds expire if you do not commit them. Money that entered your account ' +
+         R.expiryMonths.before + ' months ago goes back to the Treasury — and for anything declared from ' +
+         'August 2026 that window halves to ' + R.expiryMonths.from + ' months. This is the clock the whole tool is built around.',
+      f: expiryLine },
+    { k: 'otj', t: 'The biggest cost is time, not fees',
+      b: 'An apprentice must spend a fifth of their contracted hours training rather than producing. ' +
+         'Nobody funds that. It is your people not at their desks, and it is usually larger than the ' +
+         'training fee — which is why a plan costed on fees alone understates what it will really take.',
+      f: otjLine },
+    { k: 'epa', t: 'They finish by being assessed',
+      b: 'An apprenticeship ends with independent end-point assessment. ' + pct(R.draw.training) +
+         ' of the price is drawn in monthly instalments along the way; the final ' + pct(R.draw.epa) +
+         ' is released only when they complete. Someone who leaves part-way still costs you everything drawn to that point.',
+      f: epaLine }
+  ];
+}
+
+function primerRender() {
+  var host = document.getElementById('prBody');
+  if (!host) return;
+  var steps = primerSteps();
+  primerSeen[steps[primerAt].k] = 1;
+  primerSave();
+  var n = steps.filter(function (s) { return primerSeen[s.k]; }).length;
+
+  host.innerHTML =
+    '<div class="pr-grid">' +
+      '<div class="pr-steps">' + steps.map(function (s, i) {
+        return '<button type="button" class="pr-step' + (i === primerAt ? ' on' : '') +
+          (primerSeen[s.k] ? ' seen' : '') + '" data-i="' + i + '" onclick="primerGo(' + i + ')">' +
+          '<span class="pr-n">' + (i + 1) + '</span>' + s.t + '</button>';
+      }).join('') + '</div>' +
+      '<div class="pr-panel"><h4>' + steps[primerAt].t + '</h4><p>' + steps[primerAt].b + '</p>' +
+        '<div class="pr-f"><span class="pr-fl">In your plan</span>' + steps[primerAt].f + '</div>' +
+        '<div class="pr-nav">' +
+          (primerAt > 0 ? '<button type="button" class="pr-b" onclick="primerGo(' + (primerAt - 1) + ')">← Back</button>' : '') +
+          (primerAt < steps.length - 1
+            ? '<button type="button" class="pr-b pr-next" onclick="primerGo(' + (primerAt + 1) + ')">Next →</button>'
+            : '<span class="pr-done">That is the whole funding model.</span>') +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="pr-bar"><i style="width:' + Math.round(n / steps.length * 100) + '%"></i></div>' +
+    '<div class="pr-meta">' + n + ' of ' + steps.length + ' read · every figure here is your own, and the rules ' +
+      'come from the rulebook verified ' + escHtml(String(RULEBOOK.asOf)) + '</div>';
+}
+
+function primerGo(i) {
+  var steps = primerSteps();
+  primerAt = Math.max(0, Math.min(i, steps.length - 1));
+  primerRender();
+}
+
+function primerMount() {
+  primerLoad();
+  var steps = primerSteps();
+  var first = steps.findIndex ? steps.findIndex(function (s) { return !primerSeen[s.k]; }) : -1;
+  primerAt = (first > 0) ? first : 0;          // resume where they left off
+  primerRender();
+}
+
 function pulseFigures() {
   try {
     if (fundingMode === 'nonlevy' && typeof nonLevyFunding === 'function') {
@@ -4936,6 +5121,8 @@ function scnClearStale(){
   if(d) d.addEventListener('toggle',function(){ if(d.open) mount(); });
   var e=document.getElementById('estDetails');
   if(e) e.addEventListener('toggle',function(){ if(e.open) mount(); });
+  var pr=document.getElementById('primerCard');
+  if(pr) pr.addEventListener('toggle',function(){ if(pr.open){ try{ primerMount(); }catch(e){} } });
 })();
 function scnStaleNotice(sc){
   var w=document.getElementById('scnStale'); if(!w)return;
@@ -5031,6 +5218,7 @@ function saveState(){
     persistScenario(false);
     try{ if(typeof ledgerNote==='function') ledgerNote(); }catch(e){}
     try{ if(typeof pulseSync==='function') pulseSync(); }catch(e){}
+    try{ var _pc=document.getElementById('primerCard'); if(_pc&&_pc.open&&typeof primerRender==='function') primerRender(); }catch(e){}
     toggleClearBtn(!!(hasLevy||programmes.length));
     if(typeof markPlanDirty==='function')markPlanDirty();
   }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
@@ -6609,7 +6797,8 @@ var NAV_INDEX=[
   {sec:'Plan',items:[{lb:'Off-the-job planner',id:'planResults'},{lb:'Peaks & troughs calendar',id:'monthGrid'}]},
   {sec:'Reports',items:[{lb:'Report builder',id:'reportsCard'}]},
   {sec:'Tools',items:[{lb:'JD Matcher',id:'sec-jd'},{lb:'Funding co-pilot',id:'__copilot'}]},
-  {sec:'Start',items:[{lb:'Where would you like to start?',id:'sec-start'},
+  {sec:'Start',items:[{lb:'New to apprenticeships? (primer)',id:'primerCard'},
+                      {lb:'Where would you like to start?',id:'sec-start'},
                       {lb:'Have a budget instead of a plan?',id:'sec-solve'}]},
   {sec:'Trust',items:[{lb:'What this plan rests on',id:'estDetails'},
                       {lb:'Funding rules applied & sources',id:'rulesDetails'},
