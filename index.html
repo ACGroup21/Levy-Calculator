@@ -637,6 +637,39 @@ button{font-family:var(--sans);cursor:pointer}
 .slv-otj{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);
   font-size:12.5px;line-height:1.55;color:var(--text3)}
 .slv-otj b{color:var(--money)}
+.slv-sub{margin-top:3px;font-size:12.5px;color:var(--text3);line-height:1.45}
+/* the binding-constraint callout is the finding, so it outranks the idle-money
+   warning visually - teal, because "capacity, not money" is information, not a
+   failure, and the warn style would read as an error */
+.slv-bind{margin-top:11px;padding:10px 12px;border-radius:9px;font-size:13px;line-height:1.55;
+  color:var(--text2);background:rgba(45,212,178,.09);border:1px solid rgba(45,212,178,.32)}
+.slv-bind b{color:var(--teal)}
+.slv-eg{margin-top:12px;padding-top:10px;border-top:1px solid var(--border);
+  display:flex;flex-direction:column;gap:4px}
+.slv-eg-h{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--text3)}
+.slv-eg-i{font-size:12.5px;color:var(--text2);line-height:1.5;font-variant-numeric:tabular-nums}
+.slv-eg-i b{color:var(--text);font-weight:600}
+.slv-eg-n{font-size:11.5px;line-height:1.5;color:var(--text3);margin-top:3px}
+.slv-lvl{width:100%;border-collapse:collapse;margin-top:14px;font-size:12.5px;table-layout:fixed}
+.slv-lvl caption{caption-side:top;text-align:left;font-family:'Roboto Mono',monospace;font-size:10px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--text3);padding-bottom:6px}
+.slv-lvl th,.slv-lvl td{padding:5px 6px;text-align:right;border-bottom:1px solid var(--border);
+  font-variant-numeric:tabular-nums}
+.slv-lvl thead th{font-size:10.5px;font-weight:600;color:var(--text3);text-transform:uppercase;
+  letter-spacing:.05em;white-space:normal;vertical-align:bottom}
+.slv-lvl th[scope=row]{text-align:left;font-weight:600;color:var(--text2)}
+.slv-lvl tbody tr.is-on{background:rgba(45,212,178,.08)}
+.slv-lvl tbody tr.is-off th,.slv-lvl tbody tr.is-off td{color:var(--text3)}
+.slv-lvl tbody tr.is-off td[colspan]{text-align:left;font-style:italic}
+.slv-lvl tbody tr.is-on th,.slv-lvl tbody tr.is-on td{color:var(--text);font-weight:700}
+.slv-pick{font-family:'Roboto Mono',monospace;font-size:9.5px;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--teal);font-weight:700;white-space:nowrap}
+/* the handoff, not a primary action - the primary action is still Add to plan */
+.slv-jd{align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border);
+  color:var(--text2);border-radius:8px;padding:6px 12px;font-size:12px;font-family:inherit;
+  cursor:pointer}
+.slv-jd:hover,.slv-jd:focus-visible{color:var(--teal);border-color:var(--teal)}
 .slv-foot{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--text3)}
 .slv-empty{font-size:13px;color:var(--text3)}
 .slv-added{margin-bottom:10px;padding:8px 10px;border-radius:8px;font-size:12.5px;
@@ -1798,15 +1831,15 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
   <!-- INVERSE SOLVER: budget + headcount → plan -->
   <div class="card slv-card" id="sec-solve">
     <div class="step-row" style="margin-top:0"><span class="step-chip">START</span><span class="step-title" role="heading" aria-level="2">Have a budget instead of a plan?</span></div>
-    <p class="step-sub">Tell it what you control and how many people you want developed &mdash; it works out what that buys. The same arithmetic as everything below, run backwards.</p>
+    <p class="step-sub">Tell it what you control &mdash; it works out how many people you can get <b>qualified</b> inside your planning horizon, not just how much you could spend. The same arithmetic as everything below, run backwards.</p>
     <div class="slv-grid">
       <div class="slv-in">
         <label class="slv-lab" for="slvBudget">Budget you control &mdash; <b id="slvBudgetV">—</b></label>
         <input type="number" id="slvBudget" min="0" step="1000" placeholder="e.g. 120000" aria-label="Budget you control, in pounds">
-        <label class="slv-lab" for="slvPeople" style="margin-top:16px">People to develop &mdash; <b id="slvPeopleV">6</b></label>
+        <label class="slv-lab" for="slvPeople" style="margin-top:16px">People you would like developed &mdash; <b id="slvPeopleV">6</b><br><span style="font-weight:400;color:var(--text3)">a target to test against, not a divisor</span></label>
         <input type="range" id="slvPeople" min="1" max="40" step="1" value="6">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-          <button type="button" class="btn-demo" onclick="solveRun()">Show me what this buys</button>
+          <button type="button" class="btn-demo" onclick="solveRun()">Show me what this delivers</button>
           <button type="button" class="btn-demo" style="background:none;color:var(--text2);border-color:var(--border)" onclick="solveAdopt()">Add it to my plan</button>
         </div>
       </div>
@@ -2245,7 +2278,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02e</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -4654,86 +4687,288 @@ function solveCandidates() {
   return list.filter(function (s) { return (+s.band > 0) && (+s.dur > 0); });
 }
 
+/* --- a typical profile per level ----------------------------------------
+   Ranking real standards directly always returns the shortest, cheapest one at
+   each level, because waves reward short duration and the tiebreak rewards low
+   cost. That produced a GBP 2,500 outlier against a Level 3 median of GBP
+   9,000. So levels are costed on their MEDIAN band and MEDIAN duration - the
+   middle of the real population, which one outlier cannot move. */
+var SOLVE_LEVELS_SHOWN = [2, 3, 4, 5, 6];   /* L7 eligibility needs case-by-case checking */
+
+function solveMedian(nums) {
+  var a = nums.slice().sort(function (x, y) { return x - y; }), n = a.length;
+  if (!n) return 0;
+  return n % 2 ? a[(n - 1) / 2] : Math.round((a[n / 2 - 1] + a[n / 2]) / 2);
+}
+
+function solveLevelProfile(lv) {
+  var at = solveCandidates().filter(function (s) { return +s.level === lv; });
+  if (!at.length) return null;
+  var bands = at.map(function (s) { return +s.band; });
+  var band = solveMedian(bands), dur = solveMedian(at.map(function (s) { return +s.dur; }));
+  /* a real standard nearest the middle, so the answer stays concrete and can be
+     adopted - nearest on price first, then on duration */
+  var ex = null, exd = Infinity;
+  at.forEach(function (s) {
+    var d = Math.abs(+s.band - band) * 1000 + Math.abs(+s.dur - dur);
+    if (d < exd) { exd = d; ex = s; }
+  });
+  return { level: lv, n: at.length, band: band, dur: dur, name: 'Level ' + lv,
+           lo: Math.min.apply(null, bands), hi: Math.max.apply(null, bands), exemplar: ex };
+}
+
+
+/* --- the goal decides which levels are candidates ------------------------
+   Ranking on raw capability alone always returns Level 2: three short cheap
+   waves beat everything. Arithmetically true, usually the wrong advice. Each
+   range follows that goal's own description in GOALS. */
+var SOLVE_GOAL_LEVELS = {
+  capability: { levels: [3, 4, 5],    why: 'closing a skills gap usually sits at Level 3&ndash;5' },
+  upskill:    { levels: [3, 4, 5, 6], why: 'progressing your own people runs Level 3 &rarr; 5 &rarr; 6' },
+  recruit:    { levels: [2, 3],       why: 'an early-careers pipeline starts at Level 2&ndash;3' },
+  funding:    { levels: [2, 3, 4, 5], why: 'using the funding fully means spreading Level 2&ndash;5' },
+  cash:       { levels: [2, 3],       why: 'the lowest-investment path favours Level 2&ndash;3' },
+  other:      { levels: [3, 4],       why: 'with no goal set, Level 3&ndash;4 is the common starting point' }
+};
+
+function solveGoalKey() {
+  try { return (scnGoal && scnGoal.key && SOLVE_GOAL_LEVELS[scnGoal.key]) ? scnGoal.key : 'other'; }
+  catch (e) { return 'other'; }
+}
+
+function solveHorizonMonths() { return (projYears || 3) * 12; }
+
+/* You cannot mobilise today. solveAdopt has always started the first cohort
+   next month; the model used to ignore that and claim a wave the plan could not
+   actually deliver in time. Both read this constant now. */
+var SOLVE_LEAD_MONTHS = 1;
+function solveUsableMonths() { return solveHorizonMonths() - SOLVE_LEAD_MONTHS; }
+
+/* hours a week the department can lose and still hold service - the same
+   tolerance the capacity panel uses, not a second opinion about it */
+function solveCapacityHrs() {
+  try {
+    var p = planCfg || {};
+    return (+p.headcount || 0) * (+p.hours || 0) * ((+p.dip || 0) / 100);
+  } catch (e) { return 0; }
+}
+
+function solveOtjHrs(std) { return ((planCfg && planCfg.otj) || {})[std.level] || 6; }
+
+/* the model, for one standard */
+function solveModel(std, budget) {
+  var dur = +std.dur || 0, band = +std.band || 0;
+  if (!dur || !band || !budget) return null;
+  var waves = Math.floor(solveUsableMonths() / dur);
+  /* cannot finish in time: kept, not dropped - a missing row reads as an
+     oversight, and "will not finish inside your horizon" is a real finding */
+  if (waves < 1) return { std: std, waves: 0, completions: 0, achieved: 0, spend: 0,
+                          fits: false, capped: 'time' };
+  var otjH = solveOtjHrs(std), buffer = solveCapacityHrs();
+  var capacity = (otjH > 0 && buffer > 0) ? Math.floor(buffer / otjH) : Infinity;
+  var costPer = solveCostPer(std);
+  var byBudget = costPer > 0 ? Math.floor(budget / (costPer * waves)) : 0;
+  var perWave = Math.max(0, Math.min(capacity, byBudget));
+  var completions = perWave * waves;
+  var rate = 0.654;
+  try { if (typeof caRate === 'function') rate = caRate().r; } catch (e) {}
+  return { std: std, waves: waves, otjH: otjH, capacity: capacity, byBudget: byBudget,
+           perWave: perWave, completions: completions, achieved: completions * rate, rate: rate,
+           costPer: costPer, spend: perWave * waves * costPer, fits: true,
+           /* which constraint actually bites - a tie is 'both', because saying
+              "capacity, not money" while the budget stops at the same number
+              contradicts itself */
+           capped: (capacity === Infinity || capacity > byBudget) ? 'budget'
+                 : (capacity < byBudget) ? 'capacity' : 'both' };
+}
+
+/* one costed profile per level, for the comparison strip */
+function solveByLevel(budget) {
+  var out = [];
+  SOLVE_LEVELS_SHOWN.forEach(function (lv) {
+    var p = solveLevelProfile(lv);
+    if (!p) return;
+    var m = solveModel(p, budget);
+    if (m) out.push({ level: lv, m: m, profile: p });
+  });
+  return out;
+}
+
+/* the recommendation: best level inside the goal's range, with the overall best
+   kept alongside so a materially better option outside the goal is not hidden */
+function solveAnswer() {
+  var budget = solveState.budget;
+  if (!budget) return null;
+  var gk = solveGoalKey(), g = SOLVE_GOAL_LEVELS[gk];
+  var byLevel = solveByLevel(budget), overall = null, best = null;
+  var better = function (x, y) {
+    if (!x.m.fits || !x.m.completions) return false;
+    return !y || x.m.achieved > y.m.achieved ||
+           (x.m.achieved === y.m.achieved && x.m.spend < y.m.spend);
+  };
+  byLevel.forEach(function (r) {
+    if (better(r, overall)) overall = r;
+    if (g.levels.indexOf(r.level) >= 0 && better(r, best)) best = r;
+  });
+  return { goalKey: gk, goal: g, best: best, byLevel: byLevel, overall: overall, budget: budget };
+}
+
 function solveRun() {
   var budget = Math.max(0, +(document.getElementById('slvBudget') || {}).value || 0);
-  var people = Math.max(1, Math.round(+(document.getElementById('slvPeople') || {}).value || 1));
+  var want = Math.max(1, Math.round(+(document.getElementById('slvPeople') || {}).value || 1));
   /* keep the labels honest whatever set the inputs - typing fires solveSync,
      but a programmatic or restored value would otherwise leave them stale */
-  var bv=document.getElementById('slvBudgetV'), pv2=document.getElementById('slvPeopleV');
-  if(bv) bv.textContent = budget ? fmt(budget) : '—';
-  if(pv2) pv2.textContent = people;
-  solveState = { budget: budget, people: people, ran: true };
+  var bv = document.getElementById('slvBudgetV'), pv2 = document.getElementById('slvPeopleV');
+  if (bv) bv.textContent = budget ? fmt(budget) : '—';
+  if (pv2) pv2.textContent = want;
+  solveState = { budget: budget, people: want, ran: true };
   var out = document.getElementById('slvOut');
   if (!out) return;
   if (!budget) { out.innerHTML = '<div class="slv-empty">Enter a budget to see what it will buy.</div>'; return; }
+  if (!solveCandidates().length) { out.innerHTML = '<div class="slv-empty">No funded standards are loaded.</div>'; return; }
 
-  var cands = solveCandidates();
-  if (!cands.length) { out.innerHTML = '<div class="slv-empty">No funded standards are loaded.</div>'; return; }
+  var a = solveAnswer(), yrs = (projYears || 3);
+  var horizonLab = yrs + (yrs === 1 ? ' year' : ' years');
 
-  var perHead = budget / people;
-  var fits = cands.filter(function (s) { return solveCostPer(s) <= perHead; });
-
-  /* nothing fits: say how far the budget DOES reach rather than failing */
-  if (!fits.length) {
-    var cheapest = cands.reduce(function (a, b) { return solveCostPer(b) < solveCostPer(a) ? b : a; });
-    var canDo = Math.floor(budget / solveCostPer(cheapest));
+  /* the budget does not reach one start of anything that finishes in time */
+  if (!a || !a.best) {
+    var reach = null;
+    solveCandidates().forEach(function (st) {
+      if (!reach || solveCostPer(st) < solveCostPer(reach)) reach = st;
+    });
     out.innerHTML =
-      '<div class="slv-head">At this budget</div>' +
-      '<div class="slv-big">' + (canDo > 0 ? canDo + ' ' + (canDo === 1 ? 'person' : 'people') : 'Not yet') + '</div>' +
-      '<p class="slv-p">' + fmt(perHead) + ' each is below every funding band' +
-      (fundingMode === 'nonlevy' ? ' even at ' + Math.round(solveRate() * 100) + '% co-investment' : '') + '. ' +
-      (canDo > 0
-        ? 'The furthest it reaches is <b>' + canDo + '</b> on <b>' + escHtml(cheapest.name) + '</b> at ' +
-          fmt(solveCostPer(cheapest)) + ' each.'
-        : 'The cheapest standard is <b>' + escHtml(cheapest.name) + '</b> at ' + fmt(solveCostPer(cheapest)) +
-          ' per person.') + '</p>' + solveFootnote();
+      '<div class="slv-head">In ' + horizonLab + '</div>' +
+      '<div class="slv-big">Nothing completes yet</div>' +
+      '<p class="slv-p">' + fmt(budget) + ' does not cover a single start that also finishes inside ' +
+      horizonLab + '.' + (reach ? ' The nearest is <b>' + escHtml(reach.name) + '</b> at ' +
+      fmt(solveCostPer(reach)) + ' over ' + reach.dur + ' months.' : '') +
+      ' A longer horizon or a larger budget changes this.</p>' + solveFootnote();
     return;
   }
 
-  /* best fit = the most substantial programme the budget covers for everyone */
-  var best = fits.reduce(function (a, b) { return solveCostPer(b) > solveCostPer(a) ? b : a; });
-  var spend = solveCostPer(best) * people, left = budget - spend, idle = budget ? left / budget : 0;
-  /* the useful second move is headcount on the programme just chosen, not a
-     pivot to the cheapest thing in the library to mop up the remainder */
-  var per = solveCostPer(best);
-  var couldDo = per > 0 ? Math.floor(budget / per) : 0;
-  var otj = solveOtj(best, people);
+  var r = a.best, m = r.m, p = r.profile, ex = p.exemplar;
+  var achieved = Math.round(m.achieved * 10) / 10;
+  var left = budget - m.spend, idle = budget ? left / budget : 0;
 
+  /* HEADLINE: the answer is people qualified, not a programme name */
   var html =
-    '<div class="slv-head">Best fit</div>' +
-    '<div class="slv-big">' + escHtml(best.name) + '</div>' +
-    '<div class="slv-bar"><i style="width:' + Math.min(100, spend / budget * 100).toFixed(1) + '%"></i></div>' +
-    '<p class="slv-p">' + people + ' ' + (people === 1 ? 'person' : 'people') + ' at ' + fmt(solveCostPer(best)) +
-    ' each &mdash; <b>' + fmt(spend) + '</b> of your ' + fmt(budget) + ' committed' +
-    (fundingMode === 'nonlevy'
-      ? ', which is ' + Math.round(solveRate() * 100) + '% co-investment on ' + fmt((+best.band || 0) * people) +
-        ' of training.'
-      : '.') +
-    '<br><span class="slv-dim">' + best.dur + ' months each.</span></p>';
+    '<div class="slv-head">Capability in ' + horizonLab + '</div>' +
+    '<div class="slv-big">' + m.completions + ' ' + (m.completions === 1 ? 'person' : 'people') +
+    ' qualified</div>' +
+    '<div class="slv-sub">' + achieved + ' expected to achieve, at your ' +
+    (Math.round(m.rate * 1000) / 10) + '% completion rate</div>' +
+    '<div class="slv-bar"><i style="width:' + Math.min(100, m.spend / budget * 100).toFixed(1) +
+    '%"></i></div>' +
 
-  /* idle money is a finding, not a footnote */
-  if (idle >= 0.25) {
+    /* HOW: waves are the mechanism, and the thing v1 could not see */
+    '<p class="slv-p">' +
+    (m.waves > 1
+      ? '<b>' + m.waves + ' cohorts of ' + m.perWave + '</b>, back to back'
+      : '<b>One cohort of ' + m.perWave + '</b>') +
+    ' at <b>Level ' + p.level + '</b><br>' +
+    '<span class="slv-dim">' + p.dur + ' months each &mdash; ' + fmt(m.spend) + ' of your ' +
+    fmt(budget) + ' committed' + (fundingMode === 'nonlevy'
+      ? ' at ' + Math.round(solveRate() * 100) + '% co-investment' : '') +
+    ', at the typical Level ' + p.level + ' price of ' + fmt(p.band) + ' a head.</span></p>';
+
+  /* THE FINDING: which constraint actually bites. This is the sentence the old
+     solver could never produce, and it is usually the useful one. */
+  var relHrs = (Math.round(solveCapacityHrs() * 10) / 10) + ' tolerance hours a week across the ' +
+    'team, ' + m.otjH + ' each for off-the-job';
+  if (m.capped === 'capacity') {
+    html += '<div class="slv-bind"><b>Your limit is capacity, not money.</b> You can release ' +
+      m.capacity + ' ' + (m.capacity === 1 ? 'person' : 'people') + ' at a time &mdash; ' + relHrs +
+      '. The budget would cover ' + m.byBudget + ' a cohort.' +
+      (idle >= 0.2 ? ' ' + fmt(left) + ' would sit unused.' : '') + '</div>';
+  } else if (m.capped === 'budget' && m.capacity !== Infinity) {
+    html += '<div class="slv-bind"><b>Your limit is money, not capacity.</b> You could release ' +
+      m.capacity + ' at a time on ' + relHrs + ', but the budget covers ' + m.byBudget +
+      ' a cohort. More budget converts straight into more people here.</div>';
+  } else if (m.capped === 'both') {
+    html += '<div class="slv-bind"><b>Budget and capacity meet exactly.</b> ' + m.capacity +
+      ' a cohort is both what you can release (' + relHrs + ') and what the budget covers. ' +
+      'Moving either one alone will not add a place.</div>';
+  } else if (idle >= 0.25) {
     html += '<div class="slv-warn"><b>' + fmt(left) + '</b> &mdash; ' + Math.round(idle * 100) +
       '% of your budget &mdash; would sit unused' +
       (fundingMode === 'nonlevy' ? '.' : ', and levy expires ' + RULEBOOK.expiryMonths.from +
-        ' months after it lands for anything declared from August 2026.') +
-      (couldDo > people
-        ? ' The constraint here is headcount, not money: this budget covers <b>' + couldDo +
-          '</b> on the same programme, not ' + people + '.'
-        : '') + '</div>';
-  } else {
-    html += '<p class="slv-p slv-dim">' + fmt(left) + ' left over &mdash; ' + Math.round(idle * 100) + '% idle.' +
-      (couldDo > people ? ' Enough for ' + (couldDo - people) + ' more on this programme.' : '') + '</p>';
+        ' months after it lands for anything declared from August 2026.') + '</div>';
+  }
+
+  /* did it reach the number they asked for? */
+  if (m.completions < want) {
+    html += '<p class="slv-p slv-dim">You asked for ' + want + '. This reaches ' + m.completions +
+      ' inside ' + horizonLab + (m.capped === 'budget' ? ' on this budget.'
+        : ', held back by release capacity rather than budget.') + '</p>';
+  }
+
+  /* WHICH standard is a different question from HOW MANY people, and the JD
+     Matcher answers it from a real job description rather than from a median.
+     Naming three standards that merely sit at the median produced noise. */
+  html += '<div class="slv-eg"><span class="slv-eg-h">The spread behind that price</span>' +
+    '<span class="slv-eg-i">' + p.n + ' Level ' + p.level + ' standards, ' + fmt(p.lo) +
+    ' to ' + fmt(p.hi) + ' &mdash; costed here at the middle, ' + fmt(p.band) + '.</span>' +
+    '<span class="slv-eg-n">Your standard sets the real price. Once you know the role, ' +
+    'the JD Matcher ranks it against every funded standard &mdash; then set the actual band ' +
+    'on the programme.</span>' +
+    '<button type="button" class="slv-jd" onclick="navJump(\'sec-jd\')">' +
+    'Find the right standard &rarr;</button></div>';
+
+  /* the comparison strip - shows WHY, without asking to be trusted */
+  html += solveLevelStrip(a);
+
+  /* a materially better answer outside the goal is a finding, not a secret */
+  if (a.overall && a.overall.level !== p.level && a.overall.m.achieved > m.achieved * 1.25) {
+    html += '<p class="slv-p slv-dim">Level ' + a.overall.level + ' would deliver ' +
+      a.overall.m.completions + ' for ' + fmt(a.overall.m.spend) +
+      ', but sits outside your goal &mdash; ' + a.goal.why + '.</p>';
   }
 
   /* the cost nobody funds */
+  var otj = solveOtj({ level: p.level, dur: p.dur }, m.completions);
   if (otj && otj.cost > 0) {
     html += '<div class="slv-otj"><b>' + fmt(otj.cost) + '</b> of off-the-job time on top &mdash; ' +
-      Math.round(otj.hours).toLocaleString() + ' hours across the ' + people +
-      '. No one funds this; it is your people not producing, and it is usually larger than the training fee.</div>';
+      Math.round(otj.hours).toLocaleString() + ' hours across the ' + m.completions +
+      '. No one funds this; it is your people not producing, and it is usually larger than the ' +
+      'training fee.</div>';
   }
 
   out.innerHTML = html + solveFootnote();
+}
+
+/* every level costed the same way, so the recommendation can be checked rather
+   than believed */
+function solveLevelStrip(a) {
+  if (!a.byLevel.length) return '';
+  var rows = a.byLevel.map(function (r) {
+    var on = (r.level === a.best.level);
+    if (!r.m.fits) {
+      return '<tr class="is-off"><th scope="row">Level ' + r.level + '</th>' +
+        '<td>' + fmt(r.profile.band) + '</td><td>' + r.profile.dur + 'mo</td>' +
+        '<td colspan="3">will not finish inside ' + (projYears || 3) + ' years</td>' +
+        '<td></td></tr>';
+    }
+    return '<tr' + (on ? ' class="is-on"' : '') + '>' +
+      '<th scope="row">Level ' + r.level + '</th>' +
+      '<td>' + fmt(r.profile.band) + '</td>' +
+      '<td>' + r.profile.dur + 'mo</td>' +
+      '<td>' + r.m.waves + '</td>' +
+      '<td>' + r.m.completions + '</td>' +
+      '<td>' + fmt(r.m.spend) + '</td>' +
+      '<td>' + (on ? '<span class="slv-pick">picked</span>' : '') + '</td></tr>';
+  }).join('');
+  return '<table class="slv-lvl"><caption>What each level delivers on this budget</caption>' +
+    '<colgroup><col style="width:15%"><col style="width:15%"><col style="width:12%">' +
+    '<col style="width:13%"><col style="width:14%"><col style="width:17%">' +
+    '<col style="width:14%"></colgroup>' +
+    '<thead><tr><th scope="col">Level</th><th scope="col">Typical</th>' +
+    '<th scope="col">Length</th><th scope="col">Cohorts</th><th scope="col">Qualified</th>' +
+    '<th scope="col">Committed</th>' +
+    '<th scope="col"><span class="sr-only">Chosen</span></th></tr></thead>' +
+    '<tbody>' + rows + '</tbody></table>' +
+    '<p class="slv-p slv-dim">Each level costed at its median band and median length across the ' +
+    'funded standards, ranked on people qualified inside the horizon, then on cost. Level ' +
+    a.best.level + ' is picked because ' + a.goal.why + '.</p>';
 }
 
 function solveFootnote() {
@@ -4743,7 +4978,9 @@ function solveFootnote() {
         'A 16–21 year old is funded in full, so an early-careers plan goes further than this.'
       : 'Costed as a levy payer committing the band from your account. Co-investment applies only where the ' +
         'account cannot cover a monthly draw.') +
-    ' Band maximums from the funding rulebook, verified ' + escHtml(String(RULEBOOK.asOf)) + '.</div>';
+    ' Band maximums from the funding rulebook, verified ' + escHtml(String(RULEBOOK.asOf)) + '. ' +
+    'Cohorts are assumed to start after ' + SOLVE_LEAD_MONTHS + ' month of mobilisation, so only ' +
+    'programmes that also finish inside the horizon are counted.</div>';
 }
 
 function solveSync() {
@@ -4756,22 +4993,32 @@ function solveSync() {
 /* adopting the answer is the point - otherwise it is a calculator inside a calculator */
 function solveAdopt() {
   if (!solveState.ran) return;
-  var cands = solveCandidates(), perHead = solveState.budget / solveState.people;
-  var fits = cands.filter(function (s) { return solveCostPer(s) <= perHead; });
-  if (!fits.length) return;
-  var best = fits.reduce(function (a, b) { return solveCostPer(b) > solveCostPer(a) ? b : a; });
-  var start = new Date(); start.setMonth(start.getMonth() + 1);
-  var epa = new Date(start.getTime()); epa.setMonth(epa.getMonth() + (+best.dur || 12));
+  var a = solveAnswer();
+  if (!a || !a.best) return;
+  var m = a.best.m, p = a.best.profile, st = p.exemplar;
+  if (!st) return;
+  var dur = +st.dur || p.dur || 12;
   var iso = function (d) { return d.toISOString().slice(0, 10); };
-  programmes.push({ name: best.name, cost: +best.band || 0, count: solveState.people,
-                    start: iso(start), epa: iso(epa) });
+  /* waves are real cohorts with real start dates, not a headline multiplier -
+     adopting has to put the same thing on the plan that the answer described */
+  for (var w = 0; w < m.waves; w++) {
+    var start = new Date();
+    start.setMonth(start.getMonth() + SOLVE_LEAD_MONTHS + (w * dur));
+    var epa = new Date(start.getTime()); epa.setMonth(epa.getMonth() + dur);
+    programmes.push({ name: st.name, cost: +st.band || 0, count: m.perWave,
+                      start: iso(start), epa: iso(epa) });
+  }
   if (typeof renderProgrammes === 'function') renderProgrammes();
   if (typeof renderPlan === 'function') renderPlan();
   if (typeof saveState === 'function') saveState();
   var o = document.getElementById('slvOut');
   if (o) o.insertAdjacentHTML('afterbegin',
-    '<div class="slv-added">Added ' + solveState.people + ' × ' + escHtml(best.name) +
-    ' to your programmes. Everything below now reflects it.</div>');
+    '<div class="slv-added">Added ' + (m.waves > 1
+      ? m.waves + ' cohorts of ' + m.perWave + ', starting ' + dur + ' months apart'
+      : m.perWave + ' ' + (m.perWave === 1 ? 'place' : 'places')) +
+    ' on <b>' + escHtml(st.name) + '</b> &mdash; a typical Level ' + p.level +
+    ' standard, swap it for your real one on the programme row. Everything below now ' +
+    'reflects it.</div>');
 }
 
 function rulesMountChangelog() {
