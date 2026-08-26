@@ -2313,7 +2313,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02j</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02l</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3138,7 +3138,8 @@ function renderLearnerCost(){
     var coInv=Math.round(band*cr), directCash=coInv+otjCost;
     var rows;
     if(nl){
-      // NON-LEVY: nothing assumed levy-funded — government funds most of the band, you co-invest the rest (£0 for 16-21s), your cash = co-invest + off-the-job
+      // NON-LEVY: nothing assumed levy-funded — government funds the whole band for 16-24s
+      // (r.214.1) and 95% for 25+ (r.213.2), your cash = co-invest + off-the-job
       rows=lcCell('Government funds <span style="color:'+BLUE+'">'+(100-pct)+'%</span>',fmt(band-coInv),'up to band max &middot; 100% for 16&ndash;21s',BLUE,'fund')+
         lcCell('Your co-investment <span style="color:'+MONEY+'">'+pct+'%</span>',fmt(coInv),'22+ learners &middot; £0 for 16&ndash;21s'+(pct<25?' &middot; 25% from Aug 2026':''),MONEY,'cash')+
         lcCell('Off-the-job time <span style="color:'+AMBER+'">your cash</span>',noRate?'set £/hr':'&asymp;'+fmt(otjCost),otj+' h/wk &times; '+weeks+' wks'+(noRate?' — set a wage/plan rate':' &times; £'+rate+'/hr'),AMBER,'cash')+
@@ -3252,7 +3253,11 @@ const RULEBOOK={
   ni:{empRate:0.15,secThreshold:5000,aust:50270}, // employer NIC: 15%, Secondary Threshold £5k, Apprentice Upper Secondary Threshold £50,270 — 0% employer NIC ST→AUST for under-25 apprentices (gov.uk 2025-26)
   draw:{training:0.80,epa:0.20},    // 80% drawn over the practical period, 20% at EPA completion
   transferCapPct:0.50,              // employer may gift up to 50% of annual levy
-  coInvest:{before:0.05,from:0.25}, // employer co-investment share before / from the boundary
+  /* Employer co-investment. From Aug 2026 the rate depends on WHO the employer
+     is and HOW OLD the apprentice is - one number cannot express it:
+       non-levy 16-24 nil (214.1) | non-levy 25+ 5% (213.2)
+       levy short 16-24 nil (214.2) | levy short 25+ 25% (213.1) */
+  coInvest:{before:0.05,from:0.25,nonLevyFrom:0.05,fullyFundedToAge:24,fullyFundedToAgeBefore:21},
   expiryMonths:{before:24,from:12}, // unused funds expire after N months (by declaration date)
   apprenticeshipMinMonths:8,        // minimum apprenticeship duration (reserved for units/duration work)
   achievementBenchmark:0.654,       // national apprenticeship achievement rate 2024/25 (65.4%) — was 0.60 here while the QAR module used 65.4, two benchmarks in one app; single source now, update annually
@@ -3434,10 +3439,14 @@ var PROV = {
       steps: steps,
       result: s.gov,
       check: co * govShare + ffMoney,
-      rule: 'Government funds ' + Math.round((1 - RULEBOOK.coInvest.before) * 100) + '% of a co-funded band for ' +
-            'apprenticeships starting before August 2026, and ' + Math.round((1 - RULEBOOK.coInvest.from) * 100) +
-            '% from that point. It funds 100% for an apprentice aged 16–21 at their start date, and for a ' +
-            '22–24 year old with an EHCP or a care-leaver history.'
+      rule: 'For starts from August 2026 the government funds 100% for any apprentice aged 16–24 at ' +
+            'their start date, whoever the employer is (funding rules 2026–27, r.214). Only a 25+ ' +
+            'apprentice carries co-investment: ' +
+            Math.round(RULEBOOK.coInvest.nonLevyFrom * 100) + '% if you do not pay the levy (r.213.2), ' +
+            Math.round(RULEBOOK.coInvest.from * 100) + '% if you do and your account is short (r.213.1). ' +
+            'Before August 2026 the employer share was ' +
+            Math.round(RULEBOOK.coInvest.before * 100) + '%, waived only for 16–21, or 22–24 with an ' +
+            'EHC plan or care experience.'
     };
   },
 
@@ -3580,6 +3589,8 @@ var moneyFmt = function (v) { return fmt(v); };
 var monthsFmt = function (v) { return v + ' month' + (+v === 1 ? '' : 's'); };
 var plainFmt = function (v) { return String(v); };
 
+function ageFmt(v) { return v + ' years old'; }
+
 var RULE_SPEC = [
   ['levyRate',              'Levy rate on the pay bill',                    pctFmt],
   ['levyAllowance',         'Annual levy allowance',                        moneyFmt],
@@ -3587,7 +3598,9 @@ var RULE_SPEC = [
   ['draw.training',         'Share drawn across the practical period',      pctFmt],
   ['draw.epa',              'Share held back for end-point assessment',     pctFmt],
   ['coInvest.before',       'Employer co-investment, before Aug 2026',      pctFmt],
-  ['coInvest.from',         'Employer co-investment, from Aug 2026',        pctFmt],
+  ['coInvest.from',         'Employer co-investment, levy short, from Aug 2026', pctFmt],
+  ['coInvest.nonLevyFrom',  'Employer co-investment, non-levy 25+, from Aug 2026', pctFmt],
+  ['coInvest.fullyFundedToAge', 'Fully funded up to age, from Aug 2026',    ageFmt],
   ['expiryMonths.before',   'Funds expire after, before Aug 2026',          monthsFmt],
   ['expiryMonths.from',     'Funds expire after, from Aug 2026',            monthsFmt],
   ['transferCapPct',        'Transfer cap on annual levy',                  pctFmt],
@@ -4585,8 +4598,8 @@ function estAssumptions() {
 
   a.push({ k: 'Apprentice ages', v: estAgeMixSet() ? 'entered per programme' : 'not entered', sourced: estAgeMixSet(),
            note: estAgeMixSet()
-             ? 'Drives National Insurance relief for under-25s and full funding for 16–21 year olds.'
-             : 'Without ages, no NI relief and no 16–21 full funding are applied — so this plan may be costing you more on paper than in practice.' });
+             ? 'Drives National Insurance relief for under-25s, and 100% funding for 16–24 year olds on starts from August 2026.'
+             : 'Without ages, no NI relief and no 16–24 full funding are applied — every apprentice is costed as 25+, so this plan may be costing you more on paper than in practice.' });
 
   if (typeof caCompute === 'function' && caCompute()) {
     var _r = caRate();
@@ -5022,7 +5035,7 @@ function solveFootnote() {
   return '<div class="slv-foot">' +
     (fundingMode === 'nonlevy'
       ? 'Costed as a non-levy employer at ' + Math.round(solveRate() * 100) + '% co-investment. ' +
-        'A 16–21 year old is funded in full, so an early-careers plan goes further than this.'
+        'From August 2026 a 16–24 year old is funded in full, so an early-careers plan goes further than this.'
       : 'Costed as a levy payer committing the band from your account. Co-investment applies only where the ' +
         'account cannot cover a monthly draw.') +
     ' Band maximums from the funding rulebook, verified ' + escHtml(String(RULEBOOK.asOf)) + '. ' +
@@ -6714,18 +6727,46 @@ function simulateLevyFIFO(income,tot,pmk,M,history){
 
 // Employer co-investment rate: 5% before Aug 2026, 25% from Aug 2026 (levy payer exhausting pot)
 function coInvRate(mk){return mk<RULE_MK?RULEBOOK.coInvest.before:RULEBOOK.coInvest.from;}
+/* The employer's share of the band, per funding rules 2026-27 paras 213-215.
+   payer: 'nonlevy' | 'levyshort'.  age25: true if the apprentice is 25 or over
+   at the START of training. Before the boundary the old flat rate applies and
+   the 16-21 / 22-24-with-care waiver is handled by the caller's age split. */
+function coInvShare(mk, payer, age25){
+  if (mk < RULE_MK) return RULEBOOK.coInvest.before;
+  if (!age25) return 0;                                   /* 214.1 / 214.2 */
+  return payer === 'nonlevy' ? RULEBOOK.coInvest.nonLevyFrom   /* 213.2 - 5%  */
+                             : RULEBOOK.coInvest.from;         /* 213.1 - 25% */
+}
+/* how many of a cohort are fully funded on age alone, at that start date */
+function fullyFundedCount(p){
+  var count = +p.count || 0;
+  if (!p.age) return 0;
+  var y = +p.age.y || 0, m = +p.age.m || 0;
+  /* from Aug 2026 the waiver runs to 24, so 22-24 join it with no care-leaver
+     or EHCP test; before it, only 16-21 qualified on age alone */
+  var n = (mKey(p.start) >= RULE_MK) ? (y + m) : y;
+  return Math.min(n, count);
+}
 // Real account model: balance floors at 0; any month's uncovered cost triggers co-investment
 // (employer share), settled that month — never repaid by later surplus.
 // Co-investment with optional unit drawdown. Rule: full apprenticeships are paid from the
 // pot BEFORE units; the leftover funds units; any apprenticeship shortfall co-invests at the
 // 5/25% rate, any unit shortfall at the flat 5% unit rate. Omitting uTot is byte-identical to
 // the apprenticeship-only model (the unit step is skipped entirely).
-function simCoInvest(income,tot,pmk,uTot,bal0){
+/* shr[i] = the share of month i's draw belonging to apprentices aged 25+, the
+   only ones who carry co-investment from Aug 2026. Omit it and every month is
+   treated as fully co-investable, which is byte-identical to the old model and
+   keeps the pre-boundary golden cases exact. ASSUMPTION, stated because it is
+   an assumption: an uncovered slice of a month carries the same age mix as that
+   month's whole draw. */
+function simCoInvest(income,tot,pmk,uTot,bal0,shr){
   let bal=(bal0==null?levyData.balance:bal0),total=0;const months=[]; // bal0 defaults to the live balance → byte-identical for UI calls; pass explicit for pure/testable use
   for(let i=0;i<tot.length;i++){
     bal+=income[i];
     let aUnc=0,aShare=0,uUnc=0,uShare=0;
-    if(tot[i]>bal+0.5){aUnc=tot[i]-bal;aShare=aUnc*coInvRate(pmk+i);bal=0;}
+    if(tot[i]>bal+0.5){aUnc=tot[i]-bal;
+      var f25=(shr&&shr[i]!=null)?Math.max(0,Math.min(1,shr[i])):1;
+      aShare=aUnc*f25*coInvShare(pmk+i,'levyshort',true);bal=0;}
     else bal-=tot[i];
     if(uTot){const u=uTot[i]||0; if(u>bal+0.5){uUnc=u-bal;uShare=uUnc*RULEBOOK.unit.coInvest;bal=0;} else bal-=u;}
     const share=aShare+uShare;
@@ -6945,6 +6986,9 @@ function levyReportData(){
   var M=projYears*12, ps=new Date(today.getFullYear(),today.getMonth(),1), pmk=mKey(ps);
   var income=Array(M).fill(levyData.monthlyAvg);
   var ts=Array(M).fill(0),es=Array(M).fill(0),us=Array(M).fill(0),ev=[];
+  /* the 25+ slice of each month's draw - from Aug 2026 they are the only
+     apprentices whose shortfall carries co-investment at all */
+  var ts25=Array(M).fill(0),es25=Array(M).fill(0);
   programmes.forEach(function(p){
     if(p.type==='unit'){
       var usm=mKey(p.start),uwks=Math.max(1,+p.weeks||4),urate=(+p.cost||0)*(+p.count||0);
@@ -6954,16 +6998,21 @@ function levyReportData(){
     }
     var sm=mKey(p.start),em=mKey(p.epa),dur=mBetween(p.start,p.epa);
     var ec=lvyEligCount(p), mt=(p.cost*RULEBOOK.draw.training/dur)*ec, et=p.cost*RULEBOOK.draw.epa*ec;
-    for(var mk=sm;mk<em;mk++){var i=mk-pmk;if(i>=0&&i<M)ts[i]+=mt;}
-    var ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
+    /* no age recorded = treat the whole cohort as 25+, so a waiver is never
+       granted on data we do not hold */
+    var pc=+p.count||0, f25=(p.age&&pc)?Math.min(1,(+p.age.o||0)/pc):1;
+    for(var mk=sm;mk<em;mk++){var i=mk-pmk;if(i>=0&&i<M){ts[i]+=mt;ts25[i]+=mt*f25;}}
+    var ei=em-pmk;if(ei>=0&&ei<M){es[ei]+=et;es25[ei]+=et*f25;ev.push({idx:ei,name:p.name,count:p.count,amount:et});}
   });
   var tot=ts.map(function(s,i){return s+es[i];});
+  var tot25=ts25.map(function(s,i){return s+es25[i];});
+  var shr25=tot.map(function(t,i){return t>0?tot25[i]/t:1;});
   var combined=tot.map(function(s,i){return s+us[i];});
   var b=levyData.balance, bals=combined.map(function(s,i){b=Math.max(0,b+income[i]-s);return b;});
   var tT=ts.reduce(function(a,c){return a+c;},0), tE=es.reduce(function(a,c){return a+c;},0);
   var unitDraw=us.reduce(function(a,c){return a+c;},0);
-  var ci=simCoInvest(income,tot,pmk,us), exp=simulateLevyFIFO(income,combined,pmk,M);
-  var coFloor=0; if(ci.total>1){var trainOnly=tot.slice();ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});coFloor=simCoInvest(income,trainOnly,pmk,us).total;}
+  var ci=simCoInvest(income,tot,pmk,us,null,shr25), exp=simulateLevyFIFO(income,combined,pmk,M);
+  var coFloor=0; if(ci.total>1){var trainOnly=tot.slice();ev.forEach(function(e){trainOnly[e.idx]-=e.amount;});coFloor=simCoInvest(income,trainOnly,pmk,us,null,shr25).total;}
   var heads=programmes.reduce(function(a,p){return a+(+p.count||0);},0);
   var planCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*(+p.count||0);},0);
   var levyPlanCost=programmes.reduce(function(a,p){return a+(+p.cost||0)*lvyEligCount(p);},0); // excludes L7 22+ self-fund
@@ -7213,8 +7262,9 @@ function nonLevyFunding(){
   var units=(programmes||[]).filter(function(p){return p.type==='unit';});
   var band=0,emp=0,ff=0,co=0,tot=0,has25=false,anyAge=false,coBand=0;
   appr.forEach(function(p){
-    var count=+p.count||0,cost=+p.cost||0,rate=coInvRate(mKey(p.start));
-    var f100=p.age?Math.min(+p.age.y||0,count):0; if(p.age)anyAge=true;
+    var count=+p.count||0,cost=+p.cost||0;
+    var rate=coInvShare(mKey(p.start),'nonlevy',true);   /* only 25+ pay at all */
+    var f100=fullyFundedCount(p); if(p.age)anyAge=true;
     var coC=Math.max(0,count-f100);
     band+=cost*count; emp+=cost*rate*coC; ff+=f100; co+=coC; tot+=count; coBand+=cost*coC;
     if(rate>=0.25)has25=true;
@@ -7234,7 +7284,7 @@ function nlState(f){
   return {raised:raised,target:target,cov:cov,transfers:cov*target,residual:f.employer*(1-cov),gov:Math.max(0,f.gov-cov*(f.coFundedBands-f.employer)),apprCovered:Math.round(cov*f.coCount)};
 }
 function nlImpactText(f,s){
-  if(s.target<0.5)return 'All your learners are 16&ndash;21 &mdash; already 100% funded, nothing to fundraise.';
+  if(s.target<0.5)return 'All your learners are 16&ndash;24 &mdash; already 100% funded, nothing to fundraise.';
   if(s.residual<0.5)return '<b style="color:#2DD4B2">&#127881; Fully funded by transfer</b> &mdash; your investment is <b>£0</b>.';
   return 'Covers ~<b>'+s.apprCovered+'</b> apprentice'+(s.apprCovered!==1?'s':'')+' &mdash; your investment <b>'+fmt(f.employer)+'</b> &rarr; <b style="color:#3E86E0">'+fmt(s.residual)+'</b>.';
 }
@@ -9745,8 +9795,15 @@ document.addEventListener('keydown',e=>{
     ['Co-investment (levy short)','Uncovered £1,000 from Aug 2026 (25%)',E.coInvestShare(1000,true),250,'fund'],
     ['Funding-band drawdown','Band £9,000 → 80% training',E.bandTraining(9000),7200,'fund'],
     ['Funding-band drawdown','Band £9,000 → 20% EPA',E.bandEpa(9000),1800,'fund'],
-    ['Non-levy co-investment','Band £9,000, aged 22+ → employer 5%',E.nonLevyEmployerShare(9000),450,'fund'],
-    ['Non-levy co-investment','Band £9,000, aged 22+ → government 95%',E.nonLevyGovShare(9000),8550,'fund'],
+    ['Non-levy co-investment','Band £9,000, aged 25+ → employer 5% (r.213.2)',E.nonLevyEmployerShare(9000),450,'fund'],
+    ['Non-levy co-investment','Band £9,000, aged 25+ → government 95% (r.213.2)',E.nonLevyGovShare(9000),8550,'fund'],
+    ['Co-investment waiver','Non-levy, aged 16–24, from Aug 2026 → nil (r.214.1)',coInvShare(mkF,'nonlevy',false),0,'fund'],
+    ['Co-investment waiver','Non-levy, aged 25+, from Aug 2026 → 5% (r.213.2)',coInvShare(mkF,'nonlevy',true),0.05,'fund'],
+    ['Co-investment waiver','Levy short, aged 16–24, from Aug 2026 → nil (r.214.2)',coInvShare(mkF,'levyshort',false),0,'fund'],
+    ['Co-investment waiver','Levy short, aged 25+, from Aug 2026 → 25% (r.213.1)',coInvShare(mkF,'levyshort',true),0.25,'fund'],
+    ['Co-investment waiver','Before Aug 2026 the flat 5% still applies',coInvShare(mkB,'nonlevy',true),0.05,'fund'],
+    ['Projection · co-investment sim','£1,000 draw, empty pot, all aged 16–24, from Aug ’26 → nil',E.simCoInvest([0],[1000],mkF,null,0,[0]).total,0,'fund'],
+    ['Projection · co-investment sim','£1,000 draw, empty pot, half aged 25+, from Aug ’26 → £125',E.simCoInvest([0],[1000],mkF,null,0,[0.5]).total,125,'fund'],
     ['Employer NI relief (under-25)','Salary £22,000 → annual relief',E.niReliefPerYear(22000),2550,'ni'],
     ['Employer NI relief (under-25)','Salary £60,000 (>AUST) → relief',E.niReliefPerYear(60000),6790.5,'ni'],
     ['Projection · co-investment sim','Bal £0 · £1,000 draw · £0 income · pre-Aug ’26 → 5%',E.simCoInvest([0],[1000],mkB,null,0).total,50,'fund'],
