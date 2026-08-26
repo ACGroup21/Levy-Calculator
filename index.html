@@ -614,15 +614,45 @@ button{font-family:var(--sans);cursor:pointer}
   background:rgba(224,164,59,.14);color:#E0A43B;border:1px solid rgba(224,164,59,.36);cursor:help}
 /* ── Inverse solver: budget + headcount → plan ─────────────────────────── */
 .slv-card{margin-top:14px}
-.slv-grid{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
-.slv-in{flex:1 1 250px;min-width:230px}
-.slv-lab{display:block;font-size:12px;color:var(--text3);margin:0 0 6px}
+/* controls THEN answer, not controls BESIDE answer - the old flex split handed
+   three number inputs half the card whatever the width, which left 747px of
+   empty column at 1280 and got worse as the screen grew */
+.slv-grid{display:block}
+/* aligned by LABEL, not by bottom edge. flex-end lined the boxes up along
+   their base, so a field carrying a hint pushed its label 14px above its
+   neighbour's - the same ragged-title fault the start cards had. Tops align,
+   and the fields that have no label are padded down to meet the controls. */
+.slv-in{display:flex;flex-wrap:wrap;gap:18px 26px;align-items:flex-start;
+  margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.slv-f{display:flex;flex-direction:column;gap:7px}
+.slv-f-wide{flex:1 1 240px;max-width:400px}
+.slv-f-btns{flex-direction:row;gap:8px;flex-wrap:wrap;margin-left:auto;
+  padding-top:29px}                     /* label height 22 + the 7px field gap */
+/* a range input is 24px against the number input's 33 - matching the box heights
+   centres the track on the same line rather than floating it high */
+.slv-f-wide input[type=range]{height:33px}
+.slv-hint{font-size:11.5px;line-height:1.4;color:var(--text3)}
+.slv-adopt{background:none;color:var(--text2);border-color:var(--border)}
+.slv-adopt[disabled]{opacity:.45;cursor:not-allowed}
+/* the answer splits into argument and evidence, so prose stays near 70
+   characters instead of stretching to the full card */
+/* minmax(0,...) because a table's min-content width will otherwise push its
+   own track past its share - on 1fr 1fr these measured 419 and 520. Prose takes
+   the smaller share deliberately: at 1600 the answer column ran to 79 characters
+   a line, and the table is the thing that actually wants the extra width. */
+.slv-cols{display:grid;grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr);
+  gap:10px 30px;align-items:start}
+@media (max-width:1100px){.slv-cols{grid-template-columns:1fr;gap:0}
+  /* stacked, the answer would otherwise run the full card width - measured
+     120 characters a line at 1024, roughly double what reads comfortably */
+  .slv-cols>.slv-a{max-width:520px}}
+.slv-lab{display:block;font-size:12px;color:var(--text3);margin:0}
 .slv-lab b{color:var(--text);font-family:'Roboto Mono',monospace;font-size:13.5px;font-weight:700}
 .slv-in input[type=range]{width:100%;accent-color:var(--teal)}
 .slv-in input[type=number]{width:130px;box-sizing:border-box;background:rgba(var(--wash),0.05);
   border:1px solid var(--field-line);border-radius:10px;padding:8px 10px;color:var(--text);
   font-size:13px;font-family:inherit}
-.slv-out{flex:1 1 330px;min-width:290px;background:rgba(45,212,178,.06);
+.slv-out{width:100%;box-sizing:border-box;background:rgba(45,212,178,.06);
   border:1px solid rgba(45,212,178,.28);border-radius:12px;padding:15px 16px}
 .slv-head{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;
   text-transform:uppercase;color:var(--text3);margin-bottom:6px}
@@ -1834,17 +1864,22 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
     <p class="step-sub">Tell it what you control &mdash; it works out how many people you can get <b>qualified</b> inside your planning horizon, not just how much you could spend. The same arithmetic as everything below, run backwards.</p>
     <div class="slv-grid">
       <div class="slv-in">
-        <label class="slv-lab" for="slvBudget">Budget you control &mdash; <b id="slvBudgetV">—</b></label>
-        <input type="number" id="slvBudget" min="0" step="1000" placeholder="e.g. 120000" aria-label="Budget you control, in pounds">
-        <label class="slv-lab" for="slvPeople" style="margin-top:16px">People you would like developed &mdash; <b id="slvPeopleV">6</b><br><span style="font-weight:400;color:var(--text3)">a target to test against, not a divisor</span></label>
-        <input type="range" id="slvPeople" min="1" max="40" step="1" value="6">
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+        <div class="slv-f">
+          <label class="slv-lab" for="slvBudget">Budget you control &mdash; <b id="slvBudgetV">—</b></label>
+          <input type="number" id="slvBudget" min="0" step="1000" placeholder="e.g. 120000" aria-label="Budget you control, in pounds">
+        </div>
+        <div class="slv-f slv-f-wide">
+          <label class="slv-lab" for="slvPeople">People you would like developed &mdash; <b id="slvPeopleV">6</b></label>
+          <input type="range" id="slvPeople" min="1" max="40" step="1" value="6" aria-describedby="slvPeopleHint">
+          <span class="slv-hint" id="slvPeopleHint">a target to test against, not a divisor</span>
+        </div>
+        <div class="slv-f slv-f-btns">
           <button type="button" class="btn-demo" onclick="solveRun()">Show me what this delivers</button>
-          <button type="button" class="btn-demo" style="background:none;color:var(--text2);border-color:var(--border)" onclick="solveAdopt()">Add it to my plan</button>
+          <button type="button" class="btn-demo slv-adopt" id="slvAdopt" disabled onclick="solveAdopt()">Add it to my plan</button>
         </div>
       </div>
       <div class="slv-out" id="slvOut" role="status" aria-live="polite">
-        <div class="slv-empty">Enter a budget to see what it will buy.</div>
+        <div class="slv-empty">Enter a budget to see how many people it can qualify.</div>
       </div>
     </div>
   </div>
@@ -2278,7 +2313,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02e</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02j</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -4824,7 +4859,11 @@ function solveRun() {
   solveState = { budget: budget, people: want, ran: true };
   var out = document.getElementById('slvOut');
   if (!out) return;
-  if (!budget) { out.innerHTML = '<div class="slv-empty">Enter a budget to see what it will buy.</div>'; return; }
+  if (!budget) {
+    out.innerHTML = '<div class="slv-empty">Enter a budget to see how many people it can qualify.</div>';
+    var a0 = document.getElementById('slvAdopt'); if (a0) a0.disabled = true;
+    return;
+  }
   if (!solveCandidates().length) { out.innerHTML = '<div class="slv-empty">No funded standards are loaded.</div>'; return; }
 
   var a = solveAnswer(), yrs = (projYears || 3);
@@ -4843,6 +4882,9 @@ function solveRun() {
       horizonLab + '.' + (reach ? ' The nearest is <b>' + escHtml(reach.name) + '</b> at ' +
       fmt(solveCostPer(reach)) + ' over ' + reach.dur + ' months.' : '') +
       ' A longer horizon or a larger budget changes this.</p>' + solveFootnote();
+    /* there is no answer to adopt - leaving the button live would repeat the
+       silent no-op this pass exists to remove */
+    var aN = document.getElementById('slvAdopt'); if (aN) aN.disabled = true;
     return;
   }
 
@@ -4852,6 +4894,7 @@ function solveRun() {
 
   /* HEADLINE: the answer is people qualified, not a programme name */
   var html =
+    '<div class="slv-cols"><div class="slv-a">' +
     '<div class="slv-head">Capability in ' + horizonLab + '</div>' +
     '<div class="slv-big">' + m.completions + ' ' + (m.completions === 1 ? 'person' : 'people') +
     ' qualified</div>' +
@@ -4914,10 +4957,12 @@ function solveRun() {
     '<button type="button" class="slv-jd" onclick="navJump(\'sec-jd\')">' +
     'Find the right standard &rarr;</button></div>';
 
-  /* the comparison strip - shows WHY, without asking to be trusted */
-  html += solveLevelStrip(a);
+  /* column two is the evidence: the same arithmetic for every level, the cost
+     nobody funds, and where the numbers came from */
+  html += '</div><div class="slv-b">' + solveLevelStrip(a);
 
-  /* a materially better answer outside the goal is a finding, not a secret */
+  /* a materially better answer outside the goal is a finding, not a secret -
+     and it belongs beside the table that shows it, not beside the headline */
   if (a.overall && a.overall.level !== p.level && a.overall.m.achieved > m.achieved * 1.25) {
     html += '<p class="slv-p slv-dim">Level ' + a.overall.level + ' would deliver ' +
       a.overall.m.completions + ' for ' + fmt(a.overall.m.spend) +
@@ -4933,7 +4978,9 @@ function solveRun() {
       'training fee.</div>';
   }
 
-  out.innerHTML = html + solveFootnote();
+  out.innerHTML = html + solveFootnote() + '</div></div>';
+  var ad = document.getElementById('slvAdopt');
+  if (ad) ad.disabled = false;            /* there is now something to adopt */
 }
 
 /* every level costed the same way, so the recommendation can be checked rather
@@ -4984,6 +5031,8 @@ function solveFootnote() {
 }
 
 function solveSync() {
+  var ad = document.getElementById('slvAdopt');
+  if (ad && solveState.ran) ad.disabled = false;   /* inputs moved: adoptable again */
   var b = document.getElementById('slvBudget'), p = document.getElementById('slvPeople');
   if (b) document.getElementById('slvBudgetV').textContent = b.value ? fmt(+b.value) : '—';
   if (p) document.getElementById('slvPeopleV').textContent = p ? p.value : '';
@@ -5011,6 +5060,10 @@ function solveAdopt() {
   if (typeof renderProgrammes === 'function') renderProgrammes();
   if (typeof renderPlan === 'function') renderPlan();
   if (typeof saveState === 'function') saveState();
+  /* clicking again pushed the same cohorts a second time and silently doubled
+     the plan - it comes back the moment the inputs change */
+  var ad = document.getElementById('slvAdopt');
+  if (ad) ad.disabled = true;
   var o = document.getElementById('slvOut');
   if (o) o.insertAdjacentHTML('afterbegin',
     '<div class="slv-added">Added ' + (m.waves > 1
