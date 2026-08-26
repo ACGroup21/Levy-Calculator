@@ -424,6 +424,27 @@ button{font-family:var(--sans);cursor:pointer}
 .status.ok{color:var(--teal)}.status.warn{color:var(--amber)}.status.purple{color:var(--purple)}
 
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:1.5rem}
+/* ── Plan pulse ──────────────────────────────────────────────── */
+/* stops short of the right edge so it never sits under the co-pilot button */
+.pu-bar{position:fixed;left:16px;right:104px;bottom:18px;z-index:180;display:flex;align-items:center;
+  gap:22px;flex-wrap:wrap;padding:10px 14px;border-radius:12px;background:var(--prov-bg);
+  border:1px solid var(--border);box-shadow:0 18px 46px -20px rgba(0,0,0,.8)}
+.pu-m{display:flex;flex-direction:column;gap:1px;min-width:104px}
+.pu-l{font-family:'Roboto Mono',monospace;font-size:8.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text3)}
+.pu-v{font-family:'Roboto Mono',monospace;font-size:16px;font-weight:700;color:var(--text);
+  font-variant-numeric:tabular-nums}
+.pu-d{font-family:'Roboto Mono',monospace;font-size:10.5px}
+.pu-bad{color:var(--money)}
+.pu-good{color:var(--teal)}
+.pu-what{flex:1;min-width:0;font-size:11.5px;color:var(--text3);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.pu-x{margin-left:auto;background:none;border:0;color:var(--text3);font-size:16px;line-height:1;
+  cursor:pointer;padding:0 3px}
+.pu-x:hover{color:var(--text)}
+.pu-x:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:4px}
+@media(max-width:760px){.pu-bar{right:16px;bottom:88px;gap:14px}.pu-what{display:none}}
+@media print{.pu-bar{display:none!important}}
 /* ── Command palette ─────────────────────────────────────────── */
 .pal-wrap{position:fixed;inset:0;z-index:500;background:rgba(3,8,16,.62);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);display:flex;
@@ -1545,6 +1566,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 </head>
 <body>
 
+<div class="pu-bar" id="pulseBar" style="display:none" role="status" aria-live="polite" aria-label="Running plan totals"></div>
 <div class="pal-wrap" id="palWrap" style="display:none" onclick="if(event.target===this)palHide()">
   <div class="pal" role="dialog" aria-modal="true" aria-label="Jump to any function">
     <input id="palInput" type="text" autocomplete="off" spellcheck="false"
@@ -2149,7 +2171,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01t</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01u</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -3387,6 +3409,8 @@ document.addEventListener('keydown', function (e) {
 });
 window.addEventListener('resize', provClose);
 window.addEventListener('scroll', provClose, true);
+window.addEventListener('scroll', function(){ try{ pulseSync(); }catch(e){} }, {passive:true});
+window.addEventListener('resize', function(){ try{ pulseSync(); }catch(e){} });
 document.addEventListener('DOMContentLoaded',function(){
   try{ if(typeof ledgerRestore==='function'){ ledgerRestore(); ledgerRender(); } }catch(e){}
   var b=document.getElementById('slvBudget'), p=document.getElementById('slvPeople');
@@ -3635,6 +3659,114 @@ var PAL_ACTIONS = [
   { lb: 'Switch to non-levy employer', sec: 'App', act: function () { if (typeof setFundingMode === 'function') setFundingMode('nonlevy', true); } },
   { lb: 'Clear saved data', sec: 'App', act: function () { if (typeof clearSaved === 'function') clearSaved(); } }
 ];
+
+/* ═══ PLAN PULSE ════════════════════════════════════════════════════════════
+   Fundable is a long scroll. By the time you are editing programmes you can
+   no longer see what the plan costs, so a figure can move a long way without
+   anyone noticing. A quiet bar keeps the three that matter in view and shows
+   what your last edit did to them.
+
+   The three RECONCILE - funded + your cash = true cost - in both funding
+   modes, which is the whole reason they are worth putting on screen together.
+   After the provenance work, a bar showing three figures that do not add up
+   would undo the argument it is meant to support.
+
+   COLOUR ENCODES MEANING, NOT DIRECTION. Rising true cost is bad and rising
+   own-cash is bad, but a rising share carried by the levy is GOOD news. One
+   shared rule for all three would tell the employer that more funding is a
+   problem. This was wrong in the UX Lab sketch first time round.
+
+   The delta is read from the change ledger's own snapshot, so the bar and the
+   ledger can never disagree about what just happened.
+--------------------------------------------------------------------------- */
+function pulseFigures() {
+  try {
+    if (fundingMode === 'nonlevy' && typeof nonLevyFunding === 'function') {
+      var f = nonLevyFunding(), s = (typeof nlState === 'function') ? nlState(f) : null;
+      var gov = s ? (+s.gov || 0) : (+f.gov || 0);
+      var tr = s ? (+s.transfers || 0) : 0;
+      var res = s ? (+s.residual || 0) : (+f.employer || 0);
+      var otj = +f.otj || 0;
+      return { trueCost: (+f.totalBand || 0) + otj, funded: gov + tr, cash: res + otj,
+               fundedLabel: 'Funded for you' };
+    }
+  } catch (e) {}
+  var d = (typeof levyReportData === 'function') ? levyReportData() : null;
+  if (!d) return null;
+  return { trueCost: Math.round(d.trueCost || 0),
+           funded: Math.round(d.levyCovered || 0),
+           cash: Math.round((d.coInvest || 0) + (d.selfFundCost || 0) + (d.otjCost || 0)),
+           fundedLabel: 'From levy' };
+}
+
+/* what the last recorded change did, taken from the ledger's own snapshot so
+   the two features cannot tell different stories */
+function pulseDelta(now) {
+  try {
+    var e = (typeof LEDGER !== 'undefined') && LEDGER[0];
+    if (!e || !e.before || !e.before.meta || !e.before.meta.figures) return null;
+    var b = e.before.meta.figures;
+    if (!isFinite(b.trueCost)) return null;
+    var wasFunded = isFinite(b.drawn) ? b.drawn : null;
+    var wasCash = (isFinite(b.coInvest) && isFinite(b.otjCost)) ? (b.coInvest + b.otjCost) : null;
+    return { trueCost: now.trueCost - b.trueCost,
+             funded: wasFunded === null ? null : now.funded - wasFunded,
+             cash: wasCash === null ? null : now.cash - wasCash,
+             what: (e.what || []).join(' · ') };
+  } catch (e) { return null; }
+}
+
+var pulseOn = false;
+
+function pulseRender() {
+  var bar = document.getElementById('pulseBar');
+  if (!bar) return;
+  var n = pulseFigures();
+  var hasPlan = (typeof programmes !== 'undefined') && programmes.length > 0;
+  if (!n || !hasPlan || !pulseOn) { bar.style.display = 'none'; return; }
+  bar.style.display = '';
+
+  var d = pulseDelta(n);
+  /* polarity per figure: -1 means a rise is unwelcome, +1 means a rise is good */
+  var cell = function (lab, val, dv, polarity) {
+    var mv = '';
+    if (dv != null && Math.abs(dv) >= 1) {
+      var good = (dv > 0) === (polarity > 0);
+      mv = '<span class="pu-d ' + (good ? 'pu-good' : 'pu-bad') + '">' +
+           (dv > 0 ? '↑ +' : '↓ −') + fmt(Math.abs(dv)) + '</span>';
+    }
+    return '<div class="pu-m"><span class="pu-l">' + lab + '</span>' +
+           '<span class="pu-v">' + fmt(val) + '</span>' + mv + '</div>';
+  };
+
+  bar.innerHTML =
+    cell('True cost', n.trueCost, d && d.trueCost, -1) +
+    cell(n.fundedLabel, n.funded, d && d.funded, +1) +
+    cell('Your cash', n.cash, d && d.cash, -1) +
+    (d && d.what ? '<span class="pu-what" title="' + String(d.what).replace(/"/g, '&quot;') + '">' + d.what + '</span>' : '') +
+    '<button type="button" class="pu-x" onclick="pulseDismiss()" aria-label="Hide the running totals">×</button>';
+}
+
+function pulseDismiss() {
+  pulseOn = false;
+  try { sessionStorage.setItem('ac_pulse_off', '1'); } catch (e) {}
+  pulseRender();
+}
+
+/* only worth showing once the figures it mirrors have scrolled away */
+function pulseSync() {
+  var anchor = document.getElementById('metricCards') || document.getElementById('sec-levy');
+  var past = true;
+  if (anchor) {
+    var r = anchor.getBoundingClientRect();
+    past = r.bottom < 90;
+  }
+  var off = false;
+  try { off = sessionStorage.getItem('ac_pulse_off') === '1'; } catch (e) {}
+  var want = past && !off;
+  if (want !== pulseOn) { pulseOn = want; pulseRender(); }
+  else if (pulseOn) pulseRender();
+}
 
 function palItems() {
   var out = [];
@@ -4882,6 +5014,7 @@ function saveState(){
     const hasLevy=levyData&&levyData.byMonth&&levyData.byMonth.length;
     persistScenario(false);
     try{ if(typeof ledgerNote==='function') ledgerNote(); }catch(e){}
+    try{ if(typeof pulseSync==='function') pulseSync(); }catch(e){}
     toggleClearBtn(!!(hasLevy||programmes.length));
     if(typeof markPlanDirty==='function')markPlanDirty();
   }catch(e){/* storage unavailable (private mode etc.) — fail silently */}
