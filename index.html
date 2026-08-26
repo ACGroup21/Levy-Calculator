@@ -2226,7 +2226,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01w</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-01x</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -8997,6 +8997,127 @@ function getQueryWords(q){
 //  COPILOT ENGINE
 // ══════════════════════════════
 let copilotOpen=false;
+/* ═══ CO-PILOT: ANSWERS FROM THE ENGINE ═════════════════════════════════════
+   OVERLAP CHECKED FIRST (the discipline that already caught compare-plans
+   being built): best-moves and the co-pilot are NOT one feature. Best-moves
+   gives ranked, engine-costed recommendations unprompted; the co-pilot
+   answers a specific question. They differ in who starts the conversation.
+
+   The real gap was narrower and worse than "it speaks prose": processQuery
+   is 9,000 characters that never once call levyReportData, simCoInvest,
+   _wiWith, LevyEngine or nonLevyFunding. It could quote the funding rules
+   correctly and still not tell you what anything costs FOR YOU - and where it
+   did reach for figures it did its own arithmetic beside the engine rather
+   than through it, which is how two parts of one app come to disagree.
+
+   These branches route every number through the same engine the report uses,
+   and refuse to answer rather than estimate when there is nothing to compute.
+--------------------------------------------------------------------------- */
+
+/* one source for the figures, matching the report, the pulse and the ledger */
+function cpFacts() {
+  try {
+    var has = (typeof programmes !== 'undefined') && programmes.length > 0;
+    var d = (typeof levyReportData === 'function') ? levyReportData() : null;
+    if (!d) return null;
+    return { has: has, d: d,
+             heads: +d.heads || 0,
+             trueCost: Math.round(d.trueCost || 0),
+             planCost: Math.round(d.planCost || 0),
+             otj: Math.round(d.otjCost || 0),
+             covered: Math.round(d.levyCovered || 0),
+             coInvest: Math.round(d.coInvest || 0),
+             expiry: Math.round(d.expiry || 0),
+             avail: Math.round(d.levyAvail || 0) };
+  } catch (e) { return null; }
+}
+
+function cpNoPlan() {
+  aiMsg('I can only cost something once there is a plan to cost. Add a programme in <b>Step 02</b>, ' +
+        'or use <b>Have a budget instead of a plan?</b> at the top and I will work backwards from your budget.');
+}
+
+/* "what does this cost" - the same figures the report will print */
+function cpAnswerCost() {
+  var f = cpFacts();
+  if (!f || !f.has) { cpNoPlan(); return true; }
+  var mode = (fundingMode === 'nonlevy');
+  aiMsg('Your plan is <b>' + fmt(f.trueCost) + '</b> all in, for <b>' + f.heads + '</b> ' +
+    (f.heads === 1 ? 'person' : 'people') + '.<br><br>' +
+    '&bull; <b>' + fmt(f.planCost) + '</b> of training' +
+    (mode ? ', of which you co-invest ' + fmt(f.coInvest) : (f.coInvest > 0
+        ? ', of which ' + fmt(f.coInvest) + ' is co-investment your levy cannot cover'
+        : ', fully covered by your levy')) + '<br>' +
+    '&bull; <b>' + fmt(f.otj) + '</b> of off-the-job time &mdash; your people not producing, which nobody funds' +
+    (f.otj > f.planCost ? ' and which is <b>larger than the training fee itself</b>' : '') + '.<br><br>' +
+    'These are the same figures the report prints &mdash; click any of them in the app to see the working.');
+  return true;
+}
+
+/* "what if we defer / phase it" - run the REAL scenarios, not a description */
+function cpAnswerWhatIf() {
+  var f = cpFacts();
+  if (!f || !f.has) { cpNoPlan(); return true; }
+  if (typeof whatIfScenarios !== 'function' || typeof _wiWith !== 'function') return false;
+  var rows;
+  try {
+    rows = whatIfScenarios().map(function (sc) {
+      var variant = sc.t(programmes.map(function (p) { return Object.assign({}, p); }));
+      var d = _wiWith(variant, levyReportData);
+      var o = (typeof _wiOutcome === 'function') ? _wiOutcome(variant) : { qualified: null, firstEpa: Infinity };
+      return { name: sc.name, cash: Math.round((d.coInvest || 0) + (d.selfFundCost || 0)),
+               expiry: Math.round(d.expiry || 0), qualified: o.qualified, first: o.firstEpa };
+    });
+  } catch (e) { return false; }
+  if (!rows.length) return false;
+  var base = rows[0];
+  aiMsg('I ran each option through the same engine as the report.<br><br>' +
+    rows.map(function (r) {
+      var bits = ['<b>' + r.name + '</b>'];
+      bits.push('your cash ' + fmt(r.cash) + (r.cash === base.cash ? '' :
+        ' (' + (r.cash > base.cash ? '+' : '&minus;') + fmt(Math.abs(r.cash - base.cash)) + ')'));
+      bits.push(fmt(r.expiry) + ' expiring');
+      if (r.qualified != null) bits.push(r.qualified + ' qualified in ' + projYears + 'y');
+      if (isFinite(r.first) && typeof mkLbl === 'function') bits.push('first finishes ' + mkLbl(r.first));
+      return '&bull; ' + bits.join(' &middot; ');
+    }).join('<br>') +
+    '<br><br>Deferring rarely costs less <i>and</i> delivers the same &mdash; watch the last two figures, ' +
+    'not just the cash. The full table is under <b>Compare your options</b>.');
+  return true;
+}
+
+/* "how much of my levy will I lose" - the real FIFO forecast */
+function cpAnswerExpiry() {
+  var f = cpFacts();
+  if (!f) return false;
+  if (f.expiry <= 1) {
+    aiMsg('Nothing in your plan is currently forecast to expire' +
+      (f.has ? ' &mdash; your commitments are drawing the pot down fast enough.' : ' yet, because there is no plan against it.'));
+    return true;
+  }
+  aiMsg('<b>' + fmt(f.expiry) + '</b> of your levy is forecast to expire unused.<br><br>' +
+    'Funds expire ' + RULEBOOK.expiryMonths.from + ' months after they are declared for anything from August 2026 (' +
+    RULEBOOK.expiryMonths.before + ' months before that), so this is money you have already handed over and can still ' +
+    'spend. You could commit it to more programmes, or gift up to ' +
+    Math.round(RULEBOOK.transferCapPct * 100) + '% of your annual levy to another employer before it ages out.<br><br>' +
+    'The month-by-month breakdown is under <b>Expiry risk</b>.');
+  return true;
+}
+
+function cpPlanAware(lq) {
+  /* what-if first: "if we defer" also contains cost words */
+  if (/\b(what if|defer|delay|push(ing)? back|later start|phase|phasing|stagger|spread)\b/.test(lq)) {
+    if (cpAnswerWhatIf()) return true;
+  }
+  if (/\b(expir|unused|lose|losing|waste|wasted|running out)\b/.test(lq)) {
+    if (cpAnswerExpiry()) return true;
+  }
+  if (/\b(what does|how much does|total cost|true cost|cost me|my plan cost|all in)\b/.test(lq)) {
+    if (cpAnswerCost()) return true;
+  }
+  return false;
+}
+
 function toggleCopilot(){
   copilotOpen=!copilotOpen;
   const p=document.getElementById('copilotPanel');
@@ -9006,7 +9127,7 @@ function toggleCopilot(){
 
 function initCopilot(){
   const hasKSB=!!KSB_DATA;
-  const chips=['I want to train 3 managers at level 3','What happens if I run out of levy funds?','How does co-investment work?','Show me the official gov.uk funding rules','Are there incentives for hiring an apprentice?'];
+  const chips=['What does my plan cost, all in?','What if we defer the starts by six months?','I want to train 3 managers at level 3','What happens if I run out of levy funds?','How does co-investment work?','Show me the official gov.uk funding rules','Are there incentives for hiring an apprentice?'];
   aiMsg(`Hi! I'm your Levy Co-pilot.${hasKSB?' <strong style="color:var(--purple)">KSB data is loaded</strong> — I can now match your talent objectives to the specific Knowledge, Skills &amp; Behaviours of each standard.':' Upload your KSB JSON (above) to unlock deeper talent-to-standard matching.'}<div class="suggestion-chips">${chips.map(c=>`<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('')}</div>`);
 }
 
@@ -9143,6 +9264,10 @@ function processQuery(q){
 
   // FUNDING RULES (gov.uk guidance)
   if(isFundingQuestion(lq)&&answerFunding(q))return;
+
+  // PLAN-AWARE: anything costed goes through the same engine as the report,
+  // so the co-pilot can never quote a figure the rest of the app disagrees with.
+  try{ if(cpPlanAware(lq))return; }catch(e){}
 
   // GIFTING
   if(intent.isGifting){
