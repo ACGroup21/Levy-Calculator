@@ -667,6 +667,15 @@ button{font-family:var(--sans);cursor:pointer}
 .slv-otj{margin-top:10px;padding-top:9px;border-top:1px solid var(--border);
   font-size:12.5px;line-height:1.55;color:var(--text3)}
 .slv-otj b{color:var(--money)}
+.stage-card{border-radius:14px;padding:14px 17px;margin:0 0 1rem}
+.stage-top{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+.stage-chip{font-family:'Roboto Mono',monospace;font-size:10px;letter-spacing:.11em;
+  text-transform:uppercase;font-weight:700;border:1px solid;border-radius:99px;padding:3px 9px;
+  white-space:nowrap}
+.stage-head{font-size:15px;font-weight:700;line-height:1.35;text-wrap:balance}
+.stage-body{margin:9px 0 0;font-size:13px;line-height:1.6;color:var(--text2);max-width:74ch}
+.stage-move{margin:7px 0 0;font-size:12.5px;line-height:1.6;color:var(--text3);max-width:74ch}
+.stage-move b,.stage-body b{color:var(--text)}
 .slv-sub{margin-top:3px;font-size:12.5px;color:var(--text3);line-height:1.45}
 /* the binding-constraint callout is the finding, so it outranks the idle-money
    warning visually - teal, because "capacity, not money" is information, not a
@@ -2204,6 +2213,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
         <span style="display:flex;align-items:center;gap:5px"><span class="ll" style="background:#a78bfa"></span>Levy balance (pot)</span>
         <span style="display:flex;align-items:center;gap:5px"><span class="ld" style="background:#c02040"></span>Shortfall</span>
       </div>
+      <div id="projStage"></div>
       <div class="card" style="padding:1rem"><div class="chart-wrap"><canvas id="projChart"></canvas></div></div>
       <div class="metrics" id="projMetrics" style="margin-top:1rem"></div>
       <div id="projCapacity"></div>
@@ -2333,7 +2343,7 @@ document.addEventListener('DOMContentLoaded',function(){try{applyTheme(localStor
 
 <footer>
   <span style="font-style:italic">&ldquo;An investment in knowledge pays the best interest.&rdquo;</span> &nbsp;&middot;&nbsp; <span style="opacity:.75">Benjamin Franklin</span>
-  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-02z</div>
+  <div style="opacity:.4;font-size:11px;margin-top:7px;letter-spacing:.04em">Fundable &middot; build 2026-08-03d</div>
   <div style="margin-top:10px"><span style="display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);opacity:.85"><svg viewBox="61 47 278 310" role="img" aria-label="AC Digital" style="display:block;flex:none;height:16px;width:auto;color:var(--text2)"><path d="M 96 322 L 200 82 L 304 322" fill="none" stroke="currentColor" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/><circle cx="200" cy="238" r="23" fill="#3B9EFF"/></svg>Built by <strong style="color:var(--text2);font-weight:600;letter-spacing:.07em">AC&nbsp;<span style="color:#3B9EFF">Digital</span></strong></span></div>
 </footer>
 
@@ -6863,6 +6873,101 @@ function simCoInvest(income,tot,pmk,uTot,bal0,shr){
 LevyEngine.simCoInvest=simCoInvest; LevyEngine.simulateLevyFIFO=simulateLevyFIFO; LevyEngine.coInvRate=coInvRate; LevyEngine.expMo=expMo;
 // Training capacity + over-commitment warning (display-only — reads levyReportData figures, no engine change).
 // Capacity = how many apprentices the levy funds at the plan's own average cost. Warn when the plan exceeds it.
+/* ═══ PROGRAMME STAGE ═══════════════════════════════════════════════════════
+   Bands separated by what HAPPENS to the money, never by a threshold invented
+   here. Expiry, co-investment and headroom are all already computed; this only
+   reads them. Returns null where there is nothing to judge. */
+function planStage(d){
+  try{
+    d = d || levyReportData();
+    if(fundingMode==='nonlevy') return null;      /* no pot, so no utilisation */
+    if(!d || !d.heads || !d.progCount) return null;
+    var exp=+d.expiry||0, co=+d.coInvest||0;
+    var avail=+d.levyAvail||0, committed=+d.levyPlanCost||+d.planCost||0;
+    var head=Math.max(0, avail-committed);
+    var per=+d.perHead||0;
+    var more=per>0?Math.floor(head/per):0;
+    var firstExp=(d.expiryFirst&&d.expiryFirst.mo)||null;
+
+    /* Both at once, and this is the COMMON middle - not an exception. Tested
+       across 20 plan shapes, no plan reached "nothing expires and no
+       co-investment": the 12-month expiry means committing slowly enough to
+       avoid a shortfall guarantees something ages out. */
+    if(exp>1 && co>1){
+      var covers = avail >= committed;
+      return {
+        key:'mistimed', label:'Out of step', tone:'amber',
+        head:fmt(Math.round(exp))+' expires while '+fmt(Math.round(co))+' comes from your own cash',
+        body: covers
+          ? 'Your levy covers this plan in total &mdash; the money and the training are simply not '+
+            'arriving at the same time. That is a timing problem rather than a size one, and it is '+
+            'the cheapest kind to fix.'
+          : 'This plan also commits more than your levy will hold ('+fmt(Math.round(committed))+
+            ' against '+fmt(Math.round(avail))+'), so part of the gap is size and part of it is '+
+            'timing. Fixing the timing will not close all of it.',
+        move: covers
+          ? 'Bringing a start forward, or spreading a payment, moves both numbers at once. Try it '+
+            'in <b>What if</b> before committing.'
+          : 'Re-timing recovers the '+fmt(Math.round(exp))+' that expires; the rest needs a smaller '+
+            'plan, a transfer received, or accepting the co-investment.'
+      };
+    }
+
+    if(exp>1) return {
+      key:'underusing', label:'Under-using', tone:'amber',
+      head:fmt(Math.round(exp))+' of levy will expire unused',
+      body:'You are earning levy faster than you are committing it, so a share returns to the '+
+           'Treasury'+(firstExp?(' &mdash; the first tranche in <b>'+escHtml(String(firstExp))+'</b>'):'')+
+           '. Funds now expire '+RULEBOOK.expiryMonths.from+' months after they land.',
+      move:more>0
+        ? 'About <b>'+more+'</b> more apprentice'+(more!==1?'s':'')+' at your average of '+
+          fmt(Math.round(per))+' would absorb it. You can also gift up to '+
+          fmt(Math.round(d.transferCap||0))+' a year as a transfer rather than lose it.'
+        : 'Gifting is the other route &mdash; up to '+fmt(Math.round(d.transferCap||0))+
+          ' a year can be transferred to another employer rather than expire.'
+    };
+
+    if(co>1) return {
+      key:'capacity', label:'At capacity', tone:'money',
+      head:'Your levy is fully committed; '+fmt(Math.round(co))+' comes from your own cash',
+      body:'Nothing is being wasted &mdash; this plan asks for more than the pot holds in the '+
+           'months it is drawn, so the balance is co-investment.',
+      move:'A transfer received from another employer covers 100% of a band up to the maximum. '+
+           'Deferring or spreading a start also moves the shortfall &mdash; both are costed in <b>What if</b>.'
+    };
+
+    /* Reachable, but only just: it needs the draw to land almost exactly as the
+       levy does. Described as the rare state it is, never as the expected one. */
+    return {
+      key:'matched', label:'Fully matched', tone:'teal',
+      head:'Nothing expires, and none of it comes from your own cash',
+      body:'This is the narrow best case: you are committing levy about as fast as it lands, and no '+
+           'month runs short. Under the '+RULEBOOK.expiryMonths.from+'-month expiry very few plans '+
+           'hold this position &mdash; commit any slower and funds age out, any faster and a month '+
+           'goes short.',
+      move:more>0
+        ? 'Headroom of <b>'+fmt(Math.round(head))+'</b> &mdash; about <b>'+more+'</b> more apprentice'+
+          (more!==1?'s':'')+' at your average of '+fmt(Math.round(per))+', though adding them will '+
+          'usually tip you into one side or the other.'
+        : 'Headroom of <b>'+fmt(Math.round(head))+'</b> remains.'
+    };
+  }catch(e){ return null; }
+}
+
+function renderStage(d){
+  var el=document.getElementById('projStage'); if(!el) return;
+  var st=planStage(d);
+  if(!st){ el.innerHTML=''; return; }
+  var col={amber:'var(--amber)',teal:'#2DD4B2',money:'var(--money)'}[st.tone]||'#2DD4B2';
+  var bg={amber:'rgba(224,164,59,0.07)',teal:'rgba(45,212,178,0.06)',money:'rgba(224,110,84,0.07)'}[st.tone];
+  var bd={amber:'rgba(224,164,59,0.35)',teal:'rgba(45,212,178,0.28)',money:'rgba(224,110,84,0.32)'}[st.tone];
+  el.innerHTML='<div class="stage-card" style="background:'+bg+';border:1px solid '+bd+'">'+
+    '<div class="stage-top"><span class="stage-chip" style="color:'+col+';border-color:'+bd+'">'+
+    escHtml(st.label)+'</span><span class="stage-head" style="color:'+col+'">'+st.head+'</span></div>'+
+    '<p class="stage-body">'+st.body+'</p>'+
+    '<p class="stage-move">'+st.move+'</p></div>';
+}
+
 function renderCapacity(d){
   var el=document.getElementById('projCapacity');if(!el)return;
   if(!d||!d.heads||!d.perHead||d.levyAvail<=0){el.innerHTML='';return;}
@@ -8226,7 +8331,7 @@ function renderProjection(){
   const annual=levyData.monthlyAvg*12,n12=tot.slice(0,12).reduce((a,b)=>a+b,0);
   const safe=Math.max(0,Math.min(annual*RULEBOOK.transferCapPct,annual-n12-annual*.1));
   document.getElementById('projMetrics').innerHTML=`<div class="metric"><div class="ml">80% training draw (${projYears}y)</div><div class="mv">${pv('trainDraw',fmt(tT),'Training drawn')}</div><div class="ms">Monthly installments total</div></div><div class="metric"><div class="ml">20% EPA payments (${projYears}y)</div><div class="mv c-amber">${pv('epaPay',fmt(tE),'End-point assessment payments')}</div><div class="ms">${ev.length} completion event${ev.length!==1?'s':''}</div></div><div class="metric"><div class="ml">Co-investment months</div><div class="mv ${coMonths>0?'c-red':'c-teal'}">${coMonths}</div><div class="ms">${coMonths>0?'Levy runs short — co-invest due':(reserveMonths>0?reserveMonths+' drew on reserve (covered)':'All months covered')}</div></div><div class="metric"><div class="ml">Balance at month ${M}</div><div class="mv ${bals[M-1]>0?'c-teal':'c-red'}">${fmt(bals[M-1])}</div><div class="ms">${bals[M-1]>0?'Projected surplus':'Account depleted'}</div></div>`;
-  renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderWhatIf();renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);renderCapacity(levyReportData());renderRingfences();updateSectionNav();
+  renderBestMoves(income,tot,ev,labels,pmk,us,best,levyReportData());renderWhatIf();renderShortfallAdvice(income,tot,ev,labels,pmk,us,durTip);var _srd=levyReportData();renderStage(_srd);renderCapacity(_srd);renderRingfences();updateSectionNav();
   const exp=simulateLevyFIFO(income,combined,pmk,M);
   const ew=document.getElementById('expiryWarning');
   if(exp.total>1){
@@ -10014,6 +10119,12 @@ document.addEventListener('keydown',e=>{
     ['£1,000 incentive','no age data → nothing claimed',incentiveCount({count:5}),0,'fund'],
     ['£1,000 incentive','rate from the rulebook',incentiveRate(),1000,'fund'],
     ['£2,000 hiring payment','rate from the rulebook',hiringRate(),2000,'fund'],
+    ['Programme stage','Expiry only → under-using',(planStage({heads:1,progCount:1,expiry:5000,coInvest:0,levyAvail:100000,levyPlanCost:60000,perHead:9000})||{}).key==='underusing'?1:0,1,'fund'],
+    ['Programme stage','Co-investment only → at capacity',(planStage({heads:1,progCount:1,expiry:0,coInvest:5000,levyAvail:50000,levyPlanCost:60000,perHead:9000})||{}).key==='capacity'?1:0,1,'fund'],
+    ['Programme stage','Neither → fully matched',(planStage({heads:1,progCount:1,expiry:0,coInvest:0,levyAvail:100000,levyPlanCost:60000,perHead:9000})||{}).key==='matched'?1:0,1,'fund'],
+    ['Programme stage','Out of step, pot too small → says so',/part of the gap is size/.test((planStage({heads:1,progCount:1,expiry:5000,coInvest:5000,levyAvail:100000,levyPlanCost:270000,perHead:9000})||{}).body||'')?1:0,1,'fund'],
+    ['Programme stage','Both at once → out of step, not folded away',(planStage({heads:1,progCount:1,expiry:5000,coInvest:5000,levyAvail:100000,levyPlanCost:60000,perHead:9000})||{}).key==='mistimed'?1:0,1,'fund'],
+    ['Programme stage','No programmes → no verdict offered',planStage({heads:0,progCount:0})===null?1:0,1,'fund'],
     ['£2,000 hiring payment','levy payer → not eligible (r.133)',(function(){var m=fundingMode;fundingMode='levy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),0,'fund'],
     ['£2,000 hiring payment','non-levy, new hire 16–24, Nov 2026 → eligible',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-11-01',epa:'2028-05-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),1,'fund'],
     ['£2,000 hiring payment','start before 1 Oct 2026 → not eligible (r.133.2)',(function(){var m=fundingMode;fundingMode='nonlevy';var v=hiringCount({count:1,start:'2026-09-01',epa:'2028-03-01',age:{y:1,m:0,o:0,h:1}});fundingMode=m;return v;})(),0,'fund'],
