@@ -30,36 +30,36 @@ body{font-family:Jost,system-ui,sans-serif;color:var(--text)}
 @keyframes drift1{to{transform:translate(8vmax,6vmax) scale(1.12)}} @keyframes drift2{to{transform:translate(-7vmax,-5vmax) scale(.92)}}
 
 /* logo: LED spark (unchanged from the live app) */
-.aslogo{position:relative;z-index:1;width:min(560px,82vw);height:auto;overflow:visible;--t0:.3s;--step:0s}
-.aslogo .lt{fill:var(--logo-fill);opacity:0;animation:lfill .55s calc(var(--t0) + var(--i)*var(--step) + .6s) ease-out forwards}
+.aslogo{position:relative;z-index:1;width:min(560px,82vw);height:auto;overflow:visible;--t0:.2s;--step:.12s}
+.aslogo .lt{fill:var(--logo-fill);opacity:0;animation:lfill .55s calc(var(--t0) + var(--i)*var(--step) + .38s) ease-out forwards}
 @keyframes lfill{0%{opacity:0;filter:drop-shadow(0 0 0 #FF4FB0)}40%{opacity:1;filter:drop-shadow(0 0 5px #FF4FB0)}100%{opacity:1;filter:drop-shadow(0 0 0 transparent)}}
-.aslogo .sp,.aslogo .tr{fill:none;stroke-linecap:round;opacity:0;animation:spark 1s calc(var(--t0) + var(--i)*var(--step)) linear forwards}
-.aslogo .ap{animation-duration:.6s;animation-delay:calc(var(--t0) + .85s)}
+.aslogo .sp,.aslogo .tr{fill:none;stroke-linecap:round;opacity:0;animation:spark .55s calc(var(--t0) + var(--i)*var(--step)) linear forwards}
+.aslogo .ap{animation-duration:.45s;animation-delay:calc(var(--t0) + 1.55s)}
 .aslogo .sp{stroke:#FFE3F2;stroke-width:1.5;stroke-dasharray:0 16 6 78;filter:drop-shadow(0 0 1.5px #FF4FB0) drop-shadow(0 0 4px #FF2E9A) drop-shadow(0 0 9px #FF2E9A)}
 .aslogo .tr{stroke:#FF4FB0;stroke-width:1;stroke-dasharray:22 78;filter:drop-shadow(0 0 3px #FF2E9A)}
 @keyframes spark{0%{opacity:0;stroke-dashoffset:0}8%{opacity:1}86%{opacity:1}100%{opacity:0;stroke-dashoffset:-100}}
-.aslogo .apl{fill:#E8325E;transform-box:fill-box;transform-origin:50% 88%;opacity:0;animation:apop .75s calc(var(--t0) + 1.15s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 2.1s) ease-in-out infinite}
+.aslogo .apl{fill:#E8325E;transform-box:fill-box;transform-origin:50% 88%;opacity:0;animation:apop .75s calc(var(--t0) + 1.8s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 2.6s) ease-in-out infinite}
 @keyframes apop{0%{opacity:0;transform:scale(.3)}55%{opacity:1;filter:drop-shadow(0 0 12px #FF4FB0)}100%{opacity:1;transform:none;filter:none}}
 @keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(.97)}24%{transform:scale(1.07)}34%{transform:scale(1)}}
 
-#splash h1{position:relative;z-index:1;margin:6px 0 0;font-weight:500;font-size:clamp(15px,2.1vw,22px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .7s 1.55s ease both}
-#splash .tag{position:relative;z-index:1;margin:0;font-size:15px;color:var(--text);animation:rise .7s 1.7s ease both;text-align:center}
+#splash h1{position:relative;z-index:1;margin:6px 0 0;font-weight:500;font-size:clamp(15px,2.1vw,22px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .6s 2.0s ease both}
+#splash .tag{position:relative;z-index:1;margin:0;font-size:15px;color:var(--text);animation:rise .6s 2.1s ease both;text-align:center}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 /* "Powered by Fundable" sits where the button will be, then becomes the button */
 .cta{position:relative;z-index:1;margin-top:14px;width:270px;max-width:80vw;height:52px;display:grid;place-items:center}
 .cta > *{grid-area:1/1}
-.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .6s 1.9s ease forwards, frameOut .35s 3.5s ease forwards}
+.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .5s 2.2s ease forwards, frameOut .3s 3.4s ease forwards}
 @keyframes frameIn{from{opacity:0;transform:scale(.94)}to{opacity:.55;transform:none}}
 @keyframes frameOut{to{opacity:0}}
-.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .6s 1.85s ease forwards, pwOut .5s 3.0s ease-in forwards}
+.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .5s 2.15s ease forwards, pwOut .4s 2.95s ease-in forwards}
 .cta .pwl span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .cta .pwl svg{height:28px;width:108px;flex:none}
 @keyframes pwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pwOut{to{opacity:0;transform:scale(.86);filter:blur(5px)}}
 .cta .enter{width:100%;height:100%;border:0;border-radius:999px;background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font:inherit;font-size:14px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;box-shadow:0 10px 30px rgba(156,48,100,.25);
-  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .7s 3.15s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
-.cta .enter span{opacity:0;display:inline-block;animation:txtIn .45s 3.55s ease forwards}
+  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .6s 3.05s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
+.cta .enter span{opacity:0;display:inline-block;animation:txtIn .35s 3.5s ease forwards}
 @keyframes fillOut{to{clip-path:inset(0 0 0 0 round 999px)}}
 @keyframes txtIn{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:.24em}}
 .cta .enter:hover{background:var(--pink);color:#fff}
