@@ -98,17 +98,17 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 /* "Powered by Fundable" sits where the button will be, then becomes the button */
 .cta{position:relative;z-index:1;margin-top:14px;width:270px;max-width:80vw;height:52px;display:grid;place-items:center}
 .cta > *{grid-area:1/1}
-.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .5s 2.2s ease forwards, frameOut .3s 3.4s ease forwards}
+.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .7s 2.2s ease forwards, frameOut .35s 4.2s ease forwards}
 @keyframes frameIn{from{opacity:0;transform:scale(.94)}to{opacity:.55;transform:none}}
 @keyframes frameOut{to{opacity:0}}
-.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .5s 2.15s ease forwards, pwOut .4s 2.95s ease-in forwards}
+.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .7s 2.15s ease forwards, pwOut .55s 3.7s ease-in forwards}
 .cta .pwl span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
 .cta .pwl svg{height:28px;width:108px;flex:none}
 @keyframes pwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes pwOut{to{opacity:0;transform:scale(.86);filter:blur(5px)}}
 .cta .enter{width:100%;height:100%;border:0;border-radius:999px;background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font:inherit;font-size:14px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;box-shadow:0 10px 30px rgba(156,48,100,.25);
-  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .6s 3.05s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
-.cta .enter span{opacity:0;display:inline-block;animation:txtIn .35s 3.5s ease forwards}
+  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 3.9s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
+.cta .enter span{opacity:0;display:inline-block;animation:txtIn .45s 4.4s ease forwards}
 @keyframes fillOut{to{clip-path:inset(0 0 0 0 round 999px)}}
 @keyframes txtIn{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:.24em}}
 .cta .enter:hover{background:var(--pink);color:#fff}
