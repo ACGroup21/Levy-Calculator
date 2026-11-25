@@ -94,6 +94,13 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 .on-dark{display:none}
 :root[data-theme=dark] .on-dark{display:block}
 :root[data-theme=dark] .on-light{display:none}
+/* splash is always light, even when the app is in dark mode */
+:root[data-theme=dark] #splash{color-scheme:light;
+  --aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA);
+  --plum:#9C3064; --ink:#000; --text:#3B3935; --muted:#6E6A64; --pink-deep:#CC0874; --btn-bg:#000; --btn-fg:#fff}
+:root[data-theme=dark] #splash .aslogo{--logo-fill:#B42A72}
+:root[data-theme=dark] #splash .on-dark{display:none}
+:root[data-theme=dark] #splash .on-light{display:block}
 @keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(.97)}24%{transform:scale(1.07)}34%{transform:scale(1)}}
 #splash h1{position:relative;z-index:1;margin:6px 0 0;font-weight:500;font-size:clamp(15px,2.1vw,22px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .8s 2.95s ease both}
 #splash .tag{position:relative;z-index:1;margin:0;font-size:15px;color:var(--text);animation:rise .6s 2.1s ease both;text-align:center}
