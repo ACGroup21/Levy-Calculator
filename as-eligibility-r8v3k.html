@@ -551,6 +551,7 @@ footer a{color:var(--pink-deep)}
 .combo li.off{cursor:not-allowed;opacity:.55}
 .combo li.off:hover{background:none}
 .combo li em{display:block;font-style:normal;font-size:12.5px;color:var(--bad);margin-top:2px}
+.combo li em.cond{color:var(--warn)}
 </style>
 </head>
 <body>
@@ -828,7 +829,7 @@ function searchStds(q){
   const pick=s=>{ if(fundBlock(s)) return; inp.value=`${s.n} (${s.r})`; close(); render(); };
   const order=l=>{ const ok=l.filter(x=>!fundBlock(x)), no=l.filter(x=>fundBlock(x)); return ok.concat(no); };
   const firstOk=()=>list.findIndex(x=>!fundBlock(x));
-  const paint=()=>{ ul.innerHTML = list.length ? list.map((s,i)=>{ const b=fundBlock(s); return `<li role="option" id="opt${i}" aria-selected="${i===ix}" data-i="${i}"${b?' class="off" aria-disabled="true"':''}><span>${esc(s.n)}${b?`<em>Can't be funded: ${esc(b)}</em>`:''}</span><small>L${s.l} · ${s.r}</small></li>`; }).join('')
+  const paint=()=>{ ul.innerHTML = list.length ? list.map((s,i)=>{ const b=fundBlock(s); return `<li role="option" id="opt${i}" aria-selected="${i===ix}" data-i="${i}"${b?' class="off" aria-disabled="true"':''}><span>${esc(s.n)}${b?`<em>Can't be funded: ${esc(b)}</em>`:(s.l===7&&!(lastO&&lastO.dob)?'<em class="cond">Only funded if under 22 at the start (under 25 with an EHC plan or care experience)</em>':'')}</span><small>L${s.l} · ${s.r}</small></li>`; }).join('')
       : '<li class="empty">No matches. Try fewer words, or an ST code.</li>';
     ul.classList.remove('hide'); inp.setAttribute('aria-expanded','true');
     if(ix>=0){ inp.setAttribute('aria-activedescendant','opt'+ix); const el=$('opt'+ix); el&&el.scrollIntoView({block:'nearest'}); } else inp.removeAttribute('aria-activedescendant'); };
@@ -988,13 +989,16 @@ function compute(){
 
 /* ---------- render ---------- */
 function render(){
-  const o=compute();
+  let o=compute(); lastO=o;
+  { const cur=findStd($('std').value); const b=cur&&fundBlock(cur);
+    if(b && /age|ages/.test(b)){ S.removed={n:cur.n,why:b}; $('std').value=''; o=compute(); lastO=o; } }
   updateJourney(o);
   document.querySelectorAll('.milonly').forEach(e=>e.classList.toggle('hide',!o.mil));
   const who=o.name?esc(o.name):'This apprentice';
   ['reasonsCard','whenCard','moneyCard'].forEach(id=>$(id).classList.toggle('hide',!o.dob||!!o.badDob));
   const std=o.std;
-  $('stdinfo').innerHTML = std ? `<span class="tag">${std.r}</span><span class="tag">Level ${std.l}</span><span class="tag">${std.d||'?'} months</span><span class="tag">Band ${std.f?money(std.f):'n/a'}</span>${std.s!=='ApprovedForDelivery'?`<span class="tag" style="background:var(--bad-bg);color:var(--bad)">${std.s==='InDevelopment'?'In development':'Starts paused'}</span>`:''}` : ($('std').value?'No match. Pick a standard from the list.':'');
+  if(std) S.removed=null;
+  $('stdinfo').innerHTML = (!std && S.removed) ? `<span style="color:var(--bad)"><b>${esc(S.removed.n)}</b> was removed: ${esc(S.removed.why)}. Pick another apprenticeship.</span>` : std ? `<span class="tag">${std.r}</span><span class="tag">Level ${std.l}</span><span class="tag">${std.d||'?'} months</span><span class="tag">Band ${std.f?money(std.f):'n/a'}</span>${std.s!=='ApprovedForDelivery'?`<span class="tag" style="background:var(--bad-bg);color:var(--bad)">${std.s==='InDevelopment'?'In development':'Starts paused'}</span>`:''}` : ($('std').value?'No match. Pick a standard from the list.':'');
 
   const V=$('verdict');
   const has=!!o.dob&&!o.badDob;
