@@ -517,6 +517,36 @@ footer a{color:var(--pink-deep)}
   .rp{transform:none!important;box-shadow:none;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .rpw:last-child .rp{break-after:auto;page-break-after:auto}
 }
+
+/* ===== Style A (chosen 25 Nov): Levy Report titles on the calm layout ===== */
+:root{--mag:#D10A7D}
+:root header .app{font-family:Montserrat,Arial,sans-serif;font-weight:700;letter-spacing:0;text-transform:none;font-size:15px;color:#fff}
+/* form section titles: "01 The apprentice" in Montserrat with a magenta highlighter */
+:root .step{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:23px;letter-spacing:0;text-transform:none;color:var(--ink);position:relative;z-index:0;gap:10px;margin-bottom:18px}
+:root .step b{display:inline;background:none;width:auto;height:auto;border-radius:0;color:var(--mag);font-size:23px;font-weight:800}
+:root .step b::before{content:"0"}
+:root .step::after{content:"";position:absolute;z-index:-1;left:36px;bottom:3px;width:70px;height:11px;background:var(--mag)}
+:root .step b{position:relative}
+/* result titles */
+:root section.results h3{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:22px;letter-spacing:0;text-transform:none;color:var(--ink);display:inline-block;position:relative;z-index:0;margin-bottom:16px}
+:root section.results h3::before{content:"";position:absolute;z-index:-1;left:-8px;bottom:3px;width:46%;height:10px;background:var(--hl-soft)}
+/* the verdict word */
+:root .verdict .k{letter-spacing:.06em}
+:root .verdict h2{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:44px;letter-spacing:0;display:inline-block;position:relative;z-index:0;justify-self:start}
+:root .verdict h2::before{content:"";position:absolute;z-index:-1;left:-10px;top:.12em;width:40%;height:.5em;background:var(--mag)}
+/* journey: 01-04 numbers, magenta underline on the current step */
+:root .journey a{border-radius:0;border:0;border-bottom:3px solid transparent;padding:10px 4px 8px;background:none!important;font-family:Montserrat,Arial,sans-serif;font-weight:700}
+:root .journey .n{display:inline;border:0!important;background:none!important;width:auto;height:auto;color:var(--muted)!important;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:14px}
+:root .journey .n::before{content:"0"}
+:root .journey li.res .n::before{content:""}
+:root .journey li.done .n{color:var(--mag)!important}
+:root .journey li.current a{border-bottom-color:var(--mag);color:var(--ink)}
+:root .journey li + li::before{width:18px}
+:root .journey li.res a{background:#000!important;color:#fff;padding:6px 12px;border:0}
+:root .journey li.res .n{color:#fff!important}
+
+:root{--hl-soft:#F5D9E6}
+:root[data-theme=dark]{--hl-soft:#5A2440}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
