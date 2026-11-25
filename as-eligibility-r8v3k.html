@@ -17,7 +17,7 @@ window.loadFont=function(f){var u=window.FONT_CSS[f];if(!u)return;[].concat(u).f
 if(d.font)window.loadFont(d.font);})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Montserrat:wght@700;800&family=Open+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --plum:#9C3064; --apple:#CC2850;
@@ -386,9 +386,139 @@ footer a{color:var(--pink-deep)}
 :root[data-theme=dark] .journey li.res .n{color:#141013}
 .card,.verdict{scroll-margin-top:72px}
 @media print{.journey{display:none!important}}
+
+/* ---------- pass 2: contrast ---------- */
+:root{--info:#6B655F}
+.journey .s{color:var(--text)}
+:root[data-theme=dark] .journey li.done .n{color:#141013}
+.step b{background:#CC0874}
+.ico.i-mil{background:var(--pink-deep)}
+:root[data-theme=dark] .ico.i-mil{color:#141013}
+/* skip link */
+.skip{position:fixed;left:12px;top:-64px;z-index:300;background:#000;color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;text-decoration:none;transition:top .15s}
+.skip:focus{top:12px;outline:3px solid var(--pink);outline-offset:2px}
+/* what-this-means list */
+.means{list-style:none;margin:0;padding:0}
+.means li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:15px;color:var(--ink);align-items:start}
+.means li:first-child{border-top:0;padding-top:2px}
+/* timeline (px-positioned) */
+.tl{position:relative;height:200px;margin:12px 0 0}
+.tl .axis{position:absolute;left:0;right:0;height:3px;background:var(--line);border-radius:2px}
+.tl .tk{position:absolute;width:1px;height:9px;background:var(--muted);transform:translateX(-50%)}
+.tl .yr{position:absolute;font-family:var(--mono);font-size:11px;color:var(--muted);transform:translateX(-50%)}
+.tl .win{position:absolute;height:14px;background:var(--win);border:1px solid var(--pink);border-radius:3px}
+.tl .win.open{border-right:0;border-radius:3px 0 0 3px;background:linear-gradient(90deg,var(--win) 75%,transparent)}
+.tl .nodl{position:absolute;font-size:12px;color:var(--muted)}
+.tl .cn{position:absolute;width:1px;background:var(--field-line)}
+.tl .cn.mil{background:none;border-left:1px dashed var(--pink)}
+.tl .dot{position:absolute;width:11px;height:11px;border-radius:50%;transform:translate(-50%,-4px);background:var(--ink);border:2px solid var(--card)}
+.tl .dot.today{background:var(--card);border:2px solid var(--muted)}
+.tl .dot.rec{background:var(--ink);box-shadow:0 0 0 3px var(--win)}
+.tl .dot.start{background:var(--pink)}
+.tl .dot.mil{background:var(--card);border:2px dashed var(--pink)}
+.tl .lab{position:absolute;font-size:12px;line-height:1.25;text-align:center;color:var(--ink);white-space:nowrap;transform:none}
+.tl .lab i{display:block;font-style:normal;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.tl .lab.rec{font-weight:600}.tl .lab.start{color:var(--pink-deep);font-weight:600}.tl .lab.mil{color:var(--pink-deep)}.tl .lab.today{color:var(--muted)}
+.legend .lt::before{background:var(--card)!important;border:2px solid var(--muted);width:9px!important;height:9px!important;border-radius:50%!important}
+.legend .lr::before{background:var(--ink);width:10px!important;height:10px!important;border-radius:50%!important}
+.legend .ls::before{width:10px!important;height:10px!important;border-radius:50%!important}
+/* JD matcher */
+.jdm{margin:2px 0 14px;border:1px dashed var(--field-line);border-radius:6px;background:var(--bg)}
+.jdm summary{cursor:pointer;padding:10px 12px;font-size:14.5px;color:var(--muted);list-style:none}
+.jdm summary::-webkit-details-marker{display:none}
+.jdm summary b{color:var(--pink-deep)}
+.jdm summary::before{content:"+";display:inline-block;width:16px;font-weight:700;color:var(--pink-deep)}
+.jdm[open] summary::before{content:"–"}
+.jdm-body{padding:0 12px 12px}
+.jdm textarea{width:100%;padding:10px 12px;border:1px solid var(--field-line);border-radius:4px;background:var(--field);color:var(--ink);font:inherit;font-size:14.5px;resize:vertical}
+.jdr{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:8px}
+.jdr li{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:9px 10px;background:var(--card)}
+.jdr li.on{border-color:var(--pink);box-shadow:inset 0 0 0 1px var(--pink)}
+.jdr .rk{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--blush);color:var(--ink);font-size:12px;font-weight:700}
+.jdr .nm{font-weight:600;color:var(--ink);font-size:14.5px;line-height:1.3}
+.jdr .mt{font-size:12.5px;color:var(--muted);margin-top:2px}
+.jdr .mt b{color:var(--ink);font-weight:600}
+.jdr .tm{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:#1F7A4D;color:#fff;border-radius:999px;padding:1px 7px;margin-left:4px;vertical-align:1px}
+.jdr button{border:1px solid var(--ink);background:var(--ink);color:var(--card);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}
+.jdr li.on button{background:var(--pink);border-color:var(--pink);color:#fff}
+.jdmsg{margin:10px 0 0;font-size:14px;color:var(--muted)}
+/* role match card */
+.rm-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.rm-pct{font-family:var(--mono);font-size:30px;color:var(--ink);line-height:1}
+.rm-bar{height:8px;border-radius:999px;background:var(--line);margin:10px 0 12px;overflow:hidden}
+.rm-bar span{display:block;height:100%;border-radius:999px}
+.rm-list{margin:6px 0 0;padding-left:18px;font-size:14px;color:var(--text)}
+.rm-gap{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink)}
+.rm-gap b{font-family:var(--mono);font-size:12px;color:var(--warn);font-weight:500}
+/* print report */
+.print-head{display:none}
+@media print{
+  .skip,.vbar,.jdm,.when .best .use,.tl{display:none!important}
+  section.results{position:static!important;max-height:none!important;overflow:visible!important;padding:0!important}
+  .print-head{display:block;margin:0 0 14px;padding:0 0 12px;border-bottom:2px solid #000}
+  .print-head .ph-top{display:flex;align-items:center;gap:14px}
+  .print-head .hlogo{width:140px;height:auto}
+  .print-head .hlogo path[fill="#FFFFFF"]{fill:#B42A72}
+  .print-head h1{margin:0;font-size:20px;font-weight:600;color:#000}
+  .print-head .ph-date{margin-left:auto;font-size:12px;color:#555}
+  .print-head table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12.5px}
+  .print-head th,.print-head td{text-align:left;padding:4px 8px 4px 0;border-bottom:1px solid #ddd;vertical-align:top}
+  .print-head th{width:28%;font-weight:600;color:#000}
+  .legend{display:none!important}
+  .card,.verdict{box-shadow:none!important}
+}
+
+/* =================== REPORT (16:9 pages, Levy Report style) =================== */
+#reportView{position:fixed;inset:0;z-index:250;background:rgba(20,16,19,.92);overflow:auto;padding:70px 24px 40px}
+#reportView .rv-bar{position:fixed;top:0;left:0;right:0;z-index:2;display:flex;align-items:center;gap:12px;padding:12px 20px;background:#000;color:#fff;font-size:14px}
+#reportView .rv-bar span{color:#bbb;margin-right:auto}
+#reportView .rv-bar .btn.ghost{background:transparent;color:#fff;border-color:#666}
+.rpw{margin:0 auto 22px;position:relative}
+.rp{position:relative;width:1440px;height:810px;overflow:hidden;transform-origin:0 0;font-family:"Open Sans",Arial,sans-serif;color:#000;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.rp.dark{background:#000;color:#fff}
+.rp h1,.rp h2,.rp h3,.rp .mont{font-family:Montserrat,Arial,sans-serif;font-weight:800;letter-spacing:0;margin:0}
+.rp h1,.rp h2,.rp h3{color:inherit;text-transform:none;letter-spacing:0}
+.rp .hl{position:relative;display:inline-block;z-index:0}
+.rp .hl::before{content:"";position:absolute;z-index:-1;left:-14px;top:-.06em;width:calc(100% * .35 + 40px);height:.58em;background:#D10A7D}
+.rp .hl.low::before{left:auto;right:-10px;top:auto;bottom:.02em;width:58%;height:.48em}
+.rp .hl.pink::before{background:#F5D9E6}
+.rp .slab{position:absolute;left:0;height:56px;display:flex;align-items:center;padding:0 90px 0 68px;background:#000;color:#fff;font-family:Montserrat,Arial,sans-serif;font-weight:700;font-size:22px;clip-path:polygon(0 0,calc(100% - 90px) 0,100% 100%,0 100%)}
+.rp .lead{font-style:italic;font-size:21px;line-height:1.55;color:#000}
+.rp.dark .lead{color:#fff}
+.rp .col h3{font-size:24px;line-height:1.25;padding-bottom:16px;margin-bottom:22px;border-bottom:4px solid #000;width:330px}
+.rp.dark .col h3{border-color:#D10A7D}
+.rp .num{margin:0 0 14px;font-size:19px;line-height:1.5}
+.rp .num b.n{display:block;font-weight:700}
+.rp .kv{font-size:18px;line-height:1.5;margin:0 0 8px}
+.rp .kv b{font-weight:700}
+.rp .foot{position:absolute;left:68px;right:68px;bottom:28px;display:flex;justify-content:space-between;font-size:13px;color:#777}
+.rp.dark .foot{color:#999}
+.rp .deco{position:absolute;pointer-events:none}
+.rp .tag{display:inline-block;position:relative;z-index:0;font-size:19px}
+.rp .tag::before{content:"";position:absolute;z-index:-1;left:-8px;top:-4px;width:112px;height:24px;background:#D10A7D}
+.rp .wbox{display:inline-block;background:#fff;color:#000;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:24px;padding:4px 22px}
+.rp .gauge{text-align:center;width:340px}
+.rp .gauge .gv{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:40px;margin-top:-62px}
+.rp .gauge h3{font-size:24px;margin:34px 0 8px}
+.rp .gauge p{margin:0;font-size:17px;line-height:1.45}
+.rp .c3{position:absolute;top:380px;left:76px;right:76px;display:grid;grid-template-columns:repeat(3,1fr);gap:80px}
+.rp .c3 h3{position:relative;z-index:0;font-size:23px;line-height:1.3;padding-bottom:18px;margin-bottom:24px;border-bottom:4px solid #D10A7D}
+.rp .c3 h3::before{content:"";position:absolute;z-index:-1;left:-8px;top:-4px;width:92px;height:24px;background:#D10A7D}
+.rp .c3 p{font-style:italic;font-size:18px;line-height:1.55;margin:0 0 8px}
+@media print{
+  @page{size:1440px 810px;margin:0}
+  html,body{background:#fff!important}
+  body > *:not(#reportView){display:none!important}
+  #reportView{display:block!important;position:static;background:none;padding:0;overflow:visible}
+  #reportView .rv-bar{display:none!important}
+  .rpw{width:auto!important;height:auto!important;margin:0!important}
+  .rp{transform:none!important;box-shadow:none;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .rpw:last-child .rp{break-after:auto;page-break-after:auto}
+}
 </style>
 </head>
 <body>
+<a class="skip" href="#c-apprentice">Skip to the form</a>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="fd-logo" viewBox="0 0 1214 314"><path d="M 24 221 L 19 226 L 17 230 L 17 287 L 19 291 L 23 295 L 27 296 L 28 297 L 82 297 L 83 296 L 87 295 L 91 291 L 92 289 L 92 286 L 93 285 L 93 231 L 92 230 L 91 226 L 87 222 L 83 220 L 27 220 L 26 221 Z M 1143 119 L 1143 193 L 1196 193 L 1196 183 L 1156 183 L 1154 181 L 1154 162 L 1156 160 L 1191 160 L 1191 151 L 1190 150 L 1189 151 L 1171 151 L 1170 150 L 1159 150 L 1158 151 L 1157 150 L 1156 151 L 1154 149 L 1154 131 L 1156 129 L 1196 129 L 1196 119 Z M 1046 119 L 1046 193 L 1095 193 L 1095 183 L 1058 183 L 1057 182 L 1057 119 Z M 937 119 L 937 193 L 977 193 L 978 192 L 981 192 L 988 189 L 994 183 L 995 179 L 996 178 L 996 167 L 995 166 L 995 164 L 991 159 L 983 155 L 983 154 L 991 147 L 992 145 L 992 142 L 993 141 L 993 135 L 992 134 L 992 131 L 989 126 L 984 122 L 980 121 L 979 120 L 976 120 L 975 119 Z M 948 162 L 950 160 L 973 160 L 974 161 L 977 161 L 981 163 L 983 165 L 985 169 L 985 174 L 984 175 L 984 177 L 980 181 L 976 182 L 975 183 L 949 183 L 948 182 Z M 948 130 L 949 129 L 972 129 L 973 130 L 975 130 L 977 131 L 981 136 L 981 143 L 979 147 L 975 150 L 972 150 L 971 151 L 949 151 L 948 150 Z M 846 119 L 842 127 L 842 129 L 838 136 L 838 138 L 834 145 L 834 147 L 830 154 L 830 156 L 826 163 L 826 165 L 822 172 L 822 174 L 819 179 L 819 181 L 816 186 L 816 188 L 813 193 L 826 193 L 826 191 L 829 186 L 829 184 L 833 177 L 833 175 L 836 170 L 836 168 L 839 163 L 839 161 L 843 154 L 843 152 L 846 147 L 846 145 L 852 133 L 855 137 L 855 139 L 858 144 L 860 151 L 863 156 L 865 163 L 868 168 L 868 170 L 871 175 L 871 177 L 877 189 L 878 193 L 891 193 L 888 188 L 888 186 L 885 181 L 885 179 L 881 172 L 881 170 L 877 163 L 877 161 L 874 156 L 874 154 L 867 140 L 867 138 L 865 135 L 865 133 L 861 126 L 861 124 L 858 119 Z M 707 119 L 707 193 L 741 193 L 742 192 L 746 192 L 747 191 L 749 191 L 757 187 L 761 183 L 762 183 L 762 182 L 768 175 L 770 171 L 770 169 L 771 168 L 771 164 L 772 163 L 772 148 L 771 147 L 771 144 L 769 141 L 769 139 L 766 134 L 758 126 L 751 122 L 749 122 L 745 120 L 742 120 L 741 119 Z M 719 130 L 741 130 L 748 133 L 756 140 L 760 149 L 760 156 L 761 157 L 760 158 L 760 164 L 757 171 L 749 179 L 745 181 L 743 181 L 742 182 L 738 182 L 737 183 L 719 183 L 718 182 L 718 131 Z M 589 119 L 589 193 L 600 193 L 600 140 L 601 139 L 611 151 L 611 152 L 614 155 L 614 156 L 617 159 L 620 164 L 624 168 L 624 169 L 627 172 L 627 173 L 630 176 L 630 177 L 633 180 L 636 185 L 640 189 L 640 190 L 643 193 L 652 193 L 652 119 L 641 119 L 641 170 L 640 171 L 633 162 L 633 161 L 628 156 L 626 152 L 622 148 L 619 143 L 615 139 L 615 138 L 612 135 L 610 131 L 603 123 L 603 122 L 600 119 Z M 475 119 L 475 170 L 476 171 L 476 174 L 479 181 L 482 184 L 482 185 L 488 190 L 495 193 L 498 193 L 499 194 L 513 194 L 514 193 L 517 193 L 524 190 L 534 179 L 534 177 L 536 174 L 536 170 L 537 169 L 537 119 L 526 119 L 526 166 L 525 167 L 524 173 L 517 181 L 513 182 L 512 183 L 509 183 L 508 184 L 504 184 L 503 183 L 500 183 L 499 182 L 495 181 L 488 173 L 487 167 L 486 166 L 486 119 Z M 428 119 L 375 119 L 375 193 L 386 193 L 386 187 L 387 186 L 387 164 L 388 163 L 422 163 L 422 153 L 388 153 L 387 152 L 387 131 L 390 129 L 428 129 Z M 22 120 L 18 125 L 18 127 L 17 128 L 17 184 L 18 185 L 19 189 L 25 194 L 84 194 L 89 191 L 92 187 L 92 184 L 93 183 L 93 129 L 92 128 L 91 124 L 86 119 L 84 119 L 83 118 L 26 118 Z M 124 18 L 119 23 L 118 25 L 118 29 L 117 30 L 117 81 L 118 82 L 118 85 L 120 87 L 120 88 L 123 91 L 127 92 L 128 93 L 182 93 L 183 92 L 187 91 L 191 87 L 192 83 L 193 82 L 193 27 L 192 26 L 191 22 L 185 17 L 126 17 Z M 22 19 L 19 22 L 17 26 L 17 83 L 18 84 L 18 86 L 23 91 L 27 92 L 28 93 L 82 93 L 88 90 L 91 87 L 92 83 L 93 82 L 93 28 L 90 21 L 88 19 L 84 17 L 26 17 Z" fill="#FFFFFF" fill-rule="evenodd"/><path d="M 304 128 L 301 122 L 299 120 L 295 118 L 238 118 L 232 122 L 229 128 L 229 149 L 228 150 L 123 150 L 122 151 L 120 151 L 118 153 L 117 157 L 118 159 L 122 162 L 228 162 L 229 163 L 229 184 L 230 185 L 231 189 L 237 194 L 295 194 L 299 192 L 302 189 L 304 185 Z" fill="#00C8D0" fill-rule="evenodd"/></symbol>
@@ -472,6 +602,15 @@ footer a{color:var(--pink-deep)}
         <div class="combo"><input type="text" id="std" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stdlist" placeholder="e.g. accounts assistant level 3, or ST0002" autocomplete="off">
         <ul id="stdlist" role="listbox" class="hide"></ul></div></label>
       <div class="stdinfo" id="stdinfo"></div>
+      <details class="jdm" id="jdm"><summary><span>Not sure which apprenticeship?</span> <b>Match a job description</b></summary>
+        <div class="jdm-body">
+          <label class="f"><span>Paste the job description</span>
+            <textarea id="jdText" rows="7" placeholder="Paste the job title and duties. A job title on the first line helps most."></textarea>
+            <small>It stays in your browser. Nothing is sent anywhere.</small></label>
+          <button type="button" class="btn sm" id="jdGo">Find matching apprenticeships</button>
+          <div id="jdOut" aria-live="polite"></div>
+        </div>
+      </details>
       <label class="tick"><input type="checkbox" id="foundation"><span>This is a <b>foundation apprenticeship</b></span></label>
       <div class="row2">
         <label class="f"><span>Planned start date</span><input type="date" id="start"></label>
@@ -501,16 +640,19 @@ footer a{color:var(--pink-deep)}
 
   <!-- ================= RESULTS ================= -->
   <section class="results" aria-live="polite" aria-label="Result">
+    <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
 
     <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul></div>
+
+    <div class="card hide" id="roleCard"><h3>Role match</h3><div id="roleBody"></div></div>
 
     <div class="card" id="whenCard">
       <h3>Best time to onboard</h3>
       <div class="when" id="when"></div>
       <div id="whenNotes"></div>
       <div class="tl" id="tl" aria-hidden="true"></div>
-      <div class="legend"><span class="lw">Recommended start window</span><span class="ls">Planned start</span><span class="lc">Current rules deadline</span><span class="lm milonly">If Milburn adopted</span></div>
+      <div class="legend"><span class="lw">Start window</span><span class="lt">Today</span><span class="lr">Recommended start</span><span class="ls">Planned start</span><span class="lc">Funding deadline</span><span class="lm milonly">If Milburn adopted</span></div>
     </div>
 
     <div class="card" id="moneyCard">
@@ -520,11 +662,17 @@ footer a{color:var(--pink-deep)}
     </div>
 
     <div class="actions" id="actions">
-      <button class="btn" onclick="window.print()">Print / save as PDF</button>
+      <button class="btn" id="previewBtn" type="button">Preview report</button>
+      <button class="btn ghost" type="button" onclick="window.print()">Print / save as PDF</button>
       <button class="btn ghost" id="reset">Start again</button>
     </div>
   </section>
 </main>
+
+<div id="reportView" class="hide" role="dialog" aria-modal="true" aria-label="Report preview">
+  <div class="rv-bar"><b>Report preview</b><span id="rvCount"></span><button type="button" class="btn" id="rvPrint">Print / save as PDF</button><button type="button" class="btn ghost" id="rvClose">Close</button></div>
+  <div id="rvPages"></div>
+</div>
 
 <footer>
   Rules: <a href="https://www.gov.uk/government/publications/apprenticeship-funding-rules-and-assessment-plan-guidance-2026-to-2027" target="_blank" rel="noopener">Apprenticeship funding rules 2026–27 (v3)</a> and
@@ -666,10 +814,10 @@ function compute(){
   const std=findStd($('std').value);
   const fdn=$('foundation').checked;
   const care=$('care').checked, newHire=$('newhire').checked, levyOk=$('levyok').checked, mil=$('showmil').checked;
-  const hours=parseFloat($('hours').value)||37.5;
+  const hoursRaw=parseFloat($('hours').value), hoursAssumed=!(hoursRaw>0), hours=hoursAssumed?37.5:hoursRaw;
   const start=parse($('start').value) || addMonths(today,2);
   const name=$('name').value.trim();
-  const out={dob,std,fdn,care,newHire,levyOk,mil,hours,start,name,today,items:[],cliffs:[]};
+  const out={dob,std,fdn,care,newHire,levyOk,mil,hours,hoursAssumed,start,name,today,nostd:!std&&!fdn,items:[],cliffs:[]};
   if(!dob) return out;
   if(dob>today || ageOn(dob,today)>90){ out.badDob=true; return out; }
 
@@ -711,7 +859,10 @@ function compute(){
     else if(a===undefined) add('info',`<b>Not answered yet:</b> ${q.q.replace(/\?$/,'')}.`,q.ref,{unanswered:true});
   }
   if(S.assumed) add('info',`<b>Checks filled with the “assume all eligible” shortcut.</b> Confirm them with the apprentice. Your training provider will check them at sign-up.`,'');
-  if(hours<R.minHours) add('warn',`<b>${hours} hours a week is under 30</b>, so the apprenticeship takes longer: about <b>${dur||'—'} months</b>${baseDur?` instead of ${baseDur}`:''} (an estimate; your provider sets the actual length).`,'77.3, 80');
+  if(hours<R.minHours) add('warn',`<b>${hours} hours a week is under 30</b>, so the apprenticeship takes longer: about <b>${dur||'—'} months</b>${baseDur?` instead of ${baseDur}`:''} (an estimate; your provider sets the actual length).${dur&&baseDur&&dur>=baseDur*2?' <b>That is more than double the usual length, so check it is realistic with your provider before committing.</b>':''}`,'77.3, 80');
+  if(hoursAssumed) add('info','<b>No weekly hours entered</b>, so 37.5 hours a week is assumed. Add their contracted hours for an accurate length.','');
+  if(!std && !fdn) add('warn','<b>Pick the apprenticeship</b> to finish the check. Its level, length, funding band and some age limits all depend on it.','',{nostd:true});
+  if(start<today) add('warn',`<b>The planned start (${fmt(start)}) is in the past.</b> Choose a future date. The recommended start is shown below.`,'',{past:true});
   if(out.end) add('info',`Their contract must run beyond <b>${fmt(out.end)}</b>, plus the end-point assessment period.`,'69');
 
   // --- verdict
@@ -767,9 +918,16 @@ function compute(){
   const cap = out.until || null;
   out.busyClash = cap && rec>cap;
   out.rec = out.busyClash ? from : rec;
+  // why the recommended date (shown to the manager)
+  { const why=[]; const lead=addDays(today,R.leadDays);
+    why.push(earliest>lead ? 'is the first date they are old enough to start' : 'leaves 4 weeks for the provider to sign them up');
+    if(+out.rec>+from && !out.busyClash) why.push(`avoids your busy months (${[...S.busy].sort((a,b)=>a-b).map(i=>MONTHS[i]).join(', ')})`);
+    if(out.until) why.push(`comes before the ${out.untilWhy.what.toLowerCase()} on ${fmt(out.untilWhy.date)}`);
+    if(mil && out.milAhead && +out.rec<=+out.milAhead.last) why.push('is before the Milburn age-25 cut-off');
+    out.recWhy=why; }
   out.blocked=blocked;
   out.missedByPlan = out.cliffs.filter(k=>live(k) && start>k.last && from<=k.last);
-  out.passed = out.cliffs.filter(k=>live(k) && k.last<from);
+  out.passed = out.cliffs.filter(k=>live(k) && k.last<from && k.date>=today);  // only cut-offs that are still ahead but too soon to catch
   return out;
 }
 
@@ -787,6 +945,8 @@ function render(){
   const has=!!o.dob&&!o.badDob;
   $('actions').classList.toggle('hide',!has);
   updateVbar(o);
+  lastO=o;
+  renderRole(o); renderPrintHead(o);
   if(!has){ V.className='verdict v-empty'; V.innerHTML=`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
     <ul class="preview"><li><i>✓</i><span><b>Whether they can be funded</b>, and the rule behind each answer</span></li><li><i>📅</i><span><b>The best date to start</b>, and the last date before funding changes</span></li><li><i>£</i><span><b>Who pays</b>, today and if the Milburn Review is adopted</span></li></ul>`; return; }
   const ageTxt=`${o.age} at the planned start (${fmt(o.start)})`;
@@ -796,6 +956,7 @@ function render(){
     no:['v-bad','Not eligible for funding',`As things stand, ${who.toLowerCase()==='this apprentice'?'this apprentice':who} can't be funded. The reasons are below.`],
     notyet:['v-bad','Not eligible yet',`${who} can start from ${fmt(o.earliest)}.`]
   }[o.verdict];
+  if(o.verdict==='check' && o.nostd) { map[1]='Eligible so far'; map[2]=`${who} looks eligible so far. Pick the apprenticeship to finish the check. They'll be ${ageTxt}.`; }
   if(o.verdict==='no' && !o.blocked && o.items.filter(i=>i.sev==='bad').every(i=>i.unfunded||i.notyet) && o.until && o.start>o.until)
     map[2]+=` <b>Starting by ${fmt(o.until)} fixes this.</b>`;
   V.className='verdict '+map[0];
@@ -815,18 +976,21 @@ function render(){
     W.innerHTML=`<div><div class="l">Earliest sensible start</div><div class="v">${fmt(o.from)}</div></div>
       <div class="best"><div class="l">Recommended start</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div></div>`;
-    let h='';
-    if(o.untilWhy) h+=`<p class="callout">Start by <b>${fmt(o.until)}</b>. On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the <b>${o.untilWhy.what.toLowerCase()}</b>${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.</p>`;
-    else h+=`<p class="callout ok">There's no age deadline under current rules. Start when the team is ready, and use levy funds before they expire (12 months after they enter the account).</p>`;
-    if(o.mil && o.milAhead) h+=`<p class="callout">If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`. Your planned start of ${fmt(o.start)} is after that birthday`:''}. The changes aren't law, and the report's roadmap points to 2028, so this only matters if they're in force by the start date.</p>`;
+    const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
-    if(missCur.length) h+=`<p class="callout bad">Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.</p>`;
-    else if(o.start<o.from && o.start>=o.earliest) h+=`<p class="callout">Your planned start of ${fmt(o.start)} gives less than 4 weeks for the provider to sign up, run the skills scan and approve the commitment.</p>`;
-    else if(!missCur.length && !o.items.some(i=>i.notyet)) h+=`<p class="callout ok">Your planned start of <b>${fmt(o.start)}</b> works.</p>`;
-    if(o.busyClash) h+=`<p class="callout">Every month before the deadline is marked as one to avoid, so the recommended date ignores those preferences.</p>`;
-    if(o.passed.length) h+=`<p class="note">Already passed: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','')} on ${fmt(k.date)}`).join(' · ')}.</p>`;
-    h+=`<p class="note">“Earliest sensible start” allows 4 weeks for provider sign-up. That's a planning assumption, not a rule.</p>`;
-    N.innerHTML=h;
+    L.push(['info',`<b>Why ${fmt(o.rec)}?</b> It ${and(o.recWhy)}.`]);
+    if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the recommended date or pick a new one.`]);
+    else if(missCur.length) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.`]);
+    else if(o.start<o.from && o.start>=o.earliest) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up, run the skills scan and approve the commitment.`]);
+    else if(!o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
+    if(o.untilWhy) L.push(['warn',`<b>Start by ${fmt(o.until)}.</b> On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the ${o.untilWhy.what.toLowerCase()}${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.`]);
+    else L.push(['ok','No age deadline under current rules. Use levy funds before they expire (12 months after they enter the account).']);
+    if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
+    if(o.busyClash) L.push(['warn','Every month before the deadline is marked as one to avoid, so the recommended date ignores those preferences.']);
+    if(o.passed.length) L.push(['info',`Too soon to catch: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','').toLowerCase()} on ${fmt(k.date)}`).join('; ')}, because sign-up needs about 4 weeks.`]);
+    const IC={ok:['i-ok','✓'],warn:['i-warn','!'],bad:['i-bad','✕'],info:['i-info','i'],mil:['i-mil','M']};
+    N.innerHTML=`<ul class="means">${L.map(([k,t])=>`<li><span class="ico ${IC[k][0]}">${IC[k][1]}</span><span>${t}</span></li>`).join('')}</ul>
+      <p class="note">“Earliest sensible start” allows 4 weeks for provider sign-up. That's a planning assumption, not a rule.</p>`;
   }
   drawTimeline(o);
 
@@ -849,29 +1013,35 @@ function render(){
 }
 
 function drawTimeline(o){
-  const T=$('tl'); if(o.blocked){T.innerHTML='';return;}
-  const pts=[o.today,o.start,o.from,o.rec,...o.cliffs.filter(k=>k.scheme==='cur'||o.mil).map(k=>k.date)];
-  let a=o.today, b=new Date(Math.max(...pts.map(Number), addMonths(o.today,18)));
-  b=addMonths(b,4);
-  const span=b-a, x=d=>Math.max(0,Math.min(100,(d-a)/span*100));
-  let h='<div class="axis"></div>';
-  for(let y=a.getUTCFullYear()+1;y<=b.getUTCFullYear();y++){const d=new Date(Date.UTC(y,0,1)); if(d>a&&d<b) h+=`<div class="yr" style="left:${x(d)}%">${y}</div>`;}
-  const end=o.until||b; if(end>=o.from) h+=`<div class="win" style="left:${x(o.from)}%;width:${Math.max(.6,x(end)-x(o.from))}%"></div>`;
-  const labels=[]; // alternate above/below to avoid collisions
-  o.cliffs.filter(k=>k.scheme==='cur'||o.mil).forEach(k=>{ if(k.date<a||k.date>b) return; labels.push({x:x(k.date),cls:k.scheme==='mil'?'mil':'',t:k.what.replace('Milburn: ','If Milburn: '),d:fmt(k.date)}); });
-  labels.push({x:x(o.start),cls:'start',t:'Planned start',d:fmt(o.start)});
-  labels.sort((p,q)=>p.x-q.x);
-  const lanes=[[],[],[],[]]; // 0,1 above; 2,3 below
-  labels.forEach(l=>{
-    h+=`<div class="mk ${l.cls}" style="left:${l.x}%"></div>`;
-    let lane=0; for(;lane<4;lane++){ if(!lanes[lane].some(px=>Math.abs(px-l.x)<17)) break; } if(lane===4) lane=0;
-    lanes[lane].push(l.x);
-    const top=[30,2,100,128][lane];
-    const lx=Math.max(7,Math.min(93,l.x));
-    h+=`<div class="lab ${l.cls==='mil'?'mil':''}" style="left:${lx}%;top:${top}px">${esc(l.t)}<i>${l.d}</i></div>`;
+  const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
+  const W=Math.max(320,T.clientWidth||600), PAD=10, AX=94;
+  const ev=[{d:o.today,c:'today',t:'Today'}];
+  const same=iso(o.rec)===iso(o.start);
+  ev.push({d:o.rec,c:'rec',t:same?'Recommended = planned':'Recommended start'});
+  if(!same) ev.push({d:o.start,c:'start',t:'Planned start'});
+  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil) && k.date>=o.today).forEach(k=>ev.push({d:k.date,c:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn: ')}));
+  const a=o.today; let b=new Date(Math.max(...ev.map(e=>+e.d), +addMonths(o.today,10))); b=addMonths(b,2);
+  const X=d=>PAD+(d-a)/(b-a)*(W-2*PAD);
+  let h=`<div class="axis" style="top:${AX}px"></div>`;
+  for(let y=a.getUTCFullYear()+1;y<=b.getUTCFullYear();y++){ const d=new Date(Date.UTC(y,0,1)); if(d>a&&d<b) h+=`<i class="tk" style="left:${X(d)}px;top:${AX-3}px"></i><div class="yr" style="left:${X(d)}px;top:${AX+8}px">${y}</div>`; }
+  const wEnd=o.until?X(addDays(o.until,1)):X(b);
+  if(wEnd>X(o.from)) h+=`<div class="win${o.until?'':' open'}" style="left:${X(o.from)}px;width:${wEnd-X(o.from)}px;top:${AX-6}px"></div>`;
+  if(!o.until) h+=`<div class="nodl" style="right:${PAD}px;top:${AX-24}px">No age deadline →</div>`;
+  // labels: four lanes (two above, two below); estimate each label's width and avoid overlaps
+  const lanes=[[],[],[],[]], laneY=[AX-46,AX-88,AX+30,AX+70];
+  ev.sort((p,q)=>p.d-q.d).forEach(e=>{
+    const x=X(e.d), date=fmt(e.d), w=Math.max(e.t.length*6.3,date.length*6.6)+14;
+    const L=Math.max(0,Math.min(W-w,x-w/2)), R=L+w;
+    let ln=0; for(;ln<4;ln++){ if(!lanes[ln].some(([l,r])=>L<r+6&&R>l-6)) break; } if(ln===4) ln=0;
+    lanes[ln].push([L,R]);
+    const y=laneY[ln], above=ln<2;
+    const c1=above?y+30:AX+4, c2=above?AX-4:y;
+    h+=`<i class="cn ${e.c}" style="left:${x}px;top:${Math.min(c1,c2)}px;height:${Math.abs(c2-c1)}px"></i><i class="dot ${e.c}" style="left:${x}px;top:${AX}px"></i>`;
+    h+=`<div class="lab ${e.c}" style="left:${L}px;top:${y}px;width:${w}px">${esc(e.t)}<i>${date}</i></div>`;
   });
   T.innerHTML=h;
 }
+let _tlT=0; window.addEventListener('resize',()=>{ clearTimeout(_tlT); _tlT=setTimeout(render,150); });
 
 /* ---------- 5. use the recommended start date ---------- */
 $('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return; $('start').value=b.dataset.date; render(); });
@@ -881,7 +1051,7 @@ let verdictOnScreen=false;
 function updateVbar(o){
   const bar=$('vbar'); bar.classList.remove('r-ok','r-warn','r-bad');
   const has=!!o.dob&&!o.badDob;
-  const lab={yes:['r-ok','Eligible'],check:['r-warn','Eligible, with checks'],no:['r-bad','Not eligible'],notyet:['r-bad','Not eligible yet']}[has?o.verdict:''];
+  const lab={yes:['r-ok','Eligible'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks'],no:['r-bad','Not eligible'],notyet:['r-bad','Not eligible yet']}[has?o.verdict:''];
   if(lab){ bar.classList.add(lab[0]); $('vbarText').innerHTML=`<b>${lab[1]}</b>${o.name?' · '+esc(o.name):''}`; }
   bar.classList.toggle('off', !lab || verdictOnScreen);
 }
@@ -889,6 +1059,242 @@ if('IntersectionObserver' in window){
   new IntersectionObserver(es=>{ verdictOnScreen=es[0].isIntersecting; render(); },{threshold:.4}).observe($('verdict'));
 }
 $('vbarGo').onclick=e=>{ e.preventDefault(); $('verdict').scrollIntoView({behavior:'smooth',block:'start'}); };
+
+/* ================= JD matcher =================
+   Port of Fundable's "Which standard fits this role?" engine: job-title match leads,
+   then tf-idf cosine over the role text (About Us / benefits boilerplate stripped),
+   coverage = share of the standard's KSBs whose wording the job description evidences.
+   The KSB library (standards.json, ~2MB) is fetched from the same site only when used. */
+const JDM=(function(){
+  let LIB=null, loading=null, idf=null, svec=null, snorm=null, stok=null;
+  const STOP=new Set(['this','that','with','from','have','will','your','their','they','able','must','should','which','when','where','what','then','than','into','also','such','been','were','being','some','more','most','other','over','under','within','across','using','used','role','work','team','etc','and','for','the','our','you']);
+  const stem=w=>w.replace(/(ings?|ed|ies|es|s)$/,'');
+  const raw=t=>String(t).toLowerCase().split(/[^a-z]+/).filter(w=>w.length>3&&!STOP.has(w)).map(stem);
+  const toks=t=>new Set(raw(t));
+  function match(stmt,tk){ const ws=[...new Set(raw(stmt))]; const hits=ws.filter(w=>tk.has(w)); const r=ws.length?hits.length/ws.length:0; return {covered:hits.length>=2||r>=.25,hits}; }
+  const TITLE_GENERIC=/^(representative|specialist|practitioner|assistant|officer|operative|technician|coordinator|ordinator|administrator|professional|consultant|adviser|advisor|executive|engineer|worker|leader|supervisor|apprentice|senior|associate|support|manager|management|degree|integrated|standards|level|apprenticeship|trainee|junior|lead|head|and|the|for|with|role|job|title)$/i;
+  const DROP=/^(about (us|the company|our company)|company (overview|profile|information)|who we are|our (values|culture|mission|story|team)|values|culture|physical (demands|requirements)|work environment|equal (employment|opportunit)|eeo|diversity|inclusion|benefits|what we offer|package|other duties|disclaimer|note|travel( requirements)?|salary|hours of work|location)\b/i;
+  function titleLine(t){ const ls=String(t).split(/\n/).map(x=>x.trim()); const isL=x=>/:\s*$/.test(x)||x.length>80;
+    for(let i=0;i<ls.length;i++){ const m=/^(job[ \t]*)?title[ \t]*:[ \t]*(.*)$/i.exec(ls[i]); if(!m) continue; if(m[2]&&m[2].trim()) return m[2].trim(); for(let j=i+1;j<ls.length&&j<=i+3;j++) if(ls[j]&&!isL(ls[j])) return ls[j]; }
+    for(const l of ls) if(l&&!isL(l)) return l; return ''; }
+  function roleText(t){ const ls=String(t).split(/\n/); const keep=[]; let drop=false, n=0;
+    for(const rawl of ls){ const l=rawl.trim(); const head=l.length>0&&l.length<=60&&(/:\s*$/.test(l)||/^[A-Z][A-Za-z ,&/'-]{2,58}$/.test(l));
+      if(head){ const bare=l.replace(/:\s*$/,'').trim(); if(DROP.test(bare)){drop=true;n++;continue;} drop=false; continue; } if(!drop) keep.push(rawl); }
+    const out=keep.join('\n').trim(); return (!n||out.length<Math.max(200,String(t).length*.15))?String(t):out; }
+  const titleToks=str=>{ const o=new Set(); String(str).toLowerCase().split(/[^a-z]+/).forEach(w=>{ if(w.length>2&&!TITLE_GENERIC.test(w)) o.add(stem(w)); }); return o; };
+  function titleScore(name,tt){ if(!tt.size) return 0; const b=titleToks(String(name).replace(/^L\d+\s*/i,'').replace(/\(.*?\)/g,'')); if(!b.size) return 0; let hit=0; b.forEach(x=>{ if(tt.has(x)) hit++; }); const sc=hit/b.size; return sc>=.5?sc:0; }
+  const ksbText=s=>['knowledge','skills','behaviours'].map(k=>s.ksbs[k].map(x=>x.d).join(' ')).join(' ');
+  function prep(){ if(idf) return; const df=Object.create(null); let n=0; stok=LIB.map(s=>{ if(!s.ksbs) return new Set(); n++; const t=toks(ksbText(s)); t.forEach(w=>df[w]=(df[w]||0)+1); return t; });
+    const w=Object.create(null); Object.keys(df).forEach(t=>w[t]=Math.log((n+1)/(df[t]+1))); idf={w,max:Math.log(n+1)};
+    svec=[]; snorm=[]; LIB.forEach((s,i)=>{ if(!s.ksbs){svec[i]={};snorm[i]=1;return;} const v=vec(tf(ksbText(s))); svec[i]=v; snorm[i]=norm(v); }); }
+  const tf=t=>{ const c=Object.create(null); raw(t).forEach(w=>c[w]=(c[w]||0)+1); return c; };
+  const vec=c=>{ const v=Object.create(null); for(const t in c) v[t]=(1+Math.log(c[t]))*(idf.w[t]||idf.max); return v; };
+  const norm=v=>{ let n=0; for(const t in v) n+=v[t]*v[t]; return Math.sqrt(n)||1; };
+  function load(){
+    if(LIB) return Promise.resolve(LIB); if(loading) return loading;
+    loading=fetch('standards.json').then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }).then(j=>{
+      const arr=[]; const nat=(a,b)=>a.localeCompare(b,undefined,{numeric:true});
+      for(const ref in j.standards){ const s=j.standards[ref]; const g=o=>o?Object.keys(o).sort(nat).map(k=>({id:k,d:String(o[k])})):[];
+        const k={knowledge:g(s.K),skills:g(s.S),behaviours:g(s.B)}; const has=k.knowledge.length+k.skills.length+k.behaviours.length>0;
+        arr.push({ref:s.ref||ref,name:s.name,level:s.level,band:s.max_funding,dur:s.duration_months,status:s.status,ksbs:has?k:null}); }
+      LIB=arr; return arr; }).catch(e=>{ loading=null; throw e; });
+    return loading; }
+  function coverage(ref,text){ if(!LIB) return null; const s=LIB.find(x=>x.ref===ref); if(!s) return null; if(!s.ksbs) return {none:true,name:s.name};
+    const tk=toks(text); let total=0,cov=0; const gaps=[];
+    [['knowledge','Knowledge'],['skills','Skills'],['behaviours','Behaviours']].forEach(([k,lab])=>s.ksbs[k].forEach(x=>{ total++; if(match(x.d,tk).covered) cov++; else gaps.push({grp:lab,id:x.id,d:x.d}); }));
+    return {total,covered:cov,score:total?Math.round(cov/total*100):0,gaps,title:titleScore(s.name,titleToks(titleLine(text)))}; }
+  function rank(text,n){ prep(); const tk=toks(text), qv=vec(tf(roleText(text))), qn=norm(qv), tt=titleToks(titleLine(text)); const out=[]; let thin=0;
+    LIB.forEach((s,i)=>{ if(!s.ksbs) return; let total=0,cov=0; ['knowledge','skills','behaviours'].forEach(k=>s.ksbs[k].forEach(x=>{ total++; if(match(x.d,tk).covered) cov++; }));
+      if(total<8){thin++;return;} let dot=0; const sv=svec[i]; for(const t in qv) if(sv[t]) dot+=qv[t]*sv[t];
+      out.push({ref:s.ref,name:s.name,level:s.level,band:s.band,dur:s.dur,status:s.status,total,covered:cov,score:Math.round(cov/total*100),rel:dot/((qn*snorm[i])||1),title:titleScore(s.name,tt)}); });
+    out.sort((a,b)=>(b.title-a.title)||(b.rel-a.rel)||(b.covered-a.covered)||a.name.localeCompare(b.name));
+    return {ranked:out.slice(0,n||5),considered:out.length,thin}; }
+  return {load,rank,coverage,titleLine,ready:()=>!!LIB};
+})();
+
+const pctCol=p=>p>=50?'var(--ok)':p>=30?'var(--warn)':'var(--bad)';
+function drawJdResults(){
+  const J=S.jd; if(!J) return; const cur=findStd($('std').value);
+  $('jdOut').innerHTML = `<p class="jdmsg">Ranked across ${J.considered} standards with skills lists. Job-title matches come first, then the closest wording.</p>
+    <ol class="jdr">${J.ranked.map((x,i)=>`<li class="${cur&&cur.r===x.ref?'on':''}"><span class="rk">${i+1}</span>
+      <span><div class="nm">${esc(x.name)}${x.title?'<span class="tm">Job title matches</span>':''}</div>
+      <div class="mt">Level ${x.level} · ${x.ref}${x.dur?' · '+x.dur+' months':''}${x.band?' · '+money(x.band):''} · <b>${x.covered} of ${x.total}</b> skills in the job description (${x.score}%)${x.status&&x.status!=='ApprovedForDelivery'?' · <span style="color:var(--bad)">'+(x.status==='InDevelopment'?'in development':'starts paused')+'</span>':''}</div></span>
+      <button type="button" data-ref="${x.ref}">${cur&&cur.r===x.ref?'✓ Selected':'Use this'}</button></li>`).join('')}</ol>`;
+}
+$('jdGo').onclick=async()=>{
+  const text=$('jdText').value; const out=$('jdOut');
+  if(text.trim().length<25){ out.innerHTML='<p class="jdmsg">Paste a fuller job description first: the job title and a few duties at least.</p>'; return; }
+  if(!JDM.ready()) out.innerHTML='<p class="jdmsg">Loading the standards library (first time only)…</p>';
+  try{ await JDM.load(); }catch(e){ out.innerHTML='<p class="jdmsg" style="color:var(--bad)">Couldn\'t load the standards library. Check your connection and try again.</p>'; return; }
+  const r=JDM.rank(text,5);
+  if(!r.ranked.length){ out.innerHTML='<p class="jdmsg">No standards matched. Try adding the duties, not just the title.</p>'; return; }
+  S.jd={text,title:JDM.titleLine(text),ranked:r.ranked,considered:r.considered};
+  drawJdResults(); render();
+};
+$('jdOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-ref]'); if(!b) return; const s=STDS.find(x=>x.r===b.dataset.ref);
+  $('std').value = s ? `${s.n} (${s.r})` : `${b.dataset.ref}`; render(); drawJdResults(); });
+
+function renderRole(o){
+  const card=$('roleCard'), J=S.jd, std=o.std;
+  if(!J || !std || !o.dob || o.badDob){ card.classList.add('hide'); return; }
+  const c=JDM.coverage(std.r,J.text); if(!c){ card.classList.add('hide'); return; }
+  card.classList.remove('hide');
+  const pos=J.ranked.findIndex(x=>x.ref===std.r);
+  if(c.none){ $('roleBody').innerHTML=`<p class="note" style="margin:0">Job description: <b>${esc(J.title||'(no title line)')}</b>. ${esc(c.name)} has no skills list stored, so the match can't be scored.</p>`; return; }
+  const others=J.ranked.filter(x=>x.ref!==std.r).slice(0,3);
+  const groups=['Knowledge','Skills','Behaviours'].map(g=>({g,items:c.gaps.filter(x=>x.grp===g)})).filter(x=>x.items.length);
+  $('roleBody').innerHTML=`<div class="rm-top"><span class="rm-pct" style="color:${pctCol(c.score)}">${c.score}%</span>
+      <span style="font-size:15px;color:var(--ink)"><b>${c.covered} of ${c.total}</b> of the skills in <b>${esc(std.n)}</b> appear in the job description${c.title?' · <span class="tm" style="background:#1F7A4D;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase">Job title matches</span>':''}</span></div>
+    <div class="rm-bar"><span style="width:${c.score}%;background:${pctCol(c.score)}"></span></div>
+    <p style="margin:0;font-size:14.5px;color:var(--text)">Job description: <b>${esc(J.title||'(no title line)')}</b>${pos>=0?` · ranked <b>${ord(pos+1)}</b> of ${J.considered} standards`:' · chosen by you (not in the top 5)'}.
+      ${c.score<30&&!c.title?' A low score can mean the job description is short, not that the role is wrong. Check with your provider.':''}</p>
+    ${others.length?`<p style="margin:10px 0 0;font-size:14px;color:var(--muted)">Other close matches: ${others.map(x=>`${esc(x.name)} (${x.score}%)`).join(' · ')}</p>`:''}
+    ${c.gaps.length?`<details class="fold" style="background:var(--bg)"><summary>Skills to develop on the job (${c.gaps.length})</summary><div>
+      <p style="margin:0 0 6px">These aren't in the job description. Plan real tasks, projects or shadowing so the apprentice can practise and evidence each one.</p>
+      ${groups.map(gr=>`<p style="margin:10px 0 2px;font-weight:600;color:var(--ink)">${gr.g} (${gr.items.length})</p>${gr.items.map(x=>`<div class="rm-gap"><b>${esc(x.id)}</b><span>${esc(x.d)}</span></div>`).join('')}`).join('')}
+    </div></details>`:''}`;
+}
+
+function renderPrintHead(o){
+  const P=$('printHead'); if(!o.dob||o.badDob){ P.innerHTML=''; return; }
+  const logo=document.querySelector('header .hlogo'); const std=o.std;
+  const rows=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],
+    ['Apprenticeship',std?`${esc(std.n)} (${std.r}), Level ${std.l}, ${std.d||'?'} months, band ${std.f?money(std.f):'n/a'}`:(o.fdn?'Foundation apprenticeship':'Not chosen yet')],
+    ['Planned start',`${fmt(o.start)}${o.hoursAssumed?' · 37.5 hours a week (assumed)':' · '+o.hours+' hours a week'}`],
+    ['Circumstances',[o.care?'EHC plan or care-experienced':'',o.newHire?'New hire':'Existing employee',o.levyOk?'Levy balance covers it':'Levy balance does not cover it'].filter(Boolean).join(' · ')],
+    ['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assume-all-eligible shortcut used)':''}`]];
+  if(S.jd&&std){ const c=JDM.coverage(std.r,S.jd.text); if(c&&!c.none) rows.push(['Role match',`“${esc(S.jd.title||'Job description')}”: ${c.covered} of ${c.total} skills evidenced (${c.score}%)${c.title?', job title matches':''}`]); }
+  P.innerHTML=`<div class="ph-top">${logo?logo.outerHTML:''}<h1>Apprentice eligibility report</h1><span class="ph-date">Checked ${fmt(o.today)}</span></div>
+    <table>${rows.map(([k,v])=>`<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table>`;
+}
+// print in light, with every folded section open; put things back afterwards
+let _pt=null, _po=[];
+window.addEventListener('beforeprint',()=>{ _pt=document.documentElement.getAttribute('data-theme'); document.documentElement.setAttribute('data-theme','light');
+  _po=[...document.querySelectorAll('section.results details:not([open])')]; _po.forEach(d=>d.open=true); });
+window.addEventListener('afterprint',()=>{ if(_pt) document.documentElement.setAttribute('data-theme',_pt); _po.forEach(d=>d.open=false); _po=[]; });
+
+/* =================== REPORT builder =================== */
+let lastO=null;
+const strip=h=>String(h).replace(/<[^>]+>/g,'');
+function gaugeSVG(p){ // half donut: pale pink = the value, black = the rest (as in the Levy Report)
+  p=Math.max(0,Math.min(100,p||0))/100; const r=110, cx=150, cy=150, sw=58;
+  const pt=a=>[cx+r*Math.cos(a), cy-r*Math.sin(a)]; const A=Math.PI*(1-p);
+  const [x1,y1]=pt(Math.PI), [x2,y2]=pt(A), [x3,y3]=pt(0);
+  const pink = p>0 ? `<path d="M${x1} ${y1} A${r} ${r} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}" stroke="#F5D9E6" stroke-width="${sw}" fill="none"/>` : '';
+  const black = p<1 ? `<path d="M${x2.toFixed(2)} ${y2.toFixed(2)} A${r} ${r} 0 0 1 ${x3} ${y3}" stroke="#000" stroke-width="${sw}" fill="none"/>` : '';
+  return `<svg viewBox="0 0 300 160" width="300" height="160" aria-hidden="true">${pink}${black}</svg>`; }
+function waves(w,h,col,n){ let d=''; for(let k=0;k<n;k++){ const yy=h*.25+k*(h*.6/n); d+=`<path d="M0 ${yy} C ${w*.3} ${yy-h*.35}, ${w*.6} ${yy+h*.45}, ${w} ${yy-h*.15}" stroke="${col}" stroke-width="1" fill="none"/>`; } return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${d}</svg>`; }
+function tri(points,fill){ return `<svg class="deco" style="left:0;top:0" width="1440" height="810" viewBox="0 0 1440 810"><polygon points="${points}" fill="${fill}"/></svg>`; }
+function grid(){ let d=''; for(let x=-200;x<300;x+=28) d+=`<line x1="${x}" y1="100" x2="${x+100}" y2="0" stroke="#fff" stroke-width="1"/>`; for(let x=0;x<300;x+=28) for(let y=8;y<100;y+=30) d+=`<circle cx="${x}" cy="${y}" r="2" fill="#fff"/>`; return `<svg width="300" height="100" viewBox="0 0 300 100">${d}</svg>`; }
+
+function buildReport(o){
+  if(!o||!o.dob||o.badDob) return [];
+  const std=o.std, who=o.name?esc(o.name):'This apprentice';
+  const logo=document.querySelector('header .hlogo');
+  const logoW=w=>logo?logo.outerHTML.replace('class="hlogo"',`class="rlogo" style="width:${w}px;height:auto"`):'';
+  const logoBlack=w=>logoW(w).replace(/fill="#FFFFFF"/g,'fill="#000000"');
+  const vText={yes:'Eligible',check:o.nostd?'Eligible so far':'Eligible, with checks',no:'Not eligible for funding',notyet:'Not eligible yet'}[o.verdict];
+  const stdTxt=std?`${esc(std.n)} (Level ${std.l})`:(o.fdn?'Foundation apprenticeship':'Apprenticeship not chosen yet');
+  const pages=[]; const total=()=>pages.length;
+  const foot=(n,dark)=>`<div class="foot"><span>Ann Summers · Apprentice Eligibility Report · ${fmt(o.today)} · Powered by Fundable · page ${n}</span></div>`;
+
+  // 1. cover
+  pages.push(`<section class="rp dark">
+    <div style="position:absolute;left:0;right:0;top:300px;text-align:center"><h1 style="font-size:88px;line-height:1.05">Apprentice Eligibility Report</h1>
+    <p class="lead" style="margin:44px 0 0;font-size:24px">${who} · ${stdTxt}</p>
+    <div style="margin-top:56px;display:flex;justify-content:center">${logoW(200)}</div></div>
+    <div class="foot" style="color:#aaa"><span>Checked ${fmt(o.today)}</span><span>Powered by Fundable</span></div></section>`);
+
+  // 2. the result
+  const order={bad:0,warn:1,ok:2,info:3};
+  const keys=o.items.slice().sort((a,b)=>order[a.sev]-order[b.sev]).slice(0,3);
+  const details=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],['Apprenticeship',std?`${esc(std.n)}, ${std.r}, ${std.d||'?'} months`:stdTxt],
+    ['Planned start',`${fmt(o.start)}, ${o.hoursAssumed?'37.5 (assumed)':o.hours} hours a week`],['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assumed eligible)':''}`]];
+  pages.push(`<section class="rp">
+    ${tri('900,0 1440,0 1440,300','#000')}${tri('1440,420 1050,810 1440,810','#000')}
+    <div class="deco" style="right:0;bottom:120px;opacity:.5">${waves(640,420,'#bbb',22)}</div>
+    <h1 style="position:absolute;left:68px;top:78px;font-size:76px">The Result</h1>
+    <div class="slab" style="top:190px">Funding eligibility: ${vText}</div>
+    <p class="lead" style="position:absolute;left:68px;top:268px;width:860px;margin:0">${strip(({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far. Pick the apprenticeship to finish the check.`:`${who} looks eligible. A few items need confirming first.`,no:`As things stand, ${who} can't be funded. The reasons are below.`,notyet:`${who} can start from ${fmt(o.earliest)}.`})[o.verdict])} They'll be ${o.age} at the planned start on ${fmt(o.start)}.</p>
+    <div class="col" style="position:absolute;left:68px;top:392px;width:560px"><h3>Key points</h3>
+      ${keys.map((k,i)=>`<p class="num"><b class="n">0${i+1}</b>${strip(k.text)}</p>`).join('')}</div>
+    <div class="col" style="position:absolute;left:700px;top:392px;width:420px"><h3>The apprentice</h3>
+      ${details.map(([k,v])=>`<p class="kv"><b>${k}:</b> ${v}</p>`).join('')}</div>
+    ${foot(2)}</section>`);
+
+  // 3. key dates (stem timeline)
+  const ev=[{d:o.today,t:'Today',n:'Report run'}];
+  if(!o.blocked){ ev.push({d:o.from,t:'Earliest sensible start',n:'4 weeks for sign-up'}); ev.push({d:o.rec,t:'Recommended start',n:o.recWhy&&o.recWhy[1]?o.recWhy[1].replace(/^avoids/,'Avoids').replace(/^comes/,'Comes').replace(/^is/,'Is'):'Leaves time for sign-up'});
+    if(iso(o.start)!==iso(o.rec)) ev.push({d:o.start,t:'Planned start',n:o.start<o.today?'In the past':'Your date'}); }
+  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).slice(0,3).forEach(k=>ev.push({d:k.date,t:k.what.replace('Milburn: ','If Milburn: '),n:k.elig?'Funding changes':`Worth ${money(k.cost)}`}));
+  ev.sort((a,b)=>a.d-b.d); const E=ev.slice(0,6);
+  const x0=150, x1=1010, xs=E.map((e,i)=>x0+(E.length>1?i*(x1-x0)/(E.length-1):0));
+  const endBox=o.until?`Start by<br>${fmt(o.until)}`:'No age<br>deadline';
+  pages.push(`<section class="rp dark">
+    <h1 style="position:absolute;left:76px;top:70px;font-size:56px;line-height:1.15"><span class="hl">Key Dates</span><br>and Deadlines</h1>
+    <div style="position:absolute;left:68px;top:356px"><span class="wbox">${o.today.getUTCFullYear()}/${String((o.today.getUTCFullYear()+1)%100).padStart(2,'0')}</span></div>
+    <svg class="deco" style="left:0;top:0" width="1440" height="810"><line x1="70" y1="410" x2="1380" y2="410" stroke="#fff" stroke-width="2"/><circle cx="70" cy="410" r="5" fill="#fff"/><circle cx="1380" cy="410" r="5" fill="#fff"/>
+      ${E.map((e,i)=>{ const up=i%2===1; return `<line x1="${xs[i]}" y1="410" x2="${xs[i]}" y2="${up?270:550}" stroke="#fff" stroke-width="2"/><circle cx="${xs[i]}" cy="${up?270:550}" r="5" fill="#fff"/>`; }).join('')}
+      <line x1="1290" y1="410" x2="1290" y2="550" stroke="#fff" stroke-width="2"/><circle cx="1290" cy="550" r="5" fill="#fff"/></svg>
+    ${E.map((e,i)=>{ const up=i%2===1; return `<div style="position:absolute;left:${xs[i]+14}px;top:${up?276:430}px;width:180px;font-size:19px;line-height:1.55"><span class="tag">${fmt(e.d)}</span><br><b>${esc(e.t)}</b><br><span style="color:#ccc">${esc(e.n)}</span></div>`; }).join('')}
+    <div style="position:absolute;left:1214px;top:440px"><span class="wbox" style="font-size:20px;line-height:1.25;text-align:center">${endBox}</span></div>
+    ${foot(3,true)}</section>`);
+
+  // 4. who pays (gauges)
+  const band=o.band, fundedNow=band?Math.round((band-o.c.cash)/band*100):null, fundedMil=band?Math.round((band-o.m.cash)/band*100):null;
+  const role=S.jd&&std?JDM.coverage(std.r,S.jd.text):null;
+  const g3=role&&!role.none?{v:role.score,t:'Role Match',p:`${role.covered} of ${role.total} of the apprenticeship's skills appear in the job description${role.title?', and the job title matches':''}.`}
+        :{v:Math.round(QS.filter(q=>S.answers[q.id]!==undefined).length/QS.length*100),t:'Checks Answered',p:`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} eligibility checks answered${S.assumed?' using the assume-all-eligible shortcut':''}.`};
+  const gauges=[{v:fundedNow,t:'Funded Today',p:band?`Paid by the levy or government under current rules. Ann Summers pays ${money(o.c.cash)}${o.c.inc?` and receives ${money(o.c.inc)} in employer payments`:''}.`:'Pick an apprenticeship to see costs.'},
+    o.mil?{v:fundedMil,t:'If Milburn Adopted',p:band?`Proposed, not law. Ann Summers would pay about ${money(o.m.cash)}${o.m.hire?`, with a ${money(o.m.hire)} hiring payment`:''}.`:'Pick an apprenticeship to see costs.'}:null, g3].filter(Boolean);
+  pages.push(`<section class="rp">
+    <h1 style="position:absolute;left:80px;top:96px;font-size:60px;line-height:1.25"><span class="hl pink" style="padding:0 6px">Who Pays</span><br>for the Training</h1>
+    <div style="position:absolute;left:820px;top:104px;font-size:24px;line-height:1.5">Training price (funding band):<br><b>${band?money(band):'—'}</b><br>Ann Summers cash today:<br><b>${band?money(o.c.cash):'—'}</b> <i style="font-weight:700">${o.mil&&band?`(${money(o.m.cash)} if Milburn)`:''}</i></div>
+    <div style="position:absolute;left:0;right:0;top:330px;display:flex;justify-content:space-around;padding:0 40px">
+      ${gauges.map(g=>`<div class="gauge">${gaugeSVG(g.v==null?0:g.v)}<div class="gv">${g.v==null?'—':g.v+'%'}</div><h3>${g.t}</h3><p>${g.p}</p></div>`).join('')}</div>
+    ${foot(4)}</section>`);
+
+  // 5. role match (only when the JD matcher was used)
+  if(role){
+    const others=S.jd.ranked.filter(x=>!std||x.ref!==std.r).slice(0,3);
+    const gaps=role.none?[]:role.gaps;
+    pages.push(`<section class="rp dark">
+      <h1 style="position:absolute;left:76px;top:140px;font-size:64px;line-height:1.15">The Role<br><span class="hl low">Match</span></h1>
+      <div class="deco" style="left:586px;top:0">${grid()}</div>
+      <div style="position:absolute;left:560px;top:84px;width:880px;height:250px;background:#1a1a1a;display:flex;align-items:center;gap:40px;padding:0 50px">
+        <div style="font-family:Montserrat,Arial;font-weight:800;font-size:96px;color:#fff">${role.none?'—':role.score+'%'}</div>
+        <div style="font-size:21px;line-height:1.5;color:#ddd">${role.none?`${esc(role.name)} has no skills list stored, so the match can't be scored.`:`<b style="color:#fff">${role.covered} of ${role.total}</b> of the skills in <b style="color:#fff">${esc(std.n)}</b> appear in the job description.${role.title?'<br><b style="color:#fff">The job title matches.</b>':''}`}</div></div>
+      <div class="c3">
+        <div><h3>Job Description</h3><p>${esc(S.jd.title||'No title line')}</p><p>Ranked across ${S.jd.considered} standards with skills lists. Job-title matches come first, then the closest wording.</p></div>
+        <div><h3>Other Close Matches</h3>${others.map(x=>`<p>${esc(x.name)} (Level ${x.level}): ${x.score}%</p>`).join('')||'<p>None.</p>'}</div>
+        <div><h3>Skills to Develop</h3><p>${gaps.length} not in the job description. Plan real tasks so the apprentice can practise and evidence them${gaps.length?':':'.'}</p>${gaps.slice(0,3).map(g=>`<p style="font-style:normal;font-size:15px;color:#ccc"><b style="color:#fff">${esc(g.id)}</b> ${esc(g.d.length>70?g.d.slice(0,68)+'…':g.d)}</p>`).join('')}${gaps.length>3?`<p style="font-size:15px">…and ${gaps.length-3} more (listed in the checker).</p>`:''}</div>
+      </div>
+      ${foot(5,true)}</section>`);
+  }
+
+  // 6. how we worked it out
+  const n=pages.length+1;
+  pages.push(`<section class="rp">
+    ${tri('1010,0 1440,0 1225,140','#000')}${tri('1440,300 1000,610 1440,810','#000')}
+    <div class="deco" style="right:0;top:150px;opacity:.6">${waves(460,260,'#bbb',18)}</div>
+    <h1 style="position:absolute;left:68px;top:78px;font-size:58px">How We Worked It Out</h1>
+    <div class="slab" style="top:178px">Rules, sources and assumptions.</div>
+    <div style="position:absolute;left:68px;top:270px;width:840px;font-size:19px;line-height:1.6">
+      <p style="margin:0 0 22px"><b>01</b> Eligibility follows the <b>Apprenticeship funding rules 2026 to 2027 (version 3)</b>: age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</p>
+      <p style="margin:0 0 22px"><b>02</b> Dates come from their birthday cut-offs. <b>Earliest sensible start</b> allows 4 weeks for the provider to sign them up; that is a planning assumption, not a rule. The recommended date also avoids the months you marked as busy.</p>
+      <p style="margin:0"><b>03</b> Costs use the standard's funding band. The <b>Milburn Review</b> (November 2026) is a proposal, not law: it recommends cutting government funding for over-25s by 25%, which this report assumes the employer covers. This report is guidance, not a funding decision; the training provider confirms eligibility at sign-up.</p></div>
+    ${foot(n)}</section>`);
+  return pages;
+}
+function fitReport(){ const box=$('rvPages'); const sc=Math.min(1,(box.clientWidth||window.innerWidth-48)/1440);
+  box.querySelectorAll('.rpw').forEach(w=>{ w.style.width=(1440*sc)+'px'; w.style.height=(810*sc)+'px'; w.firstElementChild.style.transform=`scale(${sc})`; }); }
+function fillReport(){ const pages=buildReport(lastO); $('rvPages').innerHTML=pages.map(p=>`<div class="rpw">${p}</div>`).join(''); $('rvCount').textContent=pages.length+' pages · 16:9'; fitReport(); return pages.length; }
+$('previewBtn').onclick=()=>{ if(!fillReport()) return; $('reportView').classList.remove('hide'); document.body.style.overflow='hidden'; $('rvClose').focus(); };
+$('rvClose').onclick=()=>{ $('reportView').classList.add('hide'); document.body.style.overflow=''; $('previewBtn').focus(); };
+$('rvPrint').onclick=()=>window.print();
+$('reportView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('rvClose').onclick(); });
+window.addEventListener('resize',()=>{ if(!$('reportView').classList.contains('hide')) fitReport(); });
+window.addEventListener('beforeprint',fillReport);
 
 /* ---------- journey bar ---------- */
 function updateJourney(o){
@@ -902,7 +1308,7 @@ function updateJourney(o){
     const a=li.querySelector('a'); if(k===cur) a.setAttribute('aria-current','step'); else a.removeAttribute('aria-current'); });
   const R=document.querySelector('#journey li.res'); R.classList.remove('r-ok','r-warn','r-bad','current');
   const key=(o.dob&&!o.badDob)?o.verdict:'';
-  const lab={yes:['r-ok','Eligible','✓'],check:['r-warn','Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
+  const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
 }
