@@ -98,15 +98,12 @@ body{font-family:Jost,system-ui,sans-serif;color:var(--text)}
 .ctl .clock{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#bbb;min-width:44px;text-align:right}
 @media (prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}}
 
-/* ===== pixel dissolve, left to right: blocks pop in at random over the credit, then the solid button shows ===== */
-.cta .blocks{position:absolute;inset:0;border-radius:999px;overflow:hidden;pointer-events:none;z-index:1}
-.cta .blocks i{position:absolute;width:var(--bs,7px);height:var(--bs,7px);background:var(--btn-bg);opacity:0;animation:blk .06s var(--d) steps(1,end) forwards}
-@keyframes blk{to{opacity:1}}
-.cta .enter{position:relative;z-index:2;-webkit-mask:none;mask:none;clip-path:none;opacity:0;animation:btnShow .01s 5.75s forwards}
-@keyframes btnShow{to{opacity:1}}
-.cta .enter span{animation:txtIn .45s 5.8s ease forwards}
-.cta .pwl{-webkit-mask:none;mask:none;animation:pwIn .7s 3.3s ease forwards, pwFade .25s 5.55s ease forwards}
-@keyframes pwFade{to{opacity:0}}
+/* ===== button transition: fill from centre (original pace) - the credit blurs away as the button fills out from the middle ===== */
+.cta .blocks{display:none}
+.cta .enter{position:relative;z-index:2;-webkit-mask:none;mask:none;opacity:1;clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 5.05s cubic-bezier(.65,0,.25,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.55s ease forwards}
+.cta .pwl{-webkit-mask:none;mask:none;animation:pwIn .7s 3.3s ease forwards, pwOut .55s 4.85s ease-in forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .35s 5.35s ease forwards}
 </style>
 </head>
 <body>
@@ -144,16 +141,6 @@ $('theme').onclick=()=>setTheme(document.documentElement.getAttribute('data-them
 setTheme('light');
 (function tick(){ $('clock').textContent=(((performance.now()-t0)/1000)*rate).toFixed(1)+'s'; requestAnimationFrame(tick); })();
 
-/* pixel dissolve: build the block grid for each splash button (start 4.9s, sweep 0.6s left to right + up to 0.25s random) */
-function buildDissolve(root){
-  (root||document).querySelectorAll('.cta').forEach(cta=>{
-    let box=cta.querySelector('.blocks'); if(!box){ box=document.createElement('div'); box.className='blocks'; box.setAttribute('aria-hidden','true'); cta.appendChild(box); }
-    const W=cta.clientWidth||270, H=cta.clientHeight||52, bs=6, cols=Math.ceil(W/bs), rows=Math.ceil(H/bs);
-    let h=''; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const d=4.9+(c/cols)*.6+Math.random()*.25; h+=`<i style="left:${c*bs}px;top:${r*bs}px;--d:${d.toFixed(3)}s"></i>`; }
-    box.style.setProperty('--bs',(bs+.6)+'px'); box.innerHTML=h;
-  });
-}
-buildDissolve();
 </script>
 </body>
 </html>

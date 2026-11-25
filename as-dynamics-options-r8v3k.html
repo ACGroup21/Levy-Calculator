@@ -189,11 +189,11 @@ header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:upp
       <button data-v="bounce"><b>E</b><span>Bounce drop</span><small>Letters drop in one by one, and the apple lands on top.</small></button>
     </div></div>
     <div class="grp"><h3>Button transition</h3><div class="opts" id="trans">
-      <button data-v="fill"><b>1</b><span>Fill from centre</span><small>The credit blurs away as the button fills out from the middle of the pill.</small></button>
+      <button data-v="fill"><b>1</b><span>Fill from centre <em>Live</em></span><small>The credit blurs away as the button fills out from the middle of the pill.</small></button>
       <button data-v="trace"><b>2</b><span>Line trace</span><small>A pink line runs round the pill, then the button glows on.</small></button>
       <button data-v="slide"><b>3</b><span>Slide swap</span><small>The credit slides up and away as the button slides up into its place.</small></button>
       <button data-v="wipe"><b>4</b><span>Side wipe</span><small>The button wipes in from the left, pushing the credit out.</small></button>
-      <button data-v="dissolve"><b>5</b><span>Dissolve wipe <em>Live</em></span><small>The button dissolves in through a soft edge moving left to right; the credit dissolves away ahead of it.</small></button>
+      <button data-v="dissolve"><b>5</b><span>Dissolve wipe</span><small>The button dissolves in through a soft edge moving left to right; the credit dissolves away ahead of it.</small></button>
     </div></div>
     <div class="grp"><h3>Background</h3><div class="opts" id="bg">
       <button data-v="orbs"><b>i</b><span>Drifting light</span><small>Soft pink light drifting slowly.</small></button>
@@ -227,7 +227,7 @@ header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:upp
 
 <script>
 const $=id=>document.getElementById(id);
-const S={intro:'draw',trans:'dissolve',bg:'aurora'}, LIVE={intro:'draw',trans:'dissolve',bg:'aurora'};
+const S={intro:'draw',trans:'fill',bg:'aurora'}, LIVE={intro:'draw',trans:'fill',bg:'aurora'};
 const NAMES={spark:'A',neon:'B',draw:'C',shimmer:'D',bounce:'E',fill:'1',trace:'2',slide:'3',wipe:'4',dissolve:'5',orbs:'i',aurora:'ii',sparkle:'iii',still:'iv'};
 let rate=1, shineRAF=0;
 
