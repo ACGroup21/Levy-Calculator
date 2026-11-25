@@ -79,7 +79,7 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 #splash .o3{width:20vmax;height:20vmax;background:var(--o1);left:55%;top:8%;animation:drift1 11s ease-in-out infinite alternate-reverse}
 @keyframes drift1{to{transform:translate(8vmax,6vmax) scale(1.12)}}
 @keyframes drift2{to{transform:translate(-7vmax,-5vmax) scale(.92)}}
-#splash .aslogo{position:relative;z-index:1;width:min(560px,82vw);height:auto;overflow:visible;--logo-fill:#B42A72;--t0:.35s;--step:.18s}
+#splash .aslogo{position:relative;z-index:1;width:min(560px,82vw);margin-top:calc(min(560px,82vw) * -42/474);height:auto;overflow:visible;--logo-fill:#B42A72;--t0:.35s;--step:.18s}
 :root[data-theme=dark] #splash .aslogo{--logo-fill:#FFFFFF}
 .aslogo .lt{fill:var(--logo-fill);opacity:0;animation:lfill .55s calc(var(--t0) + var(--i)*var(--step) + .38s) ease-out forwards}
 @keyframes lfill{0%{opacity:0;filter:drop-shadow(0 0 0 #FF4FB0)}40%{opacity:1;filter:drop-shadow(0 0 5px #FF4FB0)}100%{opacity:1;filter:drop-shadow(0 0 0 transparent)}}
@@ -164,12 +164,13 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 @media (prefers-reduced-motion:reduce){.bgfx i{animation:none}}
 
 /* ---------- Header ---------- */
-header{background:#000;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:1px solid #2a2a2a;position:relative;z-index:40}
-header .hlogo{width:150px;height:auto;display:block}
+header{background:#000;color:#fff;padding:20px 24px 14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:1px solid #2a2a2a;position:relative;z-index:40}
+/* the apple overhangs: only the letters (y 42-107 of 110 in the logo) take part in layout, so the title centres on the text */
+header .hlogo{--lw:150px;width:var(--lw);height:auto;display:block;overflow:visible;margin:calc(var(--lw) * -42/474) 0 calc(var(--lw) * -2.6/474)}
 header .app,header .pw,.dbtn{font-family:Jost,"Futura PT",Futura,system-ui,sans-serif;letter-spacing:.22em;word-spacing:normal}
 .dbtn{letter-spacing:.02em}
 .dpanel{max-height:calc(100vh - 90px);overflow:auto}
-header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:uppercase;color:#FF8CC6;border-left:1px solid #444;padding:4px 0 4px 18px;align-self:flex-end;margin-bottom:2px}
+header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:uppercase;color:#FF8CC6;border-left:1px solid #444;padding:4px 0 4px 18px}
 header .right{margin-left:auto;display:flex;align-items:center;gap:18px}
 header .pw{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8f8984}
 header .pw svg{width:auto;height:18px}
@@ -225,8 +226,9 @@ main > section{min-width:0}
 /* 4. phones: one-row header */
 @media (max-width:640px){
   header{padding:10px 14px;gap:10px;flex-wrap:nowrap}
-  header .hlogo{width:108px}
-  header .app{font-size:10px;letter-spacing:.14em;padding:3px 0 3px 10px;margin-bottom:1px;white-space:nowrap}
+  header .hlogo{--lw:108px}
+  header{padding:16px 14px 10px}
+  header .app{font-size:10px;letter-spacing:.14em;padding:3px 0 3px 10px;white-space:nowrap}
   header .app .long{display:none}
   header .right{gap:8px}
   header .pw .pwt{display:none}
