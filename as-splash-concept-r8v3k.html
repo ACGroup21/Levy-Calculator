@@ -65,6 +65,31 @@ body{font-family:Jost,system-ui,sans-serif;color:var(--text)}
 .cta .enter:hover{background:var(--pink);color:#fff}
 .cta .enter:focus-visible{outline:3px solid var(--pink);outline-offset:4px}
 
+
+/* ===== synced to the live splash: C pen draw (letter by letter, original pace) + dissolve wipe + aurora ===== */
+:root{--aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA)}
+:root[data-theme=dark]{--aurora:linear-gradient(120deg,#2B1222,#120C10,#3A1530,#160E14,#2E1026)}
+.aslogo{--t0:.35s;--step:.18s}
+.aslogo .sp{display:none}
+.aslogo .tr{stroke:var(--logo-fill);stroke-width:.9;stroke-dasharray:100 100;filter:none;animation:draw .62s calc(var(--t0) + var(--i)*var(--step)) cubic-bezier(.5,0,.3,1) forwards}
+.aslogo .tr.ap{stroke:#E8325E;animation-delay:calc(var(--t0) + 10*var(--step));animation-duration:.62s}
+.aslogo .lt{animation:flood .55s calc(var(--t0) + var(--i)*var(--step) + .42s) ease-out forwards}
+.aslogo .apl{animation:apop .75s calc(var(--t0) + 10*var(--step) + .45s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 10*var(--step) + 1.4s) ease-in-out infinite}
+@keyframes draw{0%{opacity:1;stroke-dashoffset:100}100%{opacity:1;stroke-dashoffset:0}}
+@keyframes flood{from{opacity:0}to{opacity:1}}
+#splash h1{animation:rise .8s 2.95s ease both}
+#splash{background:var(--aurora);background-size:300% 300%;animation:aurora 9s ease-in-out infinite alternate}
+#splash .orb{display:none}
+@keyframes aurora{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+.cta .enter{clip-path:none;-webkit-mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:dissolveIn 1s 4.9s cubic-bezier(.55,0,.35,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.45s ease forwards}
+.cta .pwl{-webkit-mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:pwIn .7s 3.3s ease forwards, dissolveOut .9s 4.85s cubic-bezier(.55,0,.35,1) forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .4s 5.5s ease forwards}
+@keyframes dissolveIn{to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes dissolveOut{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(0)}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(3px)}}
+
 /* concept controls (not part of the design) */
 .ctl{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.72);color:#fff;padding:6px 8px 6px 14px;border-radius:999px;font-size:12px;backdrop-filter:blur(6px)}
 .ctl b{font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:10.5px;color:#FF8CC6;margin-right:4px}
