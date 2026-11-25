@@ -21,6 +21,7 @@ if(d.font)window.loadFont(d.font);})();</script>
 <style>
 :root{
   --plum:#9C3064; --apple:#CC2850;
+  --aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA);
   --ink:#000; --text:#3B3935; --muted:#6E6A64; --line:#E4DCD9;
   --pink:#E6007E; --pink-deep:#CC0874; --pink-soft:#F858AF; --blush:#F6E9E6;
   --bg:#F9F9F9; --card:#FFFFFF; --field:#FFFFFF; --field-line:#CFC6C2;
@@ -47,6 +48,7 @@ if(d.font)window.loadFont(d.font);})();</script>
   --bg-a:#160F14; --bg-b:#120E11; --bg-c:#1B1118; --orb-op:.30;
   --o1:#6E1F47; --o2:#4A2340; --o3:#5A2A2A;
   --splash-bg:radial-gradient(120% 90% at 50% 40%,#2A1722 0%,#170F14 55%,#0C080B 100%);
+  --aurora:linear-gradient(120deg,#2B1222,#120C10,#3A1530,#160E14,#2E1026);
   color-scheme:dark;
 }
 /* easier-read spacing (display panel) */
@@ -114,7 +116,26 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 .cta .enter:hover{background:var(--pink);color:#fff}
 .cta .enter:focus-visible{outline:3px solid var(--pink);outline-offset:4px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){#splash *{animation:none!important}.aslogo .lt,.aslogo .apl,.cta .enter span{opacity:1}.aslogo .sp,.aslogo .tr,.cta .frame{display:none}.cta .pwl{display:none}.cta .enter{clip-path:none}}
+/* ---- live combo: C pen draw + dissolve wipe + ii aurora ---- */
+/* intro C: pen draw - the outline draws itself, then the colour floods in */
+.aslogo .sp{display:none}
+.aslogo .tr{stroke:var(--logo-fill);stroke-width:.9;stroke-dasharray:100 100;filter:none;animation:draw 1.3s calc(var(--t0) + var(--i)*.07s) cubic-bezier(.5,0,.3,1) forwards}
+.aslogo .tr.ap{stroke:#E8325E;animation-delay:calc(var(--t0) + 1.0s);animation-duration:.8s}
+.aslogo .lt{animation:flood .7s calc(var(--t0) + 1.1s + var(--i)*.05s) ease-out forwards}
+@keyframes draw{0%{opacity:1;stroke-dashoffset:100}100%{opacity:1;stroke-dashoffset:0}}
+@keyframes flood{from{opacity:0}to{opacity:1}}
+#splash{background:var(--aurora);background-size:300% 300%;animation:aurora 9s ease-in-out infinite alternate}
+#splash .orb{display:none}
+@keyframes aurora{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+.cta .enter{clip-path:none;-webkit-mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:dissolveIn 1s 3.75s cubic-bezier(.55,0,.35,1) forwards}
+.cta .enter span{animation:txtIn .45s 4.3s ease forwards}
+.cta .pwl{-webkit-mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:pwIn .7s 2.15s ease forwards, dissolveOut .9s 3.7s cubic-bezier(.55,0,.35,1) forwards}
+.cta .frame{animation:frameIn .7s 2.2s ease forwards, frameOut .4s 4.35s ease forwards}
+@keyframes dissolveIn{to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes dissolveOut{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(0)}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(3px)}}
+@media (prefers-reduced-motion:reduce){#splash,#splash *{animation:none!important}.aslogo .lt,.aslogo .apl,.cta .enter span{opacity:1}.aslogo .sp,.aslogo .tr,.cta .frame{display:none}.cta .pwl{display:none}.cta .enter{clip-path:none;-webkit-mask:none;mask:none}}
 
 /* ---------- Dynamic app background: slow-drifting brand-colour light, behind the cards ---------- */
 .bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:linear-gradient(160deg,var(--bg-a) 0%,var(--bg-b) 45%,var(--bg-c) 100%)}

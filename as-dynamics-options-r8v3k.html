@@ -158,6 +158,15 @@ header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:upp
 @keyframes wipe{to{clip-path:inset(0 0 0 0 round 999px)}}
 @keyframes wipeOut{to{opacity:0;clip-path:inset(0 0 0 100%)}}
 
+/* 5 = dissolve wipe: the button dissolves in through a soft edge travelling left to right; the credit dissolves out ahead of it */
+[data-trans=dissolve] .cta .enter{clip-path:none;-webkit-mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:dissolveIn 1s 3.75s cubic-bezier(.55,0,.35,1) forwards}
+[data-trans=dissolve] .cta .enter span{animation:txtIn .45s 4.3s ease forwards}
+[data-trans=dissolve] .cta .pwl{-webkit-mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:pwIn .7s 2.15s ease forwards, dissolveOut .9s 3.7s cubic-bezier(.55,0,.35,1) forwards}
+[data-trans=dissolve] .cta .frame{animation:frameIn .7s 2.2s ease forwards, frameOut .4s 4.35s ease forwards}
+@keyframes dissolveIn{to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes dissolveOut{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(0)}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(3px)}}
 @media (prefers-reduced-motion:reduce){.stage *,.stage{animation-duration:.01s!important;animation-delay:0s!important;animation-iteration-count:1!important}}
 </style>
 </head>
@@ -173,21 +182,22 @@ header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:upp
     <h2>Pick your dynamics</h2>
     <p class="lead">Mix and match the three moving parts of the splash. Each choice replays straight away.</p>
     <div class="grp"><h3>Logo intro</h3><div class="opts" id="intro">
-      <button data-v="spark"><b>A</b><span>LED spark <em>Live</em></span><small>A pink spark runs round each letter in turn, then the apple.</small></button>
+      <button data-v="spark"><b>A</b><span>LED spark</span><small>A pink spark runs round each letter in turn, then the apple.</small></button>
       <button data-v="neon"><b>B</b><span>Neon flicker</span><small>Letters buzz on in a random order like a neon sign, and keep a soft glow.</small></button>
-      <button data-v="draw"><b>C</b><span>Pen draw</span><small>The outline draws itself, then the colour floods in.</small></button>
+      <button data-v="draw"><b>C</b><span>Pen draw <em>Live</em></span><small>The outline draws itself, then the colour floods in.</small></button>
       <button data-v="shimmer"><b>D</b><span>Gloss shimmer</span><small>Letters rise in, then a glossy highlight sweeps across the word.</small></button>
       <button data-v="bounce"><b>E</b><span>Bounce drop</span><small>Letters drop in one by one, and the apple lands on top.</small></button>
     </div></div>
     <div class="grp"><h3>Button transition</h3><div class="opts" id="trans">
-      <button data-v="fill"><b>1</b><span>Fill from centre <em>Live</em></span><small>The credit blurs away as the button fills out from the middle of the pill.</small></button>
+      <button data-v="fill"><b>1</b><span>Fill from centre</span><small>The credit blurs away as the button fills out from the middle of the pill.</small></button>
       <button data-v="trace"><b>2</b><span>Line trace</span><small>A pink line runs round the pill, then the button glows on.</small></button>
       <button data-v="slide"><b>3</b><span>Slide swap</span><small>The credit slides up and away as the button slides up into its place.</small></button>
       <button data-v="wipe"><b>4</b><span>Side wipe</span><small>The button wipes in from the left, pushing the credit out.</small></button>
+      <button data-v="dissolve"><b>5</b><span>Dissolve wipe <em>Live</em></span><small>The button dissolves in through a soft edge moving left to right; the credit dissolves away ahead of it.</small></button>
     </div></div>
     <div class="grp"><h3>Background</h3><div class="opts" id="bg">
-      <button data-v="orbs"><b>i</b><span>Drifting light <em>Live</em></span><small>Soft pink light drifting slowly.</small></button>
-      <button data-v="aurora"><b>ii</b><span>Aurora shift</span><small>The whole background slowly shifts through brand pinks.</small></button>
+      <button data-v="orbs"><b>i</b><span>Drifting light</span><small>Soft pink light drifting slowly.</small></button>
+      <button data-v="aurora"><b>ii</b><span>Aurora shift <em>Live</em></span><small>The whole background slowly shifts through brand pinks.</small></button>
       <button data-v="sparkle"><b>iii</b><span>Sparkle</span><small>Drifting light plus tiny twinkling pink lights.</small></button>
       <button data-v="still"><b>iv</b><span>Still</span><small>No background movement; the logo does all the work.</small></button>
     </div></div>
@@ -217,8 +227,8 @@ header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:upp
 
 <script>
 const $=id=>document.getElementById(id);
-const S={intro:'spark',trans:'fill',bg:'orbs'}, LIVE={intro:'spark',trans:'fill',bg:'orbs'};
-const NAMES={spark:'A',neon:'B',draw:'C',shimmer:'D',bounce:'E',fill:'1',trace:'2',slide:'3',wipe:'4',orbs:'i',aurora:'ii',sparkle:'iii',still:'iv'};
+const S={intro:'draw',trans:'dissolve',bg:'aurora'}, LIVE={intro:'draw',trans:'dissolve',bg:'aurora'};
+const NAMES={spark:'A',neon:'B',draw:'C',shimmer:'D',bounce:'E',fill:'1',trace:'2',slide:'3',wipe:'4',dissolve:'5',orbs:'i',aurora:'ii',sparkle:'iii',still:'iv'};
 let rate=1, shineRAF=0;
 
 // one-time prep of the stage template: shimmer gradient, neon order, sparkles
