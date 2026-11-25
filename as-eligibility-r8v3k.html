@@ -175,6 +175,8 @@ header .pw svg{width:auto;height:18px}
 .dpanel h4{margin:0 0 8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);font-weight:600}
 .dpanel .grp + .grp{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
 .dpanel p.h{margin:0 0 10px;font-size:14px;color:var(--muted)}
+.dpanel p.autohint{margin:8px 0 0;padding:8px 10px;border-radius:6px;background:var(--blush);color:var(--ink);font-size:13.5px;max-height:0;opacity:0;overflow:hidden;padding-top:0;padding-bottom:0;transition:max-height .2s,opacity .2s,padding .2s}
+.dpanel p.autohint.on{max-height:120px;opacity:1;padding-top:8px;padding-bottom:8px}
 .sw{display:flex;flex-wrap:wrap;gap:8px}
 .sw button{width:34px;height:34px;border-radius:50%;border:2px solid var(--field-line);cursor:pointer;padding:0;position:relative}
 .sw button[aria-pressed=true]{border-color:var(--pink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--pink)}
@@ -411,7 +413,8 @@ footer a{color:var(--pink-deep)}
   <div class="dpanel hide" id="dpanel" role="dialog" aria-label="Display and reading options">
     <button class="close" id="dclose" type="button" aria-label="Close">×</button>
     <div class="grp"><h4>Theme</h4>
-      <div class="seg" id="themeSeg" role="group" aria-label="Theme"><button type="button" data-t="auto">Auto</button><button type="button" data-t="light">Light</button><button type="button" data-t="dark">Dark</button></div></div>
+      <div class="seg" id="themeSeg" role="group" aria-label="Theme"><button type="button" data-t="auto" title="Auto matches your computer's light or dark setting" aria-describedby="autoHint">Auto</button><button type="button" data-t="light">Light</button><button type="button" data-t="dark">Dark</button></div>
+      <p class="h autohint" id="autoHint">Auto matches your computer's light or dark setting (currently: <b id="autoNow">Light</b>). Change it in your device's display settings, or pick Light or Dark here.</p></div>
     <div class="grp"><h4>Screen cover</h4>
       <p class="h">A coloured overlay that can make text easier to read with dyslexia or visual stress. Try a few colours.</p>
       <div class="sw" id="swatches"></div>
@@ -910,6 +913,7 @@ function applyDisplay(){
   if(D.font&&D.font!=='brand'){ window.loadFont(D.font); document.documentElement.setAttribute('data-font',D.font); } else document.documentElement.removeAttribute('data-font');
   document.querySelectorAll('#fontGrid button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.f===(D.font||'brand'))));
   document.querySelectorAll('#themeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===D.theme)));
+  $('autoNow').textContent = (mq&&mq.matches) ? 'Dark' : 'Light';
   const c=COVERS.find(x=>x[0]===D.cover)||COVERS[0];
   const cv=$('cover'); cv.style.background=c[2]||'transparent'; cv.style.opacity=c[2]?String(D.strength/100*(t==='dark'?.6:1)):'0';
   document.querySelectorAll('#swatches button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===D.cover)));
@@ -919,6 +923,11 @@ function applyDisplay(){
 $('swatches').innerHTML=COVERS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]==='none'?'none':''}" style="${c[2]?'background:'+c[2]:''}" aria-label="${c[1]}" title="${c[1]}">${c[0]==='none'?'⊘':''}</button>`).join('');
 $('swatches').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; D.cover=b.dataset.c; saveD(); applyDisplay(); };
 $('themeSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; D.theme=b.dataset.t; saveD(); applyDisplay(); };
+// explain Auto on hover / keyboard focus
+(function(){ const a=document.querySelector('#themeSeg [data-t="auto"]'), h=$('autoHint');
+  const show=on=>h.classList.toggle('on',on);
+  a.addEventListener('mouseenter',()=>show(true)); a.addEventListener('mouseleave',()=>show(false));
+  a.addEventListener('focus',()=>show(true)); a.addEventListener('blur',()=>show(false)); })();
 $('strength').oninput=e=>{ D.strength=+e.target.value; saveD(); applyDisplay(); };
 $('rulerOn').onchange=e=>{ D.ruler=e.target.checked; saveD(); applyDisplay(); };
 $('spacingOn').onchange=e=>{ D.spacing=e.target.checked; saveD(); applyDisplay(); };
