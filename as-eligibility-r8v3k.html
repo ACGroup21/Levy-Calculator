@@ -1081,7 +1081,8 @@ const JDM=(function(){
     for(const rawl of ls){ const l=rawl.trim(); const head=l.length>0&&l.length<=60&&(/:\s*$/.test(l)||/^[A-Z][A-Za-z ,&/'-]{2,58}$/.test(l));
       if(head){ const bare=l.replace(/:\s*$/,'').trim(); if(DROP.test(bare)){drop=true;n++;continue;} drop=false; continue; } if(!drop) keep.push(rawl); }
     const out=keep.join('\n').trim(); return (!n||out.length<Math.max(200,String(t).length*.15))?String(t):out; }
-  const titleToks=str=>{ const o=new Set(); String(str).toLowerCase().split(/[^a-z]+/).forEach(w=>{ if(w.length>2&&!TITLE_GENERIC.test(w)) o.add(stem(w)); }); return o; };
+  const ACRO=new Set(['hr','it','qa','pr','ux','ui','ai']); // two-letter job acronyms carry the title ("HR Assistant" -> HR support)
+  const titleToks=str=>{ const o=new Set(); String(str).toLowerCase().split(/[^a-z]+/).forEach(w=>{ if((w.length>2||ACRO.has(w))&&!TITLE_GENERIC.test(w)) o.add(ACRO.has(w)?w:stem(w)); }); return o; };
   function titleScore(name,tt){ if(!tt.size) return 0; const b=titleToks(String(name).replace(/^L\d+\s*/i,'').replace(/\(.*?\)/g,'')); if(!b.size) return 0; let hit=0; b.forEach(x=>{ if(tt.has(x)) hit++; }); const sc=hit/b.size; return sc>=.5?sc:0; }
   const ksbText=s=>['knowledge','skills','behaviours'].map(k=>s.ksbs[k].map(x=>x.d).join(' ')).join(' ');
   function prep(){ if(idf) return; const df=Object.create(null); let n=0; stok=LIB.map(s=>{ if(!s.ksbs) return new Set(); n++; const t=toks(ksbText(s)); t.forEach(w=>df[w]=(df[w]||0)+1); return t; });
