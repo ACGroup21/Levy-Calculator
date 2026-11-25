@@ -1,0 +1,549 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ann Summers Eligibility Checker</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#000; --text:#3B3935; --muted:#6E6A64; --line:#E4DCD9;
+  --pink:#E6007E; --pink-deep:#CC0874; --pink-soft:#F858AF; --blush:#F6E9E6;
+  --bg:#F9F9F9; --card:#FFFFFF;
+  --ok:#1F7A4D; --ok-bg:#E8F4EC; --warn:#A35F00; --warn-bg:#FBF1E1; --bad:#D62222; --bad-bg:#FBE9E9;
+  --teal:#00C8D0;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Jost,"Futura PT",Futura,system-ui,sans-serif;color:var(--text);background:var(--bg);font-size:15px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+.wordmark{font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#fff;white-space:nowrap}
+
+/* ---------- Splash ---------- */
+#splash{position:fixed;inset:0;z-index:100;background:#000;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;transition:opacity .6s ease,visibility .6s}
+#splash.gone{opacity:0;visibility:hidden}
+#splash .wordmark{font-size:clamp(34px,6vw,64px);letter-spacing:.22em;animation:rise .9s ease both}
+#splash h1{margin:0;font-weight:500;font-size:clamp(18px,2.6vw,28px);letter-spacing:.32em;text-transform:uppercase;color:var(--pink);animation:rise .9s .25s ease both}
+#splash .bar{width:0;height:2px;background:var(--pink);animation:grow 1s .5s ease forwards}
+#splash .powered{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:26px;animation:rise .9s .8s ease both}
+#splash .powered span{font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#bdb7b2}
+#splash .powered svg{width:200px;height:auto}
+#splash .skip{position:absolute;bottom:28px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#8a847f}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes grow{to{width:min(320px,60vw)}}
+@media (prefers-reduced-motion:reduce){#splash *{animation:none!important}#splash .bar{width:min(320px,60vw)}}
+
+/* ---------- Header ---------- */
+header{background:#000;color:#fff;padding:14px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header .wordmark{font-size:22px}
+header .app{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--pink-soft);border-left:1px solid #444;padding-left:18px}
+header .pw{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#a9a39e}
+header .pw svg{width:104px;height:auto}
+
+main{max-width:1320px;margin:0 auto;padding:24px;display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:1000px){main{grid-template-columns:1fr;padding:16px}}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px}
+.card + .card{margin-top:16px}
+.step{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--pink);color:#fff;font-size:12px;letter-spacing:0}
+label.f{display:block;margin-bottom:14px}
+label.f > span{display:block;font-size:13px;font-weight:500;color:var(--ink);margin-bottom:5px}
+label.f small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
+input[type=text],input[type=date],input[type=number],input[list]{width:100%;padding:10px 12px;border:1px solid #CFC6C2;border-radius:4px;background:#fff}
+input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tick{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:14px;cursor:pointer}
+.tick input{margin-top:4px;accent-color:var(--pink);width:16px;height:16px}
+.stdinfo{font-size:13px;color:var(--muted);margin:-6px 0 14px;min-height:18px}
+.stdinfo .tag{font-family:var(--mono);font-size:11.5px;background:var(--blush);color:var(--ink);padding:1px 6px;border-radius:3px;margin-right:4px}
+
+.q{border-top:1px solid var(--line);padding:12px 0}
+.q:first-of-type{border-top:0;padding-top:0}
+.q p{margin:0 0 4px;font-size:14px;color:var(--ink);font-weight:500}
+.q .help{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+.seg{display:inline-flex;border:1px solid #CFC6C2;border-radius:999px;overflow:hidden}
+.seg button{border:0;background:#fff;padding:6px 16px;cursor:pointer;font-size:13px;font-weight:500}
+.seg button + button{border-left:1px solid #CFC6C2}
+.seg button[aria-pressed=true]{background:#000;color:#fff}
+.months{display:flex;flex-wrap:wrap;gap:6px}
+.months button{border:1px solid #CFC6C2;background:#fff;border-radius:999px;padding:4px 11px;font-size:12.5px;cursor:pointer}
+.months button[aria-pressed=true]{background:var(--blush);border-color:var(--pink);color:var(--pink-deep);font-weight:600}
+
+/* ---------- Results ---------- */
+.verdict{border-radius:4px;padding:22px 24px;border:1px solid;display:grid;gap:6px}
+.verdict .k{font-size:12px;letter-spacing:.2em;text-transform:uppercase;font-weight:600}
+.verdict h2{margin:0;font-size:30px;line-height:1.15;color:var(--ink);font-weight:600}
+.verdict p{margin:0;font-size:15px}
+.v-ok{background:var(--ok-bg);border-color:#B9DCC6}.v-ok .k{color:var(--ok)}
+.v-warn{background:var(--warn-bg);border-color:#EBCF9F}.v-warn .k{color:var(--warn)}
+.v-bad{background:var(--bad-bg);border-color:#EDB8B8}.v-bad .k{color:var(--bad)}
+.v-empty{background:var(--blush);border-color:#EBD3CD}.v-empty .k{color:var(--pink-deep)}
+
+.reasons{list-style:none;margin:0;padding:0}
+.reasons li{display:grid;grid-template-columns:22px 1fr auto;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px;align-items:start}
+.reasons li:first-child{border-top:0}
+.ico{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;margin-top:1px}
+.i-bad{background:var(--bad)}.i-warn{background:var(--warn)}.i-ok{background:var(--ok)}.i-info{background:#8B8580}
+.ref{font-family:var(--mono);font-size:11px;color:var(--muted);white-space:nowrap;padding-top:3px}
+.reasons b{color:var(--ink);font-weight:600}
+
+h3{margin:0 0 12px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);font-weight:600}
+.when{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+@media (max-width:640px){.when{grid-template-columns:1fr}}
+.when > div{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
+.when .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.when .v{font-family:var(--mono);font-size:18px;color:var(--ink);margin-top:2px}
+.when .best{background:#000;border-color:#000}
+.when .best .l{color:var(--pink-soft)}.when .best .v{color:#fff}
+.callout{border-left:3px solid var(--pink);background:var(--blush);padding:10px 14px;font-size:14px;margin:0 0 10px;border-radius:0 4px 4px 0;color:var(--ink)}
+.callout.bad{border-color:var(--bad);background:var(--bad-bg)}
+.callout.ok{border-color:var(--ok);background:var(--ok-bg)}
+
+/* timeline */
+.tl{position:relative;height:150px;margin:8px 4px 0}
+.tl .axis{position:absolute;left:0;right:0;top:74px;height:4px;background:var(--line);border-radius:2px}
+.tl .win{position:absolute;top:66px;height:20px;background:rgba(230,0,126,.18);border:1px solid var(--pink);border-radius:3px}
+.tl .mk{position:absolute;top:58px;width:2px;height:36px;background:var(--ink)}
+.tl .mk.mil{background:repeating-linear-gradient(to bottom,var(--pink) 0 4px,transparent 4px 7px)}
+.tl .mk.start{background:var(--pink);width:3px}
+.tl .lab{position:absolute;font-size:11.5px;line-height:1.25;white-space:nowrap;transform:translateX(-50%);text-align:center;color:var(--ink)}
+.tl .lab i{display:block;font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.tl .lab.mil{color:var(--pink-deep)}
+.tl .yr{position:absolute;top:82px;font-family:var(--mono);font-size:10px;color:#A39D98;transform:translateX(-50%)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--muted);margin-top:6px}
+.legend span::before{content:"";display:inline-block;width:14px;height:8px;margin-right:6px;vertical-align:middle;border-radius:2px}
+.legend .lw::before{background:rgba(230,0,126,.18);border:1px solid var(--pink)}
+.legend .lc::before{background:var(--ink);height:2px}
+.legend .lm::before{background:repeating-linear-gradient(to right,var(--pink) 0 4px,transparent 4px 7px);height:2px}
+.legend .ls::before{background:var(--pink);height:3px}
+
+table.money{width:100%;border-collapse:collapse;font-size:14px}
+table.money th,table.money td{padding:10px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+table.money thead th{border-top:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+table.money thead th.mil{color:var(--pink-deep)}
+table.money tbody th{width:26%;min-width:150px}
+table.money td.n{font-family:var(--mono);font-size:13.5px;color:var(--ink)}
+table.money td.mil{background:#FDF5F8}
+table.money tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.badge{display:inline-block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;background:var(--pink);color:#fff;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.btn{border:1px solid #000;background:#000;color:#fff;border-radius:999px;padding:9px 20px;cursor:pointer;font-weight:500;letter-spacing:.04em}
+.btn.ghost{background:#fff;color:#000}
+footer{max-width:1320px;margin:0 auto;padding:8px 24px 40px;font-size:12px;color:var(--muted)}
+footer a{color:var(--pink-deep)}
+.hide{display:none!important}
+
+@media print{
+  #splash,.inputs,.actions,header .pw{display:none!important}
+  main{display:block;padding:0}
+  body{background:#fff}
+  .card{break-inside:avoid;border-color:#ccc}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="fd-logo" viewBox="0 0 1214 314"><path d="M 24 221 L 19 226 L 17 230 L 17 287 L 19 291 L 23 295 L 27 296 L 28 297 L 82 297 L 83 296 L 87 295 L 91 291 L 92 289 L 92 286 L 93 285 L 93 231 L 92 230 L 91 226 L 87 222 L 83 220 L 27 220 L 26 221 Z M 1143 119 L 1143 193 L 1196 193 L 1196 183 L 1156 183 L 1154 181 L 1154 162 L 1156 160 L 1191 160 L 1191 151 L 1190 150 L 1189 151 L 1171 151 L 1170 150 L 1159 150 L 1158 151 L 1157 150 L 1156 151 L 1154 149 L 1154 131 L 1156 129 L 1196 129 L 1196 119 Z M 1046 119 L 1046 193 L 1095 193 L 1095 183 L 1058 183 L 1057 182 L 1057 119 Z M 937 119 L 937 193 L 977 193 L 978 192 L 981 192 L 988 189 L 994 183 L 995 179 L 996 178 L 996 167 L 995 166 L 995 164 L 991 159 L 983 155 L 983 154 L 991 147 L 992 145 L 992 142 L 993 141 L 993 135 L 992 134 L 992 131 L 989 126 L 984 122 L 980 121 L 979 120 L 976 120 L 975 119 Z M 948 162 L 950 160 L 973 160 L 974 161 L 977 161 L 981 163 L 983 165 L 985 169 L 985 174 L 984 175 L 984 177 L 980 181 L 976 182 L 975 183 L 949 183 L 948 182 Z M 948 130 L 949 129 L 972 129 L 973 130 L 975 130 L 977 131 L 981 136 L 981 143 L 979 147 L 975 150 L 972 150 L 971 151 L 949 151 L 948 150 Z M 846 119 L 842 127 L 842 129 L 838 136 L 838 138 L 834 145 L 834 147 L 830 154 L 830 156 L 826 163 L 826 165 L 822 172 L 822 174 L 819 179 L 819 181 L 816 186 L 816 188 L 813 193 L 826 193 L 826 191 L 829 186 L 829 184 L 833 177 L 833 175 L 836 170 L 836 168 L 839 163 L 839 161 L 843 154 L 843 152 L 846 147 L 846 145 L 852 133 L 855 137 L 855 139 L 858 144 L 860 151 L 863 156 L 865 163 L 868 168 L 868 170 L 871 175 L 871 177 L 877 189 L 878 193 L 891 193 L 888 188 L 888 186 L 885 181 L 885 179 L 881 172 L 881 170 L 877 163 L 877 161 L 874 156 L 874 154 L 867 140 L 867 138 L 865 135 L 865 133 L 861 126 L 861 124 L 858 119 Z M 707 119 L 707 193 L 741 193 L 742 192 L 746 192 L 747 191 L 749 191 L 757 187 L 761 183 L 762 183 L 762 182 L 768 175 L 770 171 L 770 169 L 771 168 L 771 164 L 772 163 L 772 148 L 771 147 L 771 144 L 769 141 L 769 139 L 766 134 L 758 126 L 751 122 L 749 122 L 745 120 L 742 120 L 741 119 Z M 719 130 L 741 130 L 748 133 L 756 140 L 760 149 L 760 156 L 761 157 L 760 158 L 760 164 L 757 171 L 749 179 L 745 181 L 743 181 L 742 182 L 738 182 L 737 183 L 719 183 L 718 182 L 718 131 Z M 589 119 L 589 193 L 600 193 L 600 140 L 601 139 L 611 151 L 611 152 L 614 155 L 614 156 L 617 159 L 620 164 L 624 168 L 624 169 L 627 172 L 627 173 L 630 176 L 630 177 L 633 180 L 636 185 L 640 189 L 640 190 L 643 193 L 652 193 L 652 119 L 641 119 L 641 170 L 640 171 L 633 162 L 633 161 L 628 156 L 626 152 L 622 148 L 619 143 L 615 139 L 615 138 L 612 135 L 610 131 L 603 123 L 603 122 L 600 119 Z M 475 119 L 475 170 L 476 171 L 476 174 L 479 181 L 482 184 L 482 185 L 488 190 L 495 193 L 498 193 L 499 194 L 513 194 L 514 193 L 517 193 L 524 190 L 534 179 L 534 177 L 536 174 L 536 170 L 537 169 L 537 119 L 526 119 L 526 166 L 525 167 L 524 173 L 517 181 L 513 182 L 512 183 L 509 183 L 508 184 L 504 184 L 503 183 L 500 183 L 499 182 L 495 181 L 488 173 L 487 167 L 486 166 L 486 119 Z M 428 119 L 375 119 L 375 193 L 386 193 L 386 187 L 387 186 L 387 164 L 388 163 L 422 163 L 422 153 L 388 153 L 387 152 L 387 131 L 390 129 L 428 129 Z M 22 120 L 18 125 L 18 127 L 17 128 L 17 184 L 18 185 L 19 189 L 25 194 L 84 194 L 89 191 L 92 187 L 92 184 L 93 183 L 93 129 L 92 128 L 91 124 L 86 119 L 84 119 L 83 118 L 26 118 Z M 124 18 L 119 23 L 118 25 L 118 29 L 117 30 L 117 81 L 118 82 L 118 85 L 120 87 L 120 88 L 123 91 L 127 92 L 128 93 L 182 93 L 183 92 L 187 91 L 191 87 L 192 83 L 193 82 L 193 27 L 192 26 L 191 22 L 185 17 L 126 17 Z M 22 19 L 19 22 L 17 26 L 17 83 L 18 84 L 18 86 L 23 91 L 27 92 L 28 93 L 82 93 L 88 90 L 91 87 L 92 83 L 93 82 L 93 28 L 90 21 L 88 19 L 84 17 L 26 17 Z" fill="#FFFFFF" fill-rule="evenodd"/><path d="M 304 128 L 301 122 L 299 120 L 295 118 L 238 118 L 232 122 L 229 128 L 229 149 L 228 150 L 123 150 L 122 151 L 120 151 L 118 153 L 117 157 L 118 159 L 122 162 L 228 162 L 229 163 L 229 184 L 230 185 L 231 189 L 237 194 L 295 194 L 299 192 L 302 189 L 304 185 Z" fill="#00C8D0" fill-rule="evenodd"/></symbol>
+</svg>
+
+<div id="splash" role="dialog" aria-label="Ann Summers Eligibility Checker" tabindex="0">
+  <div class="wordmark">Ann Summers</div>
+  <div class="bar"></div>
+  <h1>Eligibility Checker</h1>
+  <div class="powered">
+    <span>Powered by</span>
+    <svg role="img" aria-label="Fundable"><use href="#fd-logo"/></svg>
+  </div>
+  <div class="skip">Click or press any key to start</div>
+</div>
+
+<header>
+  <div class="wordmark">Ann Summers</div>
+  <div class="app">Apprentice Eligibility Checker</div>
+  <div class="pw">Powered by <svg role="img" aria-label="Fundable" viewBox="0 0 1214 314"><use href="#fd-logo"/></svg></div>
+</header>
+
+<main>
+  <!-- ================= INPUTS ================= -->
+  <section class="inputs" aria-label="About the apprentice">
+    <div class="card">
+      <div class="step"><b>1</b>The apprentice</div>
+      <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
+        <input type="text" id="name" autocomplete="off" placeholder="e.g. Jordan">
+        <small>Nothing you enter leaves this page.</small></label>
+      <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
+      <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small style="display:block;color:var(--muted)">Extends several age limits to 24.</small></span></label>
+      <label class="tick"><input type="checkbox" id="newhire" checked><span>They're a <b>new hire</b> (with us 90 days or less at the start) <small style="display:block;color:var(--muted)">Affects hiring payments.</small></span></label>
+    </div>
+
+    <div class="card">
+      <div class="step"><b>2</b>The apprenticeship</div>
+      <label class="f"><span>Apprenticeship standard</span>
+        <input id="std" list="stdlist" placeholder="Search by name or ST code" autocomplete="off">
+        <datalist id="stdlist"></datalist></label>
+      <div class="stdinfo" id="stdinfo"></div>
+      <label class="tick"><input type="checkbox" id="foundation"><span>This is a <b>foundation apprenticeship</b></span></label>
+      <div class="row2">
+        <label class="f"><span>Planned start date</span><input type="date" id="start"></label>
+        <label class="f"><span>Contracted hours / week</span><input type="number" id="hours" min="1" max="60" step="0.5" value="37.5"></label>
+      </div>
+      <label class="tick"><input type="checkbox" id="levyok" checked><span>Our <b>levy balance</b> covers this apprenticeship</span></label>
+    </div>
+
+    <div class="card">
+      <div class="step"><b>3</b>Quick eligibility checks</div>
+      <div id="qs"></div>
+    </div>
+
+    <div class="card">
+      <div class="step"><b>4</b>Timing preferences</div>
+      <p style="margin:0 0 8px;font-size:14px;color:var(--ink);font-weight:500">Avoid starting in these months</p>
+      <p class="help" style="margin:0 0 10px;font-size:12.5px;color:var(--muted)">Pre-set to peak trading (Christmas and Valentine's). Change them to fit your team.</p>
+      <div class="months" id="months"></div>
+      <label class="tick" style="margin-top:16px"><input type="checkbox" id="showmil" checked><span>Show what changes <b>if the Milburn Review is adopted</b></span></label>
+    </div>
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section aria-live="polite" aria-label="Result">
+    <div id="verdict" class="verdict v-empty"><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
+
+    <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul></div>
+
+    <div class="card" id="whenCard">
+      <h3>Best time to onboard</h3>
+      <div class="when" id="when"></div>
+      <div id="whenNotes"></div>
+      <div class="tl" id="tl" aria-hidden="true"></div>
+      <div class="legend"><span class="lw">Recommended start window</span><span class="ls">Planned start</span><span class="lc">Current rules deadline</span><span class="lm milonly">If Milburn adopted</span></div>
+    </div>
+
+    <div class="card" id="moneyCard">
+      <h3>Who pays</h3>
+      <table class="money" id="money"></table>
+      <p class="note" id="moneyNote"></p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="window.print()">Print / save as PDF</button>
+      <button class="btn ghost" id="reset">Start again</button>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Rules: <a href="https://www.gov.uk/government/publications/apprenticeship-funding-rules-and-assessment-plan-guidance-2026-to-2027" target="_blank" rel="noopener">Apprenticeship funding rules 2026–27 (v3)</a> and
+  <a href="https://www.gov.uk/employing-an-apprentice/get-funding" target="_blank" rel="noopener">gov.uk get funding</a>, verified 25 Nov 2026. Paragraph numbers refer to the funding rules.
+  Milburn: <a href="https://assets.publishing.service.gov.uk/media/6afb1fc5ccb3ea58ac8743c1/from-a-welfare-state-to-a-working-state-full-report.pdf" target="_blank" rel="noopener">“From a Welfare State to a Working State”</a> (Nov 2026). These are proposals, not law.
+  Standards and funding bands: Skills England, 28 Jun 2026. This tool is guidance, not a funding decision. Your training provider confirms eligibility at sign-up.
+</footer>
+
+<script>
+const STDS = [{"r":"ST1472","n":"Administration assistant","l":2,"d":12,"f":4000,"s":"InDevelopment"},{"r":"ST0070","n":"Business administrator","l":3,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0239","n":"HR support","l":3,"d":18,"f":4500,"s":"ApprovedForDelivery"},{"r":"ST0193","n":"Improvement technician","l":3,"d":14,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0562","n":"Learning and development practitioner","l":3,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0301","n":"Leisure duty manager","l":3,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0664","n":"Library, information and archive services assistant","l":3,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0708","n":"Public sector compliance investigator and officer","l":3,"d":18,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0314","n":"Public service operational delivery officer","l":3,"d":12,"f":2500,"s":"ApprovedForDelivery"},{"r":"ST1421","n":"Recruiter","l":3,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0384","n":"Team leader","l":3,"d":15,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0310","n":"Associate project manager","l":4,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0092","n":"Community energy specialist","l":4,"d":24,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0934","n":"Corporate responsibility and sustainability practitioner","l":4,"d":36,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST0967","n":"Data protection and information governance practitioner","l":4,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0663","n":"Employability practitioner","l":4,"d":24,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST1302","n":"Governance officer","l":4,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0192","n":"Improvement practitioner","l":4,"d":14,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0762","n":"Information manager","l":4,"d":24,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0273","n":"Junior management consultant","l":4,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0526","n":"Policy officer","l":4,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0853","n":"Quality practitioner","l":4,"d":14,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0430","n":"Regulatory compliance officer","l":4,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0602","n":"Revenues and welfare benefits practitioner","l":4,"d":12,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0575","n":"School business professional","l":4,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0815","n":"Trade union official","l":4,"d":18,"f":5000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0809","n":"Coaching professional","l":5,"d":14,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0555","n":"Improvement specialist","l":5,"d":14,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0563","n":"Learning and development consultant business partner","l":5,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0385","n":"Operations manager","l":5,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0238","n":"People professional","l":5,"d":22,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0694","n":"Career development professional","l":6,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0272","n":"Chartered manager (degree)","l":6,"d":48,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0556","n":"Improvement leader","l":6,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0411","n":"Project manager (integrated degree)","l":6,"d":48,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0894","n":"Service designer","l":6,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST1341","n":"Social researcher","l":6,"d":42,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0998","n":"Trading standards professional","l":6,"d":36,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST1337","n":"Library, information and knowledge management professional","l":7,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST0884","n":"Operational research specialist","l":7,"d":24,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST0480","n":"Senior leader","l":7,"d":24,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST0813","n":"Senior people professional","l":7,"d":36,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0748","n":"Sustainability business specialist (integrated degree)","l":7,"d":24,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0787","n":"Systems thinking practitioner","l":7,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0005","n":"Adult care worker","l":2,"d":12,"f":4500,"s":"ApprovedForDelivery"},{"r":"ST0867","n":"Playworker","l":2,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0006","n":"Lead adult care worker","l":3,"d":18,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST1030","n":"Safeguarding support officer","l":3,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0906","n":"Youth support worker","l":3,"d":18,"f":4500,"s":"ApprovedForDelivery"},{"r":"ST0088","n":"Children, young people and families practitioner","l":4,"d":24,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0862","n":"Domestic and sexual abuse support worker","l":4,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0868","n":"Early intervention practitioner","l":4,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0007","n":"Lead practitioner in adult care","l":4,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0087","n":"Children, young people and families manager","l":5,"d":24,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0008","n":"Leader in adult care","l":5,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0527","n":"Church minister (integrated degree)","l":6,"d":36,"f":22000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0510","n":"Social worker (integrated degree)","l":6,"d":36,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0522","n":"Youth worker","l":6,"d":36,"f":20000,"s":"ApprovedForDelivery"},{"r":"ST0905","n":"Play therapist","l":7,"d":36,"f":20000,"s":"ApprovedForDelivery"},{"r":"ST0191","n":"Baker","l":2,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0228","n":"Commis chef","l":2,"d":12,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST1488","n":"Food and beverage team member","l":2,"d":12,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST1420","n":"Hospitality accommodation team member","l":2,"d":12,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0589","n":"Production chef","l":2,"d":12,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0227","n":"Chef de partie","l":3,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0230","n":"Hospitality supervisor","l":3,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST1349","n":"Lead baker","l":3,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0929","n":"Pastry chef","l":3,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0232","n":"Senior production chef","l":3,"d":12,"f":4500,"s":"ApprovedForDelivery"},{"r":"ST0229","n":"Hospitality manager","l":4,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0864","n":"Senior culinary chef","l":4,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0865","n":"Cyber security technician","l":3,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0795","n":"Data technician","l":3,"d":24,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0682","n":"Digital device repair technician","l":3,"d":21,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0120","n":"Digital support technician","l":3,"d":15,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0505","n":"IT solutions technician","l":3,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0973","n":"Information communications technician","l":3,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0485","n":"Network cable installer","l":3,"d":15,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0757","n":"Radio network technician","l":3,"d":24,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0128","n":"Software development technician","l":3,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0949","n":"Applications support lead","l":4,"d":24,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST1512","n":"Artificial intelligence (AI) and automation practitioner","l":4,"d":18,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0117","n":"Business analyst","l":4,"d":18,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1021","n":"Cyber security technologist (2021)","l":4,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0118","n":"Data analyst","l":4,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0825","n":"DevOps engineer","l":4,"d":24,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST0863","n":"Digital accessibility specialist","l":4,"d":24,"f":16000,"s":"ApprovedForDelivery"},{"r":"ST0345","n":"Digital community manager","l":4,"d":24,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST1343","n":"Digital forensic technician","l":4,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0964","n":"Digital product manager","l":4,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0127","n":"Network engineer","l":4,"d":24,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0116","n":"Software developer","l":4,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0129","n":"Software tester","l":4,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1386","n":"Data engineer","l":5,"d":24,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0974","n":"Digital learning designer","l":5,"d":24,"f":16000,"s":"ApprovedForDelivery"},{"r":"ST0625","n":"Creative digital design professional (integrated degree)","l":6,"d":36,"f":25000,"s":"ApprovedForDelivery"},{"r":"ST0409","n":"Cyber security technical professional (integrated degree)","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0585","n":"Data scientist (integrated degree)","l":6,"d":36,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0119","n":"Digital and technology solutions professional","l":6,"d":48,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0470","n":"Digital user experience (UX) professional (integrated degree)","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST1398","n":"Machine learning engineer","l":6,"d":24,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST1409","n":"Advanced digital forensic professional","l":7,"d":36,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0763","n":"Artificial intelligence (AI) data specialist","l":7,"d":24,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST0482","n":"Digital and technology solutions specialist (integrated degree)","l":7,"d":18,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0953","n":"Game programmer","l":7,"d":24,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0957","n":"Spatial data specialist","l":7,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0843","n":"Cleaning hygiene operative","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0478","n":"Community activator coach","l":2,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0218","n":"Healthcare science assistant","l":2,"d":14,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0216","n":"Healthcare support worker","l":2,"d":8,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0390","n":"Leisure team member","l":2,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0299","n":"Pharmacy services assistant","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0627","n":"Ambulance support worker (emergency, urgent and non-urgent)","l":3,"d":13,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0058","n":"Animal technologist","l":3,"d":24,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0535","n":"Clinical coder","l":3,"d":18,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0958","n":"Community health and wellbeing worker","l":3,"d":12,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0093","n":"Community sport and health officer","l":3,"d":16,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST1431","n":"Dental nurse","l":3,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0198","n":"Food industry technologist","l":3,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0248","n":"Laboratory technician","l":3,"d":24,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0282","n":"Metrology technician","l":3,"d":36,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0889","n":"Mortuary technician","l":3,"d":18,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST1377","n":"Optical assistant 2022","l":3,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0479","n":"Outdoor activity instructor","l":3,"d":12,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0896","n":"Peer worker","l":3,"d":15,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0302","n":"Personal trainer","l":3,"d":15,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0300","n":"Pharmacy technician (integrated)","l":3,"d":24,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0632","n":"Prosthetic and orthotic technician","l":3,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0217","n":"Senior healthcare support worker","l":3,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0524","n":"Sporting excellence professional","l":3,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0287","n":"Associate ambulance practitioner","l":4,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0220","n":"Healthcare science associate","l":4,"d":24,"f":16000,"s":"ApprovedForDelivery"},{"r":"ST0873","n":"Hygiene specialist","l":4,"d":24,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST0583","n":"Mammography associate","l":4,"d":12,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0542","n":"Oral health practitioner","l":4,"d":14,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST1434","n":"Orthodontic therapist","l":4,"d":13,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0770","n":"Sports coach","l":4,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0215","n":"Assistant practitioner (health)","l":5,"d":24,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST0786","n":"Associate continuing healthcare practitioner","l":5,"d":24,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST1433","n":"Clinical dental technician","l":5,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0393","n":"Dairy technologist","l":5,"d":36,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST1432","n":"Dental technician","l":5,"d":36,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0890","n":"Embalmer","l":5,"d":36,"f":20000,"s":"ApprovedForDelivery"},{"r":"ST0829","n":"Health play specialist","l":5,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0600","n":"Hearing aid dispenser","l":5,"d":24,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0827","n":"Nursing associate (NMC 2018)","l":5,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0945","n":"Outdoor learning specialist","l":5,"d":24,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0283","n":"Senior metrology technician","l":5,"d":36,"f":21000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0597","n":"Technician scientist","l":5,"d":36,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0431","n":"Vision rehabilitation specialist","l":5,"d":24,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST1314","n":"Biomedical scientist","l":6,"d":36,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0609","n":"Clinical trials specialist (degree)","l":6,"d":60,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST1383","n":"Dental hygienist","l":6,"d":36,"f":27000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0619","n":"Diagnostic radiographer","l":6,"d":36,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0599","n":"Dietitian","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0774","n":"Dispensing optician","l":6,"d":36,"f":23000,"s":"ApprovedForDelivery"},{"r":"ST0895","n":"Enhanced clinical practitioner","l":6,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0714","n":"Environmental health practitioner (integrated degree)","l":6,"d":48,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0197","n":"Food industry technical professional (integrated degree)","l":6,"d":48,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1356","n":"Geoscientist (integrated degree)","l":6,"d":60,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0413","n":"Healthcare science practitioner (integrated degree)","l":6,"d":36,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0948","n":"Midwife (2019 NMC standards) (Integrated degree)","l":6,"d":48,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST0517","n":"Occupational therapist","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0582","n":"Operating department practitioner","l":6,"d":48,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST1272","n":"Orthoptist","l":6,"d":36,"f":25000,"s":"ApprovedForDelivery"},{"r":"ST1462","n":"Osteopath","l":6,"d":48,"f":27000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0567","n":"Paramedic","l":6,"d":36,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0519","n":"Physiotherapist","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0493","n":"Podiatrist","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0601","n":"Prosthetist and orthotist","l":6,"d":48,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0568","n":"Psychological wellbeing practitioner","l":6,"d":12,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0631","n":"Public health practitioner - integrated degree","l":6,"d":36,"f":20000,"s":"ApprovedForDelivery"},{"r":"ST0781","n":"Registered nurse degree (NMC 2018)","l":6,"d":48,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST0626","n":"Scientist","l":6,"d":60,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0554","n":"Sonographer (integrated degree)","l":6,"d":36,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0618","n":"Speech and language therapist","l":6,"d":48,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST0620","n":"Therapeutic radiographer","l":6,"d":36,"f":24000,"s":"ApprovedForDelivery"},{"r":"ST0564","n":"Advanced clinical practitioner (integrated degree)","l":7,"d":36,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST0788","n":"Advanced forensic practitioner (custody or sexual offence)","l":7,"d":12,"f":5000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0633","n":"Arts therapist","l":7,"d":24,"f":19000,"s":"ApprovedForDelivery"},{"r":"ST0649","n":"Bioinformatics scientist (degree)","l":7,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0820","n":"Clinical associate in psychology (CAP) (integrated degree)","l":7,"d":18,"f":16000,"s":"ApprovedForDelivery"},{"r":"ST0798","n":"Clinical pharmacology scientist (integrated degree)","l":7,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0893","n":"Clinical scientist","l":7,"d":36,"f":20000,"s":"ApprovedForDelivery"},{"r":"ST1419","n":"Community nurse specialist practitioner (NMC 2022)","l":7,"d":24,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST0995","n":"Doctor (Degree)","l":7,"d":60,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1310","n":"Family and systemic psychotherapist","l":7,"d":24,"f":16000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0830","n":"Health and care intelligence specialist","l":7,"d":36,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST1399","n":"Hydrogeologist (integrated degree)","l":7,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0892","n":"Medical statistician","l":7,"d":30,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST0773","n":"Optometrist","l":7,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0518","n":"Physician associate - integrated degree","l":7,"d":30,"f":17000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0586","n":"Regulatory affairs specialist","l":7,"d":30,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0759","n":"Research scientist","l":7,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1362","n":"Soil scientist","l":7,"d":24,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST1418","n":"Specialist community public health nurse (NMC 2022)","l":7,"d":18,"f":14000,"s":"ApprovedForDelivery"},{"r":"ST1475","n":"Surgical care practitioner","l":7,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST0608","n":"Accounts or finance assistant","l":2,"d":12,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0176","n":"Credit controller and collector","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0179","n":"Investment operations administrator","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0880","n":"Asset finance practitioner","l":3,"d":24,"f":null,"s":"InDevelopment"},{"r":"ST0002","n":"Assistant accountant","l":3,"d":15,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST0362","n":"Compliance and risk officer","l":3,"d":15,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0177","n":"Financial services administrator","l":3,"d":12,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0185","n":"Financial services customer adviser","l":3,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0240","n":"Insurance practitioner","l":3,"d":12,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0181","n":"Investment operations technician","l":3,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0182","n":"Mortgage adviser","l":3,"d":12,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0474","n":"Motor finance specialist","l":3,"d":24,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0245","n":"Paralegal","l":3,"d":24,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0073","n":"Payroll administrator","l":3,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0187","n":"Pensions administrator","l":3,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0175","n":"Senior credit controller and debt collection specialist","l":3,"d":18,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0004","n":"Actuarial technician","l":4,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0241","n":"Insurance professional","l":4,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0587","n":"Internal audit practitioner","l":4,"d":18,"f":9000,"s":"ApprovedForDelivery-Paused"},{"r":"ST1484","n":"Internal audit technician","l":4,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0180","n":"Investment operations specialist","l":4,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST1312","n":"Legal technician - conveyancing technician or probate technician","l":4,"d":24,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST1301","n":"Paraplanner and financial planner","l":4,"d":24,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0003","n":"Professional accounting technician","l":4,"d":18,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST1458","n":"Professional taxation technician","l":4,"d":24,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST1485","n":"Treasury assistant","l":4,"d":18,"f":null,"s":"InDevelopment"},{"r":"ST1476","n":"Advanced paralegal","l":5,"d":24,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0869","n":"Payroll assistant manager","l":5,"d":24,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST1303","n":"Accounting finance manager","l":6,"d":36,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1473","n":"Actuarial analyst","l":6,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST1487","n":"Certified internal auditor","l":6,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0244","n":"Chartered legal executive","l":6,"d":60,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1464","n":"Consumer financial services professional","l":6,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST1468","n":"Corporate treasurer","l":6,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST1400","n":"Costs lawyer","l":6,"d":48,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST1465","n":"Financial investment professional","l":6,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST0472","n":"Financial services professional","l":6,"d":42,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1311","n":"Licensed conveyancer or licensed probate practitioner","l":6,"d":56,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1454","n":"Patent scientist or patent engineer","l":6,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0603","n":"Professional economist (integrated degree)","l":6,"d":42,"f":23000,"s":"ApprovedForDelivery"},{"r":"ST0363","n":"Senior compliance and risk specialist","l":6,"d":36,"f":23000,"s":"ApprovedForDelivery"},{"r":"ST0520","n":"Senior insurance professional","l":6,"d":36,"f":26000,"s":"ApprovedForDelivery"},{"r":"ST0001","n":"Accountancy or taxation professional","l":7,"d":36,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0502","n":"Actuary","l":7,"d":39,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST1389","n":"Barrister","l":7,"d":72,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1368","n":"Chartered legal executive litigator and advocate","l":7,"d":66,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST1459","n":"Chartered tax advisor","l":7,"d":36,"f":null,"s":"InDevelopment"},{"r":"ST0610","n":"Internal audit professional","l":7,"d":36,"f":17000,"s":"ApprovedForDelivery"},{"r":"ST0561","n":"Senior investment and commercial banking professional","l":7,"d":18,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0796","n":"Senior professional economist (integrated degree)","l":7,"d":24,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0246","n":"Solicitor","l":7,"d":72,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0078","n":"Butcher","l":2,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0072","n":"Customer service practitioner","l":2,"d":12,"f":3500,"s":"ApprovedForDelivery"},{"r":"ST0194","n":"Fishmonger","l":2,"d":18,"f":13000,"s":"ApprovedForDelivery"},{"r":"ST0594","n":"Funeral team member","l":2,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0235","n":"Housing and property management assistant","l":2,"d":12,"f":3000,"s":"ApprovedForDelivery"},{"r":"ST0329","n":"Junior estate agent","l":2,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0327","n":"Retailer","l":2,"d":14,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0334","n":"Trade supplier","l":2,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0077","n":"Advanced butcher","l":3,"d":18,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST0644","n":"Advertising and media executive","l":3,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0056","n":"Bid and proposal co-ordinator","l":3,"d":24,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0071","n":"Customer service specialist","l":3,"d":15,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0168","n":"Event assistant","l":3,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0887","n":"Fundraiser","l":3,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0584","n":"Funeral director","l":3,"d":12,"f":4500,"s":"ApprovedForDelivery"},{"r":"ST0234","n":"Housing and property management","l":3,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0115","n":"IT technical salesperson","l":3,"d":12,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST1031","n":"Multi-channel marketer","l":3,"d":18,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0810","n":"Procurement and supply assistant","l":3,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0340","n":"Travel consultant","l":3,"d":12,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0683","n":"Buying and merchandising assistant","l":4,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0883","n":"Market research executive","l":4,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0596","n":"Marketing executive","l":4,"d":15,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0313","n":"Procurement and supply chain practitioner","l":4,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0311","n":"Public relations and communications assistant","l":4,"d":14,"f":11000,"s":"ApprovedForDelivery"},{"r":"ST0325","n":"Retail manager","l":4,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0572","n":"Sales executive","l":4,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0236","n":"Senior housing and property management","l":4,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0668","n":"Assistant buyer and merchandiser","l":6,"d":24,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0423","n":"Business to business sales professional (integrated degree)","l":6,"d":36,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0481","n":"Digital marketer (integrated degree)","l":6,"d":36,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0612","n":"Marketing manager","l":6,"d":24,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0547","n":"Retail leadership (integrated degree)","l":6,"d":48,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0811","n":"Senior procurement and supply chain professional","l":6,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0907","n":"Aviation customer service operative","l":2,"d":12,"f":3500,"s":"ApprovedForDelivery"},{"r":"ST0908","n":"Aviation ground handler","l":2,"d":12,"f":3500,"s":"ApprovedForDelivery-Paused"},{"r":"ST0037","n":"Aviation ground operative","l":2,"d":12,"f":3000,"s":"ApprovedForDelivery"},{"r":"ST0103","n":"Express delivery operative","l":2,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0753","n":"Express delivery sortation hub operative","l":2,"d":12,"f":4000,"s":"ApprovedForDelivery"},{"r":"ST0257","n":"Large goods vehicle (LGV) driver C + E","l":2,"d":13,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0592","n":"Marina and boatyard operative","l":2,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0338","n":"Passenger transport driver - bus and coach or tram","l":2,"d":12,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0339","n":"Passenger transport operative","l":2,"d":12,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0307","n":"Port operative","l":2,"d":12,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST1393","n":"Removals operative","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0274","n":"Seafarer (deck rating)","l":2,"d":18,"f":10000,"s":"ApprovedForDelivery"},{"r":"ST0259","n":"Supply chain warehouse operative","l":2,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST1394","n":"Traffic operator","l":2,"d":12,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST1025","n":"Urban driver","l":2,"d":12,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST1007","n":"Aviation flight operations coordinator","l":3,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0038","n":"Aviation ground specialist","l":3,"d":18,"f":6000,"s":"ApprovedForDelivery"},{"r":"ST0954","n":"Aviation movement specialist","l":3,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST0621","n":"Boatmaster","l":3,"d":24,"f":25000,"s":"ApprovedForDelivery"},{"r":"ST0558","n":"Cabin crew","l":3,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST0539","n":"International freight forwarding specialist","l":3,"d":18,"f":9000,"s":"ApprovedForDelivery"},{"r":"ST0842","n":"Officer of the watch (near coastal)","l":3,"d":36,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST1378","n":"Rail infrastructure operator","l":3,"d":18,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0400","n":"Small commercial vessel crewmember","l":3,"d":24,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0201","n":"Supply chain practitioner (fast-moving consumer goods (FMCG))","l":3,"d":30,"f":15000,"s":"ApprovedForDelivery"},{"r":"ST0645","n":"Train driver","l":3,"d":12,"f":21000,"s":"ApprovedForDelivery"},{"r":"ST0647","n":"Transport and warehouse operations supervisor","l":3,"d":12,"f":5000,"s":"ApprovedForDelivery"},{"r":"ST1438","n":"Transport scheduler","l":3,"d":18,"f":8000,"s":"ApprovedForDelivery"},{"r":"ST0039","n":"Aviation operations manager","l":4,"d":18,"f":7000,"s":"ApprovedForDelivery"},{"r":"ST1336","n":"Jack-up barge master - non-propelled unit","l":4,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0337","n":"Passenger transport operations manager","l":4,"d":18,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST0428","n":"Port marine operations officer","l":4,"d":24,"f":12000,"s":"ApprovedForDelivery"},{"r":"ST1333","n":"Shipâ€™s master â€“ less than 500 gross tonnage near coastal","l":4,"d":48,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0595","n":"Air traffic controller","l":5,"d":15,"f":27000,"s":"ApprovedForDelivery"},{"r":"ST0427","n":"Marine pilot","l":5,"d":30,"f":18000,"s":"ApprovedForDelivery"},{"r":"ST0975","n":"Uncrewed marine vehicle specialist","l":5,"d":0,"f":null,"s":"InDevelopment"},{"r":"ST0471","n":"Express delivery manager (degree)","l":6,"d":36,"f":22000,"s":"ApprovedForDelivery"},{"r":"ST0523","n":"First officer pilot","l":6,"d":24,"f":27000,"s":"ApprovedForDelivery-Paused"},{"r":"ST1441","n":"Railway operations manager","l":6,"d":36,"f":19000,"s":"ApprovedForDelivery-Paused"},{"r":"ST0548","n":"Supply chain leadership professional (integrated degree)","l":6,"d":48,"f":21000,"s":"ApprovedForDelivery"}];
+
+/* ---------- Rules (verified 2026-11-25; refs = funding rules 2026-27 v3 paragraphs) ---------- */
+const R = {
+  l7Max: 22, l7MaxCare: 25,            // para 32: funded if under 22 at start, or under 25 with EHCP/care
+  adminRef: 'ST1472', adminMax: 25,    // para 33: 16-24 only
+  fdnMax: 22, fdnMaxCare: 25,          // para 160
+  fullFundMax: 25,                     // para 214: 100% govt for under-25 where levy insufficient
+  coInvest: 0.25,                      // para 213.1: levy payer, insufficient funds, 25+
+  inc1000Max: 19, inc1000MaxCare: 25,  // £1,000 employer payment: 16-18, or 19-24 EHCP/care
+  minHours: 30,                        // paras 77.3, 80
+  leadDays: 28,                        // planning assumption, not a rule
+  mil: { cut: 0.25, under: 25, hiring: 2500 } // Milburn paras 470, 472 (proposed)
+};
+
+const QS = [
+  {id:'res', bad:'no', ref:'Annex A, 354–377',
+   q:'Do they have the right to work in the UK and an eligible residency status?',
+   help:'Usually 3 years living in the UK (or the EEA with settled or pre-settled status) before the start date. Refugees and people on some humanitarian schemes are exempt from the 3 years. Student visa holders and asylum seekers are not eligible.',
+   fail:'Residency or right to work isn\'t met, so the apprenticeship can\'t be funded.'},
+  {id:'eng', bad:'no', ref:'30.5',
+   q:'Will at least half of their working hours be in England?',
+   help:'Measured across the whole apprenticeship, including home and hybrid working.',
+   fail:'Less than half their hours would be in England. Scottish and Welsh funding rules apply instead.'},
+  {id:'con', bad:'no', ref:'30.2, 69, 34.1–34.3',
+   q:'Will they be employed by Ann Summers on a contract that lasts to the end of the apprenticeship?',
+   help:'This includes end-point assessment. Sole traders can\'t be apprentices, and nor can directors or shareholders who have no separate line manager.',
+   fail:'They need a contract of employment that runs to the end of the apprenticeship.'},
+  {id:'oth', bad:'yes', ref:'34.4–34.6',
+   q:'Are they currently on another apprenticeship, apprenticeship unit, Skills Bootcamp or other government-funded course?',
+   help:'Courses with less than 4 weeks left are usually fine.',
+   fail:'They\'re already on another government-funded programme. That needs to finish first.'},
+  {id:'edu', bad:'yes', ref:'34.7, 30.3',
+   q:'Are they in full-time education, or getting student finance or a student loan?',
+   help:'A student loan can\'t pay for an apprenticeship and must be ended first.',
+   fail:'They\'re in full-time education or getting student finance, which can\'t overlap with a funded apprenticeship.'},
+  {id:'pri', bad:'yes', soft:true, ref:'68.2, 35, 38.2',
+   q:'Do they already have a qualification at the same or higher level in this subject, or a lot of experience in the role?',
+   help:'This doesn\'t rule them out, but the apprenticeship must teach materially new skills.',
+   fail:'They already have related learning. The apprenticeship must teach materially new skills, and the provider\'s skills scan will shorten it and reduce the price.'}
+];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ---------- state ---------- */
+const S = {answers:{}, busy:new Set([1,10,11])};
+const $ = id => document.getElementById(id);
+
+/* ---------- date utils (UTC, no timezone drift) ---------- */
+const parse = s => { if(!s) return null; const [y,m,d]=s.split('-').map(Number); if(!y||!m||!d) return null; return new Date(Date.UTC(y,m-1,d)); };
+const iso = d => d.toISOString().slice(0,10);
+const utcToday = () => { const n=new Date(); return new Date(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())); };
+const addDays = (d,n) => new Date(d.getTime()+n*864e5);
+const addYears = (d,n) => new Date(Date.UTC(d.getUTCFullYear()+n,d.getUTCMonth(),d.getUTCDate())); // 29 Feb -> 1 Mar, as UK law
+const addMonths = (d,n) => { const t=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+n,1)); const last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate(); t.setUTCDate(Math.min(d.getUTCDate(),last)); return t; };
+const ageOn = (dob,d) => { let a=d.getUTCFullYear()-dob.getUTCFullYear(); if(d < addYears(dob,a)) a--; return a; };
+const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+const money = n => '£'+Math.round(n).toLocaleString('en-GB');
+function lastFridayJune(y){ let d=new Date(Date.UTC(y,5,30)); while(d.getUTCDay()!==5) d=addDays(d,-1); return d; }
+function earliestStart(dob){ // para 30.1: after the last Friday in June of the school year in which they turn 16
+  const b16=addYears(dob,16); const y=b16.getUTCMonth()>=8 ? b16.getUTCFullYear()+1 : b16.getUTCFullYear();
+  return addDays(lastFridayJune(y),1);
+}
+const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- build UI ---------- */
+$('stdlist').innerHTML = STDS.slice().sort((a,b)=>a.n.localeCompare(b.n)).map(s=>`<option value="${esc(s.n)} (${s.r})">Level ${s.l}${s.f?' · '+money(s.f):''}</option>`).join('');
+$('qs').innerHTML = QS.map(q=>`<div class="q" data-q="${q.id}"><p>${q.q}</p><div class="help">${q.help}</div>
+  <div class="seg" role="group" aria-label="${esc(q.q)}">${['yes','no','unsure'].map(v=>`<button type="button" data-v="${v}" aria-pressed="false">${v==='unsure'?'Not sure':v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div></div>`).join('');
+$('months').innerHTML = MONTHS.map((m,i)=>`<button type="button" data-m="${i}" aria-pressed="${S.busy.has(i)}">${m}</button>`).join('');
+$('start').value = iso(addMonths(utcToday(),2));
+
+$('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'); if(!b) return; const id=b.closest('.q').dataset.q;
+  S.answers[id] = S.answers[id]===b.dataset.v ? undefined : b.dataset.v;
+  b.parentNode.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===S.answers[id]))); render();});
+$('months').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; const m=+b.dataset.m; S.busy.has(m)?S.busy.delete(m):S.busy.add(m); b.setAttribute('aria-pressed',String(S.busy.has(m))); render();});
+['name','dob','care','newhire','std','foundation','start','hours','levyok','showmil'].forEach(id=>$(id).addEventListener('input',render));
+$('reset').onclick=()=>{ if(!confirm('Clear everything and start again?')) return; location.reload(); };
+
+function findStd(v){ const m=/(ST\d{4})/i.exec(v||''); return m ? STDS.find(s=>s.r===m[1].toUpperCase()) : null; }
+
+/* ---------- engine ---------- */
+function compute(){
+  const today=utcToday();
+  const dob=parse($('dob').value);
+  const std=findStd($('std').value);
+  const fdn=$('foundation').checked;
+  const care=$('care').checked, newHire=$('newhire').checked, levyOk=$('levyok').checked, mil=$('showmil').checked;
+  const hours=parseFloat($('hours').value)||37.5;
+  const start=parse($('start').value) || addMonths(today,2);
+  const name=$('name').value.trim();
+  const out={dob,std,fdn,care,newHire,levyOk,mil,hours,start,name,today,items:[],cliffs:[]};
+  if(!dob) return out;
+  if(dob>today || ageOn(dob,today)>90){ out.badDob=true; return out; }
+
+  const age=ageOn(dob,start); out.age=age;
+  const bd=n=>addYears(dob,n);
+  const earliest=earliestStart(dob); out.earliest=earliest;
+  const band=std?std.f:null, level=std?std.l:(fdn?2:null);
+  const baseDur=std?std.d:null;
+  const dur= baseDur ? (hours<R.minHours ? Math.ceil(baseDur*R.minHours/hours) : baseDur) : null;
+  Object.assign(out,{band,level,baseDur,dur,end:dur?addMonths(start,dur):null});
+  const add=(sev,text,ref,extra={})=>out.items.push({sev,text,ref,...extra});
+
+  // --- age / programme rules
+  if(start<earliest) add('bad',`<b>Too young to start on ${fmt(start)}.</b> The earliest start date is <b>${fmt(earliest)}</b> (the day after the last Friday in June of the school year they turn 16).`,'30.1',{notyet:true});
+  if(std && std.s==='InDevelopment') add('bad',`<b>${esc(std.n)} isn't approved for delivery yet</b>, so nobody can start it. Check with your provider when it will be.`,'Skills England');
+  if(std && std.s==='ApprovedForDelivery-Paused') add('bad',`<b>New starts on ${esc(std.n)} are paused.</b> Choose another standard or wait for it to reopen.`,'Skills England');
+  const l7lim=care?R.l7MaxCare:R.l7Max;
+  if(level===7 && !fdn){
+    if(age>=l7lim) add('bad',`<b>Level 7 isn't funded at age ${age}.</b> It's only funded for apprentices under ${l7lim} at the start${care?'':' (under 25 with an EHC plan or care experience)'}. Ann Summers would pay the full ${band?money(band):'price'}.`,'32',{unfunded:true});
+    else add('ok',`Level 7 is funded because they'll be ${age} at the start (it's funded for under-${l7lim}s).`,'32');
+    out.cliffs.push({date:bd(l7lim),what:'Level 7 funding closes',cost:band,elig:true,scheme:'cur'});
+  }
+  if(std && std.r===R.adminRef){
+    if(age>=R.adminMax) add('bad',`<b>Administration Assistant is only funded for ages 16–24.</b> They'll be ${age} at the start.`,'33',{unfunded:true});
+    out.cliffs.push({date:bd(R.adminMax),what:'Admin Assistant funding closes',cost:band,elig:true,scheme:'cur'});
+  }
+  const flim=care?R.fdnMaxCare:R.fdnMax;
+  if(fdn){
+    if(age>=flim) add('bad',`<b>Foundation apprenticeships are for ages 16–21</b> (up to 24 with an EHC plan, care experience, or as a prison leaver). They'll be ${age} at the start.`,'160',{unfunded:true});
+    else if(age>=22) add('warn',`At age ${age}, they must consent to the employer being told about their EHC plan or care experience.`,'161–162');
+    out.cliffs.push({date:bd(flim),what:'Foundation eligibility ends',cost:band,elig:true,scheme:'cur'});
+  }
+
+  // --- checklist
+  for(const q of QS){
+    const a=S.answers[q.id];
+    if(a===q.bad) add(q.soft?'warn':'bad', q.fail, q.ref);
+    else if(a==='unsure') add('warn',`<b>To confirm:</b> ${q.q.replace(/\?$/,'')}.`,q.ref);
+    else if(a===undefined) add('info',`<b>Not answered yet:</b> ${q.q.replace(/\?$/,'')}.`,q.ref,{unanswered:true});
+  }
+  if(hours<R.minHours) add('warn',`<b>${hours} hours a week is under 30</b>, so the apprenticeship takes longer: about <b>${dur||'—'} months</b>${baseDur?` instead of ${baseDur}`:''} (an estimate; your provider sets the actual length).`,'77.3, 80');
+  if(out.end) add('info',`Their contract must run beyond <b>${fmt(out.end)}</b>, plus the end-point assessment period.`,'69');
+
+  // --- verdict
+  const bad=out.items.filter(i=>i.sev==='bad'), warn=out.items.filter(i=>i.sev==='warn'), un=out.items.filter(i=>i.unanswered);
+  if(bad.length && bad.every(b=>b.notyet)) out.verdict='notyet';
+  else if(bad.length) out.verdict='no';
+  else if(warn.length||un.length) out.verdict='check';
+  else out.verdict='yes';
+
+  // --- money
+  const unfunded=out.items.some(i=>i.unfunded);
+  const c={rows:[]}, m={rows:[]};
+  if(band){
+    if(unfunded){ c.cash=band; c.who='Not fundable. Ann Summers pays in full.'; }
+    else if(levyOk){ c.cash=0; c.who='Paid from the levy'; }
+    else if(age<R.fullFundMax){ c.cash=0; c.who='Government pays 100% (under 25)'; }
+    else { c.cash=band*R.coInvest; c.who=`Ann Summers pays 25% of the shortfall, up to ${money(band*R.coInvest)}`; }
+  }
+  const inc1000 = !unfunded && age>=15 && (age<R.inc1000Max || (care && age<R.inc1000MaxCare));
+  c.inc = (inc1000?1000:0) + (fdn && !unfunded ? 1000 : 0);
+  c.incTxt = [inc1000?'£1,000 employer payment (aged 16–18, or 19–24 with an EHC plan or care experience)':'', fdn&&!unfunded?'£1,000 foundation employer payment (169)':''].filter(Boolean).join(' + ') || 'None at this age';
+  c.hireTxt='Not available: the £2,000 hiring payment is for non-levy employers only (133)';
+  if(!unfunded && age>=15) out.cliffs.push({date:care?bd(R.inc1000MaxCare):bd(R.inc1000Max),what:'£1,000 employer payment ends',cost:1000,scheme:'cur'});
+  if(!levyOk && band) out.cliffs.push({date:bd(R.fullFundMax),what:'25% co-investment applies',cost:band*R.coInvest,scheme:'cur'});
+
+  // Milburn (proposed)
+  if(band){
+    if(unfunded){ m.cash=band; m.who='Not fundable. The review doesn\'t change the age rules.'; }
+    else if(age<R.mil.under){ m.cash=0; m.who='Government pays 100% (under 25, any size of employer)'; }
+    else { m.cash=band*R.mil.cut; m.who=`Government funding cut by 25%. Modelled as Ann Summers paying ${money(band*R.mil.cut)}*`; }
+  }
+  m.inc=c.inc; m.incTxt=c.incTxt;
+  m.hire = (!unfunded && age<R.mil.under && newHire) ? R.mil.hiring : 0;
+  m.hireTxt = m.hire ? '£2,500 hiring payment, extended to levy payers (472)' : (age>=R.mil.under ? 'None (25 or over)' : (!newHire?'None (not a new hire)':'None'));
+  if(!unfunded) out.cliffs.push({date:bd(R.mil.under),what:'Milburn: 25% cost'+(newHire?' + £2,500 lost':''),cost:(band?band*R.mil.cut:0)+(newHire?R.mil.hiring:0),scheme:'mil'});
+  out.c=c; out.m=m;
+
+  // --- timing
+  out.cliffs.forEach(k=>k.last=addDays(k.date,-1));
+  out.cliffs.sort((a,b)=>a.date-b.date);
+  const blocked = out.items.some(i=>i.sev==='bad' && !i.notyet && !i.unfunded);
+  let from=addDays(today,R.leadDays); if(earliest>from) from=earliest;
+  out.from=from;
+  const live=k=>k.scheme==='cur'||mil;
+  const ahead=out.cliffs.filter(k=>live(k) && k.last>=from);
+  const curAhead=ahead.filter(k=>k.scheme==='cur');
+  out.until = curAhead.length ? curAhead[0].last : null;
+  out.untilWhy = curAhead[0]||null;
+  out.milAhead = ahead.find(k=>k.scheme==='mil')||null;
+  // recommended: first non-busy date in window
+  let rec=new Date(from), guard=0; while(S.busy.has(rec.getUTCMonth()) && guard++<12) rec=new Date(Date.UTC(rec.getUTCFullYear(),rec.getUTCMonth()+1,1));
+  if(guard>=12) rec=new Date(from);
+  const cap = out.until || null;
+  out.busyClash = cap && rec>cap;
+  out.rec = out.busyClash ? from : rec;
+  out.blocked=blocked;
+  out.missedByPlan = out.cliffs.filter(k=>live(k) && start>k.last && from<=k.last);
+  out.passed = out.cliffs.filter(k=>live(k) && k.last<from);
+  return out;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const o=compute();
+  document.querySelectorAll('.milonly').forEach(e=>e.classList.toggle('hide',!o.mil));
+  const who=o.name?esc(o.name):'This apprentice';
+  ['reasonsCard','whenCard','moneyCard'].forEach(id=>$(id).classList.toggle('hide',!o.dob||!!o.badDob));
+  const std=o.std;
+  $('stdinfo').innerHTML = std ? `<span class="tag">${std.r}</span><span class="tag">Level ${std.l}</span><span class="tag">${std.d||'?'} months</span><span class="tag">Band ${std.f?money(std.f):'n/a'}</span>${std.s!=='ApprovedForDelivery'?`<span class="tag" style="background:var(--bad-bg);color:var(--bad)">${std.s==='InDevelopment'?'In development':'Starts paused'}</span>`:''}` : ($('std').value?'No match. Pick a standard from the list.':'');
+
+  const V=$('verdict');
+  if(!o.dob||o.badDob){ V.className='verdict v-empty'; V.innerHTML=`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form.</p>`; return; }
+  const ageTxt=`${o.age} at the planned start (${fmt(o.start)})`;
+  const map={
+    yes:['v-ok','Eligible',`${who} is eligible for apprenticeship funding. They'll be ${ageTxt}.`],
+    check:['v-warn','Eligible, with checks',`${who} looks eligible. Confirm the items below first. They'll be ${ageTxt}.`],
+    no:['v-bad','Not eligible for funding',`As things stand, ${who.toLowerCase()==='this apprentice'?'this apprentice':who} can't be funded. The reasons are below.`],
+    notyet:['v-bad','Not eligible yet',`${who} can start from ${fmt(o.earliest)}.`]
+  }[o.verdict];
+  if(o.verdict==='no' && !o.blocked && o.items.filter(i=>i.sev==='bad').every(i=>i.unfunded||i.notyet) && o.until && o.start>o.until)
+    map[2]+=` <b>Starting by ${fmt(o.until)} fixes this.</b>`;
+  V.className='verdict '+map[0];
+  V.innerHTML=`<div class="k">${o.verdict==='yes'||o.verdict==='check'?'Funding eligibility':'Funding eligibility'}</div><h2>${map[1]}</h2><p>${map[2]}</p>`;
+
+  const ic={bad:['i-bad','✕'],warn:['i-warn','!'],ok:['i-ok','✓'],info:['i-info','i']};
+  const order={bad:0,warn:1,ok:2,info:3};
+  const items=o.items.slice().sort((a,b)=>order[a.sev]-order[b.sev]);
+  $('reasons').innerHTML = items.length ? items.map(i=>`<li><span class="ico ${ic[i.sev][0]}">${ic[i.sev][1]}</span><span>${i.text}</span><span class="ref">${i.ref==='Skills England'||i.ref==='Annex A, 354–377'?'':'para '}${i.ref}</span></li>`).join('') : '<li><span class="ico i-ok">✓</span><span>No issues found.</span><span></span></li>';
+
+  // ---- when
+  const W=$('when'), N=$('whenNotes');
+  if(o.blocked){
+    W.innerHTML=''; N.innerHTML=`<p class="callout bad">Sort out the blocking items above first. No start date works until they're resolved.</p>`;
+  } else {
+    const untilV = o.until ? fmt(o.until) : 'No deadline';
+    W.innerHTML=`<div><div class="l">Earliest sensible start</div><div class="v">${fmt(o.from)}</div></div>
+      <div class="best"><div class="l">Recommended start</div><div class="v">${fmt(o.rec)}</div></div>
+      <div><div class="l">Start no later than</div><div class="v">${untilV}</div></div>`;
+    let h='';
+    if(o.untilWhy) h+=`<p class="callout">Start by <b>${fmt(o.until)}</b>. On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the <b>${o.untilWhy.what.toLowerCase()}</b>${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.</p>`;
+    else h+=`<p class="callout ok">There's no age deadline under current rules. Start when the team is ready, and use levy funds before they expire (12 months after they enter the account).</p>`;
+    if(o.mil && o.milAhead) h+=`<p class="callout">If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`. Your planned start of ${fmt(o.start)} is after that birthday`:''}. The changes aren't law, and the report's roadmap points to 2028, so this only matters if they're in force by the start date.</p>`;
+    const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
+    if(missCur.length) h+=`<p class="callout bad">Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.</p>`;
+    else if(o.start<o.from && o.start>=o.earliest) h+=`<p class="callout">Your planned start of ${fmt(o.start)} gives less than 4 weeks for the provider to sign up, run the skills scan and approve the commitment.</p>`;
+    else if(!missCur.length && !o.items.some(i=>i.notyet)) h+=`<p class="callout ok">Your planned start of <b>${fmt(o.start)}</b> works.</p>`;
+    if(o.busyClash) h+=`<p class="callout">Every month before the deadline is marked as one to avoid, so the recommended date ignores those preferences.</p>`;
+    if(o.passed.length) h+=`<p class="note">Already passed: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','')} on ${fmt(k.date)}`).join(' · ')}.</p>`;
+    h+=`<p class="note">“Earliest sensible start” allows 4 weeks for provider sign-up. That's a planning assumption, not a rule.</p>`;
+    N.innerHTML=h;
+  }
+  drawTimeline(o);
+
+  // ---- money
+  const M=$('money');
+  if(!o.band){ M.innerHTML=`<tbody><tr><td>Pick a standard to see costs.</td></tr></tbody>`; $('moneyNote').textContent=''; return; }
+  const milCol=o.mil;
+  const row=(label,a,b,cls='')=>`<tr class="${cls}"><th scope="row" style="font-weight:500;color:var(--ink)">${label}</th><td class="${typeof a==='number'?'n':''}">${typeof a==='number'?money(a):a}</td>${milCol?`<td class="mil ${typeof b==='number'?'n':''}">${typeof b==='number'?money(b):b}</td>`:''}</tr>`;
+  const cNet=o.c.cash-o.c.inc, mNet=o.m.cash-o.m.inc-o.m.hire;
+  M.innerHTML=`<thead><tr><th></th><th>Current rules</th>${milCol?'<th class="mil">If Milburn adopted <span class="badge">Proposed</span></th>':''}</tr></thead><tbody>
+    ${row('Training price (band max)',o.band,o.band)}
+    ${row('Who pays',o.c.who,o.m.who)}
+    ${row('Ann Summers cash',o.c.cash,o.m.cash)}
+    ${row('Employer payments',o.c.inc?o.c.inc:o.c.incTxt,o.m.inc?o.m.inc:o.m.incTxt)}
+    ${row('Hiring payment',o.c.hireTxt,o.m.hire?o.m.hire:o.m.hireTxt)}
+    ${row('Net cost to Ann Summers',cNet<0?`${money(-cNet)} back`:cNet,mNet<0?`${money(-mNet)} back`:mNet,'tot')}
+  </tbody>`;
+  $('moneyNote').innerHTML = (o.c.inc?`Employer payments: ${o.c.incTxt}. `:'')+(milCol?`<b>*Milburn</b> recommends cutting government funding for over-25s by 25% (para 470), possibly to 50% by 2031/32. It doesn't say how, so this tool assumes the employer covers the 25%, as the trade press reads it. Under-25s would be 100% funded for any size of employer, and the hiring payment would rise to £2,500 and include levy payers (para 472). None of this is law yet: the government has agreed the “core principles”, with a full response to follow. `:'')+'Under current rules, employers also pay no NI on under-25 apprentices’ pay up to £50,270, until they turn 25.';
+}
+
+function drawTimeline(o){
+  const T=$('tl'); if(o.blocked){T.innerHTML='';return;}
+  const pts=[o.today,o.start,o.from,o.rec,...o.cliffs.filter(k=>k.scheme==='cur'||o.mil).map(k=>k.date)];
+  let a=o.today, b=new Date(Math.max(...pts.map(Number), addMonths(o.today,18)));
+  b=addMonths(b,4);
+  const span=b-a, x=d=>Math.max(0,Math.min(100,(d-a)/span*100));
+  let h='<div class="axis"></div>';
+  for(let y=a.getUTCFullYear()+1;y<=b.getUTCFullYear();y++){const d=new Date(Date.UTC(y,0,1)); if(d>a&&d<b) h+=`<div class="yr" style="left:${x(d)}%">${y}</div>`;}
+  const end=o.until||b; if(end>=o.from) h+=`<div class="win" style="left:${x(o.from)}%;width:${Math.max(.6,x(end)-x(o.from))}%"></div>`;
+  const labels=[]; // alternate above/below to avoid collisions
+  o.cliffs.filter(k=>k.scheme==='cur'||o.mil).forEach(k=>{ if(k.date<a||k.date>b) return; labels.push({x:x(k.date),cls:k.scheme==='mil'?'mil':'',t:k.what.replace('Milburn: ','If Milburn: '),d:fmt(k.date)}); });
+  labels.push({x:x(o.start),cls:'start',t:'Planned start',d:fmt(o.start)});
+  labels.sort((p,q)=>p.x-q.x);
+  const lanes=[[],[],[],[]]; // 0,1 above; 2,3 below
+  labels.forEach(l=>{
+    h+=`<div class="mk ${l.cls}" style="left:${l.x}%"></div>`;
+    let lane=0; for(;lane<4;lane++){ if(!lanes[lane].some(px=>Math.abs(px-l.x)<17)) break; } if(lane===4) lane=0;
+    lanes[lane].push(l.x);
+    const top=[30,2,100,128][lane];
+    const lx=Math.max(7,Math.min(93,l.x));
+    h+=`<div class="lab ${l.cls==='mil'?'mil':''}" style="left:${lx}%;top:${top}px">${esc(l.t)}<i>${l.d}</i></div>`;
+  });
+  T.innerHTML=h;
+}
+
+/* ---------- splash ---------- */
+(function(){
+  const sp=$('splash'); let done=false;
+  const close=()=>{ if(done) return; done=true; sp.classList.add('gone'); setTimeout(()=>sp.remove(),700); $('dob').focus({preventScroll:true}); };
+  sp.addEventListener('click',close); document.addEventListener('keydown',close,{once:true});
+  setTimeout(close,3200); sp.focus();
+})();
+render();
+// browsers can restore form values after the first render (reload / back): re-render once they have
+window.addEventListener('load',render); window.addEventListener('pageshow',render); setTimeout(render,400);
+</script>
+</body>
+</html>
