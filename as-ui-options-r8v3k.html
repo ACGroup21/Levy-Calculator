@@ -552,6 +552,14 @@ footer a{color:var(--pink-deep)}
 .combo li.off:hover{background:none}
 .combo li em{display:block;font-style:normal;font-size:12.5px;color:var(--bad);margin-top:2px}
 .combo li em.cond{color:var(--warn)}
+
+.reasons li{grid-template-columns:22px 1fr}
+.whyfold{margin-top:12px}
+table.refs{width:100%;border-collapse:collapse;font-size:14px}
+table.refs th{text-align:left;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;padding:6px 8px 6px 0;border-bottom:1px solid var(--line)}
+table.refs td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+table.refs td.para,table.refs th:last-child{width:150px;white-space:nowrap;font-family:var(--mono);font-size:13px;letter-spacing:0}
+table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -734,7 +742,7 @@ body{padding-top:52px}
     <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
 
-    <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul></div>
+    <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
     <div class="card hide" id="roleCard"><h3>Role match</h3><div id="roleBody"></div></div>
 
@@ -841,8 +849,14 @@ const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 
 /* ---------- build UI ---------- */
 /* ---------- can this standard be funded for a new start? (funding rules 2026-27, para 68; 32; 33) ---------- */
+/* 16 standards defunded for ALL new starts (any age) from 1 Sept 2026 - GOV.UK Growth and Skills Levy factsheet
+   (updated 25 Nov 2026); Skills England Team leader page gives 1st September 2026. Existing apprentices finish funded. */
+const DEFUNDED_2026=new Set(['ST0843','ST0384','ST0708','ST0192','ST0007','ST0385','ST0945','ST0809','ST0272','ST0556']);
+const DEFUNDED_NAMES=[['professional security operative'],['cleaning','hygiene'],['custody','detention'],['facilities management supervisor'],['learning','skills assessor'],['team leader'],['security first line'],['compliance investigator'],['improvement practitioner'],['learning','skills mentor'],['lead practitioner','adult care'],['coaching professional'],['chartered manager'],['improvement leader'],['outdoor learning']];
+const isDefunded=s=>!!s&&(DEFUNDED_2026.has(s.r)||DEFUNDED_NAMES.some(p=>p.every(w=>String(s.n||'').toLowerCase().includes(w))));
 function fundBlock(s){
   if(!s) return null;
+  if(isDefunded(s)) return 'Government funding withdrawn for new starts from 1 Sept 2026';
   if(s.s==='InDevelopment') return 'In development, not approved for starts yet';
   if(s.s==='ApprovedForDelivery-Paused') return 'New starts are paused';
   if(s.s==='Retired') return 'Retired, so no new starts';
@@ -942,6 +956,7 @@ function compute(){
   // --- age / programme rules
   if(start<earliest) add('bad',`<b>Too young to start on ${fmt(start)}.</b> The earliest start date is <b>${fmt(earliest)}</b> (the day after the last Friday in June of the school year they turn 16).`,'30.1',{notyet:true});
   if(std && std.s==='InDevelopment') add('bad',`<b>${esc(std.n)} isn't approved for delivery yet</b>, so nobody can start it. Check with your provider when it will be.`,'Skills England');
+  if(std && isDefunded(std)) add('bad',`<b>${esc(std.n)} lost government funding for new starts on 1 September 2026.</b> Existing apprentices finish with funding; a new start would be paid for in full by Ann Summers. Choose another standard.`,'Growth and Skills Levy factsheet',{unfunded:true});
   if(std && (std.s==='Retired'||std.s==='Withdrawn')) add('bad',`<b>${esc(std.n)} is ${std.s.toLowerCase()}</b>, so new apprentices can't start it. Choose another standard.`,'68');
   if(std && std.s==='ApprovedForDelivery-Paused') add('bad',`<b>New starts on ${esc(std.n)} are paused.</b> Choose another standard or wait for it to reopen.`,'Skills England');
   const l7lim=care?R.l7MaxCare:R.l7Max;
@@ -1000,7 +1015,7 @@ function compute(){
 
   // Milburn (proposed)
   if(band){
-    if(unfunded){ m.cash=band; m.who='Not fundable. The review doesn\'t change the age rules.'; }
+    if(unfunded){ m.cash=band; m.who='Not fundable under the review either.'; }
     else if(age<R.mil.under){ m.cash=0; m.who='Government pays 100% (under 25, any size of employer)'; }
     else { m.cash=band*R.mil.cut; m.who=`Government funding cut by 25%. Modelled as Ann Summers paying ${money(band*R.mil.cut)}*`; }
   }
@@ -1078,7 +1093,15 @@ function render(){
   const ic={bad:['i-bad','✕'],warn:['i-warn','!'],ok:['i-ok','✓'],info:['i-info','i']};
   const order={bad:0,warn:1,ok:2,info:3};
   const items=o.items.slice().sort((a,b)=>order[a.sev]-order[b.sev]);
-  $('reasons').innerHTML = items.length ? items.map(i=>`<li><span class="ico ${ic[i.sev][0]}">${ic[i.sev][1]}</span><span>${i.text}</span><span class="ref">${!i.ref||i.ref==='Skills England'||i.ref==='Annex A, 354–377'?'':'para '}${i.ref}</span></li>`).join('') : '<li><span class="ico i-ok">✓</span><span>No issues found.</span><span></span></li>';
+  $('reasons').innerHTML = items.length ? items.map((i,n)=>`<li><span class="ico ${ic[i.sev][0]}">${ic[i.sev][1]}</span><span>${i.text}</span></li>`).join('') : '<li><span class="ico i-ok">✓</span><span>No issues found.</span></li>';
+  // the rule behind each point, kept out of the way and lined up in one column
+  const withRef=items.filter(i=>i.ref);
+  const refTxt=r=>/^(Skills England|Annex|Growth)/.test(r)?r:'para '+r;
+  const short=t=>{ const x=String(t).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); return x.length>78?x.slice(0,76).replace(/\s\S*$/,'')+'…':x; };
+  $('whyRefs').innerHTML = withRef.length ? `<details class="fold whyfold"><summary>Tell me why</summary><div>
+      <table class="refs"><thead><tr><th>Point</th><th>Funding rule</th></tr></thead><tbody>
+      ${withRef.map(i=>`<tr><td>${esc(short(i.text))}</td><td class="para">${esc(refTxt(i.ref))}</td></tr>`).join('')}</tbody></table>
+      <p class="note" style="margin-top:8px">Paragraph numbers refer to the Apprenticeship funding rules 2026 to 2027 (version 3).</p></div></details>` : '';
 
   // ---- when
   const W=$('when'), N=$('whenNotes');
@@ -1230,7 +1253,7 @@ const pctCol=p=>p>=50?'var(--ok)':p>=30?'var(--warn)':'var(--bad)';
 function drawJdResults(){
   const J=S.jd; if(!J) return; const cur=findStd($('std').value);
   $('jdOut').innerHTML = `<p class="jdmsg">Ranked across ${J.considered} standards with skills lists. Job-title matches come first, then the closest wording.</p>
-    ${J.left&&J.left.length?`<p class="jdmsg">Left out because they can't be funded: ${J.left.map(l=>`${esc(l.name)} (${esc(l.why.toLowerCase())})`).join('; ')}.</p>`:''}
+    ${J.left&&J.left.length?`<p class="jdmsg">Left out because they can't be funded: ${J.left.map(l=>`${esc(l.name)} (${esc(l.why.charAt(0).toLowerCase()+l.why.slice(1))})`).join('; ')}.</p>`:''}
     <ol class="jdr">${J.ranked.map((x,i)=>`<li class="${cur&&cur.r===x.ref?'on':''}"><span class="rk">${i+1}</span>
       <span><div class="nm">${esc(x.name)}${x.title?'<span class="tm">Job title matches</span>':''}</div>
       <div class="mt">Level ${x.level} · ${x.ref}${x.dur?' · '+x.dur+' months':''}${x.band?' · '+money(x.band):''} · <b>${x.covered} of ${x.total}</b> skills in the job description (${x.score}%)${x.status&&x.status!=='ApprovedForDelivery'?' · <span style="color:var(--bad)">'+(x.status==='InDevelopment'?'in development':'starts paused')+'</span>':''}</div></span>

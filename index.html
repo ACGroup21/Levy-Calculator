@@ -3069,6 +3069,8 @@ function renderStandardOptions(){
   let real=indexed.filter(x=>x.s.name!=='Other / custom');
   // Exclude standards not fundable for new starts (paused / retired / in-development per Skills England)
   real=real.filter(x=>x.s.fundable!==false);
+  // Defunded for all new starts from 1 Sept 2026 (GOV.UK GSL factsheet): shown, but not selectable
+  const defunded=real.filter(x=>x.s.defunded); real=real.filter(x=>!x.s.defunded);
   // Apply level + search filters
   if(activeLevel!=='all')real=real.filter(x=>String(x.s.level)===activeLevel);
   if(q)real=real.filter(x=>x.s.name.toLowerCase().includes(q)||(x.s.roles||[]).some(r=>r.includes(q)));
@@ -3086,6 +3088,12 @@ function renderStandardOptions(){
     });
     sel.appendChild(og);
   });
+  if(defunded.length&&(activeLevel==='all'||defunded.some(x=>String(x.s.level)===activeLevel))){
+    const dg=document.createElement('optgroup');dg.label='──  Defunded for new starts from 1 Sept 2026  ──';
+    defunded.filter(x=>activeLevel==='all'||String(x.s.level)===activeLevel).filter(x=>!q||x.s.name.toLowerCase().includes(q)).sort((a,b)=>a.s.name.localeCompare(b.s.name)).forEach(({s,i})=>{
+      const o=document.createElement('option');o.value=i;o.disabled=true;o.textContent=s.name+'  ·  no funded new starts';dg.appendChild(o);});
+    if(dg.children.length)sel.appendChild(dg);
+  }
   // Custom last (always shown), in its own group
   custom.forEach(({s,i})=>{
     const og=document.createElement('optgroup');og.label='──  Custom  ──';
@@ -7136,7 +7144,7 @@ function renderAffordLadder(coInvest,expiry){
   if(!apprs.length){el.innerHTML='';ladderOpen=null;return;}
   _ladderArgs={co:coInvest,exp:expiry};
   var u=UNIT_PRESETS.reduce(function(a,b){return b.rate<a.rate?b:a;});
-  var l2=STANDARDS.filter(function(s){return s.level===2&&s.band>0;}).reduce(function(a,b){return(!a||b.band<a.band)?b:a;},null);
+  var l2=STANDARDS.filter(function(s){return s.level===2&&s.band>0&&!s.defunded&&s.fundable!==false;}).reduce(function(a,b){return(!a||b.band<a.band)?b:a;},null);
   var full=apprs.reduce(function(a,b){return b.cost>a.cost?b:a;});
   var fullDur=mBetween(full.start,full.epa), uWeeks=Math.max(1,Math.round((u.hours||30)/9)), RB=RULEBOOK;
   var rec,recMsg;
@@ -8750,7 +8758,7 @@ function jdRankStandards(jdText,topN){
   var qv=jdVec(jdTf(jdRoleText(jdText))), qn=jdNorm(qv);
   var titleToks=jdTitleToks(jdTitleLine(jdText));
   STANDARDS.forEach(function(s,i){
-    if(!s.ksbs||s.name==='Other / custom')return;
+    if(!s.ksbs||s.name==='Other / custom'||s.defunded||s.fundable===false)return;
     var total=0,covered=0;
     ['knowledge','skills','behaviours'].forEach(function(k){
       (s.ksbs[k]||[]).forEach(function(it){
@@ -9844,7 +9852,7 @@ function parseIntent(q){
 }
 
 function matchStandards(intent,queryWords){
-  return STANDARDS.filter(s=>s.band>0).map(s=>{
+  return STANDARDS.filter(s=>s.band>0&&!s.defunded&&s.fundable!==false).map(s=>{
     let score=0;
     if(intent.level&&s.level===intent.level)score+=10;
     else if(intent.level&&Math.abs(s.level-intent.level)===1)score+=3;
@@ -9966,7 +9974,7 @@ function processQuery(q){
   // WHAT CAN I AFFORD broadly
   if((intent.isWhatCan||intent.isAffordability)&&!intent.level&&qWords.length<3){
     if(!hasLevy){aiMsg(`Upload your levy CSV first so I can calculate what you can afford.`);return;}
-    const affordable=STANDARDS.filter(s=>s.band>0&&s.band<=annual).sort((a,b)=>b.band-a.band).slice(0,4);
+    const affordable=STANDARDS.filter(s=>s.band>0&&s.band<=annual&&!s.defunded&&s.fundable!==false).sort((a,b)=>b.band-a.band).slice(0,4);
     const html=affordable.map(s=>`<div class="r-section"><div class="r-label">${s.name}${s.ksbs?'&nbsp;<span class="badge badge-ksb" style="font-size:9px">KSB</span>':''}</div><div class="r-val">${fmt(s.band)}/learner &nbsp;&middot;&nbsp; up to ${Math.floor(annual/s.band)}/year</div></div>`).join('');
     aiMsg(`Based on your annual levy of <strong>${fmt(annual)}</strong>, here are programmes you could fund:<br>${html}<br>Tell me a specific role, skill objective, or level for personalised matching.`);
     return;
