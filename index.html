@@ -9843,6 +9843,7 @@ function parseIntent(q){
     count:numMatch?(parseInt(numMatch[1])||numWords[numMatch[1]]||1):null,
     level:lvlMatch?parseInt(lvlMatch[1]||lvlMatch[2]):null,
     months:moMatch?parseInt(moMatch[1]):null,
+    raw:lq,
     roleKeywords:lq.split(/\s+/).filter(w=>w.length>3),
     isExpiry:/expir|unused|waste|running out/.test(lq),
     isGifting:/gift|transfer|share|sme|charity|supply chain|partner/.test(lq),
@@ -9851,26 +9852,74 @@ function parseIntent(q){
   };
 }
 
+/* ── Standard matching for the co-pilot ──────────────────────────────────────
+   Scored by evidence, not volume. The old KSB score counted every hit of every
+   query word across all of a standard's KSBs, so a 150-KSB nursing standard beat
+   everything on words like "team" or "people". Now: words that appear in most
+   standards carry no weight, KSB evidence is a SHARE (of the query words covered
+   and of the standard's own KSBs), and a word in the standard's name counts most. */
+var _kdf=null;
+function ksbDocFreq(){
+  if(_kdf)return _kdf;
+  var texts=STANDARDS.filter(function(s){return s&&s.ksbs;}).map(function(s){
+    return ['knowledge','skills','behaviours'].map(function(k){return (s.ksbs[k]||[]).map(function(x){return x.statement||x.description||'';}).join(' ');}).join(' ').toLowerCase();});
+  _kdf={n:texts.length,texts:texts,cache:new Map()};
+  return _kdf;
+}
+function ksbWordCommon(w){
+  var d=ksbDocFreq(); if(!d.n)return false; if(d.cache.has(w))return d.cache.get(w);
+  var c=0; d.texts.forEach(function(t){if(t.indexOf(w)>=0)c++;});
+  var r=c/d.n>0.4; d.cache.set(w,r); return r;
+}
+var MATCH_GENERIC=/^(level|levels|apprenticeship|apprenticeships|apprentice|apprentices|team|teams|staff|people|workers?|employees?|colleagues?|upskill|course|programme|programmes|qualification|train|training)$/;
+function ksbRelevance(s,words){
+  if(!s.ksbs||!words.length)return {rel:0,seen:0};
+  var all=[].concat(s.ksbs.knowledge||[],s.ksbs.skills||[],s.ksbs.behaviours||[]); if(!all.length)return {rel:0,seen:0};
+  var seen=new Set(), hitK=0;
+  all.forEach(function(k){var t=(k.statement||k.description||'').toLowerCase(), h=false; words.forEach(function(w){if(t.indexOf(w)>=0){h=true;seen.add(w);}}); if(h)hitK++;});
+  return {rel:0.65*(seen.size/words.length)+0.35*Math.min(1,hitK/Math.max(6,all.length*0.2)),seen:seen.size};
+}
+var MATCH_ACRO=/^(hr|it|qa|pr|ux|ui|ai)$/;
+var MATCH_TITLE_GENERIC=/^(executives?|assistants?|specialists?|practitioners?|technicians?|officers?|operatives?|professionals?|managers?|management|workers?|advis[eo]rs?|leaders?|associates?|seniors?|juniors?|consultants?)$/;
+function stdNameHits(s,words){
+  var toks=String(s.name).toLowerCase().replace(/^l\d+\s*/,'').replace(/\(.*?\)/g,'').split(/[^a-z]+/).filter(function(t){return t.length>2||MATCH_ACRO.test(t);});
+  var spec=0, gen=0;
+  // a specific query word may not match a generic title word in the name ("office" is not "officer")
+  var specToks=toks.filter(function(t){return !MATCH_TITLE_GENERIC.test(t);});
+  words.forEach(function(w){
+    var isGen=MATCH_TITLE_GENERIC.test(w), pool=isGen?toks:specToks, hit;
+    if(MATCH_ACRO.test(w)){ if(toks.indexOf(w)>=0)spec+=2; return; }   // a job acronym in the name is strong evidence
+    var st=w.replace(/(ings?|ers?|ors?|s)$/,''); if(st.length<3)return;
+    hit=pool.some(function(t){return t.indexOf(st)===0||(st.indexOf(t)===0&&t.length>=4);});
+    if(hit){ if(isGen)gen++; else spec++; }
+  });
+  return spec>0?spec+gen:0;
+}
 function matchStandards(intent,queryWords){
+  var acro=((intent.raw||'').match(/\b(hr|it|qa|pr|ux|ui|ai)\b/g)||[]);
+  var words=[...new Set((queryWords||[]).map(function(w){return w.toLowerCase();}).concat(acro))].filter(function(w){return (w.length>3||MATCH_ACRO.test(w))&&!MATCH_GENERIC.test(w);});
+  var ksbWords=words.filter(function(w){return !MATCH_ACRO.test(w)&&!ksbWordCommon(w);});
   // Leadership standards lost funding on 1 Sept 2026: Business administrator (L3, ST0070) is the funded route for new managers
   const lead=/\b(team ?leaders?|leaders?|leadership|supervis\w*|managers?|management|managing)\b/i.test((intent.roleKeywords||[]).join(' ')+' '+(queryWords||[]).join(' '));
   let ranked=STANDARDS.filter(s=>s.band>0&&!s.defunded&&s.fundable!==false).map(s=>{
     let score=0;
     if(intent.level&&s.level===intent.level)score+=10;
     else if(intent.level&&Math.abs(s.level-intent.level)===1)score+=3;
-    (s.roles||[]).forEach(role=>intent.roleKeywords.forEach(kw=>{if(role.includes(kw)||kw.includes(role))score+=5;}));
+    const nameHit=stdNameHits(s,words);
+    score+=Math.min(2,nameHit)*16;
+    let roleHit=0; (s.roles||[]).forEach(role=>words.forEach(kw=>{if(role===kw||(role.length>4&&kw.length>4&&(role.includes(kw)||kw.includes(role))))roleHit++;}));
+    score+=Math.min(3,roleHit)*3;
     if(intent.months&&s.dur<=intent.months)score+=4;
-    // KSB boost
-    if(s.ksbs&&queryWords.length){
-      const {score:kScore}=scoreKSBMatch(s,queryWords);
-      score+=kScore*2;
-    }
-    // Push defunded standards down — they can't take new funded starts after Sep 2026
-    if(s.defunded)score-=8;
-    return{...s,score};
-  }).sort((a,b)=>b.score-a.score).filter(s=>s.score>0);
-  // pin the funded route first for leadership asks (KSB wording scores would otherwise bury it)
-  if(lead){ const ba=STANDARDS.find(x=>x.ref==='ST0070'&&x.fundable!==false&&!x.defunded); if(ba){ const got=ranked.find(x=>x.ref==='ST0070')||{...ba,score:1}; ranked=[got,...ranked.filter(x=>x.ref!=='ST0070')]; } }
+    const kr=ksbRelevance(s,ksbWords);
+    score+=kr.rel*30;
+    return{...s,score,nameHit,rel:kr.rel,seen:kr.seen};
+  // a standard with no name match needs at least two distinct pieces of KSB evidence
+  // standards whose NAME matches rank above KSB-only matches
+  }).filter(s=>s.nameHit>0||(s.seen>=2&&s.rel>=0.34)).sort((a,b)=>((b.nameHit>0)-(a.nameHit>0))||b.score-a.score);
+  // Pin the funded route first for leadership asks, unless a funded standard clearly matches the job title itself
+  // (e.g. "project manager" -> Associate project manager).
+  const titleMatch=ranked.some(x=>x.nameHit>=2);
+  if(lead&&!titleMatch){ const ba=STANDARDS.find(x=>x.ref==='ST0070'&&x.fundable!==false&&!x.defunded); if(ba){ const got=ranked.find(x=>x.ref==='ST0070')||{...ba,score:1}; ranked=[got,...ranked.filter(x=>x.ref!=='ST0070')]; } }
   return ranked.slice(0,3);
 }
 
