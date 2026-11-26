@@ -831,6 +831,7 @@ table.tv .urg{font-weight:700;color:var(--bad)}
 table.tv button{border:1px solid var(--field-line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
 table.tv button:hover{border-color:var(--pink)}
 .tv-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+@media (max-width:1200px){.tv-in{grid-template-columns:minmax(0,1fr)}.tv-side{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));align-items:end}}
 @media (max-width:760px){.tv-in{grid-template-columns:minmax(0,1fr)}.tv-panel{padding:18px 16px}#teamView{padding:12px 8px}}
 .tv-in > *,.tv-side,.tv-side .f{min-width:0}
 .tv-side select{max-width:100%}
@@ -844,6 +845,28 @@ table.tv button:hover{border-color:var(--pink)}
 .rwatch b{display:block;margin-bottom:2px}
 .rwatch ul{margin:4px 0 0;padding-left:18px}
 .rwatch a{color:var(--ink)}
+
+/* team form */
+.tv-in{grid-template-columns:minmax(0,1fr) 240px}
+.tv-formwrap{min-width:0;overflow-x:auto;position:relative}
+table.tvf{width:100%;border-collapse:collapse;font-size:14px;min-width:760px;table-layout:fixed}
+table.tvf th{text-align:left;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 6px;border-bottom:2px solid var(--ink);white-space:nowrap}
+table.tvf th em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400}
+table.tvf td{padding:5px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.tvf input[type=text],table.tvf input[type=date]{width:100%;min-width:0;padding:7px 8px;border:1px solid var(--field-line);border-radius:3px;background:var(--field);color:var(--ink);font:inherit;font-size:14px}
+table.tvf th:nth-child(1){width:22%}table.tvf th:nth-child(2){width:150px}table.tvf th:nth-child(3){width:auto}table.tvf th:nth-child(4){width:84px}table.tvf th:nth-child(5){width:150px}table.tvf th:nth-child(6){width:40px}
+table.tvf td:nth-child(4){text-align:center}
+table.tvf th{white-space:normal;line-height:1.25;vertical-align:bottom}
+table.tvf input[type=checkbox]{width:20px;height:20px;accent-color:var(--pink)}
+table.tvf input.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+table.tvf .rm{border:0;background:none;color:var(--muted);font-size:20px;cursor:pointer;min-width:32px;min-height:32px}
+table.tvf .rm:hover{color:var(--bad)}
+.tv-add{margin:8px 0 0}
+.tv-imp{margin-top:12px}
+.tv-implinks{display:flex;flex-wrap:wrap;gap:8px}
+.tv-imp textarea{width:100%;font:500 13px/1.5 var(--mono);padding:8px 10px;border:1px solid var(--field-line);border-radius:3px;background:var(--field);color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:1200px){.tv-in{grid-template-columns:minmax(0,1fr)}}   /* after the base rule above, so it wins */
 </style>
 </head>
 <body>
@@ -1024,14 +1047,24 @@ table.tv button:hover{border-color:var(--pink)}
 <div id="teamView" class="hide" role="dialog" aria-modal="true" aria-labelledby="tvTitle">
   <div class="tv-panel">
     <div class="tv-head"><h2 id="tvTitle">Team check</h2><button type="button" class="tv-x" id="tvClose" aria-label="Close team check">×</button></div>
-    <p class="tv-lead">Paste a list from a spreadsheet, or choose a CSV file. One person per line: <b>name, date of birth</b>, and optionally <b>apprenticeship</b> (name or ST code), <b>EHC plan or care</b> (Y/N) and <b>planned start</b>. Everyone gets the same timing preferences, levy setting and Milburn view as the main form. It stays in your browser.</p>
+    <p class="tv-lead">Add each person below, or import a list. Everyone gets the same timing preferences, levy setting and Milburn view as the main form. Nothing leaves your browser.</p>
     <div class="tv-in">
-      <textarea id="tvText" rows="6" spellcheck="false" placeholder="Name, Date of birth, Apprenticeship, EHC/care, Planned start&#10;Jordan Lee, 26/08/2007, ST0002, N&#10;Priya Shah, 14/03/2009, Retailer, N&#10;Sam Okafor, 02/11/2004, ST0070, Y"></textarea>
+      <div class="tv-formwrap">
+        <table class="tvf" id="tvForm"><thead><tr><th>Name</th><th>Date of birth</th><th>Apprenticeship <em>(blank = default)</em></th><th>EHC plan or care</th><th>Planned start <em>(optional)</em></th><th><span class="sr">Remove</span></th></tr></thead><tbody></tbody></table>
+        <datalist id="tvStds"></datalist>
+        <button type="button" class="lnk tv-add" id="tvAdd">+ Add person</button>
+        <details class="fold tv-imp" id="tvImp"><summary>Import a list instead</summary><div>
+          <p class="tv-lead" style="margin:0 0 8px">Use the template so the columns are always right: fill it in Excel, save it as <b>CSV</b>, then choose it here. Dates as <b>dd/mm/yyyy</b>.</p>
+          <div class="tv-implinks"><button type="button" class="btn ghost sm" id="tvTpl">Download blank template</button><label class="btn ghost sm tv-file">Choose CSV file<input type="file" id="tvFile" accept=".csv,.txt,text/csv,text/plain" hidden></label></div>
+          <label class="f" style="margin:10px 0 0"><span>Or paste rows copied from a spreadsheet</span><textarea id="tvText" rows="4" spellcheck="false" placeholder="Name, Date of birth, Apprenticeship, EHC/care, Planned start&#10;Jordan Lee, 26/08/2007, ST0002, N"></textarea></label>
+          <button type="button" class="btn ghost sm" id="tvPasteGo" style="margin-top:8px">Add these to the list</button>
+        </div></details>
+      </div>
       <div class="tv-side">
-        <label class="btn ghost sm tv-file">Choose CSV file<input type="file" id="tvFile" accept=".csv,.txt,text/csv,text/plain" hidden></label>
-        <label class="f"><span>Apprenticeship if a row has none</span><select id="tvDefStd"><option value="">Use the one in the main form</option></select></label>
+        <label class="f"><span>Default apprenticeship</span><select id="tvDefStd"><option value="">Use the one in the main form</option></select></label>
         <button type="button" class="btn sm" id="tvGo">Check the team</button>
         <button type="button" class="lnk" id="tvSample">Fill with an example</button>
+        <button type="button" class="lnk" id="tvClear">Clear the list</button>
       </div>
     </div>
     <div id="tvMsg" class="tv-msg" role="status"></div>
@@ -2104,28 +2137,63 @@ function stdFromText(t){ t=String(t||'').trim(); if(!t) return null; const byCod
 function splitRow(line){ const out=[]; let cur='', q=false; const sep=line.includes('\t')?'\t':',';
   for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='"'){ if(q&&line[i+1]==='"'){cur+='"';i++;} else q=!q; } else if(c===sep&&!q){ out.push(cur); cur=''; } else cur+=c; }
   out.push(cur); return out.map(x=>x.trim()); }
-function parseTeam(text){
+function parseTeam(text,keepBad){
   const lines=String(text||'').split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!/^[,\t]+$/.test(l));
   if(!lines.length) return {rows:[],errors:[]};
   let cols={name:0,dob:1,std:2,care:3,start:4}; const head=splitRow(lines[0]).map(h=>h.toLowerCase());
   if(head.some(h=>/name|birth|dob/.test(h))){ const f=rx=>head.findIndex(h=>rx.test(h));
     cols={name:f(/name/),dob:f(/birth|dob/),std:f(/apprentice|standard|programme|course/),care:f(/ehc|care/),start:f(/start/)}; lines.shift(); }
-  const rows=[], errors=[];
+  const rows=[], errors=[], bad=[];
   lines.slice(0,500).forEach((l,i)=>{ const c=splitRow(l), g=k=>cols[k]>=0?c[cols[k]]||'':'';
+    if(/^example\b/i.test(g('name'))) return;   // the template's example row
     const name=g('name').replace(/[<>&"]/g,'').slice(0,60)||`Person ${i+1}`, dob=parseUKDate(g('dob'));
     const stdT=g('std'), std=stdFromText(stdT), care=/^(y|yes|true|1)$/i.test(g('care')), start=parseUKDate(g('start'));
-    if(!dob){ errors.push(`${name}: date of birth “${g('dob')||'blank'}” not recognised (use dd/mm/yyyy)`); return; }
+    if(!dob){ errors.push(`${name}: date of birth “${g('dob')||'blank'}” not recognised (use dd/mm/yyyy)`); if(keepBad) bad.push({name,badDob:g('dob')||'blank',std:std||null,stdT,care,start}); return; }
     if(stdT && std===undefined) errors.push(`${name}: apprenticeship “${stdT}” not found`);
     rows.push({name,dob,std:std||null,care,start,stdT}); });
   if(lines.length>500) errors.push('Only the first 500 people are checked.');
-  return {rows,errors};
+  return {rows,errors,bad};
 }
 let TEAM=[];
 function teamVerdict(o){ if(!o.dob||o.badDob) return {k:'bad',t:'Check the date of birth',rank:5};
   if((o.verdict==='yes'||o.verdict==='check') && o.earliest && o.earliest>addDays(utcToday(),R.leadDays)) return {k:'notyet',t:'Eligible from '+fmt(o.from||nextWorkingDay(o.earliest)),rank:3};   // too young today, fine at their first possible start
   return ({yes:{k:'ok',t:'Eligible',rank:1},check:{k:'warn',t:'Eligible, with checks',rank:2},notyet:{k:'notyet',t:'Not eligible yet',rank:3},no:{k:'bad',t:'Not eligible',rank:4}})[o.verdict]; }
+/* the team form: one row per person, real date pickers, so the format is always right */
+function tvRow(p){ p=p||{}; const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input type="text" class="tn" maxlength="60" placeholder="Name" aria-label="Name" autocomplete="off"></td><td><input type="date" class="td" aria-label="Date of birth"></td><td><input type="text" class="ts" list="tvStds" placeholder="e.g. Assistant accountant (ST0002)" aria-label="Apprenticeship" autocomplete="off"></td><td><input type="checkbox" class="tc" aria-label="EHC plan or care-experienced"></td><td><input type="date" class="tp" aria-label="Planned start (optional)"></td><td><button type="button" class="rm" aria-label="Remove this person">×</button></td>`;
+  tr.querySelector('.tn').value=p.name||''; tr.querySelector('.td').value=p.dob?iso(p.dob):''; tr.querySelector('.ts').value=p.std?`${p.std.n} (${p.std.r})`:(p.stdT||''); tr.querySelector('.tc').checked=!!p.care; tr.querySelector('.tp').value=p.start?iso(p.start):'';
+  if(p.badDob){ const d=tr.querySelector('.td'); d.classList.add('bad'); d.title=`Not recognised: ${p.badDob}`; }
+  if(p.stdT&&!p.std) tr.querySelector('.ts').classList.add('bad');
+  $('tvForm').tBodies[0].appendChild(tr); return tr; }
+function tvBlankRows(n){ for(let i=0;i<n;i++) tvRow(); }
+function tvFill(list,replace){ const body=$('tvForm').tBodies[0];
+  if(replace) body.innerHTML='';
+  else [...body.rows].forEach(r=>{ if(!r.querySelector('.tn').value.trim()&&!r.querySelector('.td').value) r.remove(); });
+  list.forEach(p=>tvRow(p)); if(!body.rows.length) tvBlankRows(3); }
+function readTeamForm(){ const rows=[], errors=[];
+  [...$('tvForm').tBodies[0].rows].forEach((tr,i)=>{ const name=tr.querySelector('.tn').value.replace(/[<>&"]/g,'').trim(), dobV=tr.querySelector('.td').value, stdT=tr.querySelector('.ts').value.trim();
+    const d=tr.querySelector('.td'), si=tr.querySelector('.ts'); d.classList.remove('bad'); si.classList.remove('bad');
+    if(!name&&!dobV&&!stdT) return;
+    const who=name||`Row ${i+1}`, dob=parse(dobV);
+    if(!dob){ d.classList.add('bad'); errors.push(`${who}: add a date of birth`); return; }
+    const std=stdT?stdFromText(stdT):null;
+    if(stdT&&!std){ si.classList.add('bad'); errors.push(`${who}: apprenticeship “${stdT}” not found`); }
+    rows.push({name:who,dob,std:std||null,care:tr.querySelector('.tc').checked,start:parse(tr.querySelector('.tp').value)}); });
+  return {rows,errors}; }
+$('tvAdd').onclick=()=>{ tvRow().querySelector('.tn').focus(); };
+$('tvClear').onclick=()=>{ tvFill([],true); $('tvOut').innerHTML=''; $('tvMsg').textContent=''; };
+$('tvForm').addEventListener('click',e=>{ const b=e.target.closest('.rm'); if(!b) return; b.closest('tr').remove(); if(!$('tvForm').tBodies[0].rows.length) tvBlankRows(1); });
+// import (template CSV, any CSV, or pasted rows) goes INTO the form, so it can be checked and fixed before running
+function importTeam(text){ const {rows,errors,bad}=parseTeam(text,true); tvFill(rows.concat(bad||[]),false);
+  const m=$('tvMsg'); m.classList.toggle('err',!!errors.length); m.textContent=`Added ${rows.length} ${rows.length===1?'person':'people'}.`+(errors.length?' Fix the rows marked red: '+errors.slice(0,3).join(' · ')+(errors.length>3?` · and ${errors.length-3} more`:''):''); $('tvImp').open=false; }
+$('tvPasteGo').onclick=()=>{ if(!$('tvText').value.trim()) return; importTeam($('tvText').value); $('tvText').value=''; };
+$('tvTpl').onclick=()=>{ const q=v=>`"${v}"`;
+  const lines=[['Name','Date of birth (dd/mm/yyyy)','Apprenticeship (name or ST code; blank = default)','EHC plan or care (Y/N)','Planned start (dd/mm/yyyy; optional)'].map(q).join(','),
+    ['Example - delete this row','26/08/2007','ST0002','N',''].map(q).join(',')];
+  downloadFile('team-check-template.csv','﻿'+lines.join('\r\n')+'\r\n','text/csv'); };
+
 function runTeam(){
-  const {rows,errors}=parseTeam($('tvText').value); const msg=$('tvMsg'); msg.classList.toggle('err',!rows.length&&!!errors.length);
+  const {rows,errors}=readTeamForm(); const msg=$('tvMsg'); msg.classList.toggle('err',!!errors.length);
   if(!rows.length){ msg.textContent=errors.length?errors.slice(0,3).join(' · '):'Add at least one person: name, date of birth.'; $('tvOut').innerHTML=''; return; }
   const defStd=findStd($('tvDefStd').value)||findStd($('std').value);
   TEAM=rows.map(p=>{ const o=checkPerson(p,defStd); return {p,o,v:teamVerdict(o)}; });
@@ -2155,8 +2223,9 @@ function runTeam(){
     if(!ev.length){ alert('Nobody in this list has a date to add.'); return; } downloadFile(`team-deadlines-${iso(t)}.ics`,icsCalendar(ev),'text/calendar'); };
 }
 function openTeam(e){ if(e) e.preventDefault();
+  if(!$('tvForm').tBodies[0].rows.length){ $('tvStds').innerHTML=STDS.filter(x=>!fundBlock(x)).sort((a,b)=>a.n.localeCompare(b.n)).map(x=>`<option value="${esc(x.n)} (${x.r})">`).join(''); tvBlankRows(3); }
   const sel=$('tvDefStd'); if(sel.options.length<2){ STDS.filter(x=>!fundBlock(x)).sort((a,b)=>a.n.localeCompare(b.n)).forEach(x=>sel.insertAdjacentHTML('beforeend',`<option value="${x.r}">${esc(x.n)} (L${x.l})</option>`)); }
-  $('teamView').classList.remove('hide'); document.body.style.overflow='hidden'; $('tvText').focus(); }
+  $('teamView').classList.remove('hide'); document.body.style.overflow='hidden'; $('tvForm').querySelector('.tn').focus(); }
 function closeTeam(){ $('teamView').classList.add('hide'); document.body.style.overflow=''; $('teamBtn').focus(); }
 $('teamBtn').onclick=openTeam; $('teamLink').addEventListener('click',openTeam);
 $('tvClose').onclick=closeTeam;
@@ -2164,10 +2233,10 @@ $('teamView').addEventListener('keydown',e=>{ if(e.key==='Escape') closeTeam(); 
 $('teamView').addEventListener('click',e=>{ if(e.target===$('teamView')) closeTeam(); });
 $('tvGo').onclick=runTeam;
 $('tvSample').onclick=()=>{ const t=utcToday(), y=n=>iso(addYears(t,-n)).split('-').reverse().join('/');
-  $('tvText').value=`Name, Date of birth, Apprenticeship, EHC/care\nJordan Lee, ${y(19)}, ST0002, N\nPriya Shah, ${iso(addMonths(addYears(t,-21),-10)).split('-').reverse().join('/')}, ${(STDS.find(x=>x.l==7&&!fundBlock(x))||{r:'ST0002'}).r}, N\nSam Okafor, ${y(24)}, ST0070, Y\nMia Chen, ${y(15)}, ST0002, N\nLeo Grant, ${y(30)}, ST0070, N`; runTeam(); };
+  tvFill([],true); importTeam(`Name, Date of birth, Apprenticeship, EHC/care\nJordan Lee, ${y(19)}, ST0002, N\nPriya Shah, ${iso(addMonths(addYears(t,-21),-10)).split('-').reverse().join('/')}, ${(STDS.find(x=>x.l==7&&!fundBlock(x))||{r:'ST0002'}).r}, N\nSam Okafor, ${y(24)}, ST0070, Y\nMia Chen, ${y(15)}, ST0002, N\nLeo Grant, ${y(30)}, ST0070, N`); runTeam(); };
 $('tvFile').addEventListener('change',async()=>{ const f=$('tvFile').files[0]; $('tvFile').value=''; if(!f) return;
   if(/\.xlsx?$/i.test(f.name)){ $('tvMsg').textContent='Excel files need saving as CSV first (File › Save As › CSV).'; $('tvMsg').classList.add('err'); return; }
-  $('tvText').value=await f.text(); runTeam(); });
+  importTeam(await f.text()); });
 $('tvOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-open]'); if(!b) return; const x=TEAM[+b.dataset.open]; if(!x) return;
   $('name').value=x.p.name; $('dob').value=iso(x.p.dob); $('care').checked=x.p.care; $('foundation').checked=false;
   const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('start').value=x.p.start?iso(x.p.start):(x.o.rec&&!x.o.blocked?iso(x.o.rec):$('start').value);
