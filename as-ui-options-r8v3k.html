@@ -732,13 +732,43 @@ table.bd-t.money td:not(:first-child){width:36%}
 .stem li.hskip,.stem li.gap{min-height:0}
 .stem li.hskip .s i,.stem li.gap .s i{display:none}
 .stem li.hskip .e{padding-bottom:10px}
-.stem li.hskip .e span{display:inline-block;font-size:12.5px;color:var(--muted);background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px);border:1px solid var(--line);padding:2px 8px;border-radius:2px}
+.stem li.hskip .e span{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);border:1px solid var(--field-line);padding:3px 10px 3px 8px;border-radius:2px}
+.stem li.hskip .e span::before{content:"";flex:none;width:14px;height:14px;border-radius:2px;background:repeating-linear-gradient(135deg,var(--muted) 0 2px,transparent 2px 5px);border:1px solid var(--muted)}
 .stem li.gap .s::before{border-left-style:dotted}
 .stem li.gap .e{padding:2px 0 12px}
 .stem li.gap .e span{font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
 :root[data-ui=boardroom] .stem li.chosen i{background:#9C3064;border-color:#9C3064}
 :root[data-ui=boardroom][data-theme=dark] .stem li.chosen i{background:#E58AB8;border-color:#E58AB8}
-@media print{.stem{display:none!important}}
+@media print{#tl{display:none!important}}
+
+/* report stem: fixed colours (the report is always white), one line per date */
+.rp .bd-stem{margin:0}
+.rp .bd-stem li{grid-template-columns:150px 30px 1fr;min-height:38px}
+.rp .bd-stem .d{font-size:14px;color:#666;padding-top:3px}
+.rp .bd-stem .s::before{left:14px;border-left-color:#ddd}
+.rp .bd-stem .s.win::before{left:11px;border-left:8px solid #9C3064;opacity:.25}
+.rp .bd-stem .s i{left:7px;top:4px;width:16px;height:16px;background:#fff;border-color:#888}
+.rp .bd-stem .e{display:grid;grid-template-columns:400px 1fr;gap:0 24px;font-size:15.5px;padding-bottom:10px;color:#1d1d1d}
+.rp .bd-stem .e b{font-weight:700}
+.rp .bd-stem .e small{font-size:14px;color:#555}
+.rp .bd-stem li.chosen i{background:#9C3064;border-color:#9C3064;box-shadow:0 0 0 4px #F7F2F4}
+.rp .bd-stem li.chosen .e b{color:#9C3064}
+.rp .bd-stem li.chosen .d{color:#1d1d1d;font-weight:700}
+.rp .bd-stem li.planned i{border-color:#9C3064}
+.rp .bd-stem li.planned.late i{border-color:#B21E1E}
+.rp .bd-stem li.planned.late .e small{color:#B21E1E}
+.rp .bd-stem li.dl i{background:#C62828;border-color:#C62828}
+.rp .bd-stem li.dl .e b{color:#B21E1E}
+.rp .bd-stem li.mil i{border-color:#9C3064}
+.rp .bd-stem li.mil .e b{color:#9C3064}
+.rp .bd-stem li.open .e b{color:#666}
+.rp .bd-stem li.hskip,.rp .bd-stem li.gap{min-height:0}
+.rp .bd-stem li.hskip .e,.rp .bd-stem li.gap .e{display:block}
+.rp .bd-stem li.hskip .e span{font-size:14px;font-weight:700;color:#1d1d1d;background:#fff;border-color:#bbb}
+.rp .bd-stem li.hskip .e span::before{background:repeating-linear-gradient(135deg,#666 0 2px,transparent 2px 5px);border-color:#666}
+.rp .bd-stem li.gap .e span{font-size:12.5px;color:#666;border-color:#ddd;background:#fff}
+.rp .bd-stem.dense li{min-height:31px}
+.rp .bd-stem.dense .e{padding-bottom:6px;font-size:14.5px}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -1408,32 +1438,44 @@ function render(){
     (milCol?`<details class="fold"><summary>How the Milburn figures work</summary><div><b>*</b>The Milburn Review recommends cutting government funding for over-25s by 25% (para 470), possibly to 50% by 2031/32. It doesn't say how, so this tool assumes the employer covers the 25%, as the trade press reads it. Under-25s would be 100% funded for any size of employer, and the hiring payment would rise to £2,500 and include levy payers (para 472). None of this is law yet: the government has agreed the “core principles”, with a full response to follow.</div></details>`:'');
 }
 
-function drawTimeline(o){
-  const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
-  const same=iso(o.rec)===iso(o.start);
-  const plannedSub = o.start<o.today ? 'In the past: choose a new date' : (o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur') ? 'Too late for a funding deadline' : 'Works');
-  const ev=[{d:o.today,k:'today',t:'Today'}];
-  if(o.skipped) ev.push({skip:true,d:addDays(o.rec,-0.5)});   // sits just above the date it explains
-  if(+o.from!==+o.rec) ev.push({d:o.from,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
-  ev.push({d:o.rec,k:'chosen',t:same?'Earliest start date = your planned start':'Earliest start date',s:(o.recWhy||[]).some(w=>/busy months/.test(w))?'Avoids your busy months':''});
-  if(!same) ev.push({d:o.start,k:'planned'+(plannedSub==='Works'?'':' late'),t:'Your planned start',s:plannedSub});
-  if(o.until) ev.push({d:o.until,k:'dl',t:'Start no later than',s:untilSub(o)});
+/* ---------- key dates as a vertical stem: one builder, drawn in the app (#tl) and on the report's key dates page ---------- */
+function stemRows(o,full){
+  const ev=[{d:o.today,k:'today',t:full?'Today: report prepared':'Today'}];
+  if(!o.blocked && o.from){
+    const same=iso(o.rec)===iso(o.start);
+    const plannedSub = o.start<o.today ? 'In the past: choose a new date' : (o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur') ? 'Too late for a funding deadline' : 'Works');
+    if(o.skipped) ev.push({skip:true,d:addDays(o.rec,-0.5)});   // sits just above the date it explains
+    if(+o.from!==+o.rec) ev.push({d:o.from,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
+    const busy=(o.recWhy||[]).some(w=>/busy months/.test(w));
+    ev.push({d:o.rec,k:'chosen',t:same?'Earliest start date = your planned start':'Earliest start date',
+      s: full ? (o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'') : (busy?'Avoids your busy months':'')});
+    if(!same) ev.push({d:o.start,k:'planned'+(plannedSub==='Works'?'':' late'),t:'Your planned start',s:plannedSub});
+    if(o.until) ev.push({d:o.until,k:'dl',t:'Start no later than',s:untilSub(o)});
+  }
   o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>ev.push({d:k.date,k:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn adopted: '),s:k.scheme==='mil'?'Proposal, not law':(k.elig?'Funding changes':`Worth ${money(k.cost)}`)}));
   if(o.end) ev.push({d:o.end,k:'end',t:'Earliest contract end',s:'Plus the end-point assessment'});
   ev.sort((p,q)=>p.d-q.d);
-  const winEnd = o.until ? Math.min(+o.until, Math.max(+o.rec,+o.start)) : Math.max(+o.rec,+o.start);
+  const winEnd = !o.blocked&&o.from ? (o.until ? Math.min(+o.until, Math.max(+o.rec,+o.start)) : Math.max(+o.rec,+o.start)) : -1;
   const gap=(a,b)=>{ let m=(b.getUTCFullYear()-a.getUTCFullYear())*12+b.getUTCMonth()-a.getUTCMonth(); if(b.getUTCDate()<a.getUTCDate()) m--; const y=Math.floor(m/12), mm=m%12;
     return (y?y+(y>1?' years':' year'):'')+(y&&mm?' ':'')+(mm?mm+(mm>1?' months':' month'):'')+' later'; };
-  let h='', prev=null;
+  const rows=[]; let prev=null;
   ev.forEach(e=>{
-    if(e.skip){ h+=`<li class="hskip"><span class="d"></span><span class="s"></span><span class="e"><span>Skips ${esc(o.skipped)}</span></span></li>`; return; }
-    if(prev && (e.d-prev)/864e5>120) h+=`<li class="gap"><span class="d"></span><span class="s"></span><span class="e"><span>${gap(prev,e.d)}</span></span></li>`;
-    const win = +e.d>=+o.from && +e.d<=winEnd;
-    h+=`<li class="${e.k}"><span class="d">${fmt(e.d)}</span><span class="s${win?' win':''}"><i></i></span><span class="e"><b>${esc(e.t)}</b>${e.s?`<small>${e.s}</small>`:''}</span></li>`;
+    if(e.skip){ rows.push({type:'hskip',text:'Skips '+o.skipped}); return; }
+    if(prev && (e.d-prev)/864e5>120) rows.push({type:'gap',text:gap(prev,e.d)});
+    rows.push({type:'row',k:e.k,d:fmt(e.d),t:e.t,s:e.s||'',win:o.from&&+e.d>=+o.from&&+e.d<=winEnd});
     prev=e.d;
   });
-  if(!o.until) h+=`<li class="open"><span class="d"></span><span class="s"><i></i></span><span class="e"><b>No age deadline</b><small>No age cut-off for funding</small></span></li>`;
-  T.innerHTML=h;
+  if(!o.blocked && o.from && !o.until) rows.push({type:'row',k:'open',d:'',t:'No age deadline',s:'No age cut-off for funding',win:false});
+  return rows;
+}
+function stemHtml(rows){
+  return rows.map(r=> r.type==='row'
+    ? `<li class="${r.k}"><span class="d">${r.d}</span><span class="s${r.win?' win':''}"><i></i></span><span class="e"><b>${esc(r.t)}</b>${r.s?`<small>${r.s}</small>`:''}</span></li>`
+    : `<li class="${r.type}"><span class="d"></span><span class="s"></span><span class="e"><span>${esc(r.text)}</span></span></li>`).join('');
+}
+function drawTimeline(o){
+  const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
+  T.innerHTML=stemHtml(stemRows(o,false));
 }
 
 /* ---------- 5. use the recommended start date ---------- */
@@ -1682,19 +1724,10 @@ function buildReport(o){
     } }
 
   // ---------- 3. key dates ----------
-  const dr=[[fmt(o.today),'Report prepared','—']]; const dd=(row,d)=>{ row._d=d?+d:Infinity; dr.push(row); }; dr[0]._d=+o.today;
-  if(!o.blocked){
-    dd([fmt(o.from),'First possible date','Allows 4 weeks for provider sign-up (planning assumption); always a working day'],o.from);
-    dd([`<b>${fmt(o.rec)}</b>`,'<b>Earliest start date</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—'],o.rec);
-    if(iso(o.start)!==iso(o.rec)) dd([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')],o.start);
-  }
-  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dd([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`],k.date));
-  if(!o.blocked) o.until ? dd([`<b>${fmt(o.until)}</b>`,'<b>Start no later than</b>',untilSub(o)],o.until) : dd(['—','<b>Start no later than</b>','No deadline: no age cut-off for funding'],null);
-  if(o.end) dd([fmt(o.end),'Earliest contract end','Plus the end-point assessment period'],o.end);
-  dr.sort((x,y)=>x._d-y._d);   // chronological; stable, so same-day rows keep their order
+  const sr=stemRows(o,true);
   pages.push(page('Timeline · Key dates','Key dates and deadlines',`
     <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>. <b>${untilSub(o)}.</b> On ${fmt(o.untilWhy.date)} the ${esc(o.untilWhy.what.toLowerCase())}.`:'<b>No age cut-off for funding.</b> There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
-    <div class="bd-full">${table(['Date','Event','What it means'],dr)}</div>`,false));
+    <div class="bd-full"><ol class="stem bd-stem${sr.length>11?' dense':''}" aria-label="Key dates">${stemHtml(sr)}</ol></div>`,false));
 
   // ---------- 4. who pays ----------
   if(o.band){

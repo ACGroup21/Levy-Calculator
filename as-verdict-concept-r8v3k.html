@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Verdict Card Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--plum:#9C3064;--blush:#F7F2F4;--ink:#141013;--muted:#6B5F66;--line:#E4DCE0;--card:#fff;--bg:#F4F1F2;
+  --ok:#1F7A4D;--ok-bg:#E8F4EC;--warn:#B76E00;--warn-bg:#FBF1E1;--bad:#C62828;--bad-bg:#FBE9E9}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--plum:#E58AB8;--blush:#2A1A23;--ink:#F3EEF1;--muted:#B3A5AD;--line:#3A2E35;--card:#1B1418;--bg:#120D10;
+  --ok:#5FC08E;--ok-bg:#12261B;--warn:#E3A33B;--warn-bg:#2A2012;--bad:#F07070;--bad-bg:#2C1515}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Open Sans",Arial,sans-serif}
+.wrap{max-width:1500px;margin:0 auto;padding:28px 16px 60px}
+h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
+.intro{color:var(--muted);max-width:860px;margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 22px}
+.bar span{font-weight:600;font-size:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--card)}
+.seg button{border:0;background:none;color:var(--ink);padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--plum);color:#fff}
+.replay{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:3px;padding:7px 14px;font:inherit;font-size:14px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:26px;align-items:start}
+.opt .tag{display:inline-block;font:700 11px/1 "Open Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--plum);margin-bottom:6px}
+.opt h2{font:700 18px/1.2 Montserrat,sans-serif;margin:0 0 4px}
+.opt .pitch{color:var(--muted);font-size:14px;margin:0 0 14px;min-height:84px}
+.stage{max-width:400px}
+.rec{outline:3px solid var(--plum);outline-offset:6px}
+.k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}
+.h{font:800 36px/1.1 Montserrat,Arial,sans-serif;margin:2px 0 6px}
+.p{margin:0;font-size:15.5px}
+/* status palette per card */
+.s-ok{--c:var(--ok);--cb:var(--ok-bg)} .s-warn{--c:var(--warn);--cb:var(--warn-bg)} .s-bad{--c:var(--bad);--cb:var(--bad-bg)}
+
+/* ===== current, for reference ===== */
+.cur{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:2px;padding:22px 24px}
+.cur .k{color:var(--c)}
+
+/* ===== A: heart seal (brand) ===== */
+.a{position:relative;background:var(--card);border:1px solid var(--line);border-radius:2px;padding:22px 24px 22px 116px;overflow:hidden;min-height:132px}
+.a .seal{position:absolute;left:22px;top:50%;width:76px;height:76px;transform:translateY(-50%)}
+.a .seal svg{width:100%;height:100%;overflow:visible}
+.a .heart{fill:var(--cb);stroke:var(--c);stroke-width:2.5}
+.a .fill{fill:var(--c);clip-path:inset(100% 0 0 0);animation:fillUp 1.1s .2s cubic-bezier(.6,0,.2,1) forwards}
+.a .mark{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:60;stroke-dashoffset:60;animation:draw .45s 1.2s ease-out forwards}
+.a .ring{fill:none;stroke:var(--c);stroke-width:2;opacity:0;transform-origin:50px 52px;animation:ping 1s 1.55s ease-out}
+.a .k{color:var(--c)}
+.a::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,var(--cb) 0 60%,transparent 61%);opacity:.9}
+.a > *{position:relative;z-index:1}
+.a .seal{position:absolute}
+@keyframes fillUp{to{clip-path:inset(0 0 0 0)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes ping{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+
+/* ===== B: checks to verdict (segmented progress) ===== */
+.b{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:20px 24px 22px}
+.b .k{color:var(--c)}
+.b .segs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin:12px 0 8px}
+.b .segs i{height:8px;border-radius:1px;background:var(--line);position:relative;overflow:hidden}
+.b .segs i::after{content:"";position:absolute;inset:0;background:var(--ok);transform:scaleX(0);transform-origin:left;animation:seg .35s ease-out forwards}
+.b .segs i.no::after{background:var(--bad)}
+.b .segs i.q::after{background:var(--warn)}
+.b .labs{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;font-size:10.5px;color:var(--muted);line-height:1.2}
+.b .h{display:flex;align-items:center;gap:10px;opacity:0;animation:rise .4s forwards}
+.b .h svg{width:30px;height:30px;flex:none}
+.b .p{opacity:0;animation:rise .4s forwards}
+@keyframes seg{to{transform:scaleX(1)}}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ===== C: status band + ticket stub ===== */
+.c{display:grid;grid-template-columns:1fr 96px;background:var(--card);border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.c .main{padding:20px 22px;border-top:6px solid var(--c);background:linear-gradient(180deg,var(--cb),var(--card) 70%)}
+.c .k{color:var(--c)}
+.c .stub{position:relative;border-left:2px dashed var(--line);display:grid;place-items:center;text-align:center;padding:12px 6px;background:var(--card)}
+.c .stub::before,.c .stub::after{content:"";position:absolute;left:-9px;width:16px;height:16px;border-radius:50%;background:var(--bg)}
+.c .stub::before{top:-8px}.c .stub::after{bottom:-8px}
+.c .stub b{display:block;font:800 30px/1 Montserrat,sans-serif;color:var(--c)}
+.c .stub small{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.c .stub .stamp{width:64px;height:64px;border-radius:50%;border:3px double var(--c);display:grid;place-items:center;color:var(--c);transform:rotate(-12deg) scale(1.6);opacity:0;animation:stamp .35s .5s cubic-bezier(.3,1.6,.5,1) forwards}
+.c .stub .stamp svg{width:30px;height:30px}
+@keyframes stamp{to{transform:rotate(-12deg) scale(1);opacity:1}}
+
+/* ===== D: magenta-to-status glow ===== */
+.d{position:relative;border-radius:2px;padding:24px 24px 22px;color:#fff;overflow:hidden;background:#1d1418}
+.d::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,var(--c),#9C3064,var(--c),#9C3064,var(--c));filter:blur(40px);opacity:.55;animation:spin 9s linear infinite}
+.d::after{content:"";position:absolute;inset:2px;border-radius:1px;background:linear-gradient(160deg,rgba(20,16,19,.86),rgba(20,16,19,.94))}
+.d > *{position:relative;z-index:1}
+.d .k{color:#fff;opacity:.8;display:flex;align-items:center;gap:8px}
+.d .k i{width:8px;height:8px;border-radius:50%;background:var(--c);box-shadow:0 0 0 0 var(--c);animation:beat 1.6s infinite}
+.d .h{color:#fff}
+.d .h span{background:linear-gradient(90deg,#fff,var(--c));-webkit-background-clip:text;background-clip:text;color:transparent}
+.d .p{color:#e9dfe4}
+.s-ok.d{--c:#5FD69A}.s-warn.d{--c:#F2B544}.s-bad.d{--c:#FF7A7A}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes beat{0%{box-shadow:0 0 0 0 var(--c)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.pros{margin:12px 0 0;padding:0;list-style:none;font-size:13.5px;max-width:400px}
+.pros li{padding:3px 0 3px 20px;position:relative}
+.pros li::before{position:absolute;left:0;font-weight:700}
+.pros .p1::before{content:"+";color:var(--ok)}
+.pros .c1::before{content:"–";color:var(--bad)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Eligibility verdict: concepts</h1>
+  <p class="intro">The verdict is the first thing a manager reads. Today it is a white card with a thin green edge, so “Eligible” lands with no sense of occasion. Each concept below is shown at the real card width. Switch the result to see each one handle “with checks” and “not eligible” too, and replay the entrance.</p>
+  <div class="bar"><span>Result</span>
+    <div class="seg" id="st"><button type="button" data-s="ok" aria-pressed="true">Eligible</button><button type="button" data-s="warn" aria-pressed="false">Eligible, with checks</button><button type="button" data-s="bad" aria-pressed="false">Not eligible</button></div>
+    <button type="button" class="replay" id="replay">↻ Replay</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+const TXT={ok:['Eligible','Jordan is eligible for apprenticeship funding. They’ll be 19 at the planned start (26 Jan 2027).',[1,1,1,1,1,1],'6/6'],
+ warn:['Eligible, with checks','Jordan looks eligible. 1 answer is “Not sure”: confirm it before sign-up.',[1,1,1,1,1,'q'],'5/6'],
+ bad:['Not eligible','They’re on another government-funded course. They can start once it finishes.',[1,1,1,'no',1,1],'5/6']};
+const LABS=['Residency','England','Contract','No other course','Not in education','Prior learning'];  // the six real checks, in app order
+const ICON={ok:'<path d="M20 51 L41 70 L80 30"/>',warn:'<path d="M50 28 V58"/><path d="M50 74 V75"/>',bad:'<path d="M30 30 L70 70"/><path d="M70 30 L30 70"/>'};
+const HEART='M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C39 8 46 13 50 20 C54 13 61 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z';
+const tick=(s,col)=>`<svg viewBox="0 0 100 100" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">${ICON[s]}</svg>`;
+const OPTS=[
+ {tag:'Today',name:'Current: coloured edge',f:(s,t)=>`<div class="cur s-${s}"><div class="k">Funding eligibility</div><div class="h">${t[0]}</div><p class="p">${t[1]}</p></div>`,
+  pitch:'For reference. Correct and calm, but the result has no moment: the only colour is a 6px line.',p:[],c:[]},
+ {tag:'Option A · recommended',rec:true,name:'Heart seal',f:(s,t)=>`<div class="a s-${s}"><div class="seal"><svg viewBox="0 0 100 100"><circle class="ring" cx="50" cy="52" r="44"/><path class="heart" d="${HEART}"/><path class="fill" d="${HEART}"/><g class="mark" transform="translate(16 14) scale(.68)">${ICON[s]}</g></svg></div><div class="k">Funding eligibility</div><div class="h">${t[0]}</div><p class="p">${t[1]}</p></div>`,
+  pitch:'Borrows the heart from the Ann Summers wordmark. It fills with the status colour, the tick draws in, then one ring pings out. Amber gets “!”, red gets “×”, so it never relies on colour alone.',
+  p:['On-brand: nobody else’s checker looks like this','Plays once, under 2 seconds; respects reduced motion','Works in the report too, as a still seal'],c:['A heart on a “Not eligible” result needs the × to read clearly']},
+ {tag:'Option B',name:'Checks build to the verdict',f:(s,t)=>`<div class="b s-${s}"><div class="k">Funding eligibility · ${t[3]} checks passed</div><div class="segs">${t[2].map((v,i)=>`<i class="${v==='no'?'no':v==='q'?'q':''}" style="animation-delay:${i*.12}s"></i>`).join('').replace(/<i class="([^"]*)" style="animation-delay:([^"]*)"><\/i>/g,'<i class="$1"><style></style></i>')}</div><div class="labs">${LABS.map(l=>`<span>${l}</span>`).join('')}</div><div class="h" style="animation-delay:.85s">${tick(s,'currentColor').replace('<svg','<svg style="color:var(--c)"')}${t[0]}</div><p class="p" style="animation-delay:1s">${t[1]}</p></div>`,
+  pitch:'Six segments light up one per eligibility check, then the verdict rises in. The manager sees the answer and how it was reached in one glance.',
+  p:['Shows which check failed, right in the card','Explains itself: no extra reading for “why”'],c:['Busier card','Segment labels get tight on phones']},
+ {tag:'Option C',name:'Approved ticket',f:(s,t)=>`<div class="c s-${s}"><div class="main"><div class="k">Funding eligibility</div><div class="h">${t[0]}</div><p class="p">${t[1]}</p></div><div class="stub"><div class="stamp">${tick(s,'currentColor')}</div></div></div>`,
+  pitch:'A tinted card with a tear-off stub, and a rubber stamp lands on the stub. It feels like an approval slip the manager can act on.',
+  p:['Strong “done, approved” moment','Tint carries the status across the whole card'],c:['Less brand-specific','Stub takes width from the text']},
+ {tag:'Option D',name:'Living glow',f:(s,t)=>`<div class="d s-${s}"><div class="k"><i></i>Funding eligibility</div><div class="h"><span>${t[0]}</span></div><p class="p">${t[1]}</p></div>`,
+  pitch:'A dark card with a slow magenta-to-status glow moving behind it and a beating status dot. Echoes the animated background and splash.',
+  p:['Most dramatic; ties to the splash screen'],c:['Constant motion behind text','Dark card stands apart from the Boardroom style']}
+];
+let cur='ok';
+function draw(){ const t=TXT[cur];
+  document.getElementById('grid').innerHTML=OPTS.map(o=>`<section class="opt"><span class="tag">${o.tag}</span><h2>${o.name}</h2><p class="pitch">${o.pitch}</p><div class="stage${o.rec?' rec':''}">${o.f(cur,t)}</div><ul class="pros">${o.p.map(x=>`<li class="p1">${x}</li>`).join('')}${o.c.map(x=>`<li class="c1">${x}</li>`).join('')}</ul></section>`).join('');
+  // option B: stagger the segments
+  document.querySelectorAll('.b .segs i').forEach((el,i)=>{ el.style.setProperty('--d',i*.12+'s'); el.querySelector('style')?.remove(); });
+  const st=document.createElement('style'); st.textContent=[0,1,2,3,4,5].map(i=>`.b .segs i:nth-child(${i+1})::after{animation-delay:${i*.12}s}`).join(''); document.getElementById('grid').appendChild(st);
+}
+document.getElementById('st').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cur=b.dataset.s;document.querySelectorAll('#st button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));draw();});
+document.getElementById('replay').onclick=draw;
+draw();
+</script>
+</body>
+</html>
