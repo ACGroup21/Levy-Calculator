@@ -100,13 +100,13 @@ button,input,select{font:inherit;color:inherit;letter-spacing:inherit;word-spaci
 .on-dark{display:none}
 :root[data-theme=dark] .on-dark{display:block}
 :root[data-theme=dark] .on-light{display:none}
-/* splash is always light, even when the app is in dark mode */
-:root[data-theme=dark] #splash{color-scheme:light;
+/* splash follows the theme (no white flash in dark mode). keep-light: a brand logo with no dark-background version */
+:root[data-theme=dark] #splash.keep-light{color-scheme:light;
   --aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA);
   --plum:#9C3064; --ink:#000; --text:#3B3935; --muted:#6E6A64; --pink-deep:#CC0874; --btn-bg:#000; --btn-fg:#fff}
-:root[data-theme=dark] #splash .aslogo{--logo-fill:#B42A72}
-:root[data-theme=dark] #splash .on-dark{display:none}
-:root[data-theme=dark] #splash .on-light{display:block}
+:root[data-theme=dark] #splash.keep-light .aslogo{--logo-fill:#B42A72}
+:root[data-theme=dark] #splash.keep-light .on-dark{display:none}
+:root[data-theme=dark] #splash.keep-light .on-light{display:block}
 @keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(.97)}24%{transform:scale(1.07)}34%{transform:scale(1)}}
 #splash h1{position:relative;z-index:1;margin:6px 0 0;font-weight:500;font-size:clamp(15px,2.1vw,22px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .8s 2.95s ease both}
 #splash .tag{position:relative;z-index:1;margin:0;font-size:15px;color:var(--text);animation:rise .6s 2.1s ease both;text-align:center}
@@ -927,7 +927,7 @@ table.tvf .rm:hover{color:var(--bad)}
 :root .journey li.act .n,:root[data-ui=boardroom] .journey li.act .n,:root[data-theme=dark] .journey li.act .n,:root[data-ui=boardroom][data-theme=dark] .journey li.act .n{
   background:none!important;color:var(--muted)!important;animation:none!important;box-shadow:none!important;text-shadow:none!important;padding:0!important}   /* top bar numbers never light up (user: distracting); the underline shows the step */
 :root .inputs .card.sel .step b{color:#E4479A!important;animation:none!important;text-shadow:0 0 5px rgba(228,71,154,.35)}   /* LED: between the first (too bright) and the dim version */
-:root[data-theme=dark] .inputs .card.sel .step b{color:#D97BA8!important;text-shadow:0 0 3px rgba(217,123,168,.2)}
+:root[data-theme=dark] .inputs .card.sel .step b{color:#FF5CB0!important;text-shadow:0 0 4px rgba(255,92,176,.6),0 0 12px rgba(255,92,176,.35)}   /* brighter than the unselected numbers, glows on the dark card */
 @media print{:root .inputs .card.sel .step b{text-shadow:none;color:inherit!important}}
 
 /* Best time to onboard: same typeface as the rest of the app (no monospace dates) */
