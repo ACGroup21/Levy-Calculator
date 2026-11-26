@@ -17,8 +17,7 @@ h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
 .ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 22px}
 .ctl button{border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .ctl button.pri{background:var(--pink);border-color:var(--pink);color:#000}
-.opt{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:2px;padding:18px 22px 16px;margin:0 0 16px}
-.opt.rec{border-left-color:var(--plum)}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:18px 22px 16px;margin:0 0 16px}
 .opt .tag{font:700 11px/1 "Open Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
 .opt h2{font:800 18px/1.2 Montserrat,sans-serif;margin:4px 0 2px}
 .opt p{margin:0 0 12px;color:var(--muted);font-size:14px}
@@ -50,6 +49,14 @@ h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
 @keyframes ping{0%{opacity:.8;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(5)}}
 .z .pg{position:absolute;left:50%;top:54%;width:3px;height:3px;border-radius:50%;border:1px solid var(--pink);transform:translate(-50%,-50%);opacity:0;pointer-events:none}
 .z .pg.go{animation:ping .5s ease-out}
+/* F: a real LED - domed lens, rim, glossy highlight; dark when off, glowing pink when on */
+.bulb{display:none;position:relative;width:9px;height:9px;border-radius:50%;flex:none;
+  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.35) 0 18%,transparent 40%),radial-gradient(circle at 50% 60%,#5a2a3f,#2a1220 70%);
+  box-shadow:0 0 0 1.5px #1a1a1a,0 0 0 2.5px #8a8a8a inset;transition:background .2s,box-shadow .2s}
+.m-realled .bulb{display:inline-block}
+.m-realled .led{display:none}
+.m-realled .st.lit .bulb{background:radial-gradient(circle at 35% 30%,#fff 0 16%,transparent 38%),radial-gradient(circle at 50% 55%,#FF8CC4,#FF4FA3 55%,#C2186B 100%);
+  box-shadow:0 0 0 1.5px #1a1a1a,0 0 6px 2px rgba(255,79,163,.75),0 0 16px 4px rgba(255,79,163,.35)}
 /* E: crossfade only */
 .m-fade .led{transition:opacity .45s}
 .pros{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0;padding:0;list-style:none;font-size:13.5px}
@@ -73,13 +80,14 @@ const OPTS=[
  {id:'dot',tag:'Option B · recommended',rec:true,name:'Travelling light',p:'The light itself leaves the 0, runs along the line and drops into the next 0. One light, never two.',pro:['Reads as one light moving: exactly your description','Small and calm'],con:['Tiny on very high-resolution screens']},
  {id:'spark',tag:'Option C',name:'Spark with tail',p:'A bright spark with a fading tail, and a small ring pings out when it lands. Echoes the splash screen spark.',pro:['Most lively; ties to the splash','Arrival is unmistakable'],con:['Busier than the rest of the app']},
  {id:'fill',tag:'Option D',name:'Progress fill',p:'Lines up to the active step turn pink and stay pink, like a progress bar. Moving back drains them.',pro:['Shows how far through you are'],con:['Pink lines stay on screen (more colour in the bar)']},
- {id:'fade',tag:'Option E',name:'Quiet crossfade',p:'No travel: the old light fades out as the new one fades in. Lines stay black.',pro:['Calmest; nothing moves'],con:['Loses the sense of going from one step to the next']}
+ {id:'fade',tag:'Option E',name:'Quiet crossfade',p:'No travel: the old light fades out as the new one fades in. Lines stay black.',pro:['Calmest; nothing moves'],con:['Loses the sense of going from one step to the next']},
+ {id:'realled',tag:'Option F',name:'Real LED',p:'An actual LED sits before each number: a small domed light with a rim and a glossy highlight. Off it is dark; when that step is active it glows pink. Pink travels along the line between them. The 0 stays plain.',pro:['Looks like real hardware, very tactile','Bigger, so easy to see at a glance'],con:['Adds a new visual element to the bar']}
 ];
 const per=.5;
 function build(o){
   const el=document.createElement('section'); el.className='opt'+(o.rec?' rec':'');
   el.innerHTML=`<div class="tag">${o.tag}</div><h2>${o.name}</h2><p>${o.p}</p>
-   <div class="jb m-${o.id}">${STEPS.map(([n,l],i)=>`${i?'<span class="ln"><i></i></span>':''}<button type="button" class="st" data-i="${i}"><span class="n"><span class="z">0<i class="led"></i><i class="pg"></i></span>${n}</span><span class="lbl">${l}</span></button>`).join('')}<span class="ln"><i></i></span><span class="res">✓ Eligible</span><span class="dot"></span></div>
+   <div class="jb m-${o.id}">${STEPS.map(([n,l],i)=>`${i?'<span class="ln"><i></i></span>':''}<button type="button" class="st" data-i="${i}"><span class="bulb"></span><span class="n"><span class="z">0<i class="led"></i><i class="pg"></i></span>${n}</span><span class="lbl">${l}</span></button>`).join('')}<span class="ln"><i></i></span><span class="res">✓ Eligible</span><span class="dot"></span></div>
    <ul class="pros">${o.pro.map(x=>`<li class="p">${x}</li>`).join('')}${o.con.map(x=>`<li class="c">${x}</li>`).join('')}</ul>`;
   const bar=el.querySelector('.jb'), sts=[...bar.querySelectorAll('.st')], lns=[...bar.querySelectorAll('.ln')].slice(0,3), dot=bar.querySelector('.dot');
   let cur=0, busy=0; sts[0].classList.add('lit'); if(o.id==='fill'){}
@@ -94,7 +102,7 @@ function build(o){
       dot.style.transition=`left ${per}s cubic-bezier(.5,0,.3,1), top ${per}s cubic-bezier(.5,0,.3,1)`; dot.style.left=x1+'px'; dot.style.top=y1+'px';
       busy=setTimeout(()=>{ dot.style.opacity='0'; light(to); },per*1000); return; }
     // comet / spark
-    light(null); const cls=o.id==='comet'?(fwd?'cf':'cb'):(fwd?'sf':'sb');
+    light(null); const cls=(o.id==='comet'||o.id==='realled')?(fwd?'cf':'cb'):(fwd?'sf':'sb');
     legs.forEach((k,m)=>setTimeout(()=>{ const l=lns[k]; l.classList.remove('cf','cb','sf','sb'); void l.offsetWidth; l.style.setProperty('--t',t+'s'); l.classList.add(cls); setTimeout(()=>l.classList.remove(cls),t*1000+50); },m*t*1000));
     busy=setTimeout(()=>{ light(to); if(o.id==='spark'){ const p=sts[to].querySelector('.pg'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go'); } },n*t*1000);
   }
