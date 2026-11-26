@@ -12,7 +12,7 @@ if(localStorage.getItem('asElig.ui2')==='current')ui='current';}catch(e){}
 if(ui==='boardroom')document.documentElement.setAttribute('data-ui','boardroom');})();</script>
 <script>/* apply saved display settings before first paint (no flash) */
 (function(){var d={};try{d=JSON.parse(localStorage.getItem('asElig.display.v1')||'{}')}catch(e){}
-var t=d.theme||'auto';if(t==='auto')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+var t=d.theme||'light';   /* light by default (user, 26 Nov 2026); Auto/Dark still selectable */if(t==='auto')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);if(d.spacing)document.documentElement.classList.add('spacing');
 if(d.font&&d.font!=='brand'){document.documentElement.setAttribute('data-font',d.font);window.__loadFont&&0;}
 window.FONT_CSS={lexend:'https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap',
@@ -2213,7 +2213,7 @@ function updateJourney(o){
 /* ---------- display & reading: theme, screen cover, reading ruler, spacing (saved per viewer) ---------- */
 const DKEY='asElig.display.v1';
 const COVERS=[['none','None',''],['cream','Cream','#FFF1C9'],['yellow','Yellow','#FFE66B'],['peach','Peach','#FFCBA4'],['pink','Pink','#FFC2DC'],['lilac','Lilac','#D8C7FF'],['blue','Blue','#A9D6FF'],['aqua','Aqua','#A6EEE4'],['green','Green','#BDEFB8'],['grey','Grey','#CFCFCF']];
-const D=(()=>{ let d={}; try{ d=JSON.parse(localStorage.getItem(DKEY)||'{}'); }catch(e){} return Object.assign({theme:'auto',cover:'none',strength:30,ruler:false,spacing:false,font:'brand'},d); })();
+const D=(()=>{ let d={}; try{ d=JSON.parse(localStorage.getItem(DKEY)||'{}'); }catch(e){} return Object.assign({theme:'light',cover:'none',strength:30,ruler:false,spacing:false,font:'brand'},d); })();
 const saveD=()=>{ try{ localStorage.setItem(DKEY,JSON.stringify(D)); }catch(e){} };
 const mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 function setBg(){   // starlights chosen 26 Nov 2026; the viewer can switch them off in Display & reading; dev mode can preview dots/plain
