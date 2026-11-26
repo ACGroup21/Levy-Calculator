@@ -1113,6 +1113,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <li data-k="b"><a href="#c-programme"><span class="n"><span class="z">0<i class="led"></i></span>2</span>Apprenticeship</a></li>
   <li data-k="c"><a href="#c-checks"><span class="n"><span class="z">0<i class="led"></i></span>3</span>Checks <span class="s" id="jChecks"></span></a></li>
   <li data-k="d" class="opt"><a href="#c-timing"><span class="n"><span class="z">0<i class="led"></i></span>4</span>Timing <span class="s">optional</span></a></li>
+  <li data-k="e"><a href="#actions"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final reports</a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
 </ol></nav>
 
@@ -2100,9 +2101,10 @@ window.addEventListener('resize',()=>{ if(!$('reportView').classList.contains('h
 window.addEventListener('beforeprint',fillReport);
 
 /* ---------- journey bar ---------- */
-const JOURNEY_CARD={a:'c-apprentice',b:'c-programme',c:'c-checks',d:'c-timing'};
+const JOURNEY_CARD={a:'c-apprentice',b:'c-programme',c:'c-checks',d:'c-timing',e:'actions'};
 // the section being worked on gets a pink box round its heading: chosen from the bar, or by working inside it
-function selectCard(card){ document.querySelectorAll('.inputs .card.sel').forEach(c=>{ if(c!==card) c.classList.remove('sel'); }); if(card) card.classList.add('sel'); if(typeof moveJInd==='function') moveJInd(); }
+function selectCard(card){ S.jSel=null; document.querySelectorAll('.inputs .card.sel').forEach(c=>{ if(c!==card) c.classList.remove('sel'); }); if(card) card.classList.add('sel'); if(typeof moveJInd==='function') moveJInd(); }
+function selectReports(){ document.querySelectorAll('.inputs .card.sel').forEach(c=>c.classList.remove('sel')); S.jSel='e'; if(typeof moveJInd==='function') moveJInd(); }
 document.querySelector('.inputs').addEventListener('focusin',e=>selectCard(e.target.closest('.card')));
 document.querySelector('.inputs').addEventListener('pointerdown',e=>{ const c=e.target.closest('.card'); if(c) selectCard(c); });
 $('journey').addEventListener('click',e=>{ const a=e.target.closest('a[href^="#c-"]'); if(a) selectCard(document.querySelector(a.getAttribute('href'))); });
@@ -2142,7 +2144,7 @@ function travelJourney(li){
 
 function moveJInd(){
   const nav=document.querySelector('.journey'), ind=nav&&nav.querySelector('.jind'); if(!ind) return;
-  const sel=document.querySelector('.inputs .card.sel'); const k=sel?Object.keys(JOURNEY_CARD).find(x=>JOURNEY_CARD[x]===sel.id):null;
+  const sel=document.querySelector('.inputs .card.sel'); const k=S.jSel||(sel?Object.keys(JOURNEY_CARD).find(x=>JOURNEY_CARD[x]===sel.id):null);
   const li=(k&&document.querySelector(`#journey li[data-k="${k}"]`))||document.querySelector('#journey li.current')||document.querySelector('#journey li.res');
   document.querySelectorAll('#journey li.act').forEach(x=>{ if(x!==li) x.classList.remove('act'); }); if(!li) return; li.classList.add('act'); travelJourney(li);
   const a=li.querySelector('a'), nr=nav.getBoundingClientRect(), ar=a.getBoundingClientRect();
@@ -2154,7 +2156,7 @@ window.addEventListener('resize',moveJInd);
 window.addEventListener('load',moveJInd); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(moveJInd);   // fonts change the step widths
 
 function updateJourney(o){
-  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:!!S.timingTouched};   // timing is optional: done once they change a preference
+  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:!!S.timingTouched, e:!!S.reported};   // 05 is done once a report is previewed, printed or saved   // timing is optional: done once they change a preference
   const answered=QS.filter(q=>S.answers[q.id]!==undefined).length;
   done.c = answered===QS.length;
   $('jChecks').textContent = `${answered}/${QS.length}`;
@@ -2569,7 +2571,7 @@ function guideHtml(){
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Ann Summers), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
-  <h3>Report, calendar and saving</h3>
+  <h3><span class="num">05</span> Final reports</h3>
   <ul><li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
   <li><b>Save this check</b> downloads a small file; <b>Open a saved check</b> brings it all back.</li></ul>
@@ -2602,7 +2604,7 @@ const TOUR=[
  {el:'#reasonsCard',k:'The reasons',t:'Why',x:'Every reason in plain English. Tell me why shows the funding-rule paragraph behind each one.'},
  {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest start date that avoids busy months and holidays, the last date before funding changes, and a timeline of key dates.'},
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
- {el:'#actions',k:'Next steps',t:'Report, calendar and saving',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
+ {el:'#actions',k:'Step 5',t:'Final reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
  {el:'#dbtn',k:'Your way',t:'Display and reading',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
@@ -2687,6 +2689,14 @@ function signBlock(){
     S.sign={img,name,date}; fillReport(); close(); };
   window.addEventListener('resize',()=>{ if(!P.classList.contains('hide')&&mode==='draw'&&!inked) sizePad(); });
 })();
+
+/* 05 Final reports: the bar link glides to the report buttons; using any of them counts as done */
+document.querySelector('#journey li[data-k="e"] a').addEventListener('click',e=>{ e.preventDefault(); selectReports();
+  const el=$('actions'); if(typeof bringIntoView==='function') bringIntoView(el); else el.scrollIntoView({block:'center'}); });
+$('actions').addEventListener('pointerdown',()=>selectReports());
+$('actions').addEventListener('focusin',()=>selectReports());
+['previewBtn','icsBtn','saveBtn'].forEach(id=>$(id).addEventListener('click',()=>{ S.reported=true; render(); }));
+$('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.reported=true; render(); });
 </script>
 </body>
 </html>
