@@ -1065,6 +1065,9 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
 /* bottom row under Who pays: every button styled like Preview report, back at their original sizes (15.5px semi-bold) */
 #actions .btn,:root[data-ui=boardroom] #actions .btn{font-weight:600!important;font-size:15.5px!important;background:#fff;border:1px solid #000;color:#000}
+/* dark mode: the same buttons drawn dark, so they don't glare; pink on hover stays */
+:root[data-theme=dark] #actions .btn,:root[data-theme=dark][data-ui=boardroom] #actions .btn,:root[data-theme=dark] #actions #previewBtn,:root[data-theme=dark][data-ui=boardroom] #actions #previewBtn,:root[data-theme=dark] #actions .btn.ghost,:root[data-theme=dark][data-ui=boardroom] #actions .btn.ghost{background:var(--card);border-color:var(--plum);color:var(--ink)}
+:root[data-theme=dark] #actions .btn:focus-visible{outline-color:var(--ink)}
 
 /* status strip: pinned to the top of the results column whenever the decision card has scrolled out of view */
 .vstrip{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;width:100%;height:44px;margin:0 0 -44px;padding:0 14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:5px solid var(--vs,#9C3064);border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.08);font:inherit;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
