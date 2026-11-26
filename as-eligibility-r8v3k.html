@@ -867,6 +867,25 @@ table.tvf .rm:hover{color:var(--bad)}
 .tv-imp textarea{width:100%;font:500 13px/1.5 var(--mono);padding:8px 10px;border:1px solid var(--field-line);border-radius:3px;background:var(--field);color:var(--ink)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 @media (max-width:1200px){.tv-in{grid-template-columns:minmax(0,1fr)}}   /* after the base rule above, so it wins */
+
+/* Start again lives at the right-hand end of the journey bar */
+.journey li.jreset{margin-left:auto;padding-left:16px}
+.journey li.jreset::before{display:none!important}
+.journey li.jreset .btn{padding:6px 14px;font-size:13px;white-space:nowrap}
+
+/* section numbers light up when a section is complete */
+@keyframes jLit{0%{transform:scale(.6);box-shadow:0 0 0 0 var(--pink)}55%{transform:scale(1.18);box-shadow:0 0 0 7px transparent}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}
+:root .journey li.done .n{background:var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
+:root[data-theme=dark] .journey li.done .n{color:#141013!important}
+:root .card.done .step b{background:var(--pink);color:#fff;padding:0 8px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
+:root[data-ui=boardroom] .card.done .step b{background:#9C3064;color:#fff}
+:root[data-ui=boardroom][data-theme=dark] .card.done .step b{background:#E58AB8;color:#141013}
+/* the selected section: pink box round its heading */
+.inputs .card.sel .step{outline:2px solid var(--pink);outline-offset:6px;border-radius:3px}
+:root[data-ui=boardroom] .inputs .card.sel .step{outline-color:#9C3064}
+:root[data-ui=boardroom][data-theme=dark] .inputs .card.sel .step{outline-color:#E58AB8}
+@media (prefers-reduced-motion:reduce){:root .journey li.done .n,:root .card.done .step b{animation:none}}
+@media print{.inputs .card.sel .step{outline:0}}
 </style>
 </head>
 <body>
@@ -930,6 +949,7 @@ table.tvf .rm:hover{color:var(--bad)}
   <li data-k="c"><a href="#c-checks"><span class="n">3</span>Checks <span class="s" id="jChecks"></span></a></li>
   <li data-k="d" class="opt"><a href="#c-timing"><span class="n">4</span>Timing <span class="s">optional</span></a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
+  <li class="jreset"><button type="button" class="btn ghost sm" id="reset">↺ Start again</button></li>
 </ol></nav>
 
 <div id="cover" aria-hidden="true"></div>
@@ -1037,7 +1057,6 @@ table.tvf .rm:hover{color:var(--bad)}
       <button class="btn ghost" id="icsBtn" type="button">Add dates to calendar</button>
       <button class="btn ghost" id="saveBtn" type="button">Save this check</button>
       <button class="btn ghost" type="button" onclick="window.print()">Print / save as PDF</button>
-      <button class="btn ghost" id="reset">Start again</button>
     </div>
     <p class="openline"><a href="#" id="openLink">Open a saved check</a> · <span id="rulesLine"></span></p>
     <input type="file" id="openFile" accept=".json,application/json" hidden>
@@ -1886,14 +1905,23 @@ window.addEventListener('resize',()=>{ if(!$('reportView').classList.contains('h
 window.addEventListener('beforeprint',fillReport);
 
 /* ---------- journey bar ---------- */
+const JOURNEY_CARD={a:'c-apprentice',b:'c-programme',c:'c-checks',d:'c-timing'};
+// the section being worked on gets a pink box round its heading: chosen from the bar, or by working inside it
+function selectCard(card){ document.querySelectorAll('.inputs .card.sel').forEach(c=>{ if(c!==card) c.classList.remove('sel'); }); if(card) card.classList.add('sel'); }
+document.querySelector('.inputs').addEventListener('focusin',e=>selectCard(e.target.closest('.card')));
+document.querySelector('.inputs').addEventListener('pointerdown',e=>{ const c=e.target.closest('.card'); if(c) selectCard(c); });
+$('journey').addEventListener('click',e=>{ const a=e.target.closest('a[href^="#c-"]'); if(a) selectCard(document.querySelector(a.getAttribute('href'))); });
+// any change in the timing card counts as completing it
+['click','change'].forEach(ev=>$('c-timing').addEventListener(ev,e=>{ if(!S.timingTouched && e.target.closest('button,input')){ S.timingTouched=true; render(); } }));
 function updateJourney(o){
-  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:true};
+  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:!!S.timingTouched};   // timing is optional: done once they change a preference
   const answered=QS.filter(q=>S.answers[q.id]!==undefined).length;
   done.c = answered===QS.length;
   $('jChecks').textContent = `${answered}/${QS.length}`;
-  const order=['a','b','c','d']; const cur=order.find(k=>!done[k]) || 'r';
-  document.querySelectorAll('#journey li').forEach(li=>{ const k=li.dataset.k;
-    if(k==='r') return; li.classList.toggle('done',!!done[k] && k!=='d'); li.classList.toggle('current',k===cur);
+  const order=['a','b','c']; const cur=order.find(k=>!done[k]) || 'r';
+  document.querySelectorAll('#journey li[data-k]').forEach(li=>{ const k=li.dataset.k;
+    if(k==='r') return; li.classList.toggle('done',!!done[k]); li.classList.toggle('current',k===cur);
+    const card=$(JOURNEY_CARD[k]); if(card) card.classList.toggle('done',!!done[k]);
     const a=li.querySelector('a'); if(k===cur) a.setAttribute('aria-current','step'); else a.removeAttribute('aria-current'); });
   const R=document.querySelector('#journey li.res'); R.classList.remove('r-ok','r-warn','r-bad','current');
   const key=(o.dob&&!o.badDob)?o.verdict:'';
