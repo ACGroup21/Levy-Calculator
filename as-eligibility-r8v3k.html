@@ -1176,6 +1176,8 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
         <label class="f"><span>Planned start date</span><input type="date" id="start"></label>
         <label class="f"><span>Contracted hours / week</span><input type="number" id="hours" min="1" max="60" step="0.5" value="37.5"></label>
       </div>
+      <label class="f"><span>Annual pay £ <em style="font-weight:400;color:var(--muted)">(optional)</em></span><input type="number" id="pay" min="0" max="200000" step="100" inputmode="numeric" placeholder="e.g. 24000">
+        <small>Only used to work out the National Insurance saving.</small></label>
       <label class="tick"><input type="checkbox" id="levyok" checked><span>Our <b>levy balance</b> covers this apprenticeship</span></label>
     </div>
 
@@ -1327,6 +1329,7 @@ const STDS = [{"r":"ST1472","n":"Administration assistant","l":2,"d":12,"f":4000
 
 /* ---------- Rules (verified 2026-11-25; refs = funding rules 2026-27 v3 paragraphs) ---------- */
 const R = {
+  ni: {st:5000, aust:50270, rate:0.15, under:25, year:'2026 to 2027'},   // employer NI: 15% above £5,000; apprentices under 25 pay 0% up to £50,270 (GOV.UK rates and thresholds for employers 2026 to 2027)
   l7Max: 22, l7MaxCare: 25,            // para 32: funded if under 22 at start, or under 25 with EHCP/care
   adminRef: 'ST1472', adminMax: 25,    // para 33: 16-24 only
   fdnMax: 22, fdnMaxCare: 25,          // para 160
@@ -1510,7 +1513,7 @@ $('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');
 $('assumeAll').onclick=()=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no':'yes'; }); S.assumed=true; syncQs(); render(); };
 $('clearAll').onclick=()=>{ S.answers={}; S.assumed=false; syncQs(); render(); };
 $('months').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; const m=+b.dataset.m; S.busy.has(m)?S.busy.delete(m):S.busy.add(m); b.setAttribute('aria-pressed',String(S.busy.has(m))); render();});
-['name','dob','care','newhire','std','foundation','start','hours','levyok','showmil'].forEach(id=>$(id).addEventListener('input',render));
+['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','showmil'].forEach(id=>$(id).addEventListener('input',render));
 /* ---------- holidays to avoid ---------- */
 (function(){
   const next=Object.keys(BANK_HOLIDAYS_EW).filter(k=>k>=iso(utcToday())).slice(0,3).map(k=>fmt(parse(k)));
@@ -1626,6 +1629,10 @@ function compute(){
   m.hire = (!unfunded && age<R.mil.under && newHire) ? R.mil.hiring : 0;
   m.hireTxt = m.hire ? '£2,500 hiring payment, extended to levy payers (472)' : (age>=R.mil.under ? 'None (25 or over)' : (!newHire?'None (not a new hire)':'None'));
   if(!unfunded) out.cliffs.push({date:bd(R.mil.under),what:'Milburn: 25% cost'+(newHire?' + £2,500 lost':''),cost:(band?band*R.mil.cut:0)+(newHire?R.mil.hiring:0),scheme:'mil'});
+  { const payRaw=parseFloat($('pay').value), pay=payRaw>0?payRaw:null, under=age<R.ni.under;
+    const save = pay&&under ? Math.max(0,Math.min(pay,R.ni.aust)-R.ni.st)*R.ni.rate : 0;
+    c.ni={pay,under,save,txt: !under?'None (25 or over)': pay===null?`Add their annual pay to work this out (up to ${money((R.ni.aust-R.ni.st)*R.ni.rate)} a year)`: save>0?`${money(save)} a year while under 25`:'None (pay below £5,000)'};
+    m.ni=c.ni; }
   out.c=c; out.m=m;
 
   // --- timing
@@ -1760,9 +1767,10 @@ function render(){
     ${row('Ann Summers cash',o.c.cash,o.m.cash)}
     ${row('Employer payments',o.c.inc?o.c.inc:o.c.incTxt,o.m.inc?o.m.inc:o.m.incTxt)}
     ${row('Hiring payment',o.c.hireTxt,o.m.hire?o.m.hire:o.m.hireTxt)}
+    ${row('NI saving',o.c.ni.txt,o.m.ni.txt)}
     ${row('Net cost to Ann Summers',cNet<0?`${money(-cNet)} back`:cNet,mNet<0?`${money(-mNet)} back`:mNet,'tot')}
   </tbody>`;
-  $('moneyNote').innerHTML = (o.c.inc?`Employer payments: ${o.c.incTxt}. `:'')+'Under current rules, employers also pay no NI on under-25 apprentices’ pay up to £50,270, until they turn 25.'+
+  $('moneyNote').innerHTML = (o.c.inc?`Employer payments: ${o.c.incTxt}. `:'')+'<b>NI saving:</b> employers pay no National Insurance on an under-25 apprentice’s pay up to £50,270 a year (normally 15% above £5,000), until they turn 25. It’s a payroll saving, so it isn’t included in the net cost of training.'+
     (milCol?`<details class="fold"><summary>How the Milburn figures work</summary><div><b>*</b>The Milburn Review recommends cutting government funding for over-25s by 25% (para 470), possibly to 50% by 2031/32. It doesn't say how, so this tool assumes the employer covers the 25%, as the trade press reads it. Under-25s would be 100% funded for any size of employer, and the hiring payment would rise to £2,500 and include levy payers (para 472). None of this is law yet: the government has agreed the “core principles”, with a full response to follow.</div></details>`:'');
 }
 
@@ -2086,12 +2094,12 @@ function buildReport(o){
   if(o.band){
     const cNet=o.c.cash-o.c.inc, mNet=o.m.cash-o.m.inc-o.m.hire, f=v=>typeof v==='number'?money(v):esc(v);
     const wr=[['Training price (funding band)',money(o.band),money(o.band)],['Who pays',esc(o.c.who),esc(o.m.who)],['Ann Summers cash',f(o.c.cash),f(o.m.cash)],
-      ['Employer payments',o.c.inc?money(o.c.inc):esc(o.c.incTxt),o.m.inc?money(o.m.inc):esc(o.m.incTxt)],['Hiring payment',esc(o.c.hireTxt),o.m.hire?money(o.m.hire):esc(o.m.hireTxt)],
+      ['Employer payments',o.c.inc?money(o.c.inc):esc(o.c.incTxt),o.m.inc?money(o.m.inc):esc(o.m.incTxt)],['Hiring payment',esc(o.c.hireTxt),o.m.hire?money(o.m.hire):esc(o.m.hireTxt)],['NI saving',esc(o.c.ni.txt),esc(o.m.ni.txt)],
       [`<b>Net cost to Ann Summers</b>`,`<b>${cNet<0?money(-cNet)+' back':money(cNet)}</b>`,`<b>${mNet<0?money(-mNet)+' back':money(mNet)}</b>`]];
     pages.push(page('Financial summary · Who pays','Who pays for the training',`
       <p class="bd-sum">${o.c.cash?`Under current rules Ann Summers pays ${money(o.c.cash)}.`:'Under current rules Ann Summers pays nothing: the training is paid from the levy or by government.'}${o.mil&&o.m.cash>o.c.cash?` If the Milburn Review is adopted, that would rise to about ${money(o.m.cash)}.`:''}</p>
       <div class="bd-full">${table(o.mil?['','Current rules','If Milburn adopted (proposed)']:['','Current rules'],o.mil?wr:wr.map(r=>r.slice(0,2)),'money')}</div>
-      <p class="bd-note">Employers pay no National Insurance on under-25 apprentices’ pay up to £50,270, until they turn 25.${o.mil?' The Milburn Review recommends cutting government funding for over-25s by 25% (para 470) without saying how; this report assumes the employer covers it. Not law yet.':''}</p>`,false));
+      <p class="bd-note">NI saving: employers pay no National Insurance on an under-25 apprentice’s pay up to £50,270 a year (normally 15% above £5,000), until they turn 25. It is a payroll saving, not part of the net training cost.${o.mil?' The Milburn Review recommends cutting government funding for over-25s by 25% (para 470) without saying how; this report assumes the employer covers it. Not law yet.':''}</p>`,false));
   }
 
   // ---------- 5. role match ----------
@@ -2402,7 +2410,7 @@ $('icsBtn').onclick=()=>{ const o=compute(); const ev=icsEventsFor(o,o.name);
   downloadFile(`apprenticeship-dates-${fileSafe(o.name)||'apprentice'}.ics`,icsCalendar(ev),'text/calendar'); };
 
 /* =================== save / open a check (a small file; nothing is stored online) =================== */
-const SAVE_FIELDS=['name','dob','care','newhire','std','foundation','start','hours','levyok','showmil'];
+const SAVE_FIELDS=['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','showmil'];
 function snapshot(){
   const f={}; SAVE_FIELDS.forEach(id=>{ const el=$(id); f[id]=el.type==='checkbox'?el.checked:el.value; });
   return {app:'as-eligibility',v:1,saved:new Date().toISOString(),rules:RULES_META.rules.label,form:f,answers:S.answers,assumed:!!S.assumed,busy:[...S.busy],hol:S.hol,mgrRoute:!!S.mgrRoute,jd:$('jdText').value||''};
