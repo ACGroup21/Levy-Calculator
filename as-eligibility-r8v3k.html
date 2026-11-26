@@ -702,6 +702,43 @@ table.bd-t.money td:not(:first-child){width:36%}
 .hol-err{display:block;color:var(--bad);font-size:13px}
 
 :root[data-ui=boardroom] #holList li{border-radius:3px;border-color:#9C3064}
+
+/* ---------- best time to onboard: vertical stem (concept B, 26 Nov 2026) ---------- */
+.stem{list-style:none;margin:14px 0 0;padding:0;letter-spacing:0;word-spacing:0}
+.stem li{display:grid;grid-template-columns:96px 22px 1fr;gap:0 10px;min-height:44px}
+.stem .d{font:500 12.5px/1.3 var(--mono);color:var(--muted);text-align:right;padding-top:2px;white-space:nowrap}
+.stem .s{position:relative}
+.stem .s::before{content:"";position:absolute;left:10px;top:0;bottom:0;border-left:2px solid var(--line)}
+.stem li:first-child .s::before{top:9px}
+.stem li:last-child .s::before{bottom:calc(100% - 9px)}
+.stem .s.win::before{left:8px;border-left:6px solid var(--pink);opacity:.3}
+.stem .s i{position:absolute;left:4px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--card);border:2px solid var(--muted)}
+.stem .e{padding-bottom:12px;font-size:14px;line-height:1.35}
+.stem .e b{display:block;font-weight:600}
+.stem .e small{display:block;color:var(--muted);font-size:13px}
+.stem li.chosen i{background:var(--pink);border-color:var(--pink);box-shadow:0 0 0 4px var(--blush)}
+.stem li.chosen .e b{color:var(--pink-deep)}
+.stem li.chosen .d{color:var(--ink);font-weight:700}
+.stem li.planned i{border-color:var(--pink)}
+.stem li.planned.late i{border-color:var(--bad)}
+.stem li.planned.late .e small{color:var(--bad)}
+.stem li.dl i{background:var(--bad);border-color:var(--bad);border-radius:2px}
+.stem li.dl .e b{color:var(--bad)}
+.stem li.cliff i{border-radius:2px}
+.stem li.mil i{border-style:dashed;border-color:var(--pink)}
+.stem li.mil .e b{color:var(--pink-deep)}
+.stem li.open i{border-style:dashed}
+.stem li.open .e b{color:var(--muted)}
+.stem li.hskip,.stem li.gap{min-height:0}
+.stem li.hskip .s i,.stem li.gap .s i{display:none}
+.stem li.hskip .e{padding-bottom:10px}
+.stem li.hskip .e span{display:inline-block;font-size:12.5px;color:var(--muted);background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px);border:1px solid var(--line);padding:2px 8px;border-radius:2px}
+.stem li.gap .s::before{border-left-style:dotted}
+.stem li.gap .e{padding:2px 0 12px}
+.stem li.gap .e span{font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
+:root[data-ui=boardroom] .stem li.chosen i{background:#9C3064;border-color:#9C3064}
+:root[data-ui=boardroom][data-theme=dark] .stem li.chosen i{background:#E58AB8;border-color:#E58AB8}
+@media print{.stem{display:none!important}}
 </style>
 </head>
 <body>
@@ -856,8 +893,7 @@ table.bd-t.money td:not(:first-child){width:36%}
       <h3>Best time to onboard</h3>
       <div class="when" id="when"></div>
       <div id="whenNotes"></div>
-      <div class="tl" id="tl" aria-hidden="true"></div>
-      <div class="legend"><span class="lw">Start window</span><span class="lt">Today</span><span class="lr">Earliest start date</span><span class="ls">Planned start</span><span class="lc">Funding deadline</span><span class="lm milonly">If Milburn adopted</span></div>
+      <ol class="stem" id="tl" aria-label="Key dates"></ol>
     </div>
 
     <div class="card" id="moneyCard">
@@ -1320,34 +1356,31 @@ function render(){
 
 function drawTimeline(o){
   const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
-  const W=Math.max(320,T.clientWidth||600), PAD=10, AX=94;
-  const ev=[{d:o.today,c:'today',t:'Today'}];
   const same=iso(o.rec)===iso(o.start);
-  ev.push({d:o.rec,c:'rec',t:same?'Earliest = planned':'Earliest start date'});
-  if(!same) ev.push({d:o.start,c:'start',t:'Planned start'});
-  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil) && k.date>=o.today).forEach(k=>ev.push({d:k.date,c:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn: ')}));
-  const a=o.today; let b=new Date(Math.max(...ev.map(e=>+e.d), +addMonths(o.today,10))); b=addMonths(b,2);
-  const X=d=>PAD+(d-a)/(b-a)*(W-2*PAD);
-  let h=`<div class="axis" style="top:${AX}px"></div>`;
-  for(let y=a.getUTCFullYear()+1;y<=b.getUTCFullYear();y++){ const d=new Date(Date.UTC(y,0,1)); if(d>a&&d<b) h+=`<i class="tk" style="left:${X(d)}px;top:${AX-3}px"></i><div class="yr" style="left:${X(d)}px;top:${AX+8}px">${y}</div>`; }
-  const wEnd=o.until?X(addDays(o.until,1)):X(b);
-  if(wEnd>X(o.from)) h+=`<div class="win${o.until?'':' open'}" style="left:${X(o.from)}px;width:${wEnd-X(o.from)}px;top:${AX-6}px"></div>`;
-  if(!o.until) h+=`<div class="nodl" style="right:${PAD}px;top:${AX-24}px">No age deadline →</div>`;
-  // labels: four lanes (two above, two below); estimate each label's width and avoid overlaps
-  const lanes=[[],[],[],[]], laneY=[AX-46,AX-88,AX+30,AX+70];
-  ev.sort((p,q)=>p.d-q.d).forEach(e=>{
-    const x=X(e.d), date=fmt(e.d), w=Math.max(e.t.length*6.3,date.length*6.6)+14;
-    const L=Math.max(0,Math.min(W-w,x-w/2)), R=L+w;
-    let ln=0; for(;ln<4;ln++){ if(!lanes[ln].some(([l,r])=>L<r+6&&R>l-6)) break; } if(ln===4) ln=0;
-    lanes[ln].push([L,R]);
-    const y=laneY[ln], above=ln<2;
-    const c1=above?y+30:AX+4, c2=above?AX-4:y;
-    h+=`<i class="cn ${e.c}" style="left:${x}px;top:${Math.min(c1,c2)}px;height:${Math.abs(c2-c1)}px"></i><i class="dot ${e.c}" style="left:${x}px;top:${AX}px"></i>`;
-    h+=`<div class="lab ${e.c}" style="left:${L}px;top:${y}px;width:${w}px">${esc(e.t)}<i>${date}</i></div>`;
+  const plannedSub = o.start<o.today ? 'In the past: choose a new date' : (o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur') ? 'Too late for a funding deadline' : 'Works');
+  const ev=[{d:o.today,k:'today',t:'Today'}];
+  if(o.skipped) ev.push({skip:true,d:addDays(o.rec,-0.5)});   // sits just above the date it explains
+  if(+o.from!==+o.rec) ev.push({d:o.from,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
+  ev.push({d:o.rec,k:'chosen',t:same?'Earliest start date = your planned start':'Earliest start date',s:(o.recWhy||[]).some(w=>/busy months/.test(w))?'Avoids your busy months':''});
+  if(!same) ev.push({d:o.start,k:'planned'+(plannedSub==='Works'?'':' late'),t:'Your planned start',s:plannedSub});
+  if(o.until) ev.push({d:o.until,k:'dl',t:'Start no later than',s:untilSub(o)});
+  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>ev.push({d:k.date,k:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn adopted: '),s:k.scheme==='mil'?'Proposal, not law':(k.elig?'Funding changes':`Worth ${money(k.cost)}`)}));
+  if(o.end) ev.push({d:o.end,k:'end',t:'Earliest contract end',s:'Plus the end-point assessment'});
+  ev.sort((p,q)=>p.d-q.d);
+  const winEnd = o.until ? Math.min(+o.until, Math.max(+o.rec,+o.start)) : Math.max(+o.rec,+o.start);
+  const gap=(a,b)=>{ let m=(b.getUTCFullYear()-a.getUTCFullYear())*12+b.getUTCMonth()-a.getUTCMonth(); if(b.getUTCDate()<a.getUTCDate()) m--; const y=Math.floor(m/12), mm=m%12;
+    return (y?y+(y>1?' years':' year'):'')+(y&&mm?' ':'')+(mm?mm+(mm>1?' months':' month'):'')+' later'; };
+  let h='', prev=null;
+  ev.forEach(e=>{
+    if(e.skip){ h+=`<li class="hskip"><span class="d"></span><span class="s"></span><span class="e"><span>Skips ${esc(o.skipped)}</span></span></li>`; return; }
+    if(prev && (e.d-prev)/864e5>120) h+=`<li class="gap"><span class="d"></span><span class="s"></span><span class="e"><span>${gap(prev,e.d)}</span></span></li>`;
+    const win = +e.d>=+o.from && +e.d<=winEnd;
+    h+=`<li class="${e.k}"><span class="d">${fmt(e.d)}</span><span class="s${win?' win':''}"><i></i></span><span class="e"><b>${esc(e.t)}</b>${e.s?`<small>${e.s}</small>`:''}</span></li>`;
+    prev=e.d;
   });
+  if(!o.until) h+=`<li class="open"><span class="d"></span><span class="s"><i></i></span><span class="e"><b>No age deadline</b><small>No age cut-off for funding</small></span></li>`;
   T.innerHTML=h;
 }
-let _tlT=0; window.addEventListener('resize',()=>{ clearTimeout(_tlT); _tlT=setTimeout(render,150); });
 
 /* ---------- 5. use the recommended start date ---------- */
 $('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return; $('start').value=b.dataset.date; render(); });
