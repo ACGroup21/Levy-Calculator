@@ -2582,6 +2582,7 @@ function runTeam(){
   // most urgent first: a deadline soonest, then eligible with no deadline, then not yet, then not eligible
   TEAM.sort((a,b)=>{ const la=left(a), lb=left(b); if(a.v.rank>=3||b.v.rank>=3) if(a.v.rank!==b.v.rank) return a.v.rank-b.v.rank;
     if(la!=null&&lb!=null) return la-lb; if(la!=null) return -1; if(lb!=null) return 1; return (a.o.rec||0)-(b.o.rec||0); });
+  const niCsv=o=>{ const ni=o.c&&o.c.ni; if(!ni) return ''; if(ni.save>0) return Math.round(ni.save); if(!ni.under) return 'Not applicable (25+)'; return ni.pay===null?'Pay not entered':0; };   // short, spreadsheet-friendly
   const niCell=o=>{ const ni=o.c&&o.c.ni; if(!ni) return '—'; if(ni.save>0) return `${money(ni.save)}<small>a year</small>`; if(!ni.under) return '<small>None (25+)</small>'; return ni.pay===null?'<small>Add pay</small>':'<small>None</small>'; };
   const niTotal=TEAM.reduce((a,x)=>a+(x.o.c&&x.o.c.ni?x.o.c.ni.save:0),0), niMissing=TEAM.filter(x=>x.o.c&&x.o.c.ni&&x.o.c.ni.under&&x.o.c.ni.pay===null).length;
   const n=k=>TEAM.filter(x=>x.v.k===k).length, urgent=TEAM.filter(x=>{const l=left(x); return l!=null&&l<=90;}).length;
@@ -2601,7 +2602,8 @@ function runTeam(){
     <p class="tv-lead" style="margin-top:12px">Personal checks (residency, contract, other courses, education, prior learning) are assumed met for everyone. Open a person to answer them properly.</p>`;
   $('tvCsv').onclick=()=>{ const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
     const lines=[['Name','Date of birth','Age now','Apprenticeship','ST code','Result','Earliest start','Start no later than','What the deadline protects','Days left','Annual pay','NI saving a year'].map(q).join(',')];
-    TEAM.forEach(x=>{ const o=x.o, l=left(x); lines.push([x.p.name,iso(x.p.dob),o.dob?ageOn(o.dob,t):'',o.std?o.std.n:'',o.std?o.std.r:'',x.v.t,o.verdict==='notyet'&&o.earliest?iso(o.earliest):(!o.blocked&&o.rec?iso(o.rec):''),!o.blocked&&o.until?iso(o.until):'',!o.blocked&&o.until?untilSub(o):'',l==null?'':l,x.p.pay||'',o.c&&o.c.ni&&o.c.ni.save>0?Math.round(o.c.ni.save):(o.c&&o.c.ni?o.c.ni.txt:'')].map(q).join(',')); });
+    TEAM.forEach(x=>{ const o=x.o, l=left(x); lines.push([x.p.name,iso(x.p.dob),o.dob?ageOn(o.dob,t):'',o.std?o.std.n:'',o.std?o.std.r:'',x.v.t,o.verdict==='notyet'&&o.earliest?iso(o.earliest):(!o.blocked&&o.rec?iso(o.rec):''),!o.blocked&&o.until?iso(o.until):'',!o.blocked&&o.until?untilSub(o):'',l==null?'':l,x.p.pay||'',niCsv(o)].map(q).join(',')); });
+    if(niTotal>0) lines.push([`TOTAL NI saving a year${niMissing?` (${niMissing} without pay not counted)`:''}`,'','','','','','','','','','',Math.round(niTotal)].map(q).join(','));   // the total stays a plain number for Excel
     downloadFile(`team-check-${iso(t)}.csv`,'\ufeff'+lines.join('\r\n'),'text/csv'); };
   $('tvIcs').onclick=()=>{ const ev=[]; TEAM.forEach(x=>icsEventsFor(x.o,x.p.name).forEach(e=>ev.push(e)));
     if(!ev.length){ alert('Nobody in this list has a date to add.'); return; } downloadFile(`team-deadlines-${iso(t)}.ics`,icsCalendar(ev),'text/calendar'); };
