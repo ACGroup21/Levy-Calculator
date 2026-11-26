@@ -323,6 +323,7 @@ h3{margin:0 0 12px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
 @media (max-width:640px){.when{grid-template-columns:1fr}}
 .when > div{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
 .when .l{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+.when .sub{font-size:13px;line-height:1.35;color:var(--muted);margin-top:4px}
 .when .v{font-family:var(--mono);font-size:18px;color:var(--ink);margin-top:2px;letter-spacing:0;word-spacing:0}
 .when > .best{background:var(--strong-bg);border-color:var(--pink)}
 .when .best .l{color:#FF8CC6}.when .best .v{color:var(--strong-fg)}
@@ -1211,9 +1212,15 @@ function render(){
     W.innerHTML=''; N.innerHTML=`<p class="callout bad">Sort out the blocking items above first. No start date works until they're resolved.</p>`;
   } else {
     const untilV = o.until ? fmt(o.until) : 'No deadline';
+    // say what the deadline protects: a hard funding cut-off reads very differently from a lost payment
+    function untilSub(o){ const k=o.untilWhy; if(!k) return 'No age cut-off for funding';
+      if(k.elig) return 'Funding stops after this';
+      if(/£1,000/.test(k.what)) return 'To keep the £1,000 payment. Still funded after';
+      if(/co-investment/.test(k.what)) return `Then Ann Summers pays 25%${k.cost?' ('+money(k.cost)+')':''}. Still funded`;
+      return esc(k.what); }
     W.innerHTML=`<div><div class="l">Earliest sensible start</div><div class="v">${fmt(o.from)}</div></div>
       <div class="best"><div class="l">Chosen start date</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
-      <div><div class="l">Start no later than</div><div class="v">${untilV}</div></div>`;
+      <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
     L.push(['info',`<b>Why ${fmt(o.rec)}?</b> It ${and(o.recWhy)}.`]);
