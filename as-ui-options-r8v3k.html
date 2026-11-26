@@ -2781,8 +2781,8 @@ $('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.
   new MutationObserver(()=>{ paint(false); start(); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-ui','data-bg']});
   resize(); start();
 })();
-/* background choice (dev switch while deciding): stars (default) / dots / plain */
-(function(){ let bg='stars'; try{ bg=localStorage.getItem('asElig.bg')||'stars'; }catch(e){} document.documentElement.setAttribute('data-bg',bg); })();
+/* background: starlights (final). Dev mode can still preview dots or plain */
+(function(){ let bg='stars'; try{ if(localStorage.getItem('asElig.dev')==='1') bg=localStorage.getItem('asElig.bg')||'stars'; }catch(e){} document.documentElement.setAttribute('data-bg',bg); })();   // starlights chosen 26 Nov 2026; the saved choice only applies in dev mode
 </script>
 <div class="cx" role="toolbar" aria-label="Concept options"><b>Concept</b>
   <button type="button" data-c="a">A · Titles only</button><button type="button" data-c="b">B · + black verdict</button><button type="button" data-c="c">C · + slab sections</button>
