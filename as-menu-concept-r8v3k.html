@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Menu Transition Concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF4FA3;--plum:#9C3064;--ink:#000;--muted:#6B5F66;--line:#E4DCE0;--card:#fff;--bg:#F4F1F2}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--ink:#F3EEF1;--muted:#B3A5AD;--line:#3A2E35;--card:#1B1418;--bg:#120D10}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Open Sans",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
+.intro{color:var(--muted);max-width:860px;margin:0 0 18px}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 22px}
+.ctl button{border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ctl button.pri{background:var(--pink);border-color:var(--pink);color:#000}
+.opt{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:2px;padding:18px 22px 16px;margin:0 0 16px}
+.opt.rec{border-left-color:var(--plum)}
+.opt .tag{font:700 11px/1 "Open Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
+.opt h2{font:800 18px/1.2 Montserrat,sans-serif;margin:4px 0 2px}
+.opt p{margin:0 0 12px;color:var(--muted);font-size:14px}
+/* ---- the bar (a copy of the real one) ---- */
+.jb{position:relative;display:flex;align-items:center;padding:12px 4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);user-select:none}
+.st{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;cursor:pointer;font-weight:700;font-size:14px;color:var(--ink);padding:4px 2px;background:none;border:0;font-family:inherit}
+.st .n{font-variant-numeric:tabular-nums}
+.z{position:relative;display:inline-block}
+.led{position:absolute;left:50%;top:54%;width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%);background:var(--pink);box-shadow:0 0 2px 1px rgba(255,79,163,.5);opacity:0;transition:opacity .18s}
+.st.lit .led{opacity:1}
+.res{background:var(--plum);color:#fff;border-radius:2px;padding:6px 12px;font-weight:700;font-size:14px}
+.ln{position:relative;flex:1 1 auto;height:2px;margin:0 12px;background:var(--ink);overflow:visible}
+.ln i{position:absolute;inset:0;pointer-events:none}
+/* A: comet (live today) */
+@keyframes cometF{from{background-position:-45% 0}to{background-position:145% 0}}
+@keyframes cometB{from{background-position:145% 0}to{background-position:-45% 0}}
+.ln.cf i,.ln.cb i{background:linear-gradient(90deg,transparent,var(--pink) 35%,var(--pink) 65%,transparent) no-repeat;background-size:45% 100%;box-shadow:0 0 6px rgba(255,79,163,.45)}
+.ln.cf i{animation:cometF var(--t) linear forwards}.ln.cb i{animation:cometB var(--t) linear forwards}
+/* B: progress fill (lines up to the active step stay pink) */
+.m-fill .ln i{background:var(--pink);transform:scaleX(0);transform-origin:left;transition:transform var(--t) linear}
+.m-fill .ln.on i{transform:scaleX(1)}
+/* C: travelling light (the dot itself leaves the 0) */
+.dot{position:absolute;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--pink);box-shadow:0 0 4px 2px rgba(255,79,163,.6);opacity:0;pointer-events:none}
+/* D: spark with tail + arrival ping */
+@keyframes sparkF{from{background-position:-30% 0}to{background-position:130% 0}}
+@keyframes sparkB{from{background-position:130% 0}to{background-position:-30% 0}}
+.ln.sf i{background:linear-gradient(90deg,transparent 0,rgba(255,79,163,.15) 40%,rgba(255,79,163,.8) 88%,#fff 96%,transparent 100%) no-repeat;background-size:30% 100%;animation:sparkF var(--t) cubic-bezier(.55,0,.45,1) forwards;filter:drop-shadow(0 0 3px rgba(255,79,163,.8))}
+.ln.sb i{background:linear-gradient(270deg,transparent 0,rgba(255,79,163,.15) 40%,rgba(255,79,163,.8) 88%,#fff 96%,transparent 100%) no-repeat;background-size:30% 100%;animation:sparkB var(--t) cubic-bezier(.55,0,.45,1) forwards;filter:drop-shadow(0 0 3px rgba(255,79,163,.8))}
+@keyframes ping{0%{opacity:.8;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(5)}}
+.z .pg{position:absolute;left:50%;top:54%;width:3px;height:3px;border-radius:50%;border:1px solid var(--pink);transform:translate(-50%,-50%);opacity:0;pointer-events:none}
+.z .pg.go{animation:ping .5s ease-out}
+/* E: crossfade only */
+.m-fade .led{transition:opacity .45s}
+.pros{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0;padding:0;list-style:none;font-size:13.5px}
+.pros li::before{font-weight:700;margin-right:6px}
+.pros .p::before{content:"+";color:#1F7A4D}.pros .c::before{content:"–";color:#C62828}
+@media (max-width:640px){.st .lbl{display:none}.ln{margin:0 6px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Top menu transitions</h1>
+  <p class="intro">Each bar below is a working copy of the real one: black titles and lines, a small light in each 0. Click any step to move there, or play the whole journey. The light sizes and timing match the live app (about half a second per move).</p>
+  <div class="ctl"><button class="pri" id="play">▶ Play the journey on all</button><button id="reset">Back to 01</button></div>
+  <div id="opts"></div>
+</div>
+<script>
+const STEPS=[['1','Apprentice'],['2','Apprenticeship'],['3','Checks'],['4','Timing']];
+const OPTS=[
+ {id:'comet',tag:'Option A · live today',name:'Comet',p:'A short pink streak runs along the line, then the next light comes on.',pro:['Clear direction of travel','Already built'],con:['Streak is soft, easy to miss on a quick move']},
+ {id:'dot',tag:'Option B · recommended',rec:true,name:'Travelling light',p:'The light itself leaves the 0, runs along the line and drops into the next 0. One light, never two.',pro:['Reads as one light moving: exactly your description','Small and calm'],con:['Tiny on very high-resolution screens']},
+ {id:'spark',tag:'Option C',name:'Spark with tail',p:'A bright spark with a fading tail, and a small ring pings out when it lands. Echoes the splash screen spark.',pro:['Most lively; ties to the splash','Arrival is unmistakable'],con:['Busier than the rest of the app']},
+ {id:'fill',tag:'Option D',name:'Progress fill',p:'Lines up to the active step turn pink and stay pink, like a progress bar. Moving back drains them.',pro:['Shows how far through you are'],con:['Pink lines stay on screen (more colour in the bar)']},
+ {id:'fade',tag:'Option E',name:'Quiet crossfade',p:'No travel: the old light fades out as the new one fades in. Lines stay black.',pro:['Calmest; nothing moves'],con:['Loses the sense of going from one step to the next']}
+];
+const per=.5;
+function build(o){
+  const el=document.createElement('section'); el.className='opt'+(o.rec?' rec':'');
+  el.innerHTML=`<div class="tag">${o.tag}</div><h2>${o.name}</h2><p>${o.p}</p>
+   <div class="jb m-${o.id}">${STEPS.map(([n,l],i)=>`${i?'<span class="ln"><i></i></span>':''}<button type="button" class="st" data-i="${i}"><span class="n"><span class="z">0<i class="led"></i><i class="pg"></i></span>${n}</span><span class="lbl">${l}</span></button>`).join('')}<span class="ln"><i></i></span><span class="res">✓ Eligible</span><span class="dot"></span></div>
+   <ul class="pros">${o.pro.map(x=>`<li class="p">${x}</li>`).join('')}${o.con.map(x=>`<li class="c">${x}</li>`).join('')}</ul>`;
+  const bar=el.querySelector('.jb'), sts=[...bar.querySelectorAll('.st')], lns=[...bar.querySelectorAll('.ln')].slice(0,3), dot=bar.querySelector('.dot');
+  let cur=0, busy=0; sts[0].classList.add('lit'); if(o.id==='fill'){}
+  const light=i=>sts.forEach((s,k)=>s.classList.toggle('lit',k===i));
+  const ledPos=i=>{ const b=bar.getBoundingClientRect(), r=sts[i].querySelector('.led').getBoundingClientRect(); return [r.left+r.width/2-b.left, r.top+r.height/2-b.top]; };
+  function go(to){ if(to===cur) return; const from=cur; cur=to; const fwd=to>from, n=Math.abs(to-from), t=Math.max(.2,per/n), legs=[];
+    for(let k=0;k<n;k++) legs.push(fwd?from+k:from-k-1);   // line index between step i and i+1 is i
+    clearTimeout(busy);
+    if(o.id==='fade'){ light(to); return; }
+    if(o.id==='fill'){ light(null); lns.forEach((l,k)=>{ l.style.setProperty('--t',t+'s'); }); legs.forEach((k,m)=>setTimeout(()=>lns[k].classList.toggle('on',fwd),m*t*1000)); busy=setTimeout(()=>light(to),n*t*1000); return; }
+    if(o.id==='dot'){ light(null); const [x0,y0]=ledPos(from),[x1,y1]=ledPos(to); dot.style.transition='none'; dot.style.left=x0+'px'; dot.style.top=y0+'px'; dot.style.opacity='1'; void dot.offsetWidth;
+      dot.style.transition=`left ${per}s cubic-bezier(.5,0,.3,1), top ${per}s cubic-bezier(.5,0,.3,1)`; dot.style.left=x1+'px'; dot.style.top=y1+'px';
+      busy=setTimeout(()=>{ dot.style.opacity='0'; light(to); },per*1000); return; }
+    // comet / spark
+    light(null); const cls=o.id==='comet'?(fwd?'cf':'cb'):(fwd?'sf':'sb');
+    legs.forEach((k,m)=>setTimeout(()=>{ const l=lns[k]; l.classList.remove('cf','cb','sf','sb'); void l.offsetWidth; l.style.setProperty('--t',t+'s'); l.classList.add(cls); setTimeout(()=>l.classList.remove(cls),t*1000+50); },m*t*1000));
+    busy=setTimeout(()=>{ light(to); if(o.id==='spark'){ const p=sts[to].querySelector('.pg'); p.classList.remove('go'); void p.offsetWidth; p.classList.add('go'); } },n*t*1000);
+  }
+  sts.forEach((s,i)=>s.addEventListener('click',()=>go(i)));
+  el._go=go; el._reset=()=>{ clearTimeout(busy); cur=0; light(0); lns.forEach(l=>l.classList.remove('on')); dot.style.opacity='0'; };
+  return el;
+}
+const box=document.getElementById('opts'); const els=OPTS.map(o=>{ const e=build(o); box.appendChild(e); return e; });
+let playing=0;
+document.getElementById('play').onclick=()=>{ clearInterval(playing); els.forEach(e=>e._reset()); let k=0; playing=setInterval(()=>{ k++; if(k>3){ clearInterval(playing); setTimeout(()=>els.forEach(e=>e._go(0)),900); return; } els.forEach(e=>e._go(k)); },1100); };
+document.getElementById('reset').onclick=()=>{ clearInterval(playing); els.forEach(e=>e._reset()); };
+</script>
+</body>
+</html>
