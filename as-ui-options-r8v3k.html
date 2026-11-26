@@ -678,6 +678,30 @@ table.bd-t.money td:not(:first-child){width:36%}
 .devbar .x{border:0;background:none;color:#aaa;text-decoration:underline}
 @media (max-width:1000px){.devbar{bottom:84px}}
 @media print{.devbar{display:none!important}}
+
+/* holidays to avoid */
+.hol{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.hol-h{margin:0 0 4px;font-size:15.5px;color:var(--ink);font-weight:500}
+.hol .help{margin:0 0 10px;font-size:14px;color:var(--muted)}
+.hol .tick{margin-bottom:6px}
+.hol-own{margin-top:10px}
+.hol-sub{margin:0 0 6px;font-size:14.5px;color:var(--ink);font-weight:500}
+.hol-sub small{font-weight:400;color:var(--muted)}
+#holList{list-style:none;margin:0 0 8px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+#holList:empty{display:none}
+#holList li{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--pink);background:var(--blush);color:var(--ink);border-radius:999px;padding:4px 6px 4px 12px;font-size:13.5px}
+#holList li b{color:var(--pink-deep);font-weight:600}
+#holList button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;min-width:24px;min-height:24px}
+#holList button:hover{color:var(--ink)}
+.hol-add{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;align-items:end}
+.hol-add .btn{justify-self:start;min-height:40px}
+.hol-add .f{margin:0}
+.hol-add .f span{font-size:13px}
+.hol-add em{font-style:normal;font-weight:400;color:var(--muted)}
+.hol-add .btn{white-space:nowrap}
+.hol-err{display:block;color:var(--bad);font-size:13px}
+
+:root[data-ui=boardroom] #holList li{border-radius:3px;border-color:#9C3064}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -852,6 +876,23 @@ body{padding-top:52px}
       <p style="margin:0 0 8px;font-size:15.5px;color:var(--ink);font-weight:500">Avoid starting in these months</p>
       <p class="help" style="margin:0 0 10px;font-size:14px;color:var(--muted)">Pre-set to peak trading (Christmas and Valentine's). Change them to fit your team.</p>
       <div class="months" id="months"></div>
+      <div class="hol">
+        <p class="hol-h">Holidays to avoid</p>
+        <p class="help">Suggested start dates never fall on a weekend, or on anything ticked here.</p>
+        <label class="tick"><input type="checkbox" id="holBank" checked><span><b>England bank holidays</b> <small id="holBankNext"></small></span></label>
+        <label class="tick"><input type="checkbox" id="holXmas" checked><span><b>Christmas shutdown</b> <small>24 to 31 December, when providers and most offices close.</small></span></label>
+        <div class="hol-own">
+          <p class="hol-sub">Your own dates <small>(stocktake, launches, peak weeks)</small></p>
+          <ul id="holList"></ul>
+          <div class="hol-add">
+            <label class="f"><span>From</span><input type="date" id="holFrom"></label>
+            <label class="f"><span>To <em>(optional)</em></span><input type="date" id="holTo"></label>
+            <label class="f hol-name"><span>Name <em>(optional)</em></span><input type="text" id="holName" placeholder="e.g. Stocktake" maxlength="40" autocomplete="off"></label>
+            <button type="button" class="btn sm ghost" id="holAddBtn">Add dates</button>
+          </div>
+          <small class="hol-err" id="holErr" role="alert"></small>
+        </div>
+      </div>
       <label class="tick" style="margin-top:16px"><input type="checkbox" id="showmil" checked><span>Show what changes <b>if the Milburn Review is adopted</b></span></label>
     </div>
   </section>
@@ -945,7 +986,7 @@ const QS = [
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ---------- state ---------- */
-const S = {answers:{}, busy:new Set([1,10,11])};
+const S = {answers:{}, busy:new Set([1,10,11]), hol:{bank:true, xmas:true, own:[]}};   // hol.own: [{from,to,name}] ISO strings
 const $ = id => document.getElementById(id);
 
 /* ---------- date utils (UTC, no timezone drift) ---------- */
@@ -966,11 +1007,19 @@ function earliestStart(dob){ // para 30.1: after the last Friday in June of the 
 /* England and Wales bank holidays, from https://www.gov.uk/bank-holidays.json (fetched 26 Nov 2026; GOV.UK publishes about 2 years ahead) */
 const BANK_HOLIDAYS_EW = {"2026-01-01": "New Year’s Day", "2026-04-03": "Good Friday", "2026-04-06": "Easter Monday", "2026-05-04": "Early May bank holiday", "2026-05-25": "Spring bank holiday", "2026-08-31": "Summer bank holiday", "2026-12-25": "Christmas Day", "2026-12-28": "Boxing Day", "2027-01-01": "New Year’s Day", "2027-03-26": "Good Friday", "2027-03-29": "Easter Monday", "2027-05-03": "Early May bank holiday", "2027-05-31": "Spring bank holiday", "2027-08-30": "Summer bank holiday", "2027-12-27": "Christmas Day", "2027-12-28": "Boxing Day", "2028-01-03": "New Year’s Day", "2028-04-14": "Good Friday", "2028-04-17": "Easter Monday", "2028-05-01": "Early May bank holiday", "2028-05-29": "Spring bank holiday", "2028-08-28": "Summer bank holiday", "2028-12-25": "Christmas Day", "2028-12-26": "Boxing Day"};
 const BH_LAST = Object.keys(BANK_HOLIDAYS_EW).sort().pop();
-const xmasShut = d => d.getUTCMonth()===11 && d.getUTCDate()>=24;   // Christmas Eve to New Year's Eve: providers and offices close
-const offDay = d => { const w=d.getUTCDay(); return w===0||w===6||!!BANK_HOLIDAYS_EW[iso(d)]||xmasShut(d); };
-const nextWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<14) x=addDays(x,1); return x; };
-const prevWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<14) x=addDays(x,-1); return x; };
-const offWhy = d => BANK_HOLIDAYS_EW[iso(d)] ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : xmasShut(d) ? `${fmt(d)} falls in the Christmas shutdown` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
+const xmasShut = d => S.hol.xmas && d.getUTCMonth()===11 && d.getUTCDate()>=24;   // Christmas Eve to New Year's Eve: providers and offices close
+const bankHol = d => S.hol.bank && BANK_HOLIDAYS_EW[iso(d)];
+const ownHol = d => { const k=iso(d); return S.hol.own.find(h=>k>=h.from&&k<=h.to); };
+const offDay = d => { const w=d.getUTCDay(); return w===0||w===6||!!bankHol(d)||xmasShut(d)||!!ownHol(d); };
+// what was skipped between two dates, named once each: "the Christmas shutdown, New Year's Day and Stocktake"
+function skippedTags(a,b){ const t=[]; for(let x=new Date(a); x<b; x=addDays(x,1)){ const h=ownHol(x), k=bankHol(x);
+    const tag = h ? (h.name||'your own dates') : xmasShut(x) ? 'the Christmas shutdown' : k ? k : null;
+    if(tag && !t.includes(tag)) t.push(tag); }
+  if(!t.length) return 'the weekend';
+  return t.length>1 ? t.slice(0,-1).join(', ')+' and '+t[t.length-1] : t[0]; }
+const nextWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<400) x=addDays(x,1); return x; };
+const prevWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<400) x=addDays(x,-1); return x; };
+const offWhy = d => bankHol(d) ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : xmasShut(d) ? `${fmt(d)} falls in the Christmas shutdown` : ownHol(d) ? `${fmt(d)} falls in ${ownHol(d).name||'dates you are avoiding'}` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
 const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -1074,6 +1123,22 @@ $('assumeAll').onclick=()=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no
 $('clearAll').onclick=()=>{ S.answers={}; S.assumed=false; syncQs(); render(); };
 $('months').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; const m=+b.dataset.m; S.busy.has(m)?S.busy.delete(m):S.busy.add(m); b.setAttribute('aria-pressed',String(S.busy.has(m))); render();});
 ['name','dob','care','newhire','std','foundation','start','hours','levyok','showmil'].forEach(id=>$(id).addEventListener('input',render));
+/* ---------- holidays to avoid ---------- */
+(function(){
+  const next=Object.keys(BANK_HOLIDAYS_EW).filter(k=>k>=iso(utcToday())).slice(0,3).map(k=>fmt(parse(k)));
+  $('holBankNext').textContent = next.length ? `Next: ${next.join(', ')}. From GOV.UK, listed to ${BH_LAST.slice(0,4)}.` : 'From GOV.UK.';
+  $('holBank').addEventListener('change',()=>{ S.hol.bank=$('holBank').checked; render(); });
+  $('holXmas').addEventListener('change',()=>{ S.hol.xmas=$('holXmas').checked; render(); });
+  const draw=()=>{ $('holList').innerHTML=S.hol.own.map((h,i)=>`<li><span>${h.name?`<b>${esc(h.name)}</b> `:''}${fmt(parse(h.from))}${h.to!==h.from?' to '+fmt(parse(h.to)):''}</span><button type="button" data-i="${i}" aria-label="Remove ${esc(h.name||'these dates')}">×</button></li>`).join(''); };
+  $('holAddBtn').onclick=()=>{
+    const f=$('holFrom').value, t=$('holTo').value||f, n=$('holName').value.replace(/[<>&"]/g,'').trim(); $('holErr').textContent='';
+    if(!f){ $('holErr').textContent='Choose a From date.'; $('holFrom').focus(); return; }
+    if(t<f){ $('holErr').textContent='The To date is before the From date.'; $('holTo').focus(); return; }
+    if((parse(t)-parse(f))/864e5>92){ $('holErr').textContent='Keep each range to 3 months or less. Use the months above for longer periods.'; return; }
+    S.hol.own.push({from:f,to:t,name:n}); S.hol.own.sort((a,b)=>a.from<b.from?-1:1);
+    $('holFrom').value=$('holTo').value=$('holName').value=''; draw(); render(); };
+  $('holList').addEventListener('click',e=>{ const b=e.target.closest('button[data-i]'); if(!b) return; S.hol.own.splice(+b.dataset.i,1); draw(); render(); });
+})();
 $('reset').onclick=()=>{ if(!confirm('Clear everything and start again?')) return; location.reload(); };
 
 function findStd(v){ const m=/(ST\d{4})/i.exec(v||''); return m ? STDS.find(s=>s.r===m[1].toUpperCase()) : null; }
@@ -1196,7 +1261,7 @@ function compute(){
   out.rec = out.busyClash ? from : rec;
   // a working-day shift must not push the date past a funding cut-off: step back instead
   if(cap && out.rec>cap){ const back=prevWorkingDay(cap); if(back>=rawFrom) out.rec=back; }
-  { const raw = +out.rec===+from ? rawFrom : recRaw; out.skipped = +raw!==+out.rec && offDay(raw) ? offWhy(raw) : null; }
+  { const raw = +out.rec===+from ? rawFrom : recRaw; out.skipped = raw<out.rec && offDay(raw) ? skippedTags(raw,out.rec) : null; }
   out.bhBeyond = iso(out.rec) > BH_LAST;
   // why the recommended date (shown to the manager)
   { const why=[]; const lead=addDays(today,R.leadDays);
@@ -1204,7 +1269,7 @@ function compute(){
     if(+out.rec>+from && !out.busyClash) why.push(`avoids your busy months (${[...S.busy].sort((a,b)=>a-b).map(i=>MONTHS[i]).join(', ')})`);
     if(out.until) why.push(`comes before the ${out.untilWhy.what.toLowerCase()} on ${fmt(out.untilWhy.date)}`);
     if(mil && out.milAhead && +out.rec<=+out.milAhead.last) why.push('is before the Milburn age-25 cut-off');
-    why.push(out.skipped ? `is a working day (${out.skipped})` : 'is a working day, not a weekend or bank holiday');
+    why.push(out.skipped ? `is the first working day after ${out.skipped}` : 'is a working day, not a weekend or a holiday you are avoiding');
     out.recWhy=why; }
   out.blocked=blocked;
   out.missedByPlan = out.cliffs.filter(k=>live(k) && start>k.last && from<=k.last);
@@ -1446,6 +1511,14 @@ function untilSub(o){ const k=o.untilWhy; if(!k) return 'No age cut-off for fund
   if(/co-investment/.test(k.what)) return `Then Ann Summers pays 25%${k.cost?' ('+money(k.cost)+')':''}. Still funded`;
   return esc(k.what); }
 
+function holAvoidText(){
+  const a=['a weekend'];
+  if(S.hol.bank) a.push(`an England bank holiday (GOV.UK list, published to ${BH_LAST.slice(0,4)})`);
+  if(S.hol.xmas) a.push('the Christmas shutdown (24 to 31 December)');
+  S.hol.own.forEach(h=>a.push(`${h.name?esc(h.name)+' (':''}${fmt(parse(h.from))}${h.to!==h.from?' to '+fmt(parse(h.to)):''}${h.name?')':''}`));
+  return a.length>1 ? a.slice(0,-1).join(', ')+' or '+a[a.length-1] : a[0];
+}
+
 function renderRole(o){
   const card=$('roleCard'), J=S.jd, std=o.std;
   if(!J || !std || !o.dob || o.badDob){ card.classList.add('hide'); return; }
@@ -1617,7 +1690,7 @@ function buildReport(o){
     <ol class="bd-method">
       <li><b>Eligibility</b> follows the Apprenticeship funding rules 2026 to 2027 (version 3): age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</li>
       <li><b>Standards</b> must be approved for delivery and eligible for funding (para 68). Sixteen standards lost funding for all new starts from 1 September 2026 (GOV.UK Growth and Skills Levy factsheet). Statuses and funding bands come from the Skills England apprenticeships export.</li>
-      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The chosen start date also avoids the months marked as busy, and is always a working day: never a weekend, an England bank holiday or the Christmas shutdown (24 to 31 December) (bank holidays from the GOV.UK list, published to ${BH_LAST.slice(0,4)}).</li>
+      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The chosen start date also avoids the months marked as busy, and is always a working day: never ${holAvoidText()}.</li>
       <li><b>Costs</b> use the standard's funding band. The Milburn Review (November 2026) is a proposal, not law; the 25% cut for over-25s is assumed to fall on the employer.</li>
       <li>This report is guidance, not a funding decision. The training provider confirms eligibility at sign-up.</li>
     </ol>`,false));
