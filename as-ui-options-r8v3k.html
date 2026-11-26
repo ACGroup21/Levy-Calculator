@@ -895,7 +895,8 @@ table.tvf .rm:hover{color:var(--bad)}
 @media (prefers-reduced-motion:reduce){.journey .jind,:root .journey li + li::before,:root .journey a{transition:none}}
 
 /* narrower screens: tighter gaps so Start again stays on screen at the far right */
-@media (max-width:1280px){:root .journey li + li::before{margin:0 6px;min-width:12px}:root .journey ol{padding-left:16px;padding-right:16px}}
+@media (max-width:1280px){:root .journey li + li::before{margin:0 6px;min-width:12px}}
+@media (max-width:1000px){:root .journey ol{padding-left:16px;padding-right:16px}}   /* same side space as main at every width, so the bar lines up with the app */
 @media (max-width:1100px){:root .journey li.opt .s{display:none}:root .journey a{padding-left:2px;padding-right:2px}}
 /* LED: the selected step's number glows like a lit LED (bar + that section's heading) */
 @keyframes led{0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 0 4px 1px var(--led),0 0 12px 3px var(--led-soft)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.75) inset,0 0 7px 2px var(--led),0 0 20px 7px var(--led-soft)}}
@@ -1054,6 +1055,13 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
 /* bottom row under Who pays: every button styled like Preview report, back at their original sizes (15.5px semi-bold) */
 #actions .btn,:root[data-ui=boardroom] #actions .btn{font-weight:600!important;font-size:15.5px!important;background:#fff;border:1px solid #000;color:#000}
+
+/* status strip: pinned to the top of the results column whenever the decision card has scrolled out of view */
+.vstrip{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:10px;width:100%;height:44px;margin:0 0 -44px;padding:0 14px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-left:5px solid var(--vs,#9C3064);border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.08);font:inherit;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
+.vstrip svg{width:22px;height:22px;flex:none;overflow:visible}
+.vstrip small{font-weight:400;color:var(--muted);margin-left:auto;white-space:nowrap}
+.vstrip.hide{display:none}
+@media print{.vstrip{display:none!important}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -1257,6 +1265,7 @@ body{padding-top:52px}
 
   <!-- ================= RESULTS ================= -->
   <section class="results" aria-live="polite" aria-label="Result">
+    <button type="button" id="vstrip" class="vstrip hide" aria-label="Show the eligibility decision"></button>
     <div id="rulesWatch" class="rwatch hide" role="note"></div>
     <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="seal s-empty" aria-hidden="true"></div><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
@@ -1742,6 +1751,9 @@ function render(){
   const prevSeal=V.querySelector('.seal[data-k]');
   V.innerHTML=sealSvg({yes:'ok',check:'warn',no:'bad',notyet:'notyet'}[o.verdict])+`<div class="k">Funding eligibility</div><h2>${map[1]}</h2><p>${map[2]}</p>`;
   { const ns=V.querySelector('.seal'); if(prevSeal&&ns&&prevSeal.dataset.k===ns.dataset.k) ns.replaceWith(prevSeal); }
+  { const kind={yes:'ok',check:'warn',no:'bad',notyet:'notyet'}[o.verdict], strip=$('vstrip');
+    strip.style.setProperty('--vs',{ok:'#1F7A4D',warn:'#D98E04',bad:'#C62828',notyet:'#9C3064'}[kind]);
+    strip.innerHTML=`${sealStatic(kind)}<span>${map[1]}${o.name?' · '+esc(o.name):''}</span><small>Show decision ↑</small>`; setTimeout(updateStrip,0); }
 
   const ic={bad:['i-bad','✕'],warn:['i-warn','!'],ok:['i-ok','✓'],info:['i-info','i']};
   const order={bad:0,warn:1,ok:2,info:3};
@@ -2169,16 +2181,28 @@ function selectReports(){ document.querySelectorAll('.inputs .card.sel').forEach
 document.querySelector('.inputs').addEventListener('focusin',e=>selectCard(e.target.closest('.card')));
 document.querySelector('.inputs').addEventListener('pointerdown',e=>{ const c=e.target.closest('.card'); if(c) selectCard(c); });
 $('journey').addEventListener('click',e=>{ const a=e.target.closest('a[href^="#c-"]'); if(a) selectCard(document.querySelector(a.getAttribute('href'))); });
-// the result pill: only move when the result card is off screen, and then glide rather than jump
-document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.preventDefault();
-  const v=$('verdict'), r=v.getBoundingClientRect(), barB=document.querySelector('.journey').getBoundingClientRect().bottom;
-  if(r.top>=barB-4 && r.top<innerHeight*0.6) return;   // already in view: stay put
-  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // scrollIntoView does nothing for a card inside the sticky results column, so scroll the page by the distance instead
-  const from=scrollY, dist=r.top-barB-12; if(reduce){ scrollTo(0,from+dist); return; }
-  // a frame-by-frame glide: the browser's own smooth scroll was being cancelled by the click here
-  const t0=performance.now(), dur=420; (function step(t){ const k=Math.min(1,(t-t0)/dur), ease=1-Math.pow(1-k,3); scrollTo(0,from+dist*ease); if(k<1) requestAnimationFrame(step); })(t0);
-  setTimeout(()=>{ if(Math.abs(scrollY-(from+dist))>2) scrollTo(0,from+dist); },dur+150); });   // lands even if frames are throttled
+// the result pill (and the status strip): bring the decision into view by scrolling ONLY the results column.
+// On phones the results sit below the form, so there the page itself has to move.
+function glide(get,set,to){ const from=get(); if(Math.abs(to-from)<2) return; const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ set(to); return; } const t0=performance.now(), dur=380;
+  (function step(t){ const k=Math.min(1,(t-t0)/dur); set(from+(to-from)*(1-Math.pow(1-k,3))); if(k<1) requestAnimationFrame(step); })(t0);
+  setTimeout(()=>{ if(Math.abs(get()-to)>2) set(to); },dur+150); }   // lands even if frames are throttled
+function resultsBox(){ const r=document.querySelector('section.results'); return r&&getComputedStyle(r).overflowY!=='visible'&&r.scrollHeight>r.clientHeight+1?r:null; }
+function showDecision(){
+  const v=$('verdict'), box=resultsBox();
+  if(box){ const target=Math.max(0,box.scrollTop+(v.getBoundingClientRect().top-box.getBoundingClientRect().top)); glide(()=>box.scrollTop,x=>{box.scrollTop=x;},target); setTimeout(updateStrip,560); return; }
+  const barB=document.querySelector('.journey').getBoundingClientRect().bottom, r=v.getBoundingClientRect();
+  if(r.top>=barB-4 && r.top<innerHeight*0.6) return;   // already in view
+  glide(()=>scrollY,x=>scrollTo(0,x),scrollY+r.top-barB-12);
+}
+document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.preventDefault(); showDecision(); });
+$('vstrip').addEventListener('click',showDecision);
+// show the strip only while the decision card is out of view inside the results column
+function updateStrip(){ const strip=$('vstrip'), box=resultsBox(), v=$('verdict');
+  if(!box||!lastO||!lastO.dob||lastO.badDob){ strip.classList.add('hide'); return; }
+  const br=box.getBoundingClientRect(), vr=v.getBoundingClientRect(); strip.classList.toggle('hide', vr.bottom>br.top+40); }
+document.querySelector('section.results').addEventListener('scroll',updateStrip,{passive:true});
+window.addEventListener('resize',updateStrip);
 // any change in the timing card counts as completing it
 ['click','change'].forEach(ev=>$('c-timing').addEventListener(ev,e=>{ if(!S.timingTouched && e.target.closest('button,input')){ S.timingTouched=true; render(); } }));
 
