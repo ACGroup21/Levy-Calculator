@@ -2113,6 +2113,7 @@ function buildReport(o){
     if(std&&LEAD_DEFUNDED.has(std.r)) rec.push('Use the funded route for new managers: <b>Business administrator (Level 3)</b> (page 2).');
   }
   const moneyRows=o.band?[['Funding band',money(o.band)],['Ann Summers pays today',money(o.c.cash)]].concat(o.mil?[['If Milburn adopted',money(o.m.cash)]]:[]).concat(o.c.inc?[['Employer payments',money(o.c.inc)]]:[]):[['Costs','Pick an apprenticeship']];
+  if(o.c&&o.c.ni&&o.c.ni.under) moneyRows.push(['NI saving (payroll)', o.c.ni.save>0?`${money(o.c.ni.save)} a year`:(o.c.ni.pay===null?'Pay not entered':'None')]);   // under-25 employer NI relief; not part of the training cost
   const summary=({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far; the apprenticeship still needs choosing.`:`${who} looks eligible, with items to confirm.`,no:`As things stand, ${who} can't be funded.`,notyet:`${who} is too young to start yet.`})[o.verdict]
     +(o.verdict==='yes'||o.verdict==='check'?(o.rec&&!o.blocked?` The earliest start date is ${fmt(o.rec)}${o.band?(o.c.cash?`, with ${money(o.c.cash)} from Ann Summers`:', paid in full from the levy'):''}.`:''):'')
     +` ${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} eligibility checks answered; the provider confirms them at sign-up.`;
