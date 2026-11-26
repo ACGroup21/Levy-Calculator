@@ -360,6 +360,7 @@ table.money td.mil{background:var(--mil-bg)}
 table.money tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 .note{font-size:14px;color:var(--muted);margin:10px 0 0}
 .badge{display:inline-block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;background:var(--pink);color:#fff;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
+:root[data-ui=boardroom][data-theme=dark] .badge{color:#000}   /* light pink badge in dark mode: dark text */
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .btn{border:1px solid var(--btn-bg);background:var(--btn-bg);color:var(--btn-fg);border-radius:999px;padding:9px 20px;cursor:pointer;font-weight:500;letter-spacing:.04em}
 .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--field-line)}
@@ -483,6 +484,8 @@ footer a{color:var(--pink-deep)}
 #reportView .rv-bar span{color:#bbb;margin-right:auto}
 #reportView .rv-bar .btn.ghost{background:transparent;color:#fff;border-color:#666}
 .rpw{margin:0 auto 22px;position:relative}
+/* the report page is always white: it uses the light-mode colours whatever the app theme */
+:root[data-theme=dark] .rp{--plum:#003B80;--ink:#000;--text:#3B3935;--muted:#6E6A64;--line:#E4DCD9;--pink-deep:#BA5B07;--pink-soft:#F8A152;--blush:#F6E9E6;--bg:#F9F9F9;--card:#FFFFFF;--field:#FFFFFF;--field-line:#CFC6C2;--btn-bg:#000;--btn-fg:#fff;--seg-on-bg:#000;--seg-on-fg:#fff;--ok:#1F7A4D;--ok-bg:#E8F4EC;--ok-line:#B9DCC6;--warn:#A35F00;--warn-bg:#FBF1E1;--warn-line:#EBCF9F;--bad:#D62222;--bad-bg:#FBE9E9;--bad-line:#EDB8B8;--empty-line:#EBD3CD;--info:#8B8580;--ico-fg:#fff;--mil-bg:#F3F7FF;--yr:#A39D98;color-scheme:light}
 .rp{position:relative;width:1440px;height:810px;overflow:hidden;transform-origin:0 0;font-family:"Open Sans",Arial,sans-serif;color:#000;background:#fff;box-shadow:0 20px 60px rgba(0,0,0,.5)}
 .rp.dark{background:#000;color:#fff}
 .rp h1,.rp h2,.rp h3,.rp .mont{font-family:Montserrat,Arial,sans-serif;font-weight:800;letter-spacing:0;margin:0}
@@ -500,7 +503,7 @@ footer a{color:var(--pink-deep)}
 .rp .num b.n{display:block;font-weight:700}
 .rp .kv{font-size:18px;line-height:1.5;margin:0 0 8px}
 .rp .kv b{font-weight:700}
-.rp .foot{position:absolute;left:68px;right:68px;bottom:28px;display:flex;justify-content:space-between;font-size:13px;color:#777}
+.rp .foot{position:absolute;left:68px;right:68px;bottom:28px;display:flex;justify-content:space-between;font-size:13px;color:#707070}
 .rp.dark .foot{color:#999}
 .rp .deco{position:absolute;pointer-events:none}
 .rp .tag{display:inline-block;position:relative;z-index:0;font-size:19px}
@@ -597,7 +600,7 @@ table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em
 .bd-full{position:absolute;left:70px;right:70px;top:232px}
 .bd-two{position:absolute;left:70px;right:70px;top:420px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
 table.bd-t{width:100%;border-collapse:collapse;font-size:15px}
-table.bd-t th{text-align:left;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#777;padding:7px 10px;border-bottom:2px solid #1d1d1d}
+table.bd-t th{text-align:left;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#707070;padding:7px 10px;border-bottom:2px solid #1d1d1d}
 table.bd-t td{padding:7px 10px;border-bottom:1px solid #e5e5e5;vertical-align:top}
 table.bd-t.crit td{padding:6px 10px}
 table.bd-t.money td:first-child{font-weight:600;width:28%}
@@ -617,8 +620,8 @@ table.bd-t.money td:not(:first-child){width:36%}
 .bd-gaps b{font-family:"JetBrains Mono",ui-monospace,monospace;color:#003B80}
 .bd-method{position:absolute;left:70px;right:70px;top:150px;margin:0;padding-left:28px;font-size:17px;line-height:1.6;color:#333}
 .bd-method li{margin-bottom:14px}
-.bd-sign{position:absolute;left:70px;right:70px;bottom:34px;display:flex;justify-content:space-between;font-size:13px;color:#777;border-top:1px solid #ddd;padding-top:12px}
-.bd-line{display:inline-block;width:220px;border-bottom:1px solid #777;vertical-align:-2px}
+.bd-sign{position:absolute;left:70px;right:70px;bottom:34px;display:flex;justify-content:space-between;font-size:13px;color:#707070;border-top:1px solid #ddd;padding-top:12px}
+.bd-line{display:inline-block;width:220px;border-bottom:1px solid #707070;vertical-align:-2px}
 
 /* =================== UI STYLE: Boardroom (DEFAULT since 26 Nov 2026; matches the report) =================== */
 :root[data-ui=boardroom]{--pink:#003B80;--pink-deep:#003B80;--blush:#F0F3F9;--bg:#FFFFFF;--hl-soft:transparent}
@@ -744,7 +747,7 @@ table.bd-t.money td:not(:first-child){width:36%}
 .stem li.gap .e{padding:2px 0 12px}
 .stem li.gap .e span{font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 9px}
 :root[data-ui=boardroom] .stem li.chosen i{background:#003B80;border-color:#003B80}
-:root[data-ui=boardroom][data-theme=dark] .stem li.chosen i{background:#70B5FF;border-color:#70B5FF}
+:root[data-ui=boardroom][data-theme=dark] .stem:not(.bd-stem) li.chosen i{background:#70B5FF;border-color:#70B5FF}   /* not in the report: it is always white */
 @media print{#tl{display:none!important}}
 
 /* report stem: fixed colours (the report is always white), one line per date */
@@ -1035,7 +1038,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 /* report sign-off: signature, printed name, date */
 .bd-sig{display:flex;align-items:flex-end;gap:18px;white-space:nowrap}
 .bd-sig .f{display:inline-flex;align-items:flex-end;gap:6px}
-.bd-sig .v{display:inline-block;min-width:150px;border-bottom:1px solid #777;color:#1d1d1d;font-weight:600;padding:0 2px;position:relative;height:18px;line-height:18px}
+.bd-sig .v{display:inline-block;min-width:150px;border-bottom:1px solid #707070;color:#1d1d1d;font-weight:600;padding:0 2px;position:relative;height:18px;line-height:18px}
 .bd-sig .v.sig{min-width:170px}
 .bd-sig .v.date{min-width:110px}
 .bd-sig .v img{position:absolute;left:0;bottom:1px;height:44px;max-width:200px;object-fit:contain}
