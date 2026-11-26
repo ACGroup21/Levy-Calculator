@@ -645,6 +645,8 @@ table.bd-t.money td:not(:first-child){width:36%}
 :root[data-ui=boardroom] section.results h3{display:block;font-size:19px;padding-bottom:8px;border-bottom:2px solid var(--ink);margin-bottom:14px}
 /* flat, square cards */
 :root[data-ui=boardroom] .card{border-radius:2px;border-color:var(--line);box-shadow:none}
+/* dark mode: boxes outlined in the main brand colour so they don't fade into the page */
+:root[data-theme=dark] .card,:root[data-theme=dark][data-ui=boardroom] .card{border-color:color-mix(in srgb,var(--plum) 60%,transparent)}
 :root[data-ui=boardroom] input[type=text],:root[data-ui=boardroom] input[type=date],:root[data-ui=boardroom] input[type=number],:root[data-ui=boardroom] .jdm textarea{border-radius:2px}
 :root[data-ui=boardroom] .jdm,:root[data-ui=boardroom] .route,:root[data-ui=boardroom] details.fold,:root[data-ui=boardroom] .jdr li{border-radius:2px}
 /* verdict: white card with a coloured edge and a status badge feel */
@@ -1179,7 +1181,9 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       </div>
       <label class="f"><span>Annual pay £ <em style="font-weight:400;color:var(--muted)">(optional)</em></span><input type="number" id="pay" min="0" max="200000" step="100" inputmode="numeric" placeholder="e.g. 24000">
         <small>Only used to work out the National Insurance saving.</small></label>
-      <label class="tick"><input type="checkbox" id="levyok" checked><span>Our <b>levy balance</b> covers this apprenticeship</span></label>
+      <label class="tick" id="levyokL"><input type="checkbox" id="levyok" checked><span>Our <b>levy balance</b> covers this apprenticeship</span></label>
+      <label class="f" style="margin-top:10px"><span>Levy balance today £ <em style="font-weight:400;color:var(--muted)">(optional, more exact)</em></span><input type="number" id="levybal" min="0" max="100000000" step="100" inputmode="numeric" placeholder="e.g. 18000">
+        <small id="levyBalNote">From your apprenticeship service account. Shows exactly how much the levy covers and what's left to pay. Leave blank to use the tick above.</small></label>
     </div>
 
     <div class="card" id="c-checks">
@@ -1514,7 +1518,9 @@ $('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');
 $('assumeAll').onclick=()=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no':'yes'; }); S.assumed=true; syncQs(); render(); };
 $('clearAll').onclick=()=>{ S.answers={}; S.assumed=false; syncQs(); render(); };
 $('months').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; const m=+b.dataset.m; S.busy.has(m)?S.busy.delete(m):S.busy.add(m); b.setAttribute('aria-pressed',String(S.busy.has(m))); render();});
-['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','showmil'].forEach(id=>$(id).addEventListener('input',render));
+['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','levybal','showmil'].forEach(id=>$(id).addEventListener('input',render));
+function syncLevyTick(){ const on=$('levybal').value.trim()!==''; $('levyokL').style.opacity=on?'.45':''; $('levyokL').title=on?'Using the balance you typed below':''; }
+$('levybal').addEventListener('input',syncLevyTick);
 /* ---------- holidays to avoid ---------- */
 (function(){
   const next=Object.keys(BANK_HOLIDAYS_EW).filter(k=>k>=iso(utcToday())).slice(0,3).map(k=>fmt(parse(k)));
@@ -1542,11 +1548,13 @@ function compute(){
   const dob=parse($('dob').value);
   const std=findStd($('std').value);
   const fdn=$('foundation').checked;
-  const care=$('care').checked, newHire=$('newhire').checked, levyOk=$('levyok').checked, mil=$('showmil').checked;
+  const care=$('care').checked, newHire=$('newhire').checked, levyTick=$('levyok').checked, mil=$('showmil').checked;
+  const balRaw=$('levybal').value.trim(), levyBal=balRaw===''||!(parseFloat(balRaw)>=0)?null:parseFloat(balRaw);   // typed balance overrides the tick
+  let levyOk=levyTick;
   const hoursRaw=parseFloat($('hours').value), hoursAssumed=!(hoursRaw>0), hours=hoursAssumed?37.5:hoursRaw;
   const start=parse($('start').value) || addMonths(today,2);
   const name=$('name').value.trim();
-  const out={dob,std,fdn,care,newHire,levyOk,mil,hours,hoursAssumed,start,name,today,nostd:!std&&!fdn,items:[],cliffs:[]};
+  const out={dob,std,fdn,care,newHire,levyOk,levyBal,mil,hours,hoursAssumed,start,name,today,nostd:!std&&!fdn,items:[],cliffs:[]};
   if(!dob) return out;
   if(dob>today || ageOn(dob,today)>90){ out.badDob=true; return out; }
 
@@ -1607,10 +1615,16 @@ function compute(){
   // --- money
   const unfunded=out.items.some(i=>i.unfunded);
   const c={rows:[]}, m={rows:[]};
+  // Levy balance is used first; what it doesn't cover is co-invested (government 75%, employer 25%), or fully funded under 25.
+  // A typed balance is compared with the full price; payments are monthly, so levy arriving later also helps.
+  if(band && levyBal!==null){ levyOk = levyBal>=band; out.levyOk=levyOk; }
+  const levyCover = band ? (levyBal!==null ? Math.min(levyBal,band) : (levyTick?band:0)) : 0, levyShort = band ? band-levyCover : 0;
+  out.levyCover=levyCover; out.levyShort=levyShort;
   if(band){
     if(unfunded){ c.cash=band; c.who='Not fundable. Acme Retail pays in full.'; }
-    else if(levyOk){ c.cash=0; c.who='Paid from the levy'; }
-    else if(age<R.fullFundMax){ c.cash=0; c.who='Government pays 100% (under 25)'; }
+    else if(levyShort<=0){ c.cash=0; c.who=levyBal!==null?`Paid from the levy (${money(band)} of your ${money(levyBal)} balance)`:'Paid from the levy'; }
+    else if(age<R.fullFundMax){ c.cash=0; c.who=levyBal!==null&&levyCover>0?`Levy pays ${money(levyCover)}; government pays the other ${money(levyShort)} (under 25)`:'Government pays 100% (under 25)'; }
+    else if(levyBal!==null){ c.cash=levyShort*R.coInvest; c.who=levyCover>0?`Levy pays ${money(levyCover)}; Acme Retail pays 25% of the ${money(levyShort)} left (${money(c.cash)})`:`Acme Retail pays 25% (${money(c.cash)}); no levy balance to use`; }
     else { c.cash=band*R.coInvest; c.who=`Acme Retail pays 25% of the shortfall, up to ${money(band*R.coInvest)}`; }
   }
   const inc1000 = !unfunded && age>=15 && (age<R.inc1000Max || (care && age<R.inc1000MaxCare));
@@ -1618,7 +1632,7 @@ function compute(){
   c.incTxt = [inc1000?'£1,000 employer payment (aged 16–18, or 19–24 with an EHC plan or care experience)':'', fdn&&!unfunded?'£1,000 foundation employer payment (169)':''].filter(Boolean).join(' + ') || 'None at this age';
   c.hireTxt='Not available to levy payers (133)';
   if(!unfunded && age>=15) out.cliffs.push({date:care?bd(R.inc1000MaxCare):bd(R.inc1000Max),what:'£1,000 employer payment ends',cost:1000,scheme:'cur'});
-  if(!levyOk && band) out.cliffs.push({date:bd(R.fullFundMax),what:'25% co-investment applies',cost:band*R.coInvest,scheme:'cur'});
+  if(levyShort>0 && band) out.cliffs.push({date:bd(R.fullFundMax),what:'25% co-investment applies',cost:levyShort*R.coInvest,scheme:'cur'});
 
   // Milburn (proposed)
   if(band){
@@ -1675,7 +1689,7 @@ function compute(){
 }
 
 /* ---------- render ---------- */
-function render(){
+function render(){ syncLevyTick();
   { const c=findStd($('std').value); if(!c||c.r!==MGR_ROUTE) S.mgrRoute=false; }
   let o=compute(); lastO=o;
   { const cur=findStd($('std').value); const b=cur&&fundBlock(cur);
@@ -1746,7 +1760,7 @@ function render(){
     else if(o.start<o.from && o.start>=o.earliest) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up, run the skills scan and approve the commitment.`]);
     else if(!o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
     if(o.untilWhy) L.push(['warn',`<b>Start by ${fmt(o.until)}.</b> On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the ${o.untilWhy.what.toLowerCase()}${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.`]);
-    else L.push(['ok','No age deadline under current rules. Use levy funds before they expire (12 months after they enter the account).']);
+    else L.push(['ok','No age deadline under current rules. Use levy funds before they expire: 12 months after they arrive (24 months for funds already in the account before August 2026).']);
     if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
     if(o.busyClash) L.push(['warn','Every month before the deadline is marked as one to avoid, so the earliest start date ignores those preferences.']);
     if(o.passed.length) L.push(['info',`Too soon to catch: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','').toLowerCase()} on ${fmt(k.date)}`).join('; ')}, because sign-up needs about 4 weeks.`]);
@@ -1980,7 +1994,7 @@ function renderPrintHead(o){
   const rows=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],
     ['Apprenticeship',std?`${esc(std.n)} (${std.r}), Level ${std.l}, ${std.d||'?'} months, band ${std.f?money(std.f):'n/a'}`:(o.fdn?'Foundation apprenticeship':'Not chosen yet')],
     ['Planned start',`${fmt(o.start)}${o.hoursAssumed?' · 37.5 hours a week (assumed)':' · '+o.hours+' hours a week'}`],
-    ['Circumstances',[o.care?'EHC plan or care-experienced':'',o.newHire?'New hire':'Existing employee',o.levyOk?'Levy balance covers it':'Levy balance does not cover it'].filter(Boolean).join(' · ')],
+    ['Circumstances',[o.care?'EHC plan or care-experienced':'',o.newHire?'New hire':'Existing employee',o.levyBal!==null?(o.band?`Levy balance ${money(o.levyBal)}${o.levyShort>0?` (${money(o.levyShort)} short)`:' (covers it)'}`:`Levy balance ${money(o.levyBal)}`):(o.levyOk?'Levy balance covers it':'Levy balance does not cover it')].filter(Boolean).join(' · ')],
     ['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assume-all-eligible shortcut used)':''}`]];
   if(S.jd&&std){ const c=JDM.coverage(std.r,S.jd.text); if(c&&!c.none) rows.push(['Role match',`“${esc(S.jd.title||'Job description')}”: ${c.covered} of ${c.total} skills evidenced (${c.score}%)${c.title?', job title matches':''}`]); }
   P.innerHTML=`<div class="ph-top">${logo?logo.outerHTML:''}<h1>Apprentice eligibility report</h1><span class="ph-date">Checked ${fmt(o.today)}</span></div>
@@ -2058,7 +2072,7 @@ function buildReport(o){
     else if(o.until&&o.start>o.until) rec.push(`Starting by <b>${fmt(o.until)}</b> would fix this.`);
     if(std&&LEAD_DEFUNDED.has(std.r)) rec.push('Use the funded route for new managers: <b>Business administrator (Level 3)</b> (page 2).');
   }
-  const moneyRows=o.band?[['Funding band',money(o.band)],['Acme Retail pays today',money(o.c.cash)]].concat(o.mil?[['If Milburn adopted',money(o.m.cash)]]:[]).concat(o.c.inc?[['Employer payments',money(o.c.inc)]]:[]):[['Costs','Pick an apprenticeship']];
+  const moneyRows=o.band?[['Funding band',money(o.band)]].concat(o.levyBal!==null?[['Levy pays',money(o.levyCover)]]:[]).concat([['Acme Retail pays today',money(o.c.cash)]]).concat(o.mil?[['If Milburn adopted',money(o.m.cash)]]:[]).concat(o.c.inc?[['Employer payments',money(o.c.inc)]]:[]):[['Costs','Pick an apprenticeship']];
   if(o.c&&o.c.ni&&o.c.ni.under) moneyRows.push(['NI saving (payroll)', o.c.ni.save>0?`${money(o.c.ni.save)} a year`:(o.c.ni.pay===null?'Pay not entered':'None')]);   // under-25 employer NI relief; not part of the training cost
   const summary=({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far; the apprenticeship still needs choosing.`:`${who} looks eligible, with items to confirm.`,no:`As things stand, ${who} can't be funded.`,notyet:`${who} is too young to start yet.`})[o.verdict]
     +(o.verdict==='yes'||o.verdict==='check'?(o.rec&&!o.blocked?` The earliest start date is ${fmt(o.rec)}${o.band?(o.c.cash?`, with ${money(o.c.cash)} from Acme Retail`:', paid in full from the levy'):''}.`:''):'')
@@ -2076,7 +2090,8 @@ function buildReport(o){
   { const chosen=std&&std.r===MGR_ROUTE&&S.mgrRoute, leadStd=std&&LEAD_DEFUNDED.has(std.r)?std:null, leadJd=!!(S.jd&&MGR_RX.test(S.jd.title||''));
     const ba=STDS.find(x=>x.r===MGR_ROUTE);
     if(ba&&!fundBlock(ba)&&(chosen||leadStd||leadJd)){
-      const baWho=o.levyOk?'Paid from the levy':(o.age<R.fullFundMax?'Government pays 100% (under 25)':`Acme Retail pays 25% (${money(ba.f*R.coInvest)})`);
+      const baShort=o.levyBal!==null?Math.max(0,ba.f-o.levyBal):(o.levyOk?0:ba.f);
+      const baWho=baShort<=0?'Paid from the levy':(o.age<R.fullFundMax?'Government pays 100% (under 25)':`Acme Retail pays 25%${baShort<ba.f?' of the '+money(baShort)+' the levy doesn\'t cover':''} (${money(baShort*R.coInvest)})`);
       const opts=[]; if(leadStd) opts.push([`${esc(leadStd.n)} (Level ${leadStd.l})`,rag('r'),'Not funded for new starts since 1 Sept 2026',leadStd.f?money(leadStd.f):'Full price']);
       opts.push(['Business administrator (Level 3)',rag('g'),`Funded · band ${money(ba.f)}`,esc(baWho)]);
       pages.push(page('Option appraisal · Funded route for new managers','Funded route for new managers',`
@@ -2089,7 +2104,7 @@ function buildReport(o){
   // ---------- 3. key dates ----------
   const sr=stemRows(o,true);
   pages.push(page('Timeline · Key dates','Key dates and deadlines',`
-    <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>. <b>${untilSub(o)}.</b> On ${fmt(o.untilWhy.date)} the ${esc(o.untilWhy.what.toLowerCase())}.`:'<b>No age cut-off for funding.</b> There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
+    <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>. <b>${untilSub(o)}.</b> On ${fmt(o.untilWhy.date)} the ${esc(o.untilWhy.what.toLowerCase())}.`:'<b>No age cut-off for funding.</b> There is no age deadline under current rules; use levy funds before they expire: 12 months after they arrive (24 months for funds already in the account before August 2026).'}</p>
     <div class="bd-full"><ol class="stem bd-stem${sr.length>11?' dense':''}" aria-label="Key dates">${stemHtml(sr)}</ol></div>`,false));
 
   // ---------- 4. who pays ----------
@@ -2300,7 +2315,7 @@ window.addEventListener('load',render); window.addEventListener('pageshow',rende
 /* dev only: fill a typical eligible case and jump to the result */
 function devFill(){
   const t=utcToday(); $('name').value='Jordan'; $('dob').value=iso(addMonths(addYears(t,-19),-3));
-  $('care').checked=false; $('newhire').checked=true; $('foundation').checked=false; $('levyok').checked=true;
+  $('care').checked=false; $('newhire').checked=true; $('foundation').checked=false; $('levyok').checked=true; $('levybal').value='';
   const s=STDS.find(x=>x.r==='ST0002')||STDS.find(x=>!fundBlock(x)); $('std').value=`${s.n} (${s.r})`;
   $('hours').value='37.5'; $('start').value=iso(addMonths(t,2));
   $('assumeAll').click(); render();
@@ -2412,7 +2427,7 @@ $('icsBtn').onclick=()=>{ const o=compute(); const ev=icsEventsFor(o,o.name);
   downloadFile(`apprenticeship-dates-${fileSafe(o.name)||'apprentice'}.ics`,icsCalendar(ev),'text/calendar'); };
 
 /* =================== save / open a check (a small file; nothing is stored online) =================== */
-const SAVE_FIELDS=['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','showmil'];
+const SAVE_FIELDS=['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','levybal','showmil'];
 function snapshot(){
   const f={}; SAVE_FIELDS.forEach(id=>{ const el=$(id); f[id]=el.type==='checkbox'?el.checked:el.value; });
   return {app:'as-eligibility',v:1,saved:new Date().toISOString(),rules:RULES_META.rules.label,form:f,answers:S.answers,assumed:!!S.assumed,busy:[...S.busy],hol:S.hol,mgrRoute:!!S.mgrRoute,jd:$('jdText').value||''};
@@ -2441,10 +2456,10 @@ $('openFile').addEventListener('change',async()=>{ const f=$('openFile').files[0
 /* =================== team check (cohort) =================== */
 // run the real engine for one person by borrowing the form, then put the form back exactly as it was
 function checkPerson(p,defStd){
-  const ids=['name','dob','std','care','start','foundation','pay'], keep={}; ids.forEach(id=>{ const el=$(id); keep[id]=el.type==='checkbox'?el.checked:el.value; });
+  const ids=['name','dob','std','care','start','foundation','pay','levybal'], keep={}; ids.forEach(id=>{ const el=$(id); keep[id]=el.type==='checkbox'?el.checked:el.value; });
   const keepAns=S.answers, keepAssumed=S.assumed, keepJd=S.jd, keepMgr=S.mgrRoute;
   try{
-    $('name').value=p.name; $('dob').value=p.dob?iso(p.dob):''; $('std').value=p.std?`${p.std.n} (${p.std.r})`:(defStd?`${defStd.n} (${defStd.r})`:''); $('care').checked=!!p.care; $('foundation').checked=false; $('pay').value=p.pay>0?String(p.pay):'';
+    $('name').value=p.name; $('dob').value=p.dob?iso(p.dob):''; $('std').value=p.std?`${p.std.n} (${p.std.r})`:(defStd?`${defStd.n} (${defStd.r})`:''); $('care').checked=!!p.care; $('foundation').checked=false; $('pay').value=p.pay>0?String(p.pay):''; $('levybal').value='';
     S.answers={}; QS.forEach(q=>S.answers[q.id]=q.bad==='yes'?'no':'yes'); S.assumed=true; S.jd=null; S.mgrRoute=false;
     $('start').value = p.start ? iso(p.start) : iso(addMonths(utcToday(),2));
     let o=compute();
@@ -2545,7 +2560,7 @@ function runTeam(){
         <td class="mono">${niCell(o)}</td>
         <td><button type="button" data-open="${i}">Open</button></td></tr>`; }).join('')}</tbody></table></div>
     <div class="tv-actions"><button type="button" class="btn sm" id="tvCsv">Download results (CSV)</button><button type="button" class="btn ghost sm" id="tvIcs">Add all deadlines to calendar</button></div>
-    <p class="tv-lead" style="margin-top:12px">Personal checks (residency, contract, other courses, education, prior learning) are assumed met for everyone. Open a person to answer them properly.</p>`;
+    <p class="tv-lead" style="margin-top:12px">Personal checks (residency, contract, other courses, education, prior learning) are assumed met for everyone. Open a person to answer them properly.${$('levybal').value.trim()?' Your typed levy balance isn’t used here: one balance can’t be split safely across several people, so the levy tick is used instead. Planning a team’s levy month by month is what Fundable does.':''}</p>`;
   $('tvCsv').onclick=()=>{ const q=v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`;
     const lines=[['Name','Date of birth','Age now','Apprenticeship','ST code','Result','Earliest start','Start no later than','What the deadline protects','Days left','Annual pay','NI saving a year'].map(q).join(',')];
     TEAM.forEach(x=>{ const o=x.o, l=left(x); lines.push([x.p.name,iso(x.p.dob),o.dob?ageOn(o.dob,t):'',o.std?o.std.n:'',o.std?o.std.r:'',x.v.t,o.verdict==='notyet'&&o.earliest?iso(o.earliest):(!o.blocked&&o.rec?iso(o.rec):''),!o.blocked&&o.until?iso(o.until):'',!o.blocked&&o.until?untilSub(o):'',l==null?'':l,x.p.pay||'',niCsv(o)].map(q).join(',')); });
