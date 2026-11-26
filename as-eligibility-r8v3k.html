@@ -950,7 +950,8 @@ header{position:sticky;top:0;z-index:45}
 :root .journey li[data-k]:not(.res) a,:root .journey li[data-k]:not(.res) .n,
 :root .journey li[data-k]:not(.res).done .n,:root .journey li[data-k]:not(.res).act .n{color:var(--ink)!important}
 :root .journey .z{position:relative;display:inline-block}
-:root .journey .z .led{position:absolute;left:50%;top:54%;width:4px;height:4px;border-radius:50%;transform:translate(-50%,-50%);background:#FF4FA3;box-shadow:0 0 3px 1px rgba(255,79,163,.55)}
+:root .journey .z .led{position:absolute;left:50%;top:54%;width:2px;height:2px;border-radius:50%;transform:translate(-50%,-50%);background:#FF4FA3;box-shadow:0 0 2px 1px rgba(255,79,163,.5);opacity:0;transition:opacity .18s}
+:root .journey li.lit .z .led{opacity:1}   /* only the active step's light is on */
 /* connectors: solid ink; a pink light runs along them when you move between steps */
 :root .journey li + li::before,:root .journey li.done + li::before,
 :root[data-ui=boardroom] .journey li + li::before,:root[data-ui=boardroom][data-theme=dark] .journey li + li::before{background:var(--ink)!important;height:2px;transition:none}
@@ -2017,12 +2018,16 @@ document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.prev
 let _jPrev=null;
 function travelJourney(li){
   const all=[...document.querySelectorAll('#journey li[data-k]')], to=all.indexOf(li);
-  if(_jPrev===null||to<0){ _jPrev=to; return; }
-  const from=_jPrev; _jPrev=to; if(from===to) return;
+  const light=x=>{ all.forEach(l=>l.classList.toggle('lit',l===x)); };
+  if(_jPrev===null||to<0){ _jPrev=to; light(li); return; }
+  const from=_jPrev; _jPrev=to; if(from===to){ if(!travelJourney._busy) light(li); return; }   // mid-travel re-renders must not light it early
+  clearTimeout(travelJourney._t); light(null);   // the old light goes out as the pink sets off
   const fwd=to>from, legs=[]; if(fwd) for(let k=from+1;k<=to;k++) legs.push(all[k]); else for(let k=from;k>to;k--) legs.push(all[k]);
   const per=Math.max(.18,.5/legs.length);   // the whole trip takes about half a second
   legs.forEach((l,n)=>setTimeout(()=>{ l.classList.remove('trav','travb'); void l.offsetWidth; l.style.setProperty('--jt',per+'s'); l.classList.add(fwd?'trav':'travb');
     setTimeout(()=>l.classList.remove('trav','travb'),per*1000+60); },n*per*1000));
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  travelJourney._busy=true; travelJourney._t=setTimeout(()=>{ travelJourney._busy=false; light(li); }, reduce?0:legs.length*per*1000);   // the new light comes on as the pink arrives
 }
 
 function moveJInd(){
