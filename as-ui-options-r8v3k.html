@@ -585,8 +585,9 @@ table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em
 .bd-kick{position:absolute;left:70px;top:46px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9C3064}
 .bd-logo{position:absolute;right:70px;top:40px}
 .bd-logo .rlogo{display:block}
-.rp .bd-h1{position:absolute;left:70px;top:72px;right:260px;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:38px;line-height:1.15;color:#1d1d1d}
+.rp .bd-h1{position:absolute;left:70px;top:72px;right:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:38px;line-height:1.15;color:#1d1d1d}
 .bd-verdict{position:absolute;left:70px;top:128px;display:inline-flex;align-items:center;gap:10px;font-family:Montserrat,Arial;font-weight:800;font-size:20px;padding:6px 16px 6px 12px;border-radius:4px}
+.bd-seal{width:30px;height:30px;flex:none;overflow:visible}
 .bd-verdict.g{background:#E8F4EC;color:#1F7A4D}.bd-verdict.a{background:#FBF1E1;color:#8A5A00}.bd-verdict.r{background:#FBE9E9;color:#B21E1E}
 .bd-sum{position:absolute;left:70px;top:178px;width:1300px;font-size:17px;line-height:1.6;color:#333;margin:0}
 .rp .bd-h1 + .bd-sum{top:140px}
@@ -671,7 +672,7 @@ table.bd-t.money td:not(:first-child){width:36%}
 :root[data-ui=boardroom] .jdr button{border-radius:3px;background:#9C3064;border-color:#9C3064;color:#fff}
 :root[data-ui=boardroom] .vbar{background:#9C3064}
 /* developer switch */
-.devbar{position:fixed;left:18px;bottom:18px;z-index:280;display:flex;align-items:center;gap:8px;background:#111;color:#fff;border:1px solid #444;border-radius:6px;padding:8px 10px;font:600 12.5px/1.2 Jost,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.devbar{position:fixed;left:18px;bottom:18px;z-index:280;display:flex;flex-wrap:wrap;max-width:calc(100vw - 36px);align-items:center;gap:8px;background:#111;color:#fff;border:1px solid #444;border-radius:6px;padding:8px 10px;font:600 12.5px/1.2 Jost,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .devbar b{background:#F5B700;color:#111;border-radius:3px;padding:2px 6px;letter-spacing:.08em}
 .devbar button{border:1px solid #555;background:#1c1c1c;color:#fff;border-radius:3px;padding:5px 10px;font:inherit;cursor:pointer}
 .devbar button[aria-pressed=true]{background:#9C3064;border-color:#9C3064}
@@ -693,7 +694,8 @@ table.bd-t.money td:not(:first-child){width:36%}
 #holList li b{color:var(--pink-deep);font-weight:600}
 #holList button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 4px;min-width:24px;min-height:24px}
 #holList button:hover{color:var(--ink)}
-.hol-add{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;align-items:end}
+.hol-add{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 10px;align-items:end}
+.hol-add input{min-width:0;width:100%}
 .hol-add .btn{justify-self:start;min-height:40px}
 .hol-add .f{margin:0}
 .hol-add .f span{font-size:13px}
@@ -793,7 +795,7 @@ table.bd-t.money td:not(:first-child){width:36%}
 @keyframes sealBreakL{to{transform:translate(-4px,1px) rotate(-9deg)}}
 @keyframes sealBreakR{to{transform:translate(4px,1px) rotate(9deg)}}
 @media (prefers-reduced-motion:reduce){.seal *{animation-duration:0s!important;animation-delay:0s!important}}
-@media (max-width:480px){.verdict{padding-left:88px!important}.verdict .seal{left:18px;width:54px;height:54px}}
+@media (max-width:480px){.verdict{padding-left:20px!important;min-height:0}.verdict .seal{position:static;width:50px;height:50px;margin:0 0 4px}}
 @media print{.verdict{padding-left:24px!important;min-height:0}.verdict .seal{display:none}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
@@ -1513,6 +1515,16 @@ function sealSvg(kind){
   return `<div class="seal s-${kind}" data-k="${kind}" aria-hidden="true"><svg viewBox="0 0 100 100">${body}</svg></div>`;
 }
 
+// still seal for the report (fixed colours: the report is always white)
+function sealStatic(kind){
+  const c={ok:'#1F7A4D',warn:'#B76E00',bad:'#B21E1E',notyet:'#9C3064'}[kind]||'#9C3064';
+  const mark={ok:'<path d="M31 47 L45 60 L70 34"/>',warn:'<path d="M50 28 V50"/><path d="M50 63 V64"/>',notyet:'<circle cx="50" cy="44" r="17"/><path d="M50 35 V44 L57 49"/>'}[kind]||'';
+  const body = kind==='bad'
+    ? `<path fill="${c}" d="${SEAL_L}" transform="rotate(-9 50 88) translate(-4 1)"/><path fill="${c}" d="${SEAL_R}" transform="rotate(9 50 88) translate(4 1)"/>`
+    : `<path fill="${c}" d="${SEAL_HEART}"/><g fill="none" stroke="#fff" stroke-width="${kind==='notyet'?5:6.5}" stroke-linecap="round" stroke-linejoin="round">${mark}</g>`;
+  return `<svg class="bd-seal" viewBox="0 0 100 100" aria-hidden="true">${body}</svg>`;
+}
+
 function drawTimeline(o){
   const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
   T.innerHTML=stemHtml(stemRows(o,false));
@@ -1697,9 +1709,11 @@ function buildReport(o){
   const vRag={yes:'g',check:'a',no:'r',notyet:'r'}[o.verdict];
   const RAG={g:'Pass',a:'Check',r:'Fail'};
   const pages=[];
+  // titles sit on one line above fixed-position content: shrink long ones (to 24px), then ellipsis as a last resort
+  const h1Size=t=>{ const n=String(t).replace(/<[^>]+>/g,'').replace(/&[a-z#0-9]+;/g,'x').length; return Math.max(24,Math.min(38,Math.floor(1110/(n*0.62)))); };
   const page=(kick,title,body,sign)=>`<section class="rp bd"><div class="bd-side"></div>
       <div class="bd-kick">${kick}</div><div class="bd-logo">${logoInk(150)}</div>
-      <h1 class="bd-h1">${title}</h1>${body}
+      <h1 class="bd-h1" style="font-size:${h1Size(title)}px">${title}</h1>${body}
       <div class="bd-sign"><span>Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by Fundable · page ${pages.length+1}</span>${sign?'<span>Approved by: <i class="bd-line"></i>&nbsp;&nbsp; Date: <i class="bd-line" style="width:130px"></i></span>':''}</div></section>`;
   const table=(head,rows,cls)=>`<table class="bd-t ${cls||''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const rag=k=>`<span class="bd-rag ${k}"></span>${RAG[k]}`;
@@ -1723,7 +1737,8 @@ function buildReport(o){
   // ---------- recommendation ----------
   const rec=[];
   if(o.verdict==='yes'||o.verdict==='check'){
-    if(!o.blocked&&o.rec) rec.push(`Start on <b>${fmt(o.rec)}</b>${o.recWhy&&o.recWhy[0]?': it '+o.recWhy[0]:''}.`);
+    if(!o.blocked&&o.rec){ const W=o.recWhy||[]; const why=W.find(w=>/busy months/.test(w))||(o.skipped&&W.find(w=>/first working day/.test(w)))||W[0];   // the reason that actually set the date
+      rec.push(`Start on <b>${fmt(o.rec)}</b>${why?': it '+why:''}.`); }
     if(o.band) rec.push(o.c.cash?`Budget <b>${money(o.c.cash)}</b> from Ann Summers.`:`Fund from the levy: <b>£0</b> to Ann Summers.`);
     if(o.end) rec.push(`Contract to run beyond <b>${fmt(o.end)}</b>, plus the end-point assessment.`);
     const chk=crit.filter(r=>r[1]==='a').length; if(chk) rec.push(`Confirm the <b>${chk}</b> item${chk>1?'s':''} marked “Check” before sign-up.`);
@@ -1743,7 +1758,7 @@ function buildReport(o){
 
   // ---------- 1. executive summary ----------
   pages.push(page('Executive summary · Apprentice eligibility',`${who}: ${stdTitle}`,`
-    <div class="bd-verdict ${vRag}"><span class="bd-rag ${vRag}"></span>${vText}</div>
+    <div class="bd-verdict ${vRag}">${sealStatic({yes:'ok',check:'warn',no:'bad',notyet:'notyet'}[o.verdict])}${vText}</div>
     <p class="bd-sum">${summary}</p>
     <div class="bd-left">${table(['Criterion','Status','Note'],crit.map(r=>[r[0],rag(r[1]),esc(r[2])]),'crit')}</div>
     <div class="bd-right"><div class="bd-rec"><h3>Recommendation</h3><ul>${rec.map(x=>`<li>${x}</li>`).join('')}</ul></div>
