@@ -212,7 +212,7 @@ main{max-width:1320px;margin:0 auto;padding:24px;display:grid;grid-template-colu
 main > section{min-width:0}
 /* 3. desktop: results column stays in view while the form scrolls */
 @media (min-width:1001px){
-  section.results{position:sticky;top:64px;max-height:calc(100vh - 76px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--field-line) transparent}
+  section.results{position:sticky;top:calc(var(--topH,64px) + 8px);max-height:calc(100vh - var(--topH,64px) - 20px);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:var(--field-line) transparent}
 }
 /* 1. phones: the cost table scrolls inside its card instead of pushing the page sideways */
 .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -392,7 +392,7 @@ footer a{color:var(--pink-deep)}
 .journey li.res .n{border:0;color:#fff;background:var(--info)}
 .journey li.res.r-ok .n{background:var(--ok)} .journey li.res.r-warn .n{background:var(--warn)} .journey li.res.r-bad .n{background:var(--bad)}
 :root[data-theme=dark] .journey li.res .n{color:#141013}
-.card,.verdict{scroll-margin-top:72px}
+.card,.verdict{scroll-margin-top:calc(var(--topH,64px) + 8px)}
 @media print{.journey{display:none!important}}
 
 /* ---------- pass 2: contrast ---------- */
@@ -930,6 +930,14 @@ table.tvf .rm:hover{color:var(--bad)}
 @media (max-width:1200px){header .right{gap:10px}header .pw .pwt{display:none}}
 @media (max-width:1100px){#teamBtn .lbl-t{display:none}#teamBtn{padding:7px 11px}}
 @media (max-width:480px){header{gap:6px}header .hlogo{--lw:96px}header .right{gap:6px}.dbtn{padding:6px 8px}}   /* phones: keep the one-row header with Start again on it */
+
+/* frozen top: the header (Ann Summers logo) stays put, the journey bar sits just under it */
+header{position:sticky;top:0;z-index:45}
+.journey{top:var(--hdrH,0px)}
+@media print{header{position:static}}
+
+/* the result pill keeps its own look: no selected-number box on its tick */
+:root .journey li.res.act .n,:root[data-ui=boardroom] .journey li.res.act .n,:root[data-theme=dark] .journey li.res.act .n,:root[data-ui=boardroom][data-theme=dark] .journey li.res.act .n{background:none!important;color:#fff!important;box-shadow:none!important;text-shadow:none!important;padding:0;animation:none!important}
 </style>
 </head>
 <body>
@@ -2339,6 +2347,12 @@ $('tvOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-o
   $('name').value=x.p.name; $('dob').value=iso(x.p.dob); $('care').checked=x.p.care; $('foundation').checked=false;
   const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('start').value=x.p.start?iso(x.p.start):(x.o.rec&&!x.o.blocked?iso(x.o.rec):$('start').value);
   S.answers={}; S.assumed=false; syncQs(); S.jd=null; render(); closeTeam(); $('verdict').scrollIntoView({block:'start'}); });
+
+/* measure the frozen top so the journey bar and the sticky results column sit right under it at every width */
+(function(){ const hdr=document.querySelector('header'), jr=document.querySelector('.journey'), root=document.documentElement;
+  const set=()=>{ const h=hdr.offsetHeight, j=jr?jr.offsetHeight:0; root.style.setProperty('--hdrH',h+'px'); root.style.setProperty('--topH',(h+j)+'px'); if(typeof moveJInd==='function') moveJInd(); };
+  set(); window.addEventListener('resize',set); window.addEventListener('load',set); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(set);
+  if('ResizeObserver' in window){ const ro=new ResizeObserver(set); ro.observe(hdr); if(jr) ro.observe(jr); } })();
 </script>
 </body>
 </html>
