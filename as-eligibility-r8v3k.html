@@ -912,10 +912,11 @@ function earliestStart(dob){ // para 30.1: after the last Friday in June of the 
 /* England and Wales bank holidays, from https://www.gov.uk/bank-holidays.json (fetched 26 Nov 2026; GOV.UK publishes about 2 years ahead) */
 const BANK_HOLIDAYS_EW = {"2026-01-01": "New Year’s Day", "2026-04-03": "Good Friday", "2026-04-06": "Easter Monday", "2026-05-04": "Early May bank holiday", "2026-05-25": "Spring bank holiday", "2026-08-31": "Summer bank holiday", "2026-12-25": "Christmas Day", "2026-12-28": "Boxing Day", "2027-01-01": "New Year’s Day", "2027-03-26": "Good Friday", "2027-03-29": "Easter Monday", "2027-05-03": "Early May bank holiday", "2027-05-31": "Spring bank holiday", "2027-08-30": "Summer bank holiday", "2027-12-27": "Christmas Day", "2027-12-28": "Boxing Day", "2028-01-03": "New Year’s Day", "2028-04-14": "Good Friday", "2028-04-17": "Easter Monday", "2028-05-01": "Early May bank holiday", "2028-05-29": "Spring bank holiday", "2028-08-28": "Summer bank holiday", "2028-12-25": "Christmas Day", "2028-12-26": "Boxing Day"};
 const BH_LAST = Object.keys(BANK_HOLIDAYS_EW).sort().pop();
-const offDay = d => { const w=d.getUTCDay(); return w===0||w===6||!!BANK_HOLIDAYS_EW[iso(d)]; };
+const xmasShut = d => d.getUTCMonth()===11 && d.getUTCDate()>=24;   // Christmas Eve to New Year's Eve: providers and offices close
+const offDay = d => { const w=d.getUTCDay(); return w===0||w===6||!!BANK_HOLIDAYS_EW[iso(d)]||xmasShut(d); };
 const nextWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<14) x=addDays(x,1); return x; };
 const prevWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<14) x=addDays(x,-1); return x; };
-const offWhy = d => BANK_HOLIDAYS_EW[iso(d)] ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
+const offWhy = d => BANK_HOLIDAYS_EW[iso(d)] ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : xmasShut(d) ? `${fmt(d)} falls in the Christmas shutdown` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
 const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -1521,16 +1522,16 @@ function buildReport(o){
     } }
 
   // ---------- 3. key dates ----------
-  const dr=[[fmt(o.today),'Report prepared','—']];
+  const dr=[[fmt(o.today),'Report prepared','—']]; const dd=(row,d)=>{ row._d=d?+d:Infinity; dr.push(row); }; dr[0]._d=+o.today;
   if(!o.blocked){
-    dr.push([fmt(o.from),'Earliest sensible start','Allows 4 weeks for provider sign-up (planning assumption)']);
-    dr.push([`<b>${fmt(o.rec)}</b>`,'<b>Chosen start date</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—']);
-    if(iso(o.start)!==iso(o.rec)) dr.push([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')]);
+    dd([fmt(o.from),'Earliest sensible start','Allows 4 weeks for provider sign-up (planning assumption); always a working day'],o.from);
+    dd([`<b>${fmt(o.rec)}</b>`,'<b>Chosen start date</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—'],o.rec);
+    if(iso(o.start)!==iso(o.rec)) dd([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')],o.start);
   }
-  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dr.push([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`]));
-  if(!o.blocked) dr.push(o.until?[`<b>${fmt(o.until)}</b>`,'<b>Start no later than</b>',untilSub(o)]:['—','<b>Start no later than</b>','No deadline: no age cut-off for funding']);
-  if(o.end) dr.push([fmt(o.end),'Earliest contract end','Plus the end-point assessment period']);
-  dr.sort((x,y)=>0);
+  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dd([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`],k.date));
+  if(!o.blocked) o.until ? dd([`<b>${fmt(o.until)}</b>`,'<b>Start no later than</b>',untilSub(o)],o.until) : dd(['—','<b>Start no later than</b>','No deadline: no age cut-off for funding'],null);
+  if(o.end) dd([fmt(o.end),'Earliest contract end','Plus the end-point assessment period'],o.end);
+  dr.sort((x,y)=>x._d-y._d);   // chronological; stable, so same-day rows keep their order
   pages.push(page('Timeline · Key dates','Key dates and deadlines',`
     <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>. <b>${untilSub(o)}.</b> On ${fmt(o.untilWhy.date)} the ${esc(o.untilWhy.what.toLowerCase())}.`:'<b>No age cut-off for funding.</b> There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
     <div class="bd-full">${table(['Date','Event','What it means'],dr)}</div>`,false));
@@ -1562,7 +1563,7 @@ function buildReport(o){
     <ol class="bd-method">
       <li><b>Eligibility</b> follows the Apprenticeship funding rules 2026 to 2027 (version 3): age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</li>
       <li><b>Standards</b> must be approved for delivery and eligible for funding (para 68). Sixteen standards lost funding for all new starts from 1 September 2026 (GOV.UK Growth and Skills Levy factsheet). Statuses and funding bands come from the Skills England apprenticeships export.</li>
-      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The chosen start date also avoids the months marked as busy, and is always a working day: never a weekend or an England bank holiday (GOV.UK list, published to ${BH_LAST.slice(0,4)}).</li>
+      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The chosen start date also avoids the months marked as busy, and is always a working day: never a weekend, an England bank holiday or the Christmas shutdown (24 to 31 December) (bank holidays from the GOV.UK list, published to ${BH_LAST.slice(0,4)}).</li>
       <li><b>Costs</b> use the standard's funding band. The Milburn Review (November 2026) is a proposal, not law; the 25% cut for over-25s is assumed to fall on the employer.</li>
       <li>This report is guidance, not a funding decision. The training provider confirms eligibility at sign-up.</li>
     </ol>`,false));
