@@ -581,7 +581,7 @@ table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em
 
 /* =================== REPORT: Boardroom style (chosen 26 Nov 2026) =================== */
 .rp.bd{background:#fff;color:#1d1d1d;font-family:"Open Sans",Arial,sans-serif}
-.bd-side{position:absolute;left:0;top:0;bottom:0;width:18px;background:#9C3064}
+.bd-side{display:none}   /* pink page edge removed at the user's request */
 .bd-kick{position:absolute;left:70px;top:46px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9C3064}
 .bd-logo{position:absolute;right:70px;top:40px}
 .bd-logo .rlogo{display:block}
@@ -958,7 +958,7 @@ header{position:sticky;top:0;z-index:45}
   background-color:var(--ink)!important;background-image:linear-gradient(#FF4FA3,#FF4FA3)!important;background-repeat:no-repeat!important;background-position:0 0!important;
   background-size:0% 100%!important;height:2px;transition:background-size var(--jt,.25s) linear}
 /* progress fill (option D): lines up to the active step are pink and stay pink; moving back drains them */
-#journey li.fl::before{background-size:100% 100%!important}   /* id beats the base line rule */
+#journey li.fl::before,#journey li.res.elig::before{background-size:100% 100%!important}   /* id beats the base line rule */
 .journey.nofx #journey li::before{transition:none!important}
 @keyframes jTravel{from{background-position:-45% 0,0 0}to{background-position:145% 0,0 0}}
 @keyframes jTravelBack{from{background-position:145% 0,0 0}to{background-position:-45% 0,0 0}}
@@ -977,12 +977,78 @@ header{position:sticky;top:0;z-index:45}
 /* buttons at the end of the results: black text */
 #actions .btn,:root[data-ui=boardroom] #actions .btn{color:#000}
 #actions #previewBtn,:root[data-ui=boardroom] #actions #previewBtn{background:#fff;border-color:#000;color:#000;font-weight:600}   /* no fill, like the rest of the row */
-#actions #previewBtn:hover,#actions .btn.ghost:hover{background:#F7F2F4}
+#actions .btn:hover,#actions .btn:focus-visible,#actions .btn:active,:root[data-ui=boardroom] #actions .btn:hover,:root[data-ui=boardroom] #actions .btn:active{background:#F39AC2!important;border-color:#F39AC2!important;color:#000!important}   /* pink when selected */
+#actions .btn:focus-visible{outline:2px solid #000;outline-offset:2px}
 #actions .btn.ghost,:root[data-ui=boardroom] #actions .btn.ghost{background:#fff;border-color:#000;color:#000}
 
 /* Boardroom background: a subtle rippling dot field (the orbs belong to the other UI style) */
 .bgfx canvas.dots{display:none;position:absolute;inset:0;width:100%;height:100%}
 :root[data-ui=boardroom] .bgfx canvas.dots{display:block}
+
+/* ---------- how to use guide ---------- */
+#helpView{position:fixed;inset:0;z-index:240;background:rgba(20,16,19,.6);overflow:auto;padding:40px 16px}
+.hv-panel{max-width:920px}
+.hv-start{display:flex;flex-wrap:wrap;gap:10px;margin:4px 0 18px}
+.hv-start .btn{color:#000}
+.hv-start .hv-go{background:#F39AC2;border-color:#F39AC2;font-weight:600}
+.hv-body h3{font:800 17px/1.25 Montserrat,Arial,sans-serif;margin:22px 0 6px;display:flex;align-items:center;gap:10px}
+.hv-body h3 .num{font-family:var(--font);color:var(--pink-deep)}
+.hv-body p,.hv-body li{font-size:15px;line-height:1.55}
+.hv-body p{margin:0 0 8px}
+.hv-body ul{margin:0 0 8px;padding-left:20px}
+.hv-body .seals{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:8px 0}
+.hv-body .seals div{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:2px;padding:8px 10px;font-size:14px}
+.hv-body .seals svg{width:28px;height:28px;flex:none;overflow:visible}
+.hv-body .tip{background:var(--blush);border-left:4px solid var(--pink);padding:8px 12px;margin:8px 0;font-size:14.5px}
+@media print{body.printing-guide > *:not(#helpView){display:none!important} body.printing-guide #helpView{position:static;background:none;padding:0;display:block!important} body.printing-guide .hv-start,body.printing-guide .tv-x{display:none!important} body.printing-guide .tv-panel{box-shadow:none;border:0}}
+/* ---------- walkthrough + demo ---------- */
+#tour{position:fixed;inset:0;z-index:260;pointer-events:none}
+.tr-spot{position:fixed;border-radius:6px;box-shadow:0 0 0 9999px rgba(20,16,19,.55),0 0 0 3px #F39AC2;transition:left .35s ease,top .35s ease,width .35s ease,height .35s ease;pointer-events:none}
+.tr-card{position:fixed;width:min(360px,calc(100vw - 24px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:4px;box-shadow:0 20px 50px rgba(0,0,0,.35);padding:16px 18px 14px;pointer-events:auto;transition:left .35s ease,top .35s ease}
+.tr-k{font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--pink-deep)}
+.tr-card h3,.hv-body h3{text-transform:none!important;letter-spacing:0!important;color:var(--ink)}
+.tr-card h3{margin:2px 0 6px;font:800 18px/1.25 Montserrat,Arial,sans-serif}
+.tr-card p{margin:0 0 12px;font-size:14.5px;line-height:1.5}
+.tr-nav{display:flex;align-items:center;gap:8px}
+.tr-nav .tr-dots{margin-right:auto;margin-left:4px;font-size:12.5px;color:var(--muted)}
+.tr-nav .btn{color:#000}
+.tr-nav #trNext{background:#F39AC2;border-color:#F39AC2;font-weight:600}
+#tour.demo .tr-nav #trBack{display:none}
+@media (prefers-reduced-motion:reduce){.tr-spot,.tr-card{transition:none}}
+@media print{#tour,#helpView{display:none!important}}
+@media (max-width:480px){#helpBtn{display:none}}   /* phones: the guide opens from the links in the page */
+@media (max-width:1100px){#helpBtn .lbl-t{display:none}#helpBtn{padding:7px 11px}}
+
+table.bd-t.crit th:first-child{width:250px}
+table.bd-t.crit td:first-child,table.bd-t.crit td:nth-child(2){white-space:nowrap}
+table.bd-t.crit th:nth-child(2){width:96px}
+table.bd-t.crit td{padding:5px 10px;line-height:1.35}
+/* report sign-off: signature, printed name, date */
+.bd-sig{display:flex;align-items:flex-end;gap:18px;white-space:nowrap}
+.bd-sig .f{display:inline-flex;align-items:flex-end;gap:6px}
+.bd-sig .v{display:inline-block;min-width:150px;border-bottom:1px solid #777;color:#1d1d1d;font-weight:600;padding:0 2px;position:relative;height:18px;line-height:18px}
+.bd-sig .v.sig{min-width:170px}
+.bd-sig .v.date{min-width:110px}
+.bd-sig .v img{position:absolute;left:0;bottom:1px;height:44px;max-width:200px;object-fit:contain}
+/* signing panel */
+#signPanel{position:fixed;right:20px;top:64px;z-index:260;width:min(420px,calc(100vw - 24px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:4px;box-shadow:0 20px 50px rgba(0,0,0,.4);padding:16px 18px}
+#signPanel h3{margin:0 0 10px;font:800 17px/1.2 Montserrat,Arial,sans-serif;text-transform:none;letter-spacing:0;color:var(--ink)}
+#signPanel .f{margin:0 0 10px}
+#signPanel input[type=text],#signPanel input[type=date]{width:100%;padding:8px 10px;border:1px solid var(--field-line);border-radius:3px;background:var(--field);color:var(--ink);font:inherit}
+#signPanel .sp-tabs{display:inline-flex;border:1px solid var(--ink);border-radius:999px;overflow:hidden;margin:0 0 8px}
+#signPanel .sp-tabs button{border:0;background:var(--card);color:var(--ink);padding:5px 14px;font:inherit;font-size:13px;cursor:pointer}
+#signPanel .sp-tabs button[aria-pressed=true]{background:#F39AC2;color:#000}
+#signPanel canvas{display:block;width:100%;height:120px;border:1px dashed var(--field-line);border-radius:3px;background:#fff;touch-action:none;cursor:crosshair}
+#signPanel .typed{display:none;width:100%;padding:8px 10px;border:1px solid var(--field-line);border-radius:3px;font:34px/1.2 "Segoe Script","Brush Script MT","Lucida Handwriting",cursive;color:#000;background:#fff}
+#signPanel.typing canvas{display:none}#signPanel.typing .typed{display:block}
+#signPanel .sp-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+#signPanel .sp-row .btn{color:#000}
+#signPanel .sp-row .go{background:#F39AC2;border-color:#F39AC2;font-weight:600}
+#signPanel small{display:block;color:var(--muted);font-size:12.5px;margin-top:6px}
+@media print{#signPanel{display:none!important}}
+
+/* the result pill always has white writing, whichever step is active */
+:root .journey li.res a,:root .journey li.res.act a,:root .journey li.res.current a,:root .journey li.res a #jRes,:root .journey li.res a .n{color:#fff!important}
 </style>
 </head>
 <body>
@@ -1013,6 +1079,7 @@ header{position:sticky;top:0;z-index:45}
   <div class="app"><span class="long">Apprentice </span>Eligibility Checker</div>
   <div class="pw" title="Powered by Fundable"><span class="pwt">Powered by </span><svg role="img" aria-label="Fundable" viewBox="0 0 304 297"><use href="#fd-icon"/></svg></div>
   <div class="right">
+    <button class="dbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span class="aa">?</span><span class="lbl-t"> How to use</span></button>
     <button class="dbtn" id="teamBtn" type="button" aria-haspopup="dialog"><span class="aa">⁂</span><span class="lbl-t"> Team check</span></button>
     <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel"><span class="aa">Aa</span><span class="lbl-t"> Display &amp; reading</span></button>
     <button class="dbtn" id="reset" type="button" title="Clear everything and start again"><span class="aa">↺</span><span class="lbl-t"> Start again</span></button>
@@ -1060,7 +1127,7 @@ header{position:sticky;top:0;z-index:45}
       <div class="step"><b>1</b>The apprentice</div>
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
         <input type="text" id="name" autocomplete="off" placeholder="e.g. Jordan">
-        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>.</small></label>
+        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>. New here? <a href="#" id="tourLink">Take the tour</a>.</small></label>
       <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
       <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small>Extends several age limits to 24.</small></span></label>
       <label class="tick"><input type="checkbox" id="newhire" checked><span>They're a <b>new hire</b> (with us 90 days or less at the start) <small>Affects hiring payments.</small></span></label>
@@ -1155,10 +1222,31 @@ header{position:sticky;top:0;z-index:45}
       <button class="btn ghost" id="saveBtn" type="button">Save this check</button>
       <button class="btn ghost" type="button" onclick="window.print()">Print / save as PDF</button>
     </div>
-    <p class="openline"><a href="#" id="openLink">Open a saved check</a> · <span id="rulesLine"></span></p>
+    <p class="openline"><a href="#" id="openLink">Open a saved check</a> · <a href="#" id="helpLink">How to use</a> · <span id="rulesLine"></span></p>
     <input type="file" id="openFile" accept=".json,application/json" hidden>
   </section>
 </main>
+
+<div id="helpView" class="hide" role="dialog" aria-modal="true" aria-labelledby="hvTitle">
+  <div class="tv-panel hv-panel">
+    <div class="tv-head"><h2 id="hvTitle">How to use the Eligibility Checker</h2><button type="button" class="tv-x" id="hvClose" aria-label="Close the guide">×</button></div>
+    <div class="hv-start">
+      <button type="button" class="btn sm hv-go" id="hvTour">▶ Show me around</button>
+      <button type="button" class="btn ghost sm" id="hvDemo">Watch a 1-minute demo</button>
+      <button type="button" class="btn ghost sm" id="hvPrint">Print this guide</button>
+    </div>
+    <div class="hv-body" id="hvBody"></div>
+  </div>
+</div>
+<div id="tour" class="hide" aria-live="polite">
+  <div class="tr-spot" id="trSpot"></div>
+  <div class="tr-card" id="trCard" role="dialog" aria-modal="false" aria-labelledby="trTitle">
+    <div class="tr-k" id="trK"></div>
+    <h3 id="trTitle"></h3>
+    <p id="trText"></p>
+    <div class="tr-nav"><button type="button" class="lnk" id="trSkip">Close</button><span class="tr-dots" id="trDots"></span><button type="button" class="btn ghost sm" id="trBack">Back</button><button type="button" class="btn sm" id="trNext">Next</button></div>
+  </div>
+</div>
 
 <div id="teamView" class="hide" role="dialog" aria-modal="true" aria-labelledby="tvTitle">
   <div class="tv-panel">
@@ -1188,8 +1276,18 @@ header{position:sticky;top:0;z-index:45}
   </div>
 </div>
 
+<div id="signPanel" class="hide" role="dialog" aria-labelledby="spTitle">
+  <h3 id="spTitle">Sign the report</h3>
+  <label class="f"><span>Print name</span><input type="text" id="spName" maxlength="60" autocomplete="name"></label>
+  <label class="f"><span>Date</span><input type="date" id="spDate"></label>
+  <div class="sp-tabs" role="group" aria-label="How to sign"><button type="button" data-m="draw" aria-pressed="true">Draw</button><button type="button" data-m="type" aria-pressed="false">Type</button></div>
+  <canvas id="spPad" aria-label="Draw your signature here"></canvas>
+  <input type="text" class="typed" id="spTyped" maxlength="40" placeholder="Type your name" aria-label="Typed signature">
+  <small>Draw with a mouse, finger or pen. The signature stays in this browser and is not saved with the check.</small>
+  <div class="sp-row"><button type="button" class="btn sm go" id="spApply">Add to report</button><button type="button" class="btn ghost sm" id="spClear">Clear</button><button type="button" class="btn ghost sm" id="spRemove">Remove signature</button><button type="button" class="lnk" id="spClose">Close</button></div>
+</div>
 <div id="reportView" class="hide" role="dialog" aria-modal="true" aria-label="Report preview">
-  <div class="rv-bar"><b>Report preview</b><span id="rvCount"></span><button type="button" class="btn" id="rvPrint">Print / save as PDF</button><button type="button" class="btn ghost" id="rvClose">Close</button></div>
+  <div class="rv-bar"><b>Report preview</b><span id="rvCount"></span><button type="button" class="btn ghost" id="rvSign">✍ Sign</button><button type="button" class="btn" id="rvPrint">Print / save as PDF</button><button type="button" class="btn ghost" id="rvClose">Close</button></div>
   <div id="rvPages"></div>
 </div>
 
@@ -1888,7 +1986,7 @@ function buildReport(o){
   const page=(kick,title,body,sign)=>`<section class="rp bd"><div class="bd-side"></div>
       <div class="bd-kick">${kick}</div><div class="bd-logo">${logoInk(150)}</div>
       <h1 class="bd-h1" style="font-size:${h1Size(title)}px">${title}</h1>${body}
-      <div class="bd-sign"><span>Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by Fundable · page ${pages.length+1}</span>${sign?'<span>Approved by: <i class="bd-line"></i>&nbsp;&nbsp; Date: <i class="bd-line" style="width:130px"></i></span>':''}</div></section>`;
+      <div class="bd-sign"><span>Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by Fundable · page ${pages.length+1}</span>${sign?signBlock():''}</div></section>`;
   const table=(head,rows,cls)=>`<table class="bd-t ${cls||''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const rag=k=>`<span class="bd-rag ${k}"></span>${RAG[k]}`;
 
@@ -1995,7 +2093,7 @@ function fitReport(){ const box=$('rvPages'); const sc=Math.min(1,(box.clientWid
   box.querySelectorAll('.rpw').forEach(w=>{ w.style.width=(1440*sc)+'px'; w.style.height=(810*sc)+'px'; w.firstElementChild.style.transform=`scale(${sc})`; }); }
 function fillReport(){ const pages=buildReport(lastO); $('rvPages').innerHTML=pages.map(p=>`<div class="rpw">${p}</div>`).join(''); $('rvCount').textContent=pages.length+' pages · 16:9'; fitReport(); return pages.length; }
 $('previewBtn').onclick=()=>{ if(!fillReport()) return; $('reportView').classList.remove('hide'); document.body.style.overflow='hidden'; $('rvClose').focus(); };
-$('rvClose').onclick=()=>{ $('reportView').classList.add('hide'); document.body.style.overflow=''; $('previewBtn').focus(); };
+$('rvClose').onclick=()=>{ $('signPanel').classList.add('hide'); $('reportView').classList.add('hide'); document.body.style.overflow=''; $('previewBtn').focus(); };
 $('rvPrint').onclick=()=>window.print();
 $('reportView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('rvClose').onclick(); });
 window.addEventListener('resize',()=>{ if(!$('reportView').classList.contains('hide')) fitReport(); });
@@ -2028,16 +2126,18 @@ let _jPrev=null;
 function travelJourney(li){
   const all=[...document.querySelectorAll('#journey li[data-k]')], to=all.indexOf(li);
   const light=x=>{ all.forEach(l=>l.classList.toggle('lit',l===x)); };
+  const want=k=>k>0&&k<=to;   // the lines up to the active step are filled
   if(_jPrev===null||to<0){ _jPrev=to; light(li);
-    const nav=document.querySelector('.journey'); nav.classList.add('nofx'); all.forEach((l,k)=>l.classList.toggle('fl',k>0&&k<=to)); void nav.offsetWidth; nav.classList.remove('nofx');   // first paint: no animation
+    const nav=document.querySelector('.journey'); nav.classList.add('nofx'); all.forEach((l,k)=>l.classList.toggle('fl',want(k))); void nav.offsetWidth; nav.classList.remove('nofx');   // first paint: no animation
     return; }
   const from=_jPrev; _jPrev=to; if(from===to){ if(!travelJourney._busy) light(li); return; }   // mid-travel re-renders must not light it early
-  clearTimeout(travelJourney._t); light(null);   // the old light goes out as the pink sets off
-  const fwd=to>from, legs=[]; if(fwd) for(let k=from+1;k<=to;k++) legs.push(all[k]); else for(let k=from;k>to;k--) legs.push(all[k]);
-  const per=Math.max(.18,.5/legs.length);   // the whole trip takes about half a second
-  legs.forEach((l,n)=>setTimeout(()=>{ l.style.setProperty('--jt',per+'s'); l.classList.toggle('fl',fwd); },n*per*1000));   // fill going forward, drain going back
+  // a new move cancels anything still pending from the last one, then fills or drains only the lines that are wrong, in order
+  (travelJourney._q||[]).forEach(clearTimeout); clearTimeout(travelJourney._t); light(null);
+  const fwd=to>from, legs=all.filter((l,k)=>l.classList.contains('fl')!==want(k)); if(!fwd) legs.reverse();
+  const per=Math.max(.18,.5/Math.max(1,legs.length));   // the whole trip takes about half a second
+  travelJourney._q=legs.map((l,n)=>setTimeout(()=>{ l.style.setProperty('--jt',per+'s'); l.classList.toggle('fl',want(all.indexOf(l))); },n*per*1000));
   const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-  travelJourney._busy=true; travelJourney._t=setTimeout(()=>{ travelJourney._busy=false; light(li); }, reduce?0:legs.length*per*1000);   // the new light comes on as the pink arrives
+  travelJourney._busy=true; travelJourney._t=setTimeout(()=>{ travelJourney._busy=false; light(li); all.forEach((l,k)=>l.classList.toggle('fl',want(k))); }, reduce?0:legs.length*per*1000+20);   // light the new number; make sure every line is right
 }
 
 function moveJInd(){
@@ -2068,6 +2168,7 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
+  R.classList.toggle('elig', key==='yes'||key==='check');   // the final line lights once they are eligible
   moveJInd();
 }
 
@@ -2436,6 +2537,155 @@ $('tvOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-o
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden) start(); });
   new MutationObserver(()=>{ draw(performance.now(),true); start(); }).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','data-ui']});
   if(mq.addEventListener) mq.addEventListener('change',()=>{ draw(performance.now(),true); start(); });
+})();
+
+/* =================== how to use guide =================== */
+function guideHtml(){
+  const seal=k=>sealStatic(k);
+  return `
+  <p>Check whether an apprentice can be funded, when they can start, the last date before funding changes, and who pays. Work down the four steps on the left; the result on the right updates as you go. Nothing you type leaves this page.</p>
+  <h3><span class="num">01</span> The apprentice</h3>
+  <ul><li><b>Date of birth</b> is the only thing you must enter. Age at the start date drives most funding rules.</li>
+  <li>Tick <b>EHC plan or care-experienced</b> if it applies: it extends several age limits to 24.</li>
+  <li><b>New hire</b> (with Ann Summers 90 days or less at the start) affects the hiring payments.</li></ul>
+  <h3><span class="num">02</span> The apprenticeship</h3>
+  <ul><li>Search by name or ST code. Apprenticeships that cannot be funded for new starts are blocked, with the reason.</li>
+  <li>Not sure which one? Open <b>Match a job description</b>, paste the job advert, and pick from the best matches. The report then shows how well the role fits.</li>
+  <li>For new managers, the funded <b>Business administrator</b> route is suggested where the leadership standards are no longer funded.</li>
+  <li>Set the <b>planned start date</b>, contracted <b>hours a week</b>, and whether the <b>levy balance</b> covers it.</li></ul>
+  <h3><span class="num">03</span> Quick eligibility checks</h3>
+  <p>Six yes/no questions about residency, hours in England, the contract, other courses, full-time education and prior learning. Answer <b>Not sure</b> if you don’t know. <b>Assume all eligible</b> fills them all in; change any that aren’t true.</p>
+  <h3><span class="num">04</span> Timing <small>(optional)</small></h3>
+  <ul><li><b>Avoid starting in these months</b>: pre-set to peak trading.</li>
+  <li><b>Holidays to avoid</b>: bank holidays and the Christmas shutdown are skipped automatically; add your own dates (stocktake, launches).</li>
+  <li>Tick <b>Milburn</b> to see what changes if the Milburn Review is adopted. It is a proposal, not law.</li></ul>
+  <h3>Reading the result</h3>
+  <div class="seals"><div>${seal('ok')}<span><b>Eligible</b></span></div><div>${seal('warn')}<span><b>Eligible, with checks</b>: confirm the items listed</span></div><div>${seal('bad')}<span><b>Not eligible</b>: the reasons are listed</span></div><div>${seal('notyet')}<span><b>Not eligible yet</b>: too young, shows when they can start</span></div></div>
+  <p><b>Why</b> lists each reason in plain English. <b>Tell me why</b> opens the funding-rule paragraph behind each one.</p>
+  <h3>Best time to onboard</h3>
+  <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
+  <li><b>Earliest start date</b>: the first working day that also avoids your busy months and holidays. <b>Use this date</b> copies it into the planned start.</li>
+  <li><b>Start no later than</b>: the last day before funding or a payment changes, and what that deadline protects.</li>
+  <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
+  <h3>Who pays</h3>
+  <p>The training price, who pays it (levy, government or Ann Summers), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
+  <h3>Report, calendar and saving</h3>
+  <ul><li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
+  <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
+  <li><b>Save this check</b> downloads a small file; <b>Open a saved check</b> brings it all back.</li></ul>
+  <h3>Team check</h3>
+  <p>Check several people at once: type them in, or download the template, fill it in Excel, save as CSV and choose it. Results are ranked by the nearest deadline, and you can download them or add every deadline to your calendar. <b>Open</b> loads a person into the main form.</p>
+  <h3>Display and reading</h3>
+  <p>Light or dark theme (Auto follows your computer), a coloured screen cover, a reading ruler, extra spacing and dyslexia-friendly fonts.</p>
+  <div class="tip">This tool is guidance, not a funding decision. Your training provider confirms eligibility at sign-up. ${esc(RULES_META.rules.label)}.</div>`;
+}
+function openHelp(e){ if(e) e.preventDefault(); $('hvBody').innerHTML=guideHtml(); $('helpView').classList.remove('hide'); document.body.style.overflow='hidden'; $('hvClose').focus(); }
+function closeHelp(){ $('helpView').classList.add('hide'); document.body.style.overflow=''; }
+$('helpBtn').onclick=openHelp; $('helpLink').addEventListener('click',openHelp);
+$('hvClose').onclick=()=>{ closeHelp(); $('helpBtn').focus(); };
+$('helpView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('hvClose').onclick(); });
+$('helpView').addEventListener('click',e=>{ if(e.target===$('helpView')) closeHelp(); });
+$('hvPrint').onclick=()=>{ document.body.classList.add('printing-guide'); window.print(); setTimeout(()=>document.body.classList.remove('printing-guide'),400); };
+$('hvTour').onclick=()=>{ closeHelp(); startTour(false); };
+$('hvDemo').onclick=()=>{ closeHelp(); startTour(true); };
+$('tourLink').addEventListener('click',e=>{ e.preventDefault(); startTour(false); });
+
+/* =================== walkthrough (and the auto-play demo, which runs the same steps and fills an example) =================== */
+const TOUR=[
+ {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This tour takes about a minute.'},
+ {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
+ {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async()=>{ await typeInto('name','Jordan'); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
+ {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async()=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ await typeInto('std',`${s.n} (${s.r})`); } }},
+ {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ $('assumeAll').click(); }},
+ {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
+ {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
+ {el:'#reasonsCard',k:'The reasons',t:'Why',x:'Every reason in plain English. Tell me why shows the funding-rule paragraph behind each one.'},
+ {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest start date that avoids busy months and holidays, the last date before funding changes, and a timeline of key dates.'},
+ {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
+ {el:'#actions',k:'Next steps',t:'Report, calendar and saving',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
+ {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
+ {el:'#dbtn',k:'Your way',t:'Display and reading',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
+];
+let TR={i:0,demo:false,timer:0,saved:null,running:false};
+const setVal=(id,v)=>{ const el=$(id); el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); };
+async function typeInto(id,text){ const el=$(id); el.value=''; for(const ch of text){ if(!TR.running) return; el.value+=ch; el.dispatchEvent(new Event('input',{bubbles:true})); await new Promise(r=>setTimeout(r,text.length>20?18:60)); } const ul=$('stdlist'); if(ul) ul.classList.add('hide'); }
+function tourTarget(st){ for(const sel of st.el.split(',')){ const el=document.querySelector(sel.trim()); if(el&&el.getBoundingClientRect().width>0) return el; } return document.querySelector('header'); }
+function placeTour(){
+  if(!TR.running) return; const el=tourTarget(TOUR[TR.i]); const r=el.getBoundingClientRect(), pad=6, spot=$('trSpot'), card=$('trCard');
+  const top=Math.max(4,r.top-pad), h=Math.min(innerHeight-top-4,r.height+pad*2);
+  Object.assign(spot.style,{left:(r.left-pad)+'px',top:top+'px',width:(r.width+pad*2)+'px',height:h+'px'});
+  const cw=card.offsetWidth, ch=card.offsetHeight, clampY=v=>Math.min(innerHeight-ch-12,Math.max(12,v));
+  let x=Math.min(Math.max(12,r.left),innerWidth-cw-12), y=r.bottom+14;
+  if(y+ch>innerHeight-12){ y=r.top-ch-14;
+    if(y<12){ // no room above or below: sit beside the section, on whichever side has space
+      const vis=Math.max(r.top,0); y=clampY(vis+16);
+      if(innerWidth-r.right-16>=cw+12) x=r.right+16; else if(r.left-16>=cw+12) x=r.left-cw-16; else x=Math.min(innerWidth-cw-12,Math.max(12,r.right-cw-16)); } }
+  card.style.left=x+'px'; card.style.top=y+'px';
+}
+function bringIntoView(el){
+  const topH=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+12;
+  const inResults=el.closest&&el.closest('section.results'); if(inResults){ const box=inResults; const rr=el.getBoundingClientRect(), br=box.getBoundingClientRect(); if(box.scrollHeight>box.clientHeight) box.scrollTop+=rr.top-br.top-8; }
+  const r=el.getBoundingClientRect(); if(el.closest&&(el.closest('header')||el.closest('.journey'))) return;
+  if(r.top<topH||r.bottom>innerHeight-20) window.scrollTo(0,Math.max(0,scrollY+r.top-topH));
+}
+async function showStep(i){
+  TR.i=Math.max(0,Math.min(TOUR.length-1,i)); const st=TOUR[TR.i];
+  $('trK').textContent=st.k; $('trTitle').textContent=st.t; $('trText').textContent=st.x; $('trDots').textContent=`${TR.i+1} of ${TOUR.length}`;
+  $('trBack').disabled=TR.i===0; $('trNext').textContent=TR.i===TOUR.length-1?'Finish':(TR.demo?'Pause':'Next');
+  const el=tourTarget(st); bringIntoView(el); placeTour(); setTimeout(placeTour,60); setTimeout(placeTour,400);
+  if(TR.demo){ clearTimeout(TR.timer); if(st.demo){ await st.demo(); placeTour(); } if(!TR.running||!TR.demo) return;
+    TR.timer=setTimeout(()=>{ if(!TR.running) return; if(TR.i<TOUR.length-1) showStep(TR.i+1); else endTour(); }, 3600); }
+  else $('trNext').focus();
+}
+function startTour(demo){
+  if(TR.running) endTour(); TR={i:0,demo,timer:0,saved:null,running:true};
+  if(demo){ TR.saved=snapshot(); $('name').value=''; $('dob').value=''; $('std').value=''; S.answers={}; S.assumed=false; syncQs(); render(); }
+  $('tour').classList.remove('hide'); $('tour').classList.toggle('demo',demo); document.body.classList.add('touring'); showStep(0);
+}
+async function endTour(){
+  clearTimeout(TR.timer); const wasDemo=TR.demo, saved=TR.saved; TR.running=false; $('tour').classList.add('hide'); document.body.classList.remove('touring');
+  if(wasDemo&&saved){ try{ await restore(saved); }catch(e){} }   // put their own entries back
+  window.scrollTo(0,0);
+}
+$('trNext').onclick=()=>{ if(TR.demo&&TR.i<TOUR.length-1){ // demo: Pause / Resume
+    if($('trNext').textContent==='Pause'){ clearTimeout(TR.timer); TR.demo=false; $('trNext').textContent='Next'; $('tour').classList.remove('demo'); return; } }
+  if(TR.i<TOUR.length-1) showStep(TR.i+1); else endTour(); };
+$('trBack').onclick=()=>showStep(TR.i-1);
+$('trSkip').onclick=()=>endTour();
+document.addEventListener('keydown',e=>{ if(!TR.running) return; if(e.key==='Escape') endTour(); else if(e.key==='ArrowRight'&&!TR.demo) $('trNext').onclick(); else if(e.key==='ArrowLeft'&&!TR.demo) showStep(TR.i-1); });
+window.addEventListener('resize',placeTour); window.addEventListener('scroll',placeTour,{passive:true}); document.addEventListener('scroll',placeTour,{passive:true,capture:true});
+
+/* =================== report sign-off: e-signature, printed name and date =================== */
+S.sign=null;   // {img, name, date}: kept in memory only, never saved
+function signBlock(){
+  const g=S.sign;
+  return `<span class="bd-sig"><span class="f">Approved by <span class="v sig">${g&&g.img?`<img src="${g.img}" alt="Signature">`:''}</span></span><span class="f">Print name <span class="v">${g&&g.name?esc(g.name):''}</span></span><span class="f">Date <span class="v date">${g&&g.date?fmt(parse(g.date)):''}</span></span></span>`;
+}
+(function(){
+  const P=$('signPanel'), pad=$('spPad'), ctx=pad.getContext('2d'); let drawing=false, inked=false, mode='draw';
+  function sizePad(){ const r=pad.getBoundingClientRect(), d=window.devicePixelRatio||1; if(!r.width) return; pad.width=r.width*d; pad.height=r.height*d; ctx.setTransform(d,0,0,d,0,0); ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#000'; inked=false; }
+  const pt=e=>{ const r=pad.getBoundingClientRect(); return [e.clientX-r.left,e.clientY-r.top]; };
+  pad.addEventListener('pointerdown',e=>{ drawing=true; pad.setPointerCapture(e.pointerId); const [x,y]=pt(e); ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+.1,y+.1); ctx.stroke(); inked=true; });
+  pad.addEventListener('pointermove',e=>{ if(!drawing) return; const [x,y]=pt(e); ctx.lineTo(x,y); ctx.stroke(); });
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>pad.addEventListener(ev,()=>{ drawing=false; }));
+  function typedImage(t){ const c=document.createElement('canvas'), d=2; c.width=420*d; c.height=120*d; const g=c.getContext('2d'); g.scale(d,d); g.fillStyle='#000'; g.font='44px "Segoe Script","Brush Script MT","Lucida Handwriting",cursive'; g.textBaseline='middle'; g.fillText(t,8,64,404); return c.toDataURL('image/png'); }
+  function trimmed(){ // crop the drawing to its ink so it sits neatly on the line
+    const w=pad.width,h=pad.height,data=ctx.getImageData(0,0,w,h).data; let x0=w,y0=h,x1=0,y1=0;
+    for(let y=0;y<h;y+=2) for(let x=0;x<w;x+=2){ if(data[(y*w+x)*4+3]>20){ if(x<x0)x0=x; if(y<y0)y0=y; if(x>x1)x1=x; if(y>y1)y1=y; } }
+    if(x1<=x0) return null; const m=6, c=document.createElement('canvas'); c.width=x1-x0+m*2; c.height=y1-y0+m*2; c.getContext('2d').drawImage(pad,x0-m,y0-m,c.width,c.height,0,0,c.width,c.height); return c.toDataURL('image/png'); }
+  function open(){ P.classList.remove('hide'); if(!$('spDate').value) $('spDate').value=iso(utcToday()); if(S.sign){ $('spName').value=S.sign.name||''; $('spDate').value=S.sign.date||$('spDate').value; } sizePad(); $('spName').focus(); }
+  function close(){ P.classList.add('hide'); $('rvSign').focus(); }
+  $('rvSign').onclick=()=>P.classList.contains('hide')?open():close();
+  $('spClose').onclick=close;
+  P.addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.stopPropagation(); close(); } });
+  P.querySelector('.sp-tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; mode=b.dataset.m; P.classList.toggle('typing',mode==='type'); P.querySelectorAll('.sp-tabs button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); if(mode==='draw') sizePad(); else { if(!$('spTyped').value) $('spTyped').value=$('spName').value; $('spTyped').focus(); } });
+  $('spClear').onclick=()=>{ ctx.clearRect(0,0,pad.width,pad.height); inked=false; $('spTyped').value=''; };
+  $('spRemove').onclick=()=>{ S.sign=null; $('spClear').onclick(); fillReport(); close(); };
+  $('spApply').onclick=()=>{ const name=$('spName').value.replace(/[<>&"]/g,'').trim(), date=$('spDate').value;
+    const img = mode==='type' ? ($('spTyped').value.trim()?typedImage($('spTyped').value.trim()):null) : (inked?trimmed():null);
+    if(!img&&!name){ $('spName').focus(); return; }
+    S.sign={img,name,date}; fillReport(); close(); };
+  window.addEventListener('resize',()=>{ if(!P.classList.contains('hide')&&mode==='draw'&&!inked) sizePad(); });
 })();
 </script>
 </body>
