@@ -1107,6 +1107,8 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     <div class="grp"><h4>Reading aids</h4>
       <label class="tick"><input type="checkbox" id="rulerOn"><span><b>Reading ruler</b><small>Shades the screen except a band that follows your pointer or keyboard focus.</small></span></label>
       <label class="tick" style="margin:0"><input type="checkbox" id="spacingOn"><span><b>Easier-read spacing</b><small>More space between letters, words and lines.</small></span></label></div>
+    <div class="grp"><h4>Background</h4>
+      <label class="tick" style="margin:0"><input type="checkbox" id="starsOn"><span><b>Moving star background</b><small>Soft coloured stars drifting behind the page. Switch off for a plain background.</small></span></label></div>
   </div>
 </header>
 
@@ -2182,6 +2184,10 @@ const COVERS=[['none','None',''],['cream','Cream','#FFF1C9'],['yellow','Yellow',
 const D=(()=>{ let d={}; try{ d=JSON.parse(localStorage.getItem(DKEY)||'{}'); }catch(e){} return Object.assign({theme:'auto',cover:'none',strength:30,ruler:false,spacing:false,font:'brand'},d); })();
 const saveD=()=>{ try{ localStorage.setItem(DKEY,JSON.stringify(D)); }catch(e){} };
 const mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
+function setBg(){   // starlights chosen 26 Nov 2026; the viewer can switch them off in Display & reading; dev mode can preview dots/plain
+  let bg='stars'; try{ if(localStorage.getItem('asElig.dev')==='1') bg=localStorage.getItem('asElig.bg')||'stars'; }catch(e){}
+  if(typeof D!=='undefined'&&D.stars===false) bg='plain';
+  document.documentElement.setAttribute('data-bg',bg); }
 function applyDisplay(){
   const t=D.theme==='auto'?(mq&&mq.matches?'dark':'light'):D.theme;
   document.documentElement.setAttribute('data-theme',t);
@@ -2194,6 +2200,7 @@ function applyDisplay(){
   const cv=$('cover'); cv.style.background=c[2]||'transparent'; cv.style.opacity=c[2]?String(D.strength/100*(t==='dark'?.6:1)):'0';
   document.querySelectorAll('#swatches button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===D.cover)));
   $('strength').value=D.strength; $('strVal').textContent=D.strength+'%'; $('strength').disabled=!c[2];
+  $('starsOn').checked=D.stars!==false; setBg();
   $('rulerOn').checked=!!D.ruler; $('spacingOn').checked=!!D.spacing; $('ruler').classList.toggle('on',!!D.ruler);
 }
 $('swatches').innerHTML=COVERS.map(c=>`<button type="button" data-c="${c[0]}" class="${c[0]==='none'?'none':''}" style="${c[2]?'background:'+c[2]:''}" aria-label="${c[1]}" title="${c[1]}">${c[0]==='none'?'⊘':''}</button>`).join('');
@@ -2207,6 +2214,7 @@ $('themeSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; D.
 $('strength').oninput=e=>{ D.strength=+e.target.value; saveD(); applyDisplay(); };
 $('rulerOn').onchange=e=>{ D.ruler=e.target.checked; saveD(); applyDisplay(); };
 $('spacingOn').onchange=e=>{ D.spacing=e.target.checked; saveD(); applyDisplay(); };
+$('starsOn').onchange=e=>{ D.stars=e.target.checked; saveD(); applyDisplay(); };
 $('fontGrid').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; D.font=b.dataset.f; saveD(); applyDisplay(); };
 // show each option in its own face once the panel opens (loads the font files then, not on page load)
 $('dbtn').addEventListener('click',()=>['lexend','atkinson','opendyslexic'].forEach(f=>window.loadFont(f)),{once:true});
@@ -2703,7 +2711,7 @@ $('actions').addEventListener('focusin',()=>selectReports());
 $('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.reported=true; render(); });
 
 /* starlights: Fundable's constellation background (loose drifting stars, each pulsing with a soft glow),
-   ported with the same motion and density and recoloured for Ann Summers: pink/plum stars on white, soft pink in dark mode */
+   ported with the same motion, density and multi-coloured spectrum; tuned so the colours show on white */
 (function(){ const cv=document.querySelector('.bgfx canvas.stars'); if(!cv||!cv.getContext) return; const ctx=cv.getContext('2d');
   const mq=window.matchMedia?matchMedia('(prefers-reduced-motion: reduce)'):{matches:false}; let w,h,nodes=[],raf=0,t=0;
   const DPR=Math.min(window.devicePixelRatio||1,2);
@@ -2716,8 +2724,8 @@ $('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.
     ctx.clearRect(0,0,w,h); if(move) t+=0.4;
     const dark=document.documentElement.getAttribute('data-theme')==='dark';
     for(const n of nodes){ if(move){ n.x+=n.vx; n.y+=n.vy; if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1; n.phase+=n.speed; }
-      const gl=0.5+0.5*Math.sin(n.phase), hue=Math.round(((n.accent?345:325)+n.hj*14+Math.sin(t*0.01+n.phase)*8+360)%360);
-      const sat=dark?70:62, lit=dark?72:52, a=dark?(0.28+0.42*gl):(0.22+0.36*gl);
+      const gl=0.5+0.5*Math.sin(n.phase), hue=Math.round(((t*0.28+n.phase*57.3+(n.accent?40:0))%360+360)%360);   // multi-coloured: each star drifts through the spectrum
+      const sat=72, lit=dark?66:54, a=dark?(0.28+0.42*gl):(0.24+0.36*gl);
       ctx.beginPath(); ctx.arc(n.x,n.y,n.r,0,7); ctx.fillStyle=`hsla(${hue},${sat}%,${lit}%,${a.toFixed(3)})`; ctx.fill();
       ctx.beginPath(); ctx.arc(n.x,n.y,n.r*2.8,0,7); ctx.fillStyle=`hsla(${hue},${sat+5}%,${lit+12}%,${((dark?0.06:0.05)*gl).toFixed(3)})`; ctx.fill(); }
   }
@@ -2728,7 +2736,7 @@ $('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.
   resize(); start();
 })();
 /* background: starlights (final). Dev mode can still preview dots or plain */
-(function(){ let bg='stars'; try{ if(localStorage.getItem('asElig.dev')==='1') bg=localStorage.getItem('asElig.bg')||'stars'; }catch(e){} document.documentElement.setAttribute('data-bg',bg); })();   // starlights chosen 26 Nov 2026; the saved choice only applies in dev mode
+setBg();
 </script>
 </body>
 </html>
