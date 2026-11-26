@@ -1062,6 +1062,11 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 .vstrip small{font-weight:400;color:var(--muted);margin-left:auto;white-space:nowrap}
 .vstrip.hide{display:none}
 @media print{.vstrip{display:none!important}}
+
+/* JD matcher: Clear sits beside Find */
+.jd-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.jd-btns #jdClear{color:#000;border-color:#000;background:#fff}
+.jd-btns #jdClear:hover,.jd-btns #jdClear:focus-visible{background:#F39AC2;border-color:#F39AC2}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -1215,7 +1220,7 @@ body{padding-top:52px}
           <label class="f"><span>Paste the job description</span>
             <textarea id="jdText" rows="7" placeholder="Paste the job title and duties. A job title on the first line helps most."></textarea>
             <small>It stays in your browser. Nothing is sent anywhere.</small></label>
-          <button type="button" class="btn sm" id="jdGo">Find matching apprenticeships</button>
+          <div class="jd-btns"><button type="button" class="btn sm" id="jdGo">Find matching apprenticeships</button><button type="button" class="btn ghost sm hide" id="jdClear">Clear</button></div>
           <div id="jdOut" aria-live="polite"></div>
         </div>
       </details>
@@ -2818,6 +2823,13 @@ $('actions').querySelector('button[onclick]')?.addEventListener('click',()=>{ S.
 })();
 /* background: starlights (final). Dev mode can still preview dots or plain */
 setBg();
+
+/* JD matcher: clear the pasted job description, its matches and the role-match card */
+(function(){ const sync=()=>$('jdClear').classList.toggle('hide',!$('jdText').value.trim()&&!S.jd);
+  $('jdText').addEventListener('input',sync);
+  $('jdClear').onclick=()=>{ $('jdText').value=''; $('jdOut').innerHTML=''; S.jd=null; S.mgrRoute=false; render(); sync(); $('jdText').focus(); };
+  const go=$('jdGo').onclick; $('jdGo').onclick=async function(){ const r=await go.apply(this,arguments); sync(); return r; };
+  sync(); })();
 </script>
 <div class="cx" role="toolbar" aria-label="Concept options"><b>Concept</b>
   <button type="button" data-c="a">A · Titles only</button><button type="button" data-c="b">B · + black verdict</button><button type="button" data-c="c">C · + slab sections</button>
