@@ -963,6 +963,16 @@ header{position:sticky;top:0;z-index:45}
 
 /* no underline under the menu: the pink travelling along the connecting lines shows the move */
 .journey .jind{display:none!important}
+
+/* every number in the app uses the app font (no monospace or display face for figures); the report keeps its own type */
+:root .journey .n,:root .journey .z,:root .journey .s,:root .step b,
+.stdinfo .tag,.combo li small,.ref,table.money td.n,.rm-pct,.rm-gap b,table.refs td.para,table.tv td.mono,#strVal,.tv-sum b,.when .v,#tl .d,#tl li.gap .e span{
+  font-family:var(--font)!important;letter-spacing:normal!important;font-variant-numeric:tabular-nums}
+/* buttons at the end of the results: black text */
+#actions .btn,:root[data-ui=boardroom] #actions .btn{color:#000}
+#actions #previewBtn,:root[data-ui=boardroom] #actions #previewBtn{background:#FF4FA3;border-color:#FF4FA3;color:#000;font-weight:600}
+#actions #previewBtn:hover{background:#FF6BB3;border-color:#000}
+#actions .btn.ghost,:root[data-ui=boardroom] #actions .btn.ghost{background:#fff;border-color:#000;color:#000}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
