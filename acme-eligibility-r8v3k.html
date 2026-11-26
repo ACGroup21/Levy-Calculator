@@ -664,6 +664,7 @@ table.bd-t.money td:not(:first-child){width:36%}
 :root[data-ui=boardroom][data-theme=dark] .when .best .l{color:#70B5FF}
 :root[data-ui=boardroom] .when .best .v{color:var(--ink)}
 :root[data-ui=boardroom] .when .best .use{color:#003B80;border-color:#003B80}
+:root[data-ui=boardroom][data-theme=dark] .when .best .use{color:var(--plum);border-color:var(--plum)}
 /* tables like the report */
 :root[data-ui=boardroom] table.money thead th,:root[data-ui=boardroom] table.refs th{border-bottom:2px solid var(--ink)}
 /* buttons and toggles: plum, square */
@@ -1019,7 +1020,8 @@ header{position:sticky;top:0;z-index:45}
 .tr-nav{display:flex;align-items:center;gap:8px}
 .tr-nav .tr-dots{margin-right:auto;margin-left:4px;font-size:12.5px;color:var(--muted)}
 .tr-nav .btn{color:#000}
-.tr-nav #trNext{background:#F3CD9A;border-color:#F3CD9A;font-weight:600}
+:root[data-theme=dark] .hv-start .btn.ghost,:root[data-theme=dark] .tr-nav .btn.ghost{color:var(--ink)}   /* dark mode: never black text on a dark button */
+.tr-nav #trNext{background:#F3CD9A;border-color:#F3CD9A;font-weight:600;color:#000}
 #tour.demo .tr-nav #trBack{display:none}
 @media (prefers-reduced-motion:reduce){.tr-spot,.tr-card{transition:none}}
 @media print{#tour,#helpView{display:none!important}}
@@ -1050,6 +1052,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 #signPanel.typing canvas{display:none}#signPanel.typing .typed{display:block}
 #signPanel .sp-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 #signPanel .sp-row .btn{color:#000}
+:root[data-theme=dark] #signPanel .sp-row .btn.ghost{color:var(--ink)}   /* black text only where the button is light */
 #signPanel .sp-row .go{background:#F3CD9A;border-color:#F3CD9A;font-weight:600}
 #signPanel small{display:block;color:var(--muted);font-size:12.5px;margin-top:6px}
 @media print{#signPanel{display:none!important}}
@@ -1635,15 +1638,19 @@ function compute(){
   if(levyShort>0 && band) out.cliffs.push({date:bd(R.fullFundMax),what:'25% co-investment applies',cost:levyShort*R.coInvest,scheme:'cur'});
 
   // Milburn (proposed)
+  const milRest = band ? band*(1-R.mil.cut) : 0, milAvail = levyBal!==null ? levyBal : (levyTick ? Infinity : 0);
+  const milShort = Math.max(0, milRest-milAvail), milCost25 = band ? band*R.mil.cut + milShort*R.coInvest : 0;
   if(band){
     if(unfunded){ m.cash=band; m.who='Not fundable under the review either.'; }
     else if(age<R.mil.under){ m.cash=0; m.who='Government pays 100% (under 25, any size of employer)'; }
-    else { m.cash=band*R.mil.cut; m.who=`Government funding cut by 25%. Modelled as Acme Retail paying ${money(band*R.mil.cut)}*`; }
+    else { m.cash=milCost25; m.who=milShort>0
+        ? `Government funding cut by 25%. Modelled as Acme Retail paying the ${money(band*R.mil.cut)} cut plus 25% of the ${money(milShort)} the levy doesn't cover (${money(m.cash)})*`
+        : `Government funding cut by 25%. Modelled as Acme Retail paying ${money(band*R.mil.cut)}; the levy pays the rest*`; }
   }
   m.inc=c.inc; m.incTxt=c.incTxt;
   m.hire = (!unfunded && age<R.mil.under && newHire) ? R.mil.hiring : 0;
   m.hireTxt = m.hire ? '£2,500 hiring payment, extended to levy payers (472)' : (age>=R.mil.under ? 'None (25 or over)' : (!newHire?'None (not a new hire)':'None'));
-  if(!unfunded) out.cliffs.push({date:bd(R.mil.under),what:'Milburn: 25% cost'+(newHire?' + £2,500 lost':''),cost:(band?band*R.mil.cut:0)+(newHire?R.mil.hiring:0),scheme:'mil'});
+  if(!unfunded) out.cliffs.push({date:bd(R.mil.under),what:'Milburn: 25% cost'+(newHire?' + £2,500 lost':''),cost:milCost25+(newHire?R.mil.hiring:0),scheme:'mil'});
   { const payRaw=parseFloat($('pay').value), pay=payRaw>0?payRaw:null, under=age<R.ni.under;
     const save = pay&&under ? Math.max(0,Math.min(pay,R.ni.aust)-R.ni.st)*R.ni.rate : 0;
     c.ni={pay,under,save,txt: !under?'None (25 or over)': pay===null?`Add their annual pay to work this out (up to ${money((R.ni.aust-R.ni.st)*R.ni.rate)} a year)`: save>0?`${money(save)} a year while under 25`:'None (pay below £5,000)'};
@@ -1786,7 +1793,7 @@ function render(){ syncLevyTick();
     ${row('Net cost to Acme Retail',cNet<0?`${money(-cNet)} back`:cNet,mNet<0?`${money(-mNet)} back`:mNet,'tot')}
   </tbody>`;
   $('moneyNote').innerHTML = (o.c.inc?`Employer payments: ${o.c.incTxt}. `:'')+'<b>NI saving:</b> employers pay no National Insurance on an under-25 apprentice’s pay up to £50,270 a year (normally 15% above £5,000), until they turn 25. It’s a payroll saving, so it isn’t included in the net cost of training.'+
-    (milCol?`<details class="fold"><summary>How the Milburn figures work</summary><div><b>*</b>The Milburn Review recommends cutting government funding for over-25s by 25% (para 470), possibly to 50% by 2031/32. It doesn't say how, so this tool assumes the employer covers the 25%, as the trade press reads it. Under-25s would be 100% funded for any size of employer, and the hiring payment would rise to £2,500 and include levy payers (para 472). None of this is law yet: the government has agreed the “core principles”, with a full response to follow.</div></details>`:'');
+    (milCol?`<details class="fold"><summary>How the Milburn figures work</summary><div><b>*</b>The Milburn Review recommends cutting government funding for over-25s by 25% (para 470), possibly to 50% by 2031/32. It doesn't say how, so this tool assumes the employer covers the 25%, as the trade press reads it. The other 75% is paid as today: from the levy first, then 25% co-investment on anything the levy doesn't cover. Under-25s would be 100% funded for any size of employer, and the hiring payment would rise to £2,500 and include levy payers (para 472). None of this is law yet: the government has agreed the “core principles”, with a full response to follow.</div></details>`:'');
 }
 
 /* ---------- key dates as a vertical stem: one builder, drawn in the app (#tl) and on the report's key dates page ---------- */
