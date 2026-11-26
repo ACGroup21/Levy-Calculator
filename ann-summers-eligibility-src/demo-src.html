@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ann Summers Checker Dynamics</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&family=JetBrains+Mono:wght@500&family=Lexend:wght@400;600&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@fontsource/opendyslexic@5.2.5/400.css" rel="stylesheet">
+<style>
+:root{
+  --plum:#9C3064; --pink:#E6007E; --pink-deep:#CC0874;
+  --ink:#000; --text:#3B3935; --muted:#6E6A64; --line:#E4DCD9; --card:#fff; --field:#fff; --field-line:#CFC6C2; --blush:#F6E9E6;
+  --bg-a:#FBF6F7; --bg-b:#F9F9F9; --bg-c:#F7EEF2; --o1:#F6B6CF; --o2:#E8C3D6; --o3:#F9D7C9; --orb-op:.42;
+  --stage:radial-gradient(120% 90% at 50% 40%,#FFFFFF 0%,#FBF1F4 45%,#F3D9E3 100%); --logo-fill:#B42A72;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace; color-scheme:light;
+}
+:root[data-theme=dark]{
+  --plum:#E58AB8; --pink-deep:#FF77BC; --ink:#F6F1F3; --text:#DCD4D8; --muted:#A99FA5; --line:#3A3237; --card:#1E181C; --field:#272025; --field-line:#4C4249; --blush:#3A2431;
+  --bg-a:#160F14; --bg-b:#120E11; --bg-c:#1B1118; --o1:#6E1F47; --o2:#4A2340; --o3:#5A2A2A; --orb-op:.30;
+  --stage:radial-gradient(120% 90% at 50% 40%,#2A1722 0%,#170F14 55%,#0C080B 100%); --logo-fill:#FFFFFF; color-scheme:dark;
+}
+*{box-sizing:border-box} html,body{margin:0}
+body{font-family:Jost,system-ui,sans-serif;color:var(--text);font-size:15px;line-height:1.55}
+button{font:inherit;color:inherit}
+.bgfx{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;background:linear-gradient(160deg,var(--bg-a),var(--bg-b) 45%,var(--bg-c))}
+.bgfx i{position:absolute;border-radius:50%;filter:blur(80px);opacity:var(--orb-op)}
+.bgfx .b1{width:42vmax;height:42vmax;background:var(--o1);left:-12vmax;top:4vmax;animation:bg1 26s ease-in-out infinite alternate}
+.bgfx .b2{width:36vmax;height:36vmax;background:var(--o2);right:-10vmax;top:-8vmax;animation:bg2 31s ease-in-out infinite alternate}
+.bgfx .b3{width:30vmax;height:30vmax;background:var(--o3);left:30%;bottom:-14vmax;animation:bg3 23s ease-in-out infinite alternate}
+@keyframes bg1{to{transform:translate(14vmax,10vmax) scale(1.15)}} @keyframes bg2{to{transform:translate(-12vmax,14vmax) scale(.9)}} @keyframes bg3{to{transform:translate(-10vmax,-12vmax) scale(1.1)}}
+
+header{background:#000;color:#fff;padding:12px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+header .hlogo{width:150px;height:auto;display:block}
+header .app{font-size:13px;line-height:1;letter-spacing:.22em;text-transform:uppercase;color:#FF8CC6;border-left:1px solid #444;padding:4px 0 4px 18px;align-self:flex-end;margin-bottom:2px}
+header .right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.pill{border:1px solid #555;background:#111;color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.pill:hover{border-color:var(--pink)}
+.pill[aria-pressed=true]{background:var(--pink);border-color:var(--pink)}
+
+main{max-width:1180px;margin:0 auto;padding:28px 24px 60px}
+.intro h1{margin:0 0 6px;font-size:30px;color:var(--ink);font-weight:600}
+.intro p{margin:0 0 24px;max-width:720px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.card.wide{grid-column:1/-1}
+.card h2{margin:0;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);font-weight:600;display:flex;align-items:center;gap:10px}
+.card h2 b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--pink);color:#fff;font-size:12px;letter-spacing:0}
+.card p.d{margin:0;font-size:14px;color:var(--muted)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--card);border-radius:999px;padding:7px 16px;font-size:13px;font-weight:500;cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--field-line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--field);color:var(--ink);padding:6px 14px;cursor:pointer;font-size:13px}
+.seg button+button{border-left:1px solid var(--field-line)}
+.seg button[aria-pressed=true]{background:var(--pink);color:#fff}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-right:4px}
+
+/* stage = the splash, scaled into a card */
+.stage{position:relative;overflow:hidden;border-radius:6px;background:var(--stage);aspect-ratio:16/9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px solid var(--line)}
+.stage .orb{position:absolute;border-radius:50%;filter:blur(50px);opacity:.55;pointer-events:none}
+.stage .o1{width:46%;aspect-ratio:1;background:var(--o1);left:-14%;top:-20%;animation:d1 14s ease-in-out infinite alternate}
+.stage .o2{width:38%;aspect-ratio:1;background:var(--o2);right:-12%;bottom:-24%;animation:d2 17s ease-in-out infinite alternate}
+@keyframes d1{to{transform:translate(20%,15%) scale(1.12)}} @keyframes d2{to{transform:translate(-18%,-12%) scale(.92)}}
+.stage h3{position:relative;margin:4px 0 0;font-weight:500;font-size:clamp(11px,1.6vw,18px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .6s 2.0s ease both}
+/* "Powered by Fundable" sits where the button will be, then becomes the button */
+.stage .cta{position:relative;z-index:1;margin-top:14px;width:min(250px,60%);height:44px;display:grid;place-items:center}
+.cta > *{grid-area:1/1}
+.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .7s 2.2s ease forwards, frameOut .35s 4.2s ease forwards}
+@keyframes frameIn{from{opacity:0;transform:scale(.94)}to{opacity:.55;transform:none}}
+@keyframes frameOut{to{opacity:0}}
+.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .7s 2.15s ease forwards, pwOut .55s 3.7s ease-in forwards}
+.cta .pwl span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.cta .pwl svg{height:22px;width:85px;flex:none}
+@keyframes pwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pwOut{to{opacity:0;transform:scale(.86);filter:blur(5px)}}
+.cta .enter{width:100%;height:100%;border:0;border-radius:999px;background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font:inherit;font-size:12px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;box-shadow:0 10px 30px rgba(156,48,100,.25);
+  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 3.9s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
+.cta .enter span{opacity:0;display:inline-block;animation:txtIn .45s 4.4s ease forwards}
+@keyframes fillOut{to{clip-path:inset(0 0 0 0 round 999px)}}
+@keyframes txtIn{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:.24em}}
+.cta .enter:hover{background:var(--pink);color:#fff}
+.cta .enter:focus-visible{outline:3px solid var(--pink);outline-offset:4px}
+.on-dark{display:none} :root[data-theme=dark] .on-dark{display:inline-block} :root[data-theme=dark] .on-light{display:none}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.stage.solo{aspect-ratio:auto;padding:36px 20px}
+
+/* logo animation (same rules as the app splash) */
+.aslogo{position:relative;width:min(560px,78%);height:auto;overflow:visible;--t0:.2s;--step:.12s}
+.aslogo .lt{fill:var(--logo-fill);opacity:0;animation:lfill .55s calc(var(--t0) + var(--i)*var(--step) + .38s) ease-out forwards}
+@keyframes lfill{0%{opacity:0;filter:drop-shadow(0 0 0 #FF4FB0)}40%{opacity:1;filter:drop-shadow(0 0 5px #FF4FB0)}100%{opacity:1;filter:drop-shadow(0 0 0 transparent)}}
+.aslogo .sp,.aslogo .tr{fill:none;stroke-linecap:round;opacity:0;animation:spark .55s calc(var(--t0) + var(--i)*var(--step)) linear forwards}
+.aslogo .ap{animation-duration:.45s;animation-delay:calc(var(--t0) + 1.55s)}
+.aslogo .sp{stroke:#FFE3F2;stroke-width:1.5;stroke-dasharray:0 16 6 78;filter:drop-shadow(0 0 1.5px #FF4FB0) drop-shadow(0 0 4px #FF2E9A) drop-shadow(0 0 9px #FF2E9A)}
+.aslogo .tr{stroke:#FF4FB0;stroke-width:1;stroke-dasharray:22 78;filter:drop-shadow(0 0 3px #FF2E9A)}
+@keyframes spark{0%{opacity:0;stroke-dashoffset:0}8%{opacity:1}86%{opacity:1}100%{opacity:0;stroke-dashoffset:-100}}
+.aslogo .apl{fill:#E8325E;transform-box:fill-box;transform-origin:50% 88%;opacity:0;animation:apop .75s calc(var(--t0) + 1.8s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 2.6s) ease-in-out infinite}
+@keyframes apop{0%{opacity:0;transform:scale(.3);filter:drop-shadow(0 0 0 #FF4FB0)}55%{opacity:1;filter:drop-shadow(0 0 12px #FF4FB0)}100%{opacity:1;transform:none;filter:drop-shadow(0 0 0 transparent)}}
+@keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(.97)}24%{transform:scale(1.07)}34%{transform:scale(1)}}
+/* spark-only view: outline stays faint so you can follow the path */
+.ghost .aslogo .lt{animation:none;opacity:.12}
+.ghost .aslogo .apl{animation:none;opacity:.12}
+
+/* reading demo */
+.sample{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:6px;padding:18px 20px;background:var(--field);color:var(--ink)}
+.sample p{margin:0 0 10px;font-size:16px;line-height:1.7}
+.sample p:last-of-type{margin:0}
+.sample .cover{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply;transition:background .2s,opacity .2s}
+:root[data-theme=dark] .sample .cover{mix-blend-mode:normal}
+.sample .rul{position:absolute;left:0;right:0;pointer-events:none;display:none}
+.sample.ruler .rul{display:block}
+.sample .rt{top:0;background:rgba(0,0,0,.4)} .sample .rb{bottom:0;background:rgba(0,0,0,.4)}
+.sw{display:flex;flex-wrap:wrap;gap:8px}
+.sw button{width:30px;height:30px;border-radius:50%;border:2px solid var(--field-line);cursor:pointer;padding:0}
+.sw button[aria-pressed=true]{border-color:var(--pink);box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--pink)}
+.fonts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:640px){.fonts{grid-template-columns:1fr}}
+.fonts div{border:1px solid var(--line);border-radius:6px;padding:14px;background:var(--field);color:var(--ink)}
+.fonts b{display:block;font-family:var(--mono);font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px;letter-spacing:.06em}
+.fonts span{font-size:17px;line-height:1.5}
+.themes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini{border-radius:6px;overflow:hidden;border:1px solid var(--line)}
+.mini .mh{background:#000;padding:8px 12px}
+.mini .mh svg{width:90px;display:block}
+.mini .mb{padding:12px;display:grid;gap:8px}
+.mini .mc{border-radius:4px;padding:10px;font-size:13px}
+.mini.l .mb{background:#F9F4F6}.mini.l .mc{background:#fff;color:#000;border:1px solid #E4DCD9}
+.mini.d .mb{background:#141013}.mini.d .mc{background:#1E181C;color:#F6F1F3;border:1px solid #3A3237}
+.mini .v{font-weight:600}.mini.l .v{color:#1F7A4D}.mini.d .v{color:#62D69E}
+footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;font-size:12px;color:var(--muted)}
+footer a{color:var(--pink-deep)}
+@media (prefers-reduced-motion:reduce){.bgfx i,.stage .orb{animation:none}}
+
+/* ===== synced to the live splash: C pen draw (letter by letter, original pace) + dissolve wipe + aurora ===== */
+:root{--aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA)}
+:root[data-theme=dark]{--aurora:linear-gradient(120deg,#2B1222,#120C10,#3A1530,#160E14,#2E1026)}
+.aslogo{--t0:.35s;--step:.18s}
+.aslogo .sp{display:none}
+.aslogo .tr{stroke:var(--logo-fill);stroke-width:.9;stroke-dasharray:100 100;filter:none;animation:draw .62s calc(var(--t0) + var(--i)*var(--step)) cubic-bezier(.5,0,.3,1) forwards}
+.aslogo .tr.ap{stroke:#E8325E;animation-delay:calc(var(--t0) + 10*var(--step));animation-duration:.62s}
+.aslogo .lt{animation:flood .55s calc(var(--t0) + var(--i)*var(--step) + .42s) ease-out forwards}
+.aslogo .apl{animation:apop .75s calc(var(--t0) + 10*var(--step) + .45s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 10*var(--step) + 1.4s) ease-in-out infinite}
+@keyframes draw{0%{opacity:1;stroke-dashoffset:100}100%{opacity:1;stroke-dashoffset:0}}
+@keyframes flood{from{opacity:0}to{opacity:1}}
+.stage h3{animation:rise .8s 2.95s ease both}
+#splash.stage{background:var(--aurora);background-size:300% 300%;animation:aurora 9s ease-in-out infinite alternate}
+#splash.stage .orb{display:none}
+@keyframes aurora{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+.cta .enter{clip-path:none;-webkit-mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:dissolveIn 1s 4.9s cubic-bezier(.55,0,.35,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.45s ease forwards}
+.cta .pwl{-webkit-mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:pwIn .7s 3.3s ease forwards, dissolveOut .9s 4.85s cubic-bezier(.55,0,.35,1) forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .4s 5.5s ease forwards}
+@keyframes dissolveIn{to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes dissolveOut{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(0)}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(3px)}}
+/* spark-only card now shows the pen draw: keep the faded letters as a guide */
+.ghost .aslogo .lt{animation:none;opacity:.12}
+
+/* ===== button transition: fill from centre (original pace) - the credit blurs away as the button fills out from the middle ===== */
+.cta .blocks{display:none}
+.cta .enter{position:relative;z-index:2;-webkit-mask:none;mask:none;opacity:1;clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 5.05s cubic-bezier(.65,0,.25,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.55s ease forwards}
+.cta .pwl{-webkit-mask:none;mask:none;animation:pwIn .7s 3.3s ease forwards, pwOut .55s 4.85s ease-in forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .35s 5.35s ease forwards}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="fd-icon" viewBox="0 0 304 297">__FUNDABLE_ICON_PATHS__</symbol>
+  <symbol id="fd-icon-dark" viewBox="0 0 304 297">__FUNDABLE_ICON_PATHS_DARK__</symbol>
+</svg>
+<div class="bgfx" aria-hidden="true"><i class="b1"></i><i class="b2"></i><i class="b3"></i></div>
+
+<header>
+  __AS_HEADER_SVG__
+  <div class="app">Checker Dynamics · Demo</div>
+  <div class="right">
+    <button class="pill" id="themeBtn" type="button">◐ Switch to dark</button>
+    <a class="pill" href="as-eligibility-r8v3k.html" target="_blank" rel="noopener">Open the live checker ↗</a>
+  </div>
+</header>
+
+<main>
+  <div class="intro">
+    <h1>The moving parts</h1>
+    <p>Every animation and reading aid in the Ann Summers Eligibility Checker, shown one at a time. Replay them, slow them down, and switch the whole page between light and dark.</p>
+  </div>
+
+  <div class="grid">
+    <section class="card wide">
+      <h2><b>1</b>The splash screen</h2>
+      <p class="d">What a manager sees on their first visit. The outline of each letter draws itself in turn and fills with colour, then the apple pops in. “Powered by Fundable” appears where the button will be, then dissolves into the “Click to enter” button from left to right, over a slowly shifting aurora background. Return visits skip it.</p>
+      <div class="ctl">
+        <button class="btn" data-replay="splash">↻ Replay</button>
+        <span class="lbl">Speed</span>
+        <div class="seg" data-speed="splash"><button data-s="0.4">0.4×</button><button data-s="1" aria-pressed="true">1×</button><button data-s="2">2×</button></div>
+      </div>
+      <div class="stage" id="splash">
+        <div class="orb o1"></div><div class="orb o2"></div>
+        __AS_SPLASH_SVG__
+        <h3>Eligibility Checker</h3>
+        <div class="cta">
+    <div class="frame"></div>
+    <div class="pwl"><span>Powered by</span><svg class="on-light" viewBox="0 0 1214 314" role="img" aria-label="Fundable"><use href="#fd-logo-dark"/></svg><svg class="on-dark" viewBox="0 0 1214 314" role="img" aria-label="Fundable"><use href="#fd-logo"/></svg></div>
+    <button class="enter" type="button"><span>Click to enter</span></button>
+  </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><b>2</b>The pen draw on its own</h2>
+      <p class="d">Each letter's outline drawing itself in turn, slowed down and looping, over faded letters so you can follow the pen.</p>
+      <div class="ctl"><button class="btn" data-replay="spark">↻ Replay</button><span class="lbl">Loops every 8s</span></div>
+      <div class="stage solo ghost" id="spark">__AS_SPLASH_SVG__</div>
+    </section>
+
+    <section class="card">
+      <h2><b>3</b>The apple heartbeat</h2>
+      <p class="d">After the letters, the apple draws its outline, pops in with a glow, then keeps a gentle double-beat while the splash is open.</p>
+      <div class="ctl"><button class="btn" data-replay="apple">↻ Replay</button></div>
+      <div class="stage solo" id="apple">__AS_SPLASH_SVG__</div>
+    </section>
+
+    <section class="card">
+      <h2><b>4</b>The moving background</h2>
+      <p class="d">Behind the app: soft brand-colour light drifting very slowly (20–30 second cycles), so it never competes with the form. This page's own background is it. The splash screen uses the aurora instead (see card 1). Both stay still for anyone whose device asks for reduced motion.</p>
+      <div class="ctl"><span class="lbl">Background</span><div class="seg" id="bgSpeed"><button data-s="1" aria-pressed="true">Real speed</button><button data-s="8">8× (to see it move)</button></div></div>
+    </section>
+
+    <section class="card">
+      <h2><b>5</b>Light and dark</h2>
+      <p class="d">The app follows the device's theme automatically (“Auto”), and anyone can pick Light or Dark. Every colour has a version for each.</p>
+      <div class="themes">
+        <div class="mini l"><div class="mh">__AS_HEADER_SVG__</div><div class="mb"><div class="mc"><span class="v">Eligible</span> · Jordan is eligible for funding.</div><div class="mc">Recommended start: 1 Jan 2027</div></div></div>
+        <div class="mini d"><div class="mh">__AS_HEADER_SVG__</div><div class="mb"><div class="mc"><span class="v">Eligible</span> · Jordan is eligible for funding.</div><div class="mc">Recommended start: 1 Jan 2027</div></div></div>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2><b>6</b>Screen cover and reading ruler</h2>
+      <p class="d">A coloured overlay that can make text easier to read with dyslexia or visual stress, plus a ruler that shades everything except the line you're on. Pick a colour, then move your pointer over the text.</p>
+      <div class="ctl">
+        <div class="sw" id="sw"></div>
+        <span class="lbl" style="margin-left:8px">Ruler</span><div class="seg" id="rulerSeg"><button data-r="0" aria-pressed="true">Off</button><button data-r="1">On</button></div>
+      </div>
+      <div class="sample" id="sample">
+        <p><b>Eligible, with checks.</b> Jordan looks eligible for apprenticeship funding. Confirm the items below first. They'll be 24 at the planned start (1 March 2027).</p>
+        <p>Start by 9 March 2027. On 10 March 2027 (25th birthday) the 25% co-investment applies. If the Milburn Review is adopted, starting before their 25th birthday avoids about £3,750.</p>
+        <p>Their contract must run beyond 1 June 2028, plus the end-point assessment period.</p>
+        <div class="cover" id="cover"></div><i class="rul rt"></i><i class="rul rb"></i>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2><b>7</b>Reading fonts</h2>
+      <p class="d">Four fonts to choose from in the app. The brand font is the default; the other three are designed to be easier to read, including for dyslexia.</p>
+      <div class="fonts">
+        <div><b>BRAND · JOST</b><span style="font-family:Jost">Is your apprentice funded, and when's the best time to start?</span></div>
+        <div><b>LEXEND · READING FLUENCY</b><span style="font-family:Lexend">Is your apprentice funded, and when's the best time to start?</span></div>
+        <div><b>ATKINSON HYPERLEGIBLE · HIGH LEGIBILITY</b><span style="font-family:'Atkinson Hyperlegible'">Is your apprentice funded, and when's the best time to start?</span></div>
+        <div><b>OPENDYSLEXIC · WEIGHTED LETTERS</b><span style="font-family:OpenDyslexic;font-size:15px">Is your apprentice funded, and when's the best time to start?</span></div>
+      </div>
+    </section>
+  </div>
+</main>
+<footer>Ann Summers Eligibility Checker · demo of its animations and reading aids · Powered by Fundable. <a href="as-eligibility-r8v3k.html">Open the live checker</a>.</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+// replay = swap the element for a fresh clone, which restarts every CSS animation inside it
+function replay(id){ const el=$(id); const c=el.cloneNode(true); el.replaceWith(c); applySpeed(id); return c; }
+const speeds={splash:1};
+function applySpeed(id){ const el=$(id); const r=speeds[id]||1; el.getAnimations({subtree:true}).forEach(a=>a.playbackRate=r); }
+document.querySelectorAll('[data-replay]').forEach(b=>b.onclick=()=>replay(b.dataset.replay));
+document.querySelectorAll('[data-speed]').forEach(seg=>seg.onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
+  speeds[seg.dataset.speed]=+b.dataset.s; seg.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); replay(seg.dataset.speed); });
+// spark-only view loops, slowed to half speed
+speeds.spark=.5; applySpeed('spark'); setInterval(()=>replay('spark'),8000);
+// background speed
+$('bgSpeed').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const r=+b.dataset.s;
+  document.querySelector('.bgfx').getAnimations({subtree:true}).forEach(a=>a.playbackRate=r);
+  $('bgSpeed').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); };
+// theme
+function setTheme(t){ document.documentElement.setAttribute('data-theme',t); $('themeBtn').textContent = t==='dark'?'◑ Switch to light':'◐ Switch to dark'; }
+$('themeBtn').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+setTheme(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+// screen cover + ruler
+const COVERS=[['none',''],['cream','#FFF1C9'],['yellow','#FFE66B'],['peach','#FFCBA4'],['pink','#FFC2DC'],['lilac','#D8C7FF'],['blue','#A9D6FF'],['aqua','#A6EEE4'],['green','#BDEFB8'],['grey','#CFCFCF']];
+$('sw').innerHTML=COVERS.map(c=>`<button type="button" data-c="${c[1]}" aria-label="${c[0]}" title="${c[0]}" style="${c[1]?'background:'+c[1]:'background:var(--field)'}" aria-pressed="${c[0]==='cream'}">${c[1]?'':'⊘'}</button>`).join('');
+const setCover=c=>{ $('cover').style.background=c||'transparent'; $('cover').style.opacity=c?'.35':'0'; };
+setCover('#FFF1C9');
+$('sw').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; setCover(b.dataset.c); $('sw').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); };
+$('rulerSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; $('sample').classList.toggle('ruler',b.dataset.r==='1'); $('rulerSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b))); };
+(function(){ const s=$('sample'), t=s.querySelector('.rt'), bt=s.querySelector('.rb'), H=40;
+  const at=y=>{ const top=Math.max(0,y-H/2); t.style.height=top+'px'; bt.style.top=(top+H)+'px'; };
+  at(30); s.addEventListener('mousemove',e=>at(e.clientY-s.getBoundingClientRect().top)); })();
+
+</script>
+</body>
+</html>

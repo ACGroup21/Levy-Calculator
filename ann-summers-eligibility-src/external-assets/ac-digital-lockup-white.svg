@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-45 0 884 600" role="img" aria-label="AC Digital">
+  <style>.ac-glow{animation:acg 2.6s ease-in-out infinite}@keyframes acg{0%,100%{filter:drop-shadow(0 0 .5px #3B9EFF)}50%{filter:drop-shadow(0 0 7px #3B9EFF)}}@media(prefers-reduced-motion:reduce){.ac-glow{animation:none;filter:drop-shadow(0 0 6px #3B9EFF)}}@media print{.ac-glow{animation:none;filter:drop-shadow(0 0 6px #3B9EFF)}}</style>
+  <path d="M 25 454 L 235 50 L 445 454" fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 770.1 387.1 A 202 202 0 0 1 420.9 286" fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round"/>
+  <path d="M 420.9 218 A 202 202 0 0 1 770.1 116.9" fill="none" stroke="#FFFFFF" stroke-width="20" stroke-linecap="round"/>
+  <circle class="ac-glow" cx="235" cy="252" r="18" fill="#3B9EFF"/>
+  <g class="ac-glow" fill="#3B9EFF" fill-rule="evenodd">
+    <path transform="translate(-106 254)" d="M 81 257 L 81 305 L 104 305 L 105 304 L 112 303 L 120 298 L 127 287 L 127 274 L 123 266 L 118 261 L 109 257 L 86 257 L 85 256 L 84 257 Z M 91 264 L 105 264 L 112 267 L 116 271 L 118 275 L 119 282 L 117 288 L 113 293 L 108 296 L 105 296 L 104 297 L 90 297 L 89 296 L 90 293 L 89 269 Z"/>
+    <path transform="translate(-90 254)" d="M 211 257 L 211 305 L 219 305 L 220 304 L 220 257 Z"/>
+    <path transform="translate(-73 254)" d="M 314 260 L 307 267 L 303 276 L 303 286 L 307 295 L 315 302 L 323 305 L 335 305 L 342 303 L 349 299 L 351 297 L 351 278 L 329 278 L 329 286 L 341 286 L 342 287 L 342 293 L 336 297 L 324 297 L 318 294 L 313 288 L 312 285 L 312 277 L 314 272 L 320 266 L 325 264 L 335 264 L 341 267 L 344 270 L 350 265 L 345 260 L 334 256 L 324 256 Z"/>
+    <path transform="translate(-56 254)" d="M 435 257 L 435 305 L 443 305 L 443 298 L 444 297 L 444 272 L 443 271 L 444 269 L 444 257 Z"/>
+    <path transform="translate(-38 254)" d="M 526 257 L 526 264 L 541 264 L 542 265 L 542 305 L 550 305 L 551 304 L 551 265 L 552 264 L 568 264 L 568 257 L 560 257 L 559 256 L 556 257 L 545 257 L 544 256 L 543 257 Z"/>
+    <path transform="translate(-7 254)" d="M 660 257 L 637 305 L 646 305 L 664 270 L 666 271 L 666 273 L 669 277 L 682 305 L 691 305 L 691 303 L 668 257 Z"/>
+    <path transform="translate(18 254)" d="M 767 256 L 766 257 L 766 305 L 801 305 L 801 297 L 776 297 L 775 296 L 775 257 L 774 256 L 773 257 Z"/>
+  </g>
+</svg>

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checker UI Concept</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--mag:#D10A7D;--blush:#F5D9E6;--ink:#000;--text:#222;--muted:#5E5E5E;--line:#E2E2E2;--bg:#FFFFFF;--soft:#F7F4F5;--ok:#1F7A4D;--warn:#A35F00}
+*{box-sizing:border-box} html,body{margin:0}
+body{font-family:"Open Sans",Arial,sans-serif;color:var(--text);background:var(--bg);font-size:16px;line-height:1.55}
+h1,h2,h3,.mont{font-family:Montserrat,Arial,sans-serif;font-weight:800;color:var(--ink);margin:0;letter-spacing:0}
+.hl{position:relative;display:inline-block;z-index:0}
+.hl::before{content:"";position:absolute;z-index:-1;left:-10px;top:.05em;width:46%;height:.55em;background:var(--mag)}
+.hl.pink::before{background:var(--blush)}
+.hl.pink.under::before{width:75%;height:.5em;bottom:.02em}
+.hl.under::before{top:auto;bottom:.04em;left:auto;right:-8px;width:60%;height:.42em}
+
+/* concept banner */
+.cbar{background:#111;color:#fff;font-size:13px;padding:8px 20px;display:flex;gap:10px;align-items:center;justify-content:center}
+.cbar b{color:#FF8CC6;letter-spacing:.12em;text-transform:uppercase;font-size:11px}
+.cbar a{color:#fff}
+
+/* header */
+header{background:#000;color:#fff;padding:14px 28px;display:flex;align-items:center;gap:20px}
+header .hlogo{width:150px;height:auto;display:block}
+header .ttl{font-family:Montserrat,Arial;font-weight:700;font-size:15px;color:#fff;border-left:1px solid #444;padding-left:18px}
+header .right{margin-left:auto;display:flex;align-items:center;gap:16px;font-size:12px;color:#999}
+header .right svg{height:18px;width:auto}
+.aa{border:1px solid #555;border-radius:999px;padding:6px 14px;color:#fff;font-size:13px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding:44px 28px 34px;border-bottom:1px solid var(--line)}
+.hero .wrap{max-width:1320px;margin:0 auto;position:relative;z-index:1}
+.hero h1{font-size:46px;line-height:1.15}
+.hero p{font-style:italic;font-size:19px;margin:14px 0 0;max-width:640px}
+.hero svg.deco{position:absolute;right:0;top:0;height:100%;width:auto}
+
+/* journey: 01 02 03 04 */
+.journey{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.journey ol{max-width:1320px;margin:0 auto;padding:0 28px;list-style:none;display:flex;gap:0;overflow-x:auto}
+.journey li{padding:14px 26px 12px 0;margin-right:26px;border-bottom:4px solid transparent;white-space:nowrap;font-family:Montserrat,Arial;font-weight:700;font-size:15px;color:#999}
+.journey li b{display:inline-block;font-weight:800;color:#999;margin-right:8px}
+.journey li.done{color:var(--ink)} .journey li.done b{color:var(--mag)}
+.journey li.on{color:var(--ink);border-bottom-color:var(--mag)}
+.journey li.res{margin-left:auto;margin-right:0;padding-right:0}
+.journey li.res span{background:#000;color:#fff;padding:5px 14px}
+
+main{max-width:1320px;margin:0 auto;padding:30px 28px 60px;display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:36px;align-items:start}
+@media (max-width:1000px){main{grid-template-columns:minmax(0,1fr);padding:22px 16px}}
+
+/* form sections: black slab headings */
+.sec{margin-bottom:30px}
+.slab{display:inline-flex;align-items:center;gap:12px;background:#000;color:#fff;font-family:Montserrat,Arial;font-weight:700;font-size:17px;height:46px;padding:0 64px 0 18px;margin-left:-28px;padding-left:28px;clip-path:polygon(0 0,calc(100% - 46px) 0,100% 100%,0 100%)}
+@media (max-width:1000px){.slab{margin-left:-16px;padding-left:16px}}
+.slab b{color:var(--mag);font-weight:800}
+.fld{margin:18px 0 0}
+.fld label{display:block;font-weight:700;color:var(--ink);font-size:15px;margin-bottom:4px}
+.fld .in{border:0;border-bottom:2px solid var(--ink);padding:8px 2px;font-size:17px;color:var(--ink);background:transparent;width:100%;font-family:inherit}
+.fld small{display:block;color:var(--muted);font-size:14px;margin-top:4px;font-style:italic}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:14px 0 0;font-size:15.5px}
+.chk i{flex:none;width:20px;height:20px;border:2px solid #000;margin-top:2px;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:700}
+.chk i.on{background:#000;color:#fff}
+.pickd{margin-top:8px;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--ink)}
+.pickd span{background:var(--blush);padding:2px 7px;margin-right:6px}
+.jdlink{margin-top:12px;font-size:15px}
+.jdlink a{color:var(--mag);font-weight:700}
+.q{padding:14px 0;border-bottom:1px solid var(--line)}
+.q p{margin:0 0 8px;font-weight:600;color:var(--ink)}
+.yn{display:inline-flex;border:2px solid #000}
+.yn span{padding:5px 18px;font-weight:700;font-size:14px}
+.yn span.on{background:#000;color:#fff}
+.assume{display:inline-block;margin-top:16px;background:var(--mag);color:#fff;font-weight:700;padding:9px 18px;font-size:14px}
+
+/* results */
+.verdict{position:relative;overflow:hidden;background:#000;color:#fff;padding:34px 36px}
+.verdict .k{font-family:Montserrat,Arial;font-weight:700;font-size:14px;color:#bbb}
+.verdict h2{color:#fff;font-size:64px;line-height:1.05;margin:8px 0 12px}
+.verdict p{font-style:italic;font-size:19px;margin:0;max-width:560px;color:#eee}
+.verdict svg{position:absolute;right:0;top:0;height:100%;width:auto;opacity:.9}
+.block{margin-top:34px}
+.block h3{font-size:26px;padding-bottom:14px;margin-bottom:18px;border-bottom:4px solid #000;display:flex;align-items:baseline;gap:12px}
+.num{display:grid;grid-template-columns:44px 1fr;gap:6px;padding:10px 0;font-size:16.5px}
+.num b{font-family:Montserrat,Arial;font-weight:800;font-size:18px;color:var(--mag)}
+.num .ref{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);margin-left:8px}
+.dates{background:#000;color:#fff;padding:30px 28px 22px;position:relative}
+.dates h3{color:#fff;border-color:var(--mag)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px}
+@media (max-width:640px){.tiles{grid-template-columns:1fr}}
+.tile{border:1px solid #444;padding:12px 14px}
+.tile .l{font-size:13px;color:#bbb}
+.tile .v{font-family:Montserrat,Arial;font-weight:800;font-size:22px;color:#fff;margin-top:2px}
+.tile.best{background:#fff;border-color:#fff}
+.tile.best .l{color:var(--mag);font-weight:700}.tile.best .v{color:#000}
+.tile.best a{display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:var(--mag)}
+.stem{position:relative;height:190px}
+.why{margin-top:10px;font-style:italic;color:#ddd;font-size:15.5px}
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;text-align:center}
+@media (max-width:640px){.gauges{grid-template-columns:1fr}}
+.gauges .gv{font-family:Montserrat,Arial;font-weight:800;font-size:30px;margin-top:-48px;color:#000}
+.gauges h4{font-family:Montserrat,Arial;font-weight:800;font-size:18px;margin:22px 0 4px;color:#000}
+.gauges p{margin:0;font-size:14.5px;color:var(--muted)}
+.money{margin-top:22px;display:grid;grid-template-columns:repeat(2,1fr);gap:0;border-top:4px solid #000}
+.money div{padding:14px 0;border-bottom:1px solid var(--line);font-size:16px}
+.money div:nth-child(odd){font-weight:700;color:#000}
+.money .big{font-family:Montserrat,Arial;font-weight:800;font-size:22px;color:#000}
+.role{background:#000;color:#fff;padding:28px;display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center}
+.role .pct{font-family:Montserrat,Arial;font-weight:800;font-size:78px;color:#fff;line-height:1}
+.role p{margin:0 0 6px;color:#ddd;font-size:16px}
+.role b{color:#fff}
+.role .tm{display:inline-block;background:var(--mag);color:#fff;font-weight:700;font-size:12px;padding:3px 10px;margin-top:6px}
+.actions{margin-top:34px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{background:#000;color:#fff;font-family:Montserrat,Arial;font-weight:700;font-size:15px;padding:13px 24px}
+.btn.alt{background:#fff;color:#000;border:2px solid #000}
+.notes{max-width:1320px;margin:0 auto;padding:0 28px 50px;font-size:14px;color:var(--muted)}
+.notes h4{font-family:Montserrat,Arial;font-weight:800;color:#000;font-size:18px;margin:0 0 8px}
+.notes li{margin:4px 0}
+header .hlogo{flex:none}
+@media (max-width:640px){
+  .cbar{font-size:12px;padding:6px 12px;flex-wrap:wrap;gap:4px 8px}
+  header{padding:10px 14px;gap:10px}
+  header .hlogo{width:108px}
+  header .ttl{font-size:12px;padding-left:10px;white-space:nowrap}
+  header .right{gap:8px}
+  header .right .pw{display:none}
+  .aa{padding:5px 9px;font-size:0}
+  .aa::before{content:"Aa";font-size:13px}
+  .hero{padding:28px 16px 24px}
+  .hero h1{font-size:32px}
+  .hero svg.deco{display:none}
+  .verdict h2{font-size:48px}
+  .role{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="fd-icon" viewBox="0 0 304 297">__FUNDABLE_ICON_PATHS__</symbol></svg>
+<div class="cbar"><b>Concept</b> The checker restyled in the Levy Report language. Static mock-up with an example result; nothing here is interactive. <a href="as-eligibility-r8v3k.html">Live checker ↗</a></div>
+
+<header>__AS_HEADER_SVG__<span class="ttl">Eligibility Checker</span>
+  <span class="right"><span class="aa">Aa Display &amp; reading</span><span class="pw">Powered by</span><svg viewBox="0 0 304 297" aria-label="Fundable"><use href="#fd-icon"/></svg></span></header>
+
+<section class="hero">
+  <svg class="deco" viewBox="0 0 560 220" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+    <polygon points="300,0 560,0 560,140" fill="#000"/>
+    <g fill="none" stroke="#c9c9c9" stroke-width="1">
+      <path d="M120 200 C 240 120, 360 260, 560 150"/><path d="M120 190 C 240 110, 360 250, 560 140"/><path d="M120 180 C 240 100, 360 240, 560 130"/><path d="M120 170 C 240 90, 360 230, 560 120"/><path d="M120 160 C 240 80, 360 220, 560 110"/><path d="M120 150 C 240 70, 360 210, 560 100"/>
+    </g></svg>
+  <div class="wrap"><h1>Is this apprentice <span class="hl under">funded?</span></h1>
+  <p>Check eligibility, find the best start date and see who pays, now and if the Milburn Review is adopted.</p></div>
+</section>
+
+<nav class="journey"><ol>
+  <li class="done"><b>01</b>Apprentice</li><li class="done"><b>02</b>Apprenticeship</li><li class="done"><b>03</b>Checks</li><li class="on"><b>04</b>Timing</li>
+  <li class="res"><span>Eligible</span></li></ol></nav>
+
+<main>
+  <section aria-label="Form">
+    <div class="sec"><div class="slab"><b>01</b>The apprentice</div>
+      <div class="fld"><label>Name</label><div class="in">Jordan</div><small>Optional. Nothing you enter leaves this page.</small></div>
+      <div class="fld"><label>Date of birth</label><div class="in">20 / 05 / 2002</div></div>
+      <div class="chk"><i></i>They have an EHC plan or are care-experienced</div>
+      <div class="chk"><i class="on">✓</i>They're a new hire (with us 90 days or less at the start)</div></div>
+
+    <div class="sec"><div class="slab"><b>02</b>The apprenticeship</div>
+      <div class="fld"><label>Apprenticeship standard</label><div class="in">Assistant accountant (ST0002)</div>
+        <div class="pickd"><span>Level 3</span><span>15 months</span><span>Band £12,000</span></div></div>
+      <div class="jdlink">Not sure which apprenticeship? <a>Match a job description →</a></div>
+      <div class="fld"><label>Planned start date</label><div class="in">01 / 06 / 2027</div></div></div>
+
+    <div class="sec"><div class="slab"><b>03</b>Quick checks</div><br><span class="assume">✓ Assume all eligible</span>
+      <div class="q"><p>Do they have the right to work in the UK and an eligible residency status?</p><span class="yn"><span class="on">Yes</span><span>No</span><span>Not sure</span></span></div>
+      <div class="q"><p>Will at least half of their working hours be in England?</p><span class="yn"><span class="on">Yes</span><span>No</span><span>Not sure</span></span></div>
+      <div class="q" style="border:0"><p style="color:var(--muted);font-weight:400;font-style:italic">…four more checks</p></div></div>
+  </section>
+
+  <section aria-label="Result">
+    <div class="verdict">
+      <svg viewBox="0 0 300 260" preserveAspectRatio="xMaxYMid slice" aria-hidden="true"><polygon points="170,0 300,0 300,160" fill="#D10A7D"/><polygon points="300,160 300,260 210,260" fill="#fff" opacity=".08"/></svg>
+      <div class="k">Funding eligibility</div><h2><span class="hl">Eligible</span></h2>
+      <p>Jordan is eligible for apprenticeship funding. They'll be 25 at the planned start on 1 June 2027.</p></div>
+
+    <div class="block"><h3>Key points</h3>
+      <div class="num"><b>01</b><span>Their contract must run beyond 1 Sept 2028, plus the end-point assessment period.<span class="ref">para 69</span></span></div>
+      <div class="num"><b>02</b><span>Checks filled with the assume-all-eligible shortcut. Confirm them with the apprentice; the provider checks at sign-up.</span></div></div>
+
+    <div class="block dates"><h3>Best time to start</h3>
+      <div class="tiles"><div class="tile"><div class="l">Earliest sensible start</div><div class="v">23 Dec 2026</div></div>
+        <div class="tile best"><div class="l">Recommended start</div><div class="v">1 Jan 2027</div><a>Use this date →</a></div>
+        <div class="tile"><div class="l">Start no later than</div><div class="v">No deadline</div></div></div>
+      <svg class="stem" viewBox="0 0 760 190" width="100%" aria-hidden="true">
+        <line x1="10" y1="95" x2="750" y2="95" stroke="#fff" stroke-width="2"/><circle cx="10" cy="95" r="4" fill="#fff"/><circle cx="750" cy="95" r="4" fill="#fff"/>
+        <g font-family="Open Sans" font-size="13" fill="#fff">
+          <line x1="60" y1="95" x2="60" y2="160" stroke="#fff" stroke-width="2"/><rect x="70" y="118" width="86" height="18" fill="#D10A7D"/><text x="74" y="132">25 Nov 2026</text><text x="74" y="152" font-weight="700">Today</text>
+          <line x1="230" y1="95" x2="230" y2="25" stroke="#fff" stroke-width="2"/><rect x="240" y="18" width="78" height="18" fill="#D10A7D"/><text x="244" y="32">1 Jan 2027</text><text x="244" y="52" font-weight="700">Recommended</text>
+          <line x1="430" y1="95" x2="430" y2="160" stroke="#fff" stroke-width="2"/><rect x="440" y="118" width="86" height="18" fill="#D10A7D"/><text x="444" y="132">20 May 2027</text><text x="444" y="152" font-weight="700">If Milburn: 25 cut-off</text>
+          <line x1="560" y1="95" x2="560" y2="25" stroke="#fff" stroke-width="2"/><rect x="570" y="18" width="78" height="18" fill="#D10A7D"/><text x="574" y="32">1 Jun 2027</text><text x="574" y="52" font-weight="700">Planned start</text>
+          <rect x="672" y="106" width="78" height="40" fill="#fff"/><text x="680" y="122" fill="#000" font-family="Montserrat" font-weight="800" font-size="12">No age</text><text x="680" y="138" fill="#000" font-family="Montserrat" font-weight="800" font-size="12">deadline</text>
+        </g></svg>
+      <p class="why">Why 1 Jan 2027? It leaves 4 weeks for sign-up, avoids your busy months (Feb, Nov, Dec) and is before the Milburn age-25 cut-off.</p></div>
+
+    <div class="block"><h3><span class="hl pink under">Who pays</span></h3>
+      <div class="gauges">
+        <div><svg viewBox="0 0 300 160" width="100%" style="max-width:230px" aria-hidden="true"><path d="M40.00 150.00 A110 110 0 0 1 260.00 150.00" stroke="#F5D9E6" stroke-width="58" fill="none"/></svg><div class="gv">100%</div><h4>Funded today</h4><p>Levy-funded. Ann Summers pays £0.</p></div>
+        <div><svg viewBox="0 0 300 160" width="100%" style="max-width:230px" aria-hidden="true"><path d="M40.00 150.00 A110 110 0 0 1 227.78 72.22" stroke="#F5D9E6" stroke-width="58" fill="none"/><path d="M227.78 72.22 A110 110 0 0 1 260.00 150.00" stroke="#000" stroke-width="58" fill="none"/></svg><div class="gv">75%</div><h4>If Milburn adopted</h4><p>Proposed, not law. About £3,000 to pay.</p></div>
+        <div><svg viewBox="0 0 300 160" width="100%" style="max-width:230px" aria-hidden="true"><path d="M40.00 150.00 A110 110 0 0 1 225.30 69.81" stroke="#F5D9E6" stroke-width="58" fill="none"/><path d="M225.30 69.81 A110 110 0 0 1 260.00 150.00" stroke="#000" stroke-width="58" fill="none"/></svg><div class="gv">74%</div><h4>Role match</h4><p>23 of 31 skills in the job description.</p></div></div>
+      <div class="money"><div>Training price (band)</div><div class="big">£12,000</div><div>Ann Summers cash today</div><div class="big">£0</div><div>If Milburn is adopted</div><div class="big">£3,000</div></div></div>
+
+    <div class="block"><h3>Role match</h3>
+      <div class="role"><div class="pct">74%</div><div><p><b>23 of 31</b> of the skills in <b>Assistant accountant</b> appear in the job description.</p><p>Ranked 1st of 255 standards. 8 skills to develop on the job.</p><span class="tm">Job title matches</span></div></div></div>
+
+    <div class="actions"><span class="btn">Preview report</span><span class="btn alt">Print / save as PDF</span></div>
+  </section>
+</main>
+
+<section class="notes"><h4>What changes in this concept</h4><ul>
+  <li><b>Headings</b> in Montserrat ExtraBold with the magenta highlighter, as in the Levy Report.</li>
+  <li><b>Sections</b> open with black slab banners numbered 01, 02, 03; the journey bar uses the same numbers.</li>
+  <li><b>Inputs</b> become underlined fields and square Yes/No toggles, sharper and more editorial than rounded boxes.</li>
+  <li><b>Results</b> lead with a black verdict panel, then numbered key points, a black timeline panel and half-donut gauges for who pays.</li>
+  <li><b>Unchanged:</b> every rule, figure, the JD matcher, dark mode and the reading aids; this is styling only.</li></ul></section>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splash Concept</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+:root{
+  --plum:#9C3064; --pink:#E6007E; --ink:#000; --text:#3B3935; --muted:#6E6A64; --card:#fff;
+  --o1:#F7A8C8; --o2:#E9B7D0; --logo-fill:#B42A72; --acblue:#075EFC; --btn-bg:#000; --btn-fg:#fff;
+  --splash-bg:radial-gradient(120% 90% at 50% 40%,#FFFFFF 0%,#FBF1F4 45%,#F3D9E3 100%); color-scheme:light;
+}
+:root[data-theme=dark]{
+  --plum:#E58AB8; --ink:#F6F1F3; --text:#DCD4D8; --muted:#A99FA5; --card:#1E181C;
+  --o1:#6E1F47; --o2:#4A2340; --logo-fill:#FFFFFF; --acblue:#3B9EFF; --btn-bg:#F6F1F3; --btn-fg:#141013;
+  --splash-bg:radial-gradient(120% 90% at 50% 40%,#2A1722 0%,#170F14 55%,#0C080B 100%); color-scheme:dark;
+}
+*{box-sizing:border-box} html,body{margin:0;height:100%}
+body{font-family:Jost,system-ui,sans-serif;color:var(--text)}
+.on-dark{display:none} :root[data-theme=dark] .on-dark{display:block} :root[data-theme=dark] .on-light{display:none}
+
+#splash{position:fixed;inset:0;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;background:var(--splash-bg)}
+#splash .orb{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none}
+#splash .o1{width:46vmax;height:46vmax;background:var(--o1);left:-14vmax;top:-12vmax;animation:drift1 14s ease-in-out infinite alternate}
+#splash .o2{width:38vmax;height:38vmax;background:var(--o2);right:-12vmax;bottom:-14vmax;animation:drift2 17s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(8vmax,6vmax) scale(1.12)}} @keyframes drift2{to{transform:translate(-7vmax,-5vmax) scale(.92)}}
+
+/* logo: LED spark (unchanged from the live app) */
+.aslogo{position:relative;z-index:1;width:min(560px,82vw);height:auto;overflow:visible;--t0:.2s;--step:.12s}
+.aslogo .lt{fill:var(--logo-fill);opacity:0;animation:lfill .55s calc(var(--t0) + var(--i)*var(--step) + .38s) ease-out forwards}
+@keyframes lfill{0%{opacity:0;filter:drop-shadow(0 0 0 #FF4FB0)}40%{opacity:1;filter:drop-shadow(0 0 5px #FF4FB0)}100%{opacity:1;filter:drop-shadow(0 0 0 transparent)}}
+.aslogo .sp,.aslogo .tr{fill:none;stroke-linecap:round;opacity:0;animation:spark .55s calc(var(--t0) + var(--i)*var(--step)) linear forwards}
+.aslogo .ap{animation-duration:.45s;animation-delay:calc(var(--t0) + 1.55s)}
+.aslogo .sp{stroke:#FFE3F2;stroke-width:1.5;stroke-dasharray:0 16 6 78;filter:drop-shadow(0 0 1.5px #FF4FB0) drop-shadow(0 0 4px #FF2E9A) drop-shadow(0 0 9px #FF2E9A)}
+.aslogo .tr{stroke:#FF4FB0;stroke-width:1;stroke-dasharray:22 78;filter:drop-shadow(0 0 3px #FF2E9A)}
+@keyframes spark{0%{opacity:0;stroke-dashoffset:0}8%{opacity:1}86%{opacity:1}100%{opacity:0;stroke-dashoffset:-100}}
+.aslogo .apl{fill:#E8325E;transform-box:fill-box;transform-origin:50% 88%;opacity:0;animation:apop .75s calc(var(--t0) + 1.8s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 2.6s) ease-in-out infinite}
+@keyframes apop{0%{opacity:0;transform:scale(.3)}55%{opacity:1;filter:drop-shadow(0 0 12px #FF4FB0)}100%{opacity:1;transform:none;filter:none}}
+@keyframes beat{0%,100%{transform:scale(1)}8%{transform:scale(1.12)}16%{transform:scale(.97)}24%{transform:scale(1.07)}34%{transform:scale(1)}}
+
+#splash h1{position:relative;z-index:1;margin:6px 0 0;font-weight:500;font-size:clamp(15px,2.1vw,22px);letter-spacing:.34em;text-transform:uppercase;color:var(--plum);animation:rise .6s 2.0s ease both}
+#splash .tag{position:relative;z-index:1;margin:0;font-size:15px;color:var(--text);animation:rise .6s 2.1s ease both;text-align:center}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* "Powered by Fundable" sits where the button will be, then becomes the button */
+.cta{position:relative;z-index:1;margin-top:14px;width:270px;max-width:80vw;height:52px;display:grid;place-items:center}
+.cta > *{grid-area:1/1}
+.cta .frame{width:100%;height:100%;border-radius:999px;border:1px solid var(--pink);opacity:0;animation:frameIn .7s 2.2s ease forwards, frameOut .35s 4.2s ease forwards}
+@keyframes frameIn{from{opacity:0;transform:scale(.94)}to{opacity:.55;transform:none}}
+@keyframes frameOut{to{opacity:0}}
+.cta .pwl{display:flex;align-items:center;gap:12px;opacity:0;animation:pwIn .7s 2.15s ease forwards, pwOut .55s 3.7s ease-in forwards}
+.cta .pwl span{font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.cta .pwl svg{height:28px;width:108px;flex:none}
+@keyframes pwIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pwOut{to{opacity:0;transform:scale(.86);filter:blur(5px)}}
+.cta .enter{width:100%;height:100%;border:0;border-radius:999px;background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;font:inherit;font-size:14px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;box-shadow:0 10px 30px rgba(156,48,100,.25);
+  clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 3.9s cubic-bezier(.65,0,.25,1) forwards;transition:background .2s,color .2s}
+.cta .enter span{opacity:0;display:inline-block;animation:txtIn .45s 4.4s ease forwards}
+@keyframes fillOut{to{clip-path:inset(0 0 0 0 round 999px)}}
+@keyframes txtIn{from{opacity:0;letter-spacing:.5em}to{opacity:1;letter-spacing:.24em}}
+.cta .enter:hover{background:var(--pink);color:#fff}
+.cta .enter:focus-visible{outline:3px solid var(--pink);outline-offset:4px}
+
+
+/* ===== synced to the live splash: C pen draw (letter by letter, original pace) + dissolve wipe + aurora ===== */
+:root{--aurora:linear-gradient(120deg,#FBE1EE,#FFFFFF,#F4CFE2,#FFF3F8,#EFC6DA)}
+:root[data-theme=dark]{--aurora:linear-gradient(120deg,#2B1222,#120C10,#3A1530,#160E14,#2E1026)}
+.aslogo{--t0:.35s;--step:.18s}
+.aslogo .sp{display:none}
+.aslogo .tr{stroke:var(--logo-fill);stroke-width:.9;stroke-dasharray:100 100;filter:none;animation:draw .62s calc(var(--t0) + var(--i)*var(--step)) cubic-bezier(.5,0,.3,1) forwards}
+.aslogo .tr.ap{stroke:#E8325E;animation-delay:calc(var(--t0) + 10*var(--step));animation-duration:.62s}
+.aslogo .lt{animation:flood .55s calc(var(--t0) + var(--i)*var(--step) + .42s) ease-out forwards}
+.aslogo .apl{animation:apop .75s calc(var(--t0) + 10*var(--step) + .45s) cubic-bezier(.3,1.6,.5,1) forwards, beat 2.4s calc(var(--t0) + 10*var(--step) + 1.4s) ease-in-out infinite}
+@keyframes draw{0%{opacity:1;stroke-dashoffset:100}100%{opacity:1;stroke-dashoffset:0}}
+@keyframes flood{from{opacity:0}to{opacity:1}}
+#splash h1{animation:rise .8s 2.95s ease both}
+#splash{background:var(--aurora);background-size:300% 300%;animation:aurora 9s ease-in-out infinite alternate}
+#splash .orb{display:none}
+@keyframes aurora{0%{background-position:0% 40%}100%{background-position:100% 60%}}
+.cta .enter{clip-path:none;-webkit-mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);mask-image:linear-gradient(90deg,#000 0 40%,transparent 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:dissolveIn 1s 4.9s cubic-bezier(.55,0,.35,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.45s ease forwards}
+.cta .pwl{-webkit-mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);mask-image:linear-gradient(90deg,transparent 0 40%,#000 60% 100%);
+  -webkit-mask-size:300% 100%;mask-size:300% 100%;-webkit-mask-position:100% 0;mask-position:100% 0;animation:pwIn .7s 3.3s ease forwards, dissolveOut .9s 4.85s cubic-bezier(.55,0,.35,1) forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .4s 5.5s ease forwards}
+@keyframes dissolveIn{to{-webkit-mask-position:0 0;mask-position:0 0}}
+@keyframes dissolveOut{0%{-webkit-mask-position:100% 0;mask-position:100% 0;filter:blur(0)}100%{-webkit-mask-position:0 0;mask-position:0 0;filter:blur(3px)}}
+
+/* concept controls (not part of the design) */
+.ctl{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:8px;align-items:center;background:rgba(0,0,0,.72);color:#fff;padding:6px 8px 6px 14px;border-radius:999px;font-size:12px;backdrop-filter:blur(6px)}
+.ctl b{font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:10.5px;color:#FF8CC6;margin-right:4px}
+.ctl button{border:1px solid #555;background:#111;color:#fff;border-radius:999px;padding:5px 12px;cursor:pointer;font:inherit;font-size:12px}
+.ctl button[aria-pressed=true]{background:#E6007E;border-color:#E6007E}
+.ctl .clock{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:#bbb;min-width:44px;text-align:right}
+@media (prefers-reduced-motion:reduce){#splash *{animation-duration:.01s!important;animation-delay:0s!important}}
+
+/* ===== button transition: fill from centre (original pace) - the credit blurs away as the button fills out from the middle ===== */
+.cta .blocks{display:none}
+.cta .enter{position:relative;z-index:2;-webkit-mask:none;mask:none;opacity:1;clip-path:inset(0 50% 0 50% round 999px);animation:fillOut .75s 5.05s cubic-bezier(.65,0,.25,1) forwards}
+.cta .enter span{animation:txtIn .45s 5.55s ease forwards}
+.cta .pwl{-webkit-mask:none;mask:none;animation:pwIn .7s 3.3s ease forwards, pwOut .55s 4.85s ease-in forwards}
+.cta .frame{animation:frameIn .7s 3.35s ease forwards, frameOut .35s 5.35s ease forwards}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="fd-logo" viewBox="0 0 1214 314">__FUNDABLE_LOGO_PATHS__</symbol>
+  <symbol id="fd-logo-dark" viewBox="0 0 1214 314">__FUNDABLE_LOGO_PATHS_DARK__</symbol>
+</svg>
+
+<div class="ctl" aria-label="Concept controls"><b>Concept</b>
+  <button id="replay" type="button">↻ Replay</button>
+  <button id="slow" type="button" aria-pressed="false">Slow-mo</button>
+  <button id="theme" type="button">Dark</button>
+  <span class="clock" id="clock">0.0s</span>
+</div>
+
+<div id="splash">
+  <div class="orb o1"></div><div class="orb o2"></div>
+  __AS_SPLASH_SVG__
+  <h1>Eligibility Checker</h1>
+  <div class="cta">
+    <div class="frame"></div>
+    <div class="pwl"><span>Powered by</span><svg class="on-light" viewBox="0 0 1214 314" role="img" aria-label="Fundable"><use href="#fd-logo-dark"/></svg><svg class="on-dark" viewBox="0 0 1214 314" role="img" aria-label="Fundable"><use href="#fd-logo"/></svg></div>
+    <button class="enter" id="enter" type="button"><span>Click to enter</span></button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let rate=1, t0=performance.now();
+function restart(){ const s=$('splash'), c=s.cloneNode(true); s.replaceWith(c); c.getAnimations({subtree:true}).forEach(a=>a.playbackRate=rate); t0=performance.now(); }
+$('replay').onclick=restart;
+$('slow').onclick=()=>{ rate = rate===1 ? .4 : 1; $('slow').setAttribute('aria-pressed',String(rate!==1)); restart(); };
+const setTheme=t=>{ document.documentElement.setAttribute('data-theme',t); $('theme').textContent = t==='dark'?'Light':'Dark'; };
+$('theme').onclick=()=>setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark');
+setTheme('light');
+(function tick(){ $('clock').textContent=(((performance.now()-t0)/1000)*rate).toFixed(1)+'s'; requestAnimationFrame(tick); })();
+
+</script>
+</body>
+</html>
