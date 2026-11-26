@@ -869,8 +869,6 @@ table.tvf .rm:hover{color:var(--bad)}
 @media (max-width:1200px){.tv-in{grid-template-columns:minmax(0,1fr)}}   /* after the base rule above, so it wins */
 
 /* Start again lives at the right-hand end of the journey bar */
-.journey li.jreset{margin-left:auto;padding-left:16px}
-.journey li.jreset::before{display:none!important}
 .journey li.jreset .btn{padding:6px 14px;font-size:13px;white-space:nowrap}
 
 /* section numbers light up when a section is complete */
@@ -886,7 +884,11 @@ table.tvf .rm:hover{color:var(--bad)}
 /* journey bar: steps spread across the full app width; connectors fill as steps complete; an underline glides to the active step */
 :root .journey ol{gap:0}
 :root .journey li{flex:1 1 auto}
-:root .journey li.res,:root .journey li.jreset{flex:0 0 auto}
+:root .journey li:first-child{flex:0 0 auto}
+/* every later part grows by the same amount, and its connector takes the growth, so the gaps are all equal;
+   Start again gets an invisible connector of the same size, which pins it to the far right */
+:root .journey li.jreset{margin-left:0;padding-left:0}
+:root .journey li.jreset::before{display:block!important;background:none!important}
 :root .journey li + li::before{flex:1 1 auto;width:auto;min-width:18px;height:3px;margin:0 12px;border-radius:2px;background:linear-gradient(var(--pink),var(--pink)) 0 0/0% 100% no-repeat,var(--line);transition:background-size .55s cubic-bezier(.6,0,.2,1)}
 :root .journey li.done + li::before{background:linear-gradient(var(--pink),var(--pink)) 0 0/100% 100% no-repeat,var(--line)}
 :root[data-ui=boardroom] .journey li + li::before{background-image:linear-gradient(#9C3064,#9C3064)}
@@ -898,6 +900,19 @@ table.tvf .rm:hover{color:var(--bad)}
 :root .journey a{transition:color .25s,transform .25s}
 :root .journey li.act a{color:var(--ink);transform:translateY(-1px)}
 @media (prefers-reduced-motion:reduce){.journey .jind,:root .journey li + li::before,:root .journey a{transition:none}}
+
+/* narrower screens: tighter gaps so Start again stays on screen at the far right */
+@media (max-width:1280px){:root .journey li + li::before{margin:0 6px;min-width:12px}:root .journey ol{padding-left:16px;padding-right:16px}}
+@media (max-width:1100px){:root .journey li.opt .s{display:none}:root .journey a{padding-left:2px;padding-right:2px}}
+/* LED: the selected step's number glows like a lit LED (bar + that section's heading) */
+@keyframes led{0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 0 4px 1px var(--led),0 0 12px 3px var(--led-soft)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.75) inset,0 0 7px 2px var(--led),0 0 20px 7px var(--led-soft)}}
+:root{--led:#FF4FA3;--led-soft:rgba(255,79,163,.45)}
+:root .journey li.act .n,:root .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7) 0 14%,transparent 42%),var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:led 1.8s ease-in-out infinite}
+:root[data-ui=boardroom] .journey li.act .n,:root[data-ui=boardroom] .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#9C3064!important}
+:root[data-theme=dark] .journey li.act .n,:root[data-theme=dark] .inputs .card.sel .step b{color:#141013!important}
+:root[data-ui=boardroom][data-theme=dark] .journey li.act .n,:root[data-ui=boardroom][data-theme=dark] .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#E58AB8!important}
+@media (prefers-reduced-motion:reduce){:root .journey li.act .n,:root .inputs .card.sel .step b{animation:none;box-shadow:0 0 6px 2px var(--led-soft)}}
+@media print{:root .inputs .card.sel .step b{animation:none;box-shadow:none}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
