@@ -507,6 +507,8 @@ footer a{color:var(--pink-deep)}
 .rp .c3 h3{position:relative;z-index:0;font-size:23px;line-height:1.3;padding-bottom:18px;margin-bottom:24px;border-bottom:4px solid #D10A7D}
 .rp .c3 h3::before{content:"";position:absolute;z-index:-1;left:-8px;top:-4px;width:92px;height:24px;background:#D10A7D}
 .rp .c3 p{font-style:italic;font-size:18px;line-height:1.55;margin:0 0 8px}
+.rp .rc3 p{font-size:16px;line-height:1.5}
+.rp .rc3 h3{padding-bottom:14px;margin-bottom:16px}
 @media print{
   @page{size:1440px 810px;margin:0}
   html,body{background:#fff!important}
@@ -1402,7 +1404,30 @@ function buildReport(o){
       ${keys.map((k,i)=>`<p class="num"><b class="n">0${i+1}</b>${strip(k.text)}</p>`).join('')}</div>
     <div class="col" style="position:absolute;left:700px;top:392px;width:420px"><h3>The apprentice</h3>
       ${details.map(([k,v])=>`<p class="kv"><b>${k}:</b> ${v}</p>`).join('')}</div>
-    ${foot(2)}</section>`);
+    ${foot(pages.length+1)}</section>`);
+
+  // 2b. funded route for new managers (route chosen, a defunded leadership standard picked, or a leadership JD)
+  { const chosen=std&&std.r===MGR_ROUTE&&S.mgrRoute, leadStd=std&&LEAD_DEFUNDED.has(std.r)?std:null, leadJd=!!(S.jd&&MGR_RX.test(S.jd.title||''));
+    const ba=STDS.find(x=>x.r===MGR_ROUTE);
+    if(ba&&!fundBlock(ba)&&(chosen||leadStd||leadJd)){
+      const baWho = o.levyOk ? 'Paid from the levy' : (o.age<R.fullFundMax ? 'Government pays 100% (under 25)' : `Ann Summers pays 25% (${money(ba.f*R.coInvest)})`);
+      const slab = chosen ? 'Chosen: Business administrator (Level 3)' : leadStd ? `A funded alternative to ${esc(leadStd.n)}` : 'A funded route for this leadership role';
+      const compare = leadStd ? `<div style="position:absolute;left:76px;right:76px;top:652px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
+          <div style="border:2px solid #555;padding:12px 20px"><div class="mont" style="color:#fff;font-size:18px">${esc(leadStd.n)} (Level ${leadStd.l})</div><p style="margin:4px 0 0;font-size:15px;color:#ccc">Not funded for new starts since 1 September 2026. Ann Summers would pay the full ${leadStd.f?money(leadStd.f):'price'}.</p></div>
+          <div style="background:#fff;padding:12px 20px"><div class="mont" style="color:#000;font-size:18px">Business administrator (Level 3)</div><p style="margin:4px 0 0;font-size:15px;color:#222">Funded: ${money(ba.f)} band. ${esc(baWho)}.</p></div></div>` : '';
+      pages.push(`<section class="rp dark">
+        <h1 style="position:absolute;left:76px;top:56px;font-size:48px;line-height:1.15">The Funded Route<br>for <span class="hl">New Managers</span></h1>
+        <div class="deco" style="right:0;top:0">${grid()}</div>
+        <div class="slab" style="top:212px;background:#fff;color:#000">${slab}</div>
+        <p class="lead" style="position:absolute;left:76px;top:290px;width:1290px;margin:0;font-size:19px">The leadership standards, including Team leader, Operations manager and Chartered manager, lost government funding for new starts on 1 September 2026. Business administrator is still fully funded and is the standard behind funded new-manager programmes.</p>
+        <div class="c3 rc3" style="top:${leadStd?384:410}px">
+          <div><h3>What It Is</h3><p>Business administrator, Level 3 (ST0070). Funding band ${money(ba.f)}; typically 15 to 18 months.</p></div>
+          <div><h3>What Providers Add</h3><p>Some include management content and CMI awards for every learner at no extra cost. BPP&rsquo;s Management and Business Foundations: CMI Leadership Academy qualification, Foundation Chartered Manager status, Leader as Coach. Confirm what&rsquo;s included.</p></div>
+          <div><h3>When It Fits</h3><p>Use it where the role genuinely involves running day-to-day business operations. The apprenticeship has to fit the job, and the provider checks this at sign-up.</p></div>
+        </div>
+        ${compare}
+        ${foot(pages.length+1,true)}</section>`);
+    } }
 
   // 3. key dates (stem timeline)
   const ev=[{d:o.today,t:'Today',n:'Report run'}];
@@ -1420,7 +1445,7 @@ function buildReport(o){
       <line x1="1290" y1="410" x2="1290" y2="550" stroke="#fff" stroke-width="2"/><circle cx="1290" cy="550" r="5" fill="#fff"/></svg>
     ${E.map((e,i)=>{ const up=i%2===1; return `<div style="position:absolute;left:${xs[i]+14}px;top:${up?276:430}px;width:180px;font-size:19px;line-height:1.55"><span class="tag">${fmt(e.d)}</span><br><b>${esc(e.t)}</b><br><span style="color:#ccc">${esc(e.n)}</span></div>`; }).join('')}
     <div style="position:absolute;left:1214px;top:440px"><span class="wbox" style="font-size:20px;line-height:1.25;text-align:center">${endBox}</span></div>
-    ${foot(3,true)}</section>`);
+    ${foot(pages.length+1,true)}</section>`);
 
   // 4. who pays (gauges)
   const band=o.band, fundedNow=band?Math.round((band-o.c.cash)/band*100):null, fundedMil=band?Math.round((band-o.m.cash)/band*100):null;
@@ -1434,7 +1459,7 @@ function buildReport(o){
     <div style="position:absolute;left:820px;top:104px;font-size:24px;line-height:1.5">Training price (funding band):<br><b>${band?money(band):'—'}</b><br>Ann Summers cash today:<br><b>${band?money(o.c.cash):'—'}</b> <i style="font-weight:700">${o.mil&&band?`(${money(o.m.cash)} if Milburn)`:''}</i></div>
     <div style="position:absolute;left:0;right:0;top:330px;display:flex;justify-content:space-around;padding:0 40px">
       ${gauges.map(g=>`<div class="gauge">${gaugeSVG(g.v==null?0:g.v)}<div class="gv">${g.v==null?'—':g.v+'%'}</div><h3>${g.t}</h3><p>${g.p}</p></div>`).join('')}</div>
-    ${foot(4)}</section>`);
+    ${foot(pages.length+1)}</section>`);
 
   // 5. role match (only when the JD matcher was used)
   if(role){
@@ -1451,7 +1476,7 @@ function buildReport(o){
         <div><h3>Other Close Matches</h3>${others.map(x=>`<p>${esc(x.name)} (Level ${x.level}): ${x.score}%</p>`).join('')||'<p>None.</p>'}</div>
         <div><h3>Skills to Develop</h3><p>${gaps.length} not in the job description. Plan real tasks so the apprentice can practise and evidence them${gaps.length?':':'.'}</p>${gaps.slice(0,3).map(g=>`<p style="font-style:normal;font-size:15px;color:#ccc"><b style="color:#fff">${esc(g.id)}</b> ${esc(g.d.length>70?g.d.slice(0,68)+'…':g.d)}</p>`).join('')}${gaps.length>3?`<p style="font-size:15px">…and ${gaps.length-3} more (listed in the checker).</p>`:''}</div>
       </div>
-      ${foot(5,true)}</section>`);
+      ${foot(pages.length+1,true)}</section>`);
   }
 
   // 6. how we worked it out
