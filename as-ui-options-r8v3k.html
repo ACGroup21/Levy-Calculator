@@ -921,8 +921,13 @@ table.tvf .rm:hover{color:var(--bad)}
    Top bar: black box, pink number, pink glow. Section headings: the number only, pink, medium glow. */
 :root .journey li.act .n,:root[data-ui=boardroom] .journey li.act .n,:root[data-theme=dark] .journey li.act .n,:root[data-ui=boardroom][data-theme=dark] .journey li.act .n{
   background:#000!important;color:#FF4FA3!important;animation:none!important;box-shadow:0 0 6px 1px rgba(255,79,163,.55),0 0 14px 3px rgba(255,79,163,.3)!important;text-shadow:0 0 6px rgba(255,79,163,.6)}
-:root .inputs .card.sel .step b{color:#FF4FA3!important;animation:none!important;text-shadow:0 0 6px rgba(255,79,163,.5),0 0 12px rgba(255,79,163,.25)}
+:root .inputs .card.sel .step b{color:#FF4FA3!important;animation:none!important;text-shadow:0 0 4px rgba(255,79,163,.28)}   /* dim glow */
 @media print{:root .inputs .card.sel .step b{text-shadow:none;color:inherit!important}}
+
+/* Best time to onboard: same typeface as the rest of the app (no monospace dates) */
+.when .v,#tl .d,#tl li.gap .e span{font-family:var(--font,inherit)!important;letter-spacing:normal;font-variant-numeric:tabular-nums}
+.when .v{font-weight:600}
+#tl .d{font-weight:600;font-size:13px}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -2002,6 +2007,16 @@ function selectCard(card){ document.querySelectorAll('.inputs .card.sel').forEac
 document.querySelector('.inputs').addEventListener('focusin',e=>selectCard(e.target.closest('.card')));
 document.querySelector('.inputs').addEventListener('pointerdown',e=>{ const c=e.target.closest('.card'); if(c) selectCard(c); });
 $('journey').addEventListener('click',e=>{ const a=e.target.closest('a[href^="#c-"]'); if(a) selectCard(document.querySelector(a.getAttribute('href'))); });
+// the result pill: only move when the result card is off screen, and then glide rather than jump
+document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.preventDefault();
+  const v=$('verdict'), r=v.getBoundingClientRect(), barB=document.querySelector('.journey').getBoundingClientRect().bottom;
+  if(r.top>=barB-4 && r.top<innerHeight*0.6) return;   // already in view: stay put
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // scrollIntoView does nothing for a card inside the sticky results column, so scroll the page by the distance instead
+  const from=scrollY, dist=r.top-barB-12; if(reduce){ scrollTo(0,from+dist); return; }
+  // a frame-by-frame glide: the browser's own smooth scroll was being cancelled by the click here
+  const t0=performance.now(), dur=420; (function step(t){ const k=Math.min(1,(t-t0)/dur), ease=1-Math.pow(1-k,3); scrollTo(0,from+dist*ease); if(k<1) requestAnimationFrame(step); })(t0);
+  setTimeout(()=>{ if(Math.abs(scrollY-(from+dist))>2) scrollTo(0,from+dist); },dur+150); });   // lands even if frames are throttled
 // any change in the timing card counts as completing it
 ['click','change'].forEach(ev=>$('c-timing').addEventListener(ev,e=>{ if(!S.timingTouched && e.target.closest('button,input')){ S.timingTouched=true; render(); } }));
 
