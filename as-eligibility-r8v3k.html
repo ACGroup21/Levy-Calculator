@@ -875,9 +875,6 @@ table.tvf .rm:hover{color:var(--bad)}
 @keyframes jLit{0%{transform:scale(.6);box-shadow:0 0 0 0 var(--pink)}55%{transform:scale(1.18);box-shadow:0 0 0 7px transparent}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}
 :root .journey li.done .n{background:var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
 :root[data-theme=dark] .journey li.done .n{color:#141013!important}
-:root .card.done .step b{background:var(--pink);color:#fff;padding:0 8px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
-:root[data-ui=boardroom] .card.done .step b{background:#9C3064;color:#fff}
-:root[data-ui=boardroom][data-theme=dark] .card.done .step b{background:#E58AB8;color:#141013}
 /* the selected section (.card.sel) is shown by the journey bar's gliding underline, not on the heading */
 @media (prefers-reduced-motion:reduce){:root .journey li.done .n,:root .card.done .step b{animation:none}}
 
@@ -907,12 +904,18 @@ table.tvf .rm:hover{color:var(--bad)}
 /* LED: the selected step's number glows like a lit LED (bar + that section's heading) */
 @keyframes led{0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.55) inset,0 0 4px 1px var(--led),0 0 12px 3px var(--led-soft)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.75) inset,0 0 7px 2px var(--led),0 0 20px 7px var(--led-soft)}}
 :root{--led:#FF4FA3;--led-soft:rgba(255,79,163,.45)}
-:root .journey li.act .n,:root .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7) 0 14%,transparent 42%),var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:led 1.8s ease-in-out infinite}
-:root[data-ui=boardroom] .journey li.act .n,:root[data-ui=boardroom] .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#9C3064!important}
-:root[data-theme=dark] .journey li.act .n,:root[data-theme=dark] .inputs .card.sel .step b{color:#141013!important}
-:root[data-ui=boardroom][data-theme=dark] .journey li.act .n,:root[data-ui=boardroom][data-theme=dark] .inputs .card.sel .step b{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#E58AB8!important}
-@media (prefers-reduced-motion:reduce){:root .journey li.act .n,:root .inputs .card.sel .step b{animation:none;box-shadow:0 0 6px 2px var(--led-soft)}}
-@media print{:root .inputs .card.sel .step b{animation:none;box-shadow:none}}
+:root .journey li.act .n{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.7) 0 14%,transparent 42%),var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:led 1.8s ease-in-out infinite}
+:root[data-ui=boardroom] .journey li.act .n{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#9C3064!important}
+:root[data-theme=dark] .journey li.act .n{color:#141013!important}
+:root[data-ui=boardroom][data-theme=dark] .journey li.act .n{background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.6) 0 14%,transparent 42%),#E58AB8!important}
+@media (prefers-reduced-motion:reduce){:root .journey li.act .n{animation:none;box-shadow:0 0 6px 2px var(--led-soft)}}
+
+
+/* section headings: only the number itself lights up (pink, glowing text), no box */
+@keyframes ledText{0%,100%{text-shadow:0 0 4px var(--led-soft),0 0 10px var(--led-soft)}50%{text-shadow:0 0 6px var(--led),0 0 16px var(--led-soft)}}
+:root .inputs .card.sel .step b{color:var(--led)!important;animation:ledText 1.8s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){:root .inputs .card.sel .step b{animation:none;text-shadow:0 0 6px var(--led-soft)}}
+@media print{:root .inputs .card.sel .step b{animation:none;text-shadow:none;color:inherit!important}}
 </style>
 </head>
 <body>
