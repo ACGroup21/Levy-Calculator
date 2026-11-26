@@ -118,7 +118,7 @@ h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
 <body>
 <div class="wrap">
   <h1>Best time to onboard: timeline concepts</h1>
-  <p class="intro">Today's chart puts five years on one line, so Today, the chosen start date and the planned start all land in the first few millimetres and their labels pile up, while the deadlines collide at the far end. Each concept below is drawn at the real card width from the same data. Switch the case to check each one copes with a far deadline and a near one.</p>
+  <p class="intro">Today's chart puts five years on one line, so Today, the earliest start date and the planned start all land in the first few millimetres and their labels pile up, while the deadlines collide at the far end. Each concept below is drawn at the real card width from the same data. Switch the case to check each one copes with a far deadline and a near one.</p>
   <div class="bar"><span>Case</span>
     <div class="seg" id="case"><button type="button" data-c="0" aria-pressed="true">Jordan, 19, EHC plan, stocktake week</button><button type="button" data-c="1" aria-pressed="false">Sam, 21, Level 7 (deadline next year)</button></div>
   </div>
@@ -160,7 +160,7 @@ function A(c){
   h+=`<div class="a-dot" style="left:${X(t0)+6}px;color:var(--muted);background:var(--card)"></div>`;
   h+=`<div class="a-pin up" style="left:${Math.max(30,X(t0)+6)}px;color:var(--muted)"><b>Today</b><span class="mono">${fmtS(t0)}</span></div>`;
   h+=`<div class="a-dot" style="left:${X(D(c.chosen))}px;color:var(--plum)"></div>`;
-  h+=`<div class="a-pin up" style="left:${X(D(c.chosen))}px;color:var(--plum)"><b>Chosen start</b><span class="mono" style="color:var(--plum)">${fmtS(D(c.chosen))}</span></div>`;
+  h+=`<div class="a-pin up" style="left:${X(D(c.chosen))}px;color:var(--plum)"><b>Earliest start</b><span class="mono" style="color:var(--plum)">${fmtS(D(c.chosen))}</span></div>`;
   h+=`<div class="a-dot" style="left:${X(D(c.planned))}px;color:var(--plum);background:var(--card)"></div>`;
   h+=`<div class="a-pin dn" style="left:${Math.min(W-40,X(D(c.planned)))}px;color:var(--ink)"><b>Your plan</b><span class="mono">${fmtS(D(c.planned))}</span></div>`;
   if(c.earliest!==c.chosen) h+=`<div class="a-pin dn" style="left:${X(D(c.earliest))}px;color:var(--muted)"><b>Earliest</b><span class="mono">${fmtS(D(c.earliest))}</span></div>`;
@@ -173,8 +173,8 @@ function A(c){
 function B(c){
   const ev=[{d:c.today,k:'today',t:'Today',s:''}];
   ev.push({skip:true});
-  if(c.earliest!==c.chosen) ev.push({d:c.earliest,k:'',t:'Earliest sensible start',s:'4 weeks for provider sign-up',win:true});
-  ev.push({d:c.chosen,k:'chosen',t:'Chosen start date',s:c.why,win:true});
+  if(c.earliest!==c.chosen) ev.push({d:c.earliest,k:'',t:'First possible date',s:'4 weeks for provider sign-up',win:true});
+  ev.push({d:c.chosen,k:'chosen',t:'Earliest start date',s:c.why,win:true});
   if(c.planned!==c.chosen) ev.push({d:c.planned,k:'planned',t:'Your planned start',s:'Works',win:true});
   const all=[...ev]; let prev=D(c.planned);
   c.later.forEach(e=>{ const g=gapText(prev,D(e.d)); if(days(prev,D(e.d))>120) all.push({gap:g}); all.push({...e,win:e.k==='dl'?false:false}); prev=D(e.d); });
@@ -192,8 +192,8 @@ function C(c){
   const t0=D(c.today), nEnd=new Date(+D(c.planned)+14*864e5), far=c.later.map(e=>D(e.d)), fEnd=new Date(Math.max(...far)+60*864e5), W=376, NW=W*.55, GAP=18;
   const X=d=> d<=nEnd ? days(t0,d)/days(t0,nEnd)*NW : NW+GAP+days(nEnd,d)/days(nEnd,fEnd)*(W-NW-GAP);
   const pts=[{d:c.today,k:'',t:'Today'}];
-  if(c.earliest!==c.chosen) pts.push({d:c.earliest,k:'',t:'Earliest sensible start',s:'4 weeks for provider sign-up'});
-  pts.push({d:c.chosen,k:'chosen',t:'Chosen start date',s:c.why});
+  if(c.earliest!==c.chosen) pts.push({d:c.earliest,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
+  pts.push({d:c.chosen,k:'chosen',t:'Earliest start date',s:c.why});
   if(c.planned!==c.chosen) pts.push({d:c.planned,k:'planned',t:'Your planned start'});
   c.later.forEach(e=>pts.push(e));
   pts.sort((a,b)=>D(a.d)-D(b.d));

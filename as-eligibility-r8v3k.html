@@ -857,7 +857,7 @@ table.bd-t.money td:not(:first-child){width:36%}
       <div class="when" id="when"></div>
       <div id="whenNotes"></div>
       <div class="tl" id="tl" aria-hidden="true"></div>
-      <div class="legend"><span class="lw">Start window</span><span class="lt">Today</span><span class="lr">Chosen start date</span><span class="ls">Planned start</span><span class="lc">Funding deadline</span><span class="lm milonly">If Milburn adopted</span></div>
+      <div class="legend"><span class="lw">Start window</span><span class="lt">Today</span><span class="lr">Earliest start date</span><span class="ls">Planned start</span><span class="lc">Funding deadline</span><span class="lm milonly">If Milburn adopted</span></div>
     </div>
 
     <div class="card" id="moneyCard">
@@ -1147,7 +1147,7 @@ function compute(){
   if(hours<R.minHours) add('warn',`<b>${hours} hours a week is under 30</b>, so the apprenticeship takes longer: about <b>${dur||'—'} months</b>${baseDur?` instead of ${baseDur}`:''} (an estimate; your provider sets the actual length).${dur&&baseDur&&dur>=baseDur*2?' <b>That is more than double the usual length, so check it is realistic with your provider before committing.</b>':''}`,'77.3, 80');
   if(hoursAssumed) add('info','<b>No weekly hours entered</b>, so 37.5 hours a week is assumed. Add their contracted hours for an accurate length.','');
   if(!std && !fdn) add('warn','<b>Pick the apprenticeship</b> to finish the check. Its level, length, funding band and some age limits all depend on it.','',{nostd:true});
-  if(start<today) add('warn',`<b>The planned start (${fmt(start)}) is in the past.</b> Choose a future date. The chosen start date is shown below.`,'',{past:true});
+  if(start<today) add('warn',`<b>The planned start (${fmt(start)}) is in the past.</b> Choose a future date. The earliest start date is shown below.`,'',{past:true});
   if(out.end) add('info',`Their contract must run beyond <b>${fmt(out.end)}</b>, plus the end-point assessment period.`,'69');
 
   // --- verdict
@@ -1279,24 +1279,24 @@ function render(){
   } else {
     const untilV = o.until ? fmt(o.until) : 'No deadline';
 
-    W.innerHTML=`<div><div class="l">Earliest sensible start</div><div class="v">${fmt(o.from)}</div></div>
-      <div class="best"><div class="l">Chosen start date</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
+    W.innerHTML=`<div><div class="l">First possible date</div><div class="v">${fmt(o.from)}</div></div>
+      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
     L.push(['info',`<b>Why ${fmt(o.rec)}?</b> It ${and(o.recWhy)}.`]);
-    if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the chosen start date or pick a new one.`]);
+    if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the earliest start date or pick a new one.`]);
     else if(missCur.length) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.`]);
     else if(o.start<o.from && o.start>=o.earliest) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up, run the skills scan and approve the commitment.`]);
     else if(!o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
     if(o.untilWhy) L.push(['warn',`<b>Start by ${fmt(o.until)}.</b> On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the ${o.untilWhy.what.toLowerCase()}${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.`]);
     else L.push(['ok','No age deadline under current rules. Use levy funds before they expire (12 months after they enter the account).']);
     if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
-    if(o.busyClash) L.push(['warn','Every month before the deadline is marked as one to avoid, so the chosen start date ignores those preferences.']);
+    if(o.busyClash) L.push(['warn','Every month before the deadline is marked as one to avoid, so the earliest start date ignores those preferences.']);
     if(o.passed.length) L.push(['info',`Too soon to catch: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','').toLowerCase()} on ${fmt(k.date)}`).join('; ')}, because sign-up needs about 4 weeks.`]);
     const IC={ok:['i-ok','✓'],warn:['i-warn','!'],bad:['i-bad','✕'],info:['i-info','i'],mil:['i-mil','M']};
     N.innerHTML=`<ul class="means">${L.map(([k,t])=>`<li><span class="ico ${IC[k][0]}">${IC[k][1]}</span><span>${t}</span></li>`).join('')}</ul>
-      <p class="note">“Earliest sensible start” allows 4 weeks for provider sign-up. That's a planning assumption, not a rule.</p>`;
+      <p class="note">“First possible date” allows 4 weeks for provider sign-up. That's a planning assumption, not a rule.</p>`;
   }
   drawTimeline(o);
 
@@ -1323,7 +1323,7 @@ function drawTimeline(o){
   const W=Math.max(320,T.clientWidth||600), PAD=10, AX=94;
   const ev=[{d:o.today,c:'today',t:'Today'}];
   const same=iso(o.rec)===iso(o.start);
-  ev.push({d:o.rec,c:'rec',t:same?'Chosen = planned':'Chosen start date'});
+  ev.push({d:o.rec,c:'rec',t:same?'Earliest = planned':'Earliest start date'});
   if(!same) ev.push({d:o.start,c:'start',t:'Planned start'});
   o.cliffs.filter(k=>(k.scheme==='cur'||o.mil) && k.date>=o.today).forEach(k=>ev.push({d:k.date,c:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn: ')}));
   const a=o.today; let b=new Date(Math.max(...ev.map(e=>+e.d), +addMonths(o.today,10))); b=addMonths(b,2);
@@ -1569,7 +1569,7 @@ function buildReport(o){
   }
   const moneyRows=o.band?[['Funding band',money(o.band)],['Ann Summers pays today',money(o.c.cash)]].concat(o.mil?[['If Milburn adopted',money(o.m.cash)]]:[]).concat(o.c.inc?[['Employer payments',money(o.c.inc)]]:[]):[['Costs','Pick an apprenticeship']];
   const summary=({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far; the apprenticeship still needs choosing.`:`${who} looks eligible, with items to confirm.`,no:`As things stand, ${who} can't be funded.`,notyet:`${who} is too young to start yet.`})[o.verdict]
-    +(o.verdict==='yes'||o.verdict==='check'?(o.rec&&!o.blocked?` The chosen start date is ${fmt(o.rec)}${o.band?(o.c.cash?`, with ${money(o.c.cash)} from Ann Summers`:', paid in full from the levy'):''}.`:''):'')
+    +(o.verdict==='yes'||o.verdict==='check'?(o.rec&&!o.blocked?` The earliest start date is ${fmt(o.rec)}${o.band?(o.c.cash?`, with ${money(o.c.cash)} from Ann Summers`:', paid in full from the levy'):''}.`:''):'')
     +` ${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} eligibility checks answered; the provider confirms them at sign-up.`;
 
   // ---------- 1. executive summary ----------
@@ -1597,8 +1597,8 @@ function buildReport(o){
   // ---------- 3. key dates ----------
   const dr=[[fmt(o.today),'Report prepared','—']]; const dd=(row,d)=>{ row._d=d?+d:Infinity; dr.push(row); }; dr[0]._d=+o.today;
   if(!o.blocked){
-    dd([fmt(o.from),'Earliest sensible start','Allows 4 weeks for provider sign-up (planning assumption); always a working day'],o.from);
-    dd([`<b>${fmt(o.rec)}</b>`,'<b>Chosen start date</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—'],o.rec);
+    dd([fmt(o.from),'First possible date','Allows 4 weeks for provider sign-up (planning assumption); always a working day'],o.from);
+    dd([`<b>${fmt(o.rec)}</b>`,'<b>Earliest start date</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—'],o.rec);
     if(iso(o.start)!==iso(o.rec)) dd([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')],o.start);
   }
   o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dd([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`],k.date));
@@ -1636,7 +1636,7 @@ function buildReport(o){
     <ol class="bd-method">
       <li><b>Eligibility</b> follows the Apprenticeship funding rules 2026 to 2027 (version 3): age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</li>
       <li><b>Standards</b> must be approved for delivery and eligible for funding (para 68). Sixteen standards lost funding for all new starts from 1 September 2026 (GOV.UK Growth and Skills Levy factsheet). Statuses and funding bands come from the Skills England apprenticeships export.</li>
-      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The chosen start date also avoids the months marked as busy, and is always a working day: never ${holAvoidText()}.</li>
+      <li><b>Dates</b> come from birthday cut-offs. The first possible date allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The earliest start date also avoids the months marked as busy, and is always a working day: never ${holAvoidText()}.</li>
       <li><b>Costs</b> use the standard's funding band. The Milburn Review (November 2026) is a proposal, not law; the 25% cut for over-25s is assumed to fall on the employer.</li>
       <li>This report is guidance, not a funding decision. The training provider confirms eligibility at sign-up.</li>
     </ol>`,false));
