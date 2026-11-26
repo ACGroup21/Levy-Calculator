@@ -960,6 +960,9 @@ header{position:sticky;top:0;z-index:45}
 :root .journey li.trav::before{animation:jTravel var(--jt,.45s) linear forwards}
 :root .journey li.travb::before{animation:jTravelBack var(--jt,.45s) linear forwards}
 @media (prefers-reduced-motion:reduce){:root .journey li.trav::before,:root .journey li.travb::before{animation:none;background:var(--ink)!important;box-shadow:none}}
+
+/* no underline under the menu: the pink travelling along the connecting lines shows the move */
+.journey .jind{display:none!important}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
