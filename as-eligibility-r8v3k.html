@@ -572,6 +572,45 @@ table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em
 .combo li em.route{color:var(--pink-deep);font-weight:600}
 .jdalt{margin:12px 0 4px}
 .jdalt li{border-color:var(--pink-deep);border-left-width:4px}
+
+/* =================== REPORT: Boardroom style (chosen 26 Nov 2026) =================== */
+.rp.bd{background:#fff;color:#1d1d1d;font-family:"Open Sans",Arial,sans-serif}
+.bd-side{position:absolute;left:0;top:0;bottom:0;width:18px;background:#9C3064}
+.bd-kick{position:absolute;left:70px;top:46px;font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#9C3064}
+.bd-logo{position:absolute;right:70px;top:40px}
+.bd-logo .rlogo{display:block}
+.rp .bd-h1{position:absolute;left:70px;top:72px;right:260px;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:38px;line-height:1.15;color:#1d1d1d}
+.bd-verdict{position:absolute;left:70px;top:128px;display:inline-flex;align-items:center;gap:10px;font-family:Montserrat,Arial;font-weight:800;font-size:20px;padding:6px 16px 6px 12px;border-radius:4px}
+.bd-verdict.g{background:#E8F4EC;color:#1F7A4D}.bd-verdict.a{background:#FBF1E1;color:#8A5A00}.bd-verdict.r{background:#FBE9E9;color:#B21E1E}
+.bd-sum{position:absolute;left:70px;top:178px;width:1300px;font-size:17px;line-height:1.6;color:#333;margin:0}
+.rp .bd-h1 + .bd-sum{top:140px}
+.bd-left{position:absolute;left:70px;top:252px;width:770px}
+.bd-right{position:absolute;left:880px;right:70px;top:252px}
+.bd-full{position:absolute;left:70px;right:70px;top:232px}
+.bd-two{position:absolute;left:70px;right:70px;top:420px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+table.bd-t{width:100%;border-collapse:collapse;font-size:15px}
+table.bd-t th{text-align:left;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#777;padding:7px 10px;border-bottom:2px solid #1d1d1d}
+table.bd-t td{padding:7px 10px;border-bottom:1px solid #e5e5e5;vertical-align:top}
+table.bd-t.crit td{padding:6px 10px}
+table.bd-t.money td:first-child{font-weight:600;width:28%}
+table.bd-t.money td:not(:first-child){width:36%}
+.bd-rag{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:8px;vertical-align:-1px}
+.bd-rag.g{background:#1F7A4D}.bd-rag.a{background:#D98E04}.bd-rag.r{background:#C62828}
+.bd-rec{background:#F7F2F4;border-left:5px solid #9C3064;padding:18px 22px}
+.rp .bd-rec h3{font-family:Montserrat,Arial;font-weight:800;font-size:19px;margin:0 0 8px;color:#1d1d1d}
+.bd-rec ul{margin:0;padding-left:18px}.bd-rec li{margin:0 0 7px;font-size:15px;line-height:1.5}
+.bd-rec p{margin:0;font-size:15px;line-height:1.55;color:#333}
+.bd-money{margin-top:16px;display:grid;grid-template-columns:1fr auto;border-top:2px solid #1d1d1d}
+.bd-money div{padding:8px 0;border-bottom:1px solid #e5e5e5;font-size:15px}
+.bd-money div:nth-child(even){text-align:right;font-family:"JetBrains Mono",ui-monospace,monospace}
+.bd-note{position:absolute;left:70px;right:70px;bottom:92px;font-size:13.5px;color:#666;line-height:1.55;margin:0}
+.bd-gaps{padding-left:16px!important}.bd-gaps li{font-size:13.5px!important;margin-bottom:4px!important}
+.bd-more{margin:6px 0 0!important;font-size:13.5px!important;color:#666!important}
+.bd-gaps b{font-family:"JetBrains Mono",ui-monospace,monospace;color:#9C3064}
+.bd-method{position:absolute;left:70px;right:70px;top:150px;margin:0;padding-left:28px;font-size:17px;line-height:1.6;color:#333}
+.bd-method li{margin-bottom:14px}
+.bd-sign{position:absolute;left:70px;right:70px;bottom:34px;display:flex;justify-content:space-between;font-size:13px;color:#777;border-top:1px solid #ddd;padding-top:12px}
+.bd-line{display:inline-block;width:220px;border-bottom:1px solid #777;vertical-align:-2px}
 </style>
 </head>
 <body>
@@ -1320,123 +1359,123 @@ function buildReport(o){
   if(!o||!o.dob||o.badDob) return [];
   const std=o.std, who=o.name?esc(o.name):'This apprentice';
   const logo=document.querySelector('header .hlogo');
-  const logoW=w=>logo?logo.outerHTML.replace('class="hlogo"',`class="rlogo" style="width:${w}px;height:auto"`):'';
-  const logoBlack=w=>logoW(w).replace(/fill="#FFFFFF"/g,'fill="#000000"');
+  const logoInk=w=>logo?logo.outerHTML.replace('class="hlogo"',`class="rlogo" style="width:${w}px;height:auto"`).replace(/fill="#FFFFFF"/g,'fill="#9C3064"'):'';
+  const stdTitle=std?`${esc(std.n)} (Level ${std.l})`:(o.fdn?'Foundation apprenticeship':'Apprenticeship not chosen yet');
   const vText={yes:'Eligible',check:o.nostd?'Eligible so far':'Eligible, with checks',no:'Not eligible for funding',notyet:'Not eligible yet'}[o.verdict];
-  const stdTxt=std?`${esc(std.n)} (Level ${std.l})`:(o.fdn?'Foundation apprenticeship':'Apprenticeship not chosen yet');
-  const pages=[]; const total=()=>pages.length;
-  const foot=(n,dark)=>`<div class="foot"><span>Ann Summers · Apprentice Eligibility Report · ${fmt(o.today)} · Powered by Fundable · page ${n}</span></div>`;
+  const vRag={yes:'g',check:'a',no:'r',notyet:'r'}[o.verdict];
+  const RAG={g:'Pass',a:'Check',r:'Fail'};
+  const pages=[];
+  const page=(kick,title,body,sign)=>`<section class="rp bd"><div class="bd-side"></div>
+      <div class="bd-kick">${kick}</div><div class="bd-logo">${logoInk(150)}</div>
+      <h1 class="bd-h1">${title}</h1>${body}
+      <div class="bd-sign"><span>Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by Fundable · page ${pages.length+1}</span>${sign?'<span>Approved by: <i class="bd-line"></i>&nbsp;&nbsp; Date: <i class="bd-line" style="width:130px"></i></span>':''}</div></section>`;
+  const table=(head,rows,cls)=>`<table class="bd-t ${cls||''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const rag=k=>`<span class="bd-rag ${k}"></span>${RAG[k]}`;
 
-  // 1. cover
-  pages.push(`<section class="rp dark">
-    <div style="position:absolute;left:0;right:0;top:300px;text-align:center"><h1 style="font-size:88px;line-height:1.05">Apprentice Eligibility Report</h1>
-    <p class="lead" style="margin:44px 0 0;font-size:24px">${who} · ${stdTxt}</p>
-    <div style="margin-top:56px;display:flex;justify-content:center">${logoW(200)}</div></div>
-    <div class="foot" style="color:#aaa"><span>Checked ${fmt(o.today)}</span><span>Powered by Fundable</span></div></section>`);
+  // ---------- criteria (each row is read from the live result) ----------
+  const crit=[];
+  const ageBad=o.items.find(i=>i.sev==='bad'&&(i.notyet||i.unfunded)&&/age|young|ages/i.test(strip(i.text)));
+  crit.push(['Age at start',ageBad?'r':'g',ageBad?strip(ageBad.text).split('.')[0]:`${o.age} at the planned start`]);
+  if(!std&&!o.fdn) crit.push(['Apprenticeship','a','Not chosen yet']);
+  else { const fb=std?fundBlock(std):null; crit.push(['Apprenticeship status',fb&&!/age|ages/i.test(fb)?'r':'g',fb&&!/age|ages/i.test(fb)?fb:`Approved for delivery${std&&std.f?' · band '+money(std.f):''}`]); }
+  const QL={res:'Residency and right to work',eng:'Half of hours in England',con:'Contract to the end',oth:'No other funded programme',edu:'Not in full-time education',pri:'Prior learning'};
+  QS.forEach(q=>{ const a=S.answers[q.id]; let st,note;
+    if(a===undefined){st='a';note='Not answered';} else if(a==='unsure'){st='a';note='To confirm';}
+    else if(a===q.bad){ st=q.soft?'a':'r'; note=q.soft?'Must teach new skills; price may reduce':'Blocks funding'; }
+    else { st='g'; note=S.assumed?'Assumed eligible (shortcut)':'Confirmed'; }
+    crit.push([QL[q.id],st,note]); });
+  if(o.hours<R.minHours) crit.push(['Weekly hours','a',`${o.hours} a week: about ${o.dur||'?'} months`]);
+  const role=S.jd&&std?JDM.coverage(std.r,S.jd.text):null;
+  if(role&&!role.none) crit.push(['Role fit',role.score>=50||role.title?'g':'a',`${role.score}% of skills${role.title?' · title match':''}`]);
 
-  // 2. the result
-  const order={bad:0,warn:1,ok:2,info:3};
-  const keys=o.items.slice().sort((a,b)=>order[a.sev]-order[b.sev]).slice(0,3);
-  const details=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],['Apprenticeship',std?`${esc(std.n)}, ${std.r}, ${std.d||'?'} months`:stdTxt],
-    ...(std&&std.r===MGR_ROUTE&&S.mgrRoute?[['Route','Funded route for new managers. Providers may include management content and CMI awards; confirm with the provider.']]:[]),
-    ['Planned start',`${fmt(o.start)}, ${o.hoursAssumed?'37.5 (assumed)':o.hours} hours a week`],['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assumed eligible)':''}`]];
-  pages.push(`<section class="rp">
-    ${tri('900,0 1440,0 1440,300','#000')}${tri('1440,420 1050,810 1440,810','#000')}
-    <div class="deco" style="right:0;bottom:120px;opacity:.5">${waves(640,420,'#bbb',22)}</div>
-    <h1 style="position:absolute;left:68px;top:78px;font-size:76px">The Result</h1>
-    <div class="slab" style="top:190px">Funding eligibility: ${vText}</div>
-    <p class="lead" style="position:absolute;left:68px;top:268px;width:860px;margin:0">${strip(({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far. Pick the apprenticeship to finish the check.`:`${who} looks eligible. A few items need confirming first.`,no:`As things stand, ${who} can't be funded. The reasons are below.`,notyet:`${who} can start from ${fmt(o.earliest)}.`})[o.verdict])} They'll be ${o.age} at the planned start on ${fmt(o.start)}.</p>
-    <div class="col" style="position:absolute;left:68px;top:392px;width:560px"><h3>Key points</h3>
-      ${keys.map((k,i)=>`<p class="num"><b class="n">0${i+1}</b>${strip(k.text)}</p>`).join('')}</div>
-    <div class="col" style="position:absolute;left:700px;top:392px;width:420px"><h3>The apprentice</h3>
-      ${details.map(([k,v])=>`<p class="kv"><b>${k}:</b> ${v}</p>`).join('')}</div>
-    ${foot(pages.length+1)}</section>`);
+  // ---------- recommendation ----------
+  const rec=[];
+  if(o.verdict==='yes'||o.verdict==='check'){
+    if(!o.blocked&&o.rec) rec.push(`Start on <b>${fmt(o.rec)}</b>${o.recWhy&&o.recWhy[0]?': it '+o.recWhy[0]:''}.`);
+    if(o.band) rec.push(o.c.cash?`Budget <b>${money(o.c.cash)}</b> from Ann Summers.`:`Fund from the levy: <b>£0</b> to Ann Summers.`);
+    if(o.end) rec.push(`Contract to run beyond <b>${fmt(o.end)}</b>, plus the end-point assessment.`);
+    const chk=crit.filter(r=>r[1]==='a').length; if(chk) rec.push(`Confirm the <b>${chk}</b> item${chk>1?'s':''} marked “Check” before sign-up.`);
+    if(std&&std.r===MGR_ROUTE&&S.mgrRoute) rec.push('Funded route for new managers: confirm the role involves running day-to-day operations (page 2).');
+    if(o.mil&&o.band&&o.m.cash>o.c.cash) rec.push(`Note: about <b>${money(o.m.cash)}</b> if the Milburn Review is adopted.`);
+  } else {
+    const bad=o.items.find(i=>i.sev==='bad');
+    rec.push(`<b>Not fundable as planned.</b> ${bad?strip(bad.text).split('. ')[0]+'.':''}`);
+    if(o.verdict==='notyet') rec.push(`Earliest start: <b>${fmt(o.earliest)}</b>.`);
+    else if(o.until&&o.start>o.until) rec.push(`Starting by <b>${fmt(o.until)}</b> would fix this.`);
+    if(std&&LEAD_DEFUNDED.has(std.r)) rec.push('Use the funded route for new managers: <b>Business administrator (Level 3)</b> (page 2).');
+  }
+  const moneyRows=o.band?[['Funding band',money(o.band)],['Ann Summers pays today',money(o.c.cash)]].concat(o.mil?[['If Milburn adopted',money(o.m.cash)]]:[]).concat(o.c.inc?[['Employer payments',money(o.c.inc)]]:[]):[['Costs','Pick an apprenticeship']];
+  const summary=({yes:`${who} is eligible for apprenticeship funding.`,check:o.nostd?`${who} looks eligible so far; the apprenticeship still needs choosing.`:`${who} looks eligible, with items to confirm.`,no:`As things stand, ${who} can't be funded.`,notyet:`${who} is too young to start yet.`})[o.verdict]
+    +(o.verdict==='yes'||o.verdict==='check'?(o.rec&&!o.blocked?` The recommended start is ${fmt(o.rec)}${o.band?(o.c.cash?`, with ${money(o.c.cash)} from Ann Summers`:', paid in full from the levy'):''}.`:''):'')
+    +` ${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} eligibility checks answered; the provider confirms them at sign-up.`;
 
-  // 2b. funded route for new managers (route chosen, a defunded leadership standard picked, or a leadership JD)
+  // ---------- 1. executive summary ----------
+  pages.push(page('Executive summary · Apprentice eligibility',`${who}: ${stdTitle}`,`
+    <div class="bd-verdict ${vRag}"><span class="bd-rag ${vRag}"></span>${vText}</div>
+    <p class="bd-sum">${summary}</p>
+    <div class="bd-left">${table(['Criterion','Status','Note'],crit.map(r=>[r[0],rag(r[1]),esc(r[2])]),'crit')}</div>
+    <div class="bd-right"><div class="bd-rec"><h3>Recommendation</h3><ul>${rec.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div class="bd-money">${moneyRows.map(([k,v])=>`<div>${k}</div><div><b>${v}</b></div>`).join('')}</div></div>`,true));
+
+  // ---------- 2. funded route for new managers ----------
   { const chosen=std&&std.r===MGR_ROUTE&&S.mgrRoute, leadStd=std&&LEAD_DEFUNDED.has(std.r)?std:null, leadJd=!!(S.jd&&MGR_RX.test(S.jd.title||''));
     const ba=STDS.find(x=>x.r===MGR_ROUTE);
     if(ba&&!fundBlock(ba)&&(chosen||leadStd||leadJd)){
-      const baWho = o.levyOk ? 'Paid from the levy' : (o.age<R.fullFundMax ? 'Government pays 100% (under 25)' : `Ann Summers pays 25% (${money(ba.f*R.coInvest)})`);
-      const slab = chosen ? 'Chosen: Business administrator (Level 3)' : leadStd ? `A funded alternative to ${esc(leadStd.n)}` : 'A funded route for this leadership role';
-      const compare = leadStd ? `<div style="position:absolute;left:76px;right:76px;top:652px;display:grid;grid-template-columns:1fr 1fr;gap:24px">
-          <div style="border:2px solid #555;padding:12px 20px"><div class="mont" style="color:#fff;font-size:18px">${esc(leadStd.n)} (Level ${leadStd.l})</div><p style="margin:4px 0 0;font-size:15px;color:#ccc">Not funded for new starts since 1 September 2026. Ann Summers would pay the full ${leadStd.f?money(leadStd.f):'price'}.</p></div>
-          <div style="background:#fff;padding:12px 20px"><div class="mont" style="color:#000;font-size:18px">Business administrator (Level 3)</div><p style="margin:4px 0 0;font-size:15px;color:#222">Funded: ${money(ba.f)} band. ${esc(baWho)}.</p></div></div>` : '';
-      pages.push(`<section class="rp dark">
-        <h1 style="position:absolute;left:76px;top:56px;font-size:48px;line-height:1.15">The Funded Route<br>for <span class="hl">New Managers</span></h1>
-        <div class="deco" style="right:0;top:0">${grid()}</div>
-        <div class="slab" style="top:212px;background:#fff;color:#000">${slab}</div>
-        <p class="lead" style="position:absolute;left:76px;top:290px;width:1290px;margin:0;font-size:19px">The leadership standards, including Team leader, Operations manager and Chartered manager, lost government funding for new starts on 1 September 2026. Business administrator is still fully funded and is the standard behind funded new-manager programmes.</p>
-        <div class="c3 rc3" style="top:${leadStd?384:410}px">
-          <div><h3>What It Is</h3><p>Business administrator, Level 3 (ST0070). Funding band ${money(ba.f)}; typically 15 to 18 months.</p></div>
-          <div><h3>What Providers Add</h3><p>Some include management content and CMI awards for every learner at no extra cost. BPP&rsquo;s Management and Business Foundations: CMI Leadership Academy qualification, Foundation Chartered Manager status, Leader as Coach. Confirm what&rsquo;s included.</p></div>
-          <div><h3>When It Fits</h3><p>Use it where the role genuinely involves running day-to-day business operations. The apprenticeship has to fit the job, and the provider checks this at sign-up.</p></div>
-        </div>
-        ${compare}
-        ${foot(pages.length+1,true)}</section>`);
+      const baWho=o.levyOk?'Paid from the levy':(o.age<R.fullFundMax?'Government pays 100% (under 25)':`Ann Summers pays 25% (${money(ba.f*R.coInvest)})`);
+      const opts=[]; if(leadStd) opts.push([`${esc(leadStd.n)} (Level ${leadStd.l})`,rag('r'),'Not funded for new starts since 1 Sept 2026',leadStd.f?money(leadStd.f):'Full price']);
+      opts.push(['Business administrator (Level 3)',rag('g'),`Funded · band ${money(ba.f)}`,esc(baWho)]);
+      pages.push(page('Option appraisal · Funded route for new managers','Funded route for new managers',`
+        <p class="bd-sum">The leadership standards, including Team leader, Operations manager and Chartered manager, lost government funding for new starts on 1 September 2026. Business administrator (Level 3, ST0070) is still fully funded and is the standard behind funded new-manager programmes.</p>
+        <div class="bd-full">${table(['Option','Status','Funding','Cost to Ann Summers'],opts)}</div>
+        <div class="bd-two"><div class="bd-rec"><h3>What providers add</h3><p>Some providers include management content and CMI awards for every learner at no extra cost. For example, BPP’s Management and Business Foundations includes a CMI Leadership Academy qualification, CMI Foundation Chartered Manager status and Leader as Coach accreditation. That is the provider’s offer, so confirm what is included.</p></div>
+          <div class="bd-rec"><h3>When it fits</h3><p>Use it where the role genuinely involves running day-to-day business operations. The apprenticeship has to fit the job, and the provider checks this at sign-up. Typical length is 15 to 18 months.</p></div></div>`,false));
     } }
 
-  // 3. key dates (stem timeline)
-  const ev=[{d:o.today,t:'Today',n:'Report run'}];
-  if(!o.blocked){ ev.push({d:o.from,t:'Earliest sensible start',n:'4 weeks for sign-up'}); ev.push({d:o.rec,t:'Recommended start',n:o.recWhy&&o.recWhy[1]?o.recWhy[1].replace(/^avoids/,'Avoids').replace(/^comes/,'Comes').replace(/^is/,'Is'):'Leaves time for sign-up'});
-    if(iso(o.start)!==iso(o.rec)) ev.push({d:o.start,t:'Planned start',n:o.start<o.today?'In the past':'Your date'}); }
-  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).slice(0,3).forEach(k=>ev.push({d:k.date,t:k.what.replace('Milburn: ','If Milburn: '),n:k.elig?'Funding changes':`Worth ${money(k.cost)}`}));
-  ev.sort((a,b)=>a.d-b.d); const E=ev.slice(0,6);
-  const x0=150, x1=1010, xs=E.map((e,i)=>x0+(E.length>1?i*(x1-x0)/(E.length-1):0));
-  const endBox=o.until?`Start by<br>${fmt(o.until)}`:'No age<br>deadline';
-  pages.push(`<section class="rp dark">
-    <h1 style="position:absolute;left:76px;top:70px;font-size:56px;line-height:1.15"><span class="hl">Key Dates</span><br>and Deadlines</h1>
-    <div style="position:absolute;left:68px;top:356px"><span class="wbox">${o.today.getUTCFullYear()}/${String((o.today.getUTCFullYear()+1)%100).padStart(2,'0')}</span></div>
-    <svg class="deco" style="left:0;top:0" width="1440" height="810"><line x1="70" y1="410" x2="1380" y2="410" stroke="#fff" stroke-width="2"/><circle cx="70" cy="410" r="5" fill="#fff"/><circle cx="1380" cy="410" r="5" fill="#fff"/>
-      ${E.map((e,i)=>{ const up=i%2===1; return `<line x1="${xs[i]}" y1="410" x2="${xs[i]}" y2="${up?270:550}" stroke="#fff" stroke-width="2"/><circle cx="${xs[i]}" cy="${up?270:550}" r="5" fill="#fff"/>`; }).join('')}
-      <line x1="1290" y1="410" x2="1290" y2="550" stroke="#fff" stroke-width="2"/><circle cx="1290" cy="550" r="5" fill="#fff"/></svg>
-    ${E.map((e,i)=>{ const up=i%2===1; return `<div style="position:absolute;left:${xs[i]+14}px;top:${up?276:430}px;width:180px;font-size:19px;line-height:1.55"><span class="tag">${fmt(e.d)}</span><br><b>${esc(e.t)}</b><br><span style="color:#ccc">${esc(e.n)}</span></div>`; }).join('')}
-    <div style="position:absolute;left:1214px;top:440px"><span class="wbox" style="font-size:20px;line-height:1.25;text-align:center">${endBox}</span></div>
-    ${foot(pages.length+1,true)}</section>`);
+  // ---------- 3. key dates ----------
+  const dr=[[fmt(o.today),'Report prepared','—']];
+  if(!o.blocked){
+    dr.push([fmt(o.from),'Earliest sensible start','Allows 4 weeks for provider sign-up (planning assumption)']);
+    dr.push([`<b>${fmt(o.rec)}</b>`,'<b>Recommended start</b>',o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'—']);
+    if(iso(o.start)!==iso(o.rec)) dr.push([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')]);
+  }
+  o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dr.push([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`]));
+  if(o.end) dr.push([fmt(o.end),'Earliest contract end','Plus the end-point assessment period']);
+  dr.sort((x,y)=>0);
+  pages.push(page('Timeline · Key dates','Key dates and deadlines',`
+    <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>: after that the ${esc(o.untilWhy.what.toLowerCase())}.`:'There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
+    <div class="bd-full">${table(['Date','Event','What it means'],dr)}</div>`,false));
 
-  // 4. who pays (gauges)
-  const band=o.band, fundedNow=band?Math.round((band-o.c.cash)/band*100):null, fundedMil=band?Math.round((band-o.m.cash)/band*100):null;
-  const role=S.jd&&std?JDM.coverage(std.r,S.jd.text):null;
-  const g3=role&&!role.none?{v:role.score,t:'Role Match',p:`${role.covered} of ${role.total} of the apprenticeship's skills appear in the job description${role.title?', and the job title matches':''}.`}
-        :{v:Math.round(QS.filter(q=>S.answers[q.id]!==undefined).length/QS.length*100),t:'Checks Answered',p:`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} eligibility checks answered${S.assumed?' using the assume-all-eligible shortcut':''}.`};
-  const gauges=[{v:fundedNow,t:'Funded Today',p:band?`Paid by the levy or government under current rules. Ann Summers pays ${money(o.c.cash)}${o.c.inc?` and receives ${money(o.c.inc)} in employer payments`:''}.`:'Pick an apprenticeship to see costs.'},
-    o.mil?{v:fundedMil,t:'If Milburn Adopted',p:band?`Proposed, not law. Ann Summers would pay about ${money(o.m.cash)}${o.m.hire?`, with a ${money(o.m.hire)} hiring payment`:''}.`:'Pick an apprenticeship to see costs.'}:null, g3].filter(Boolean);
-  pages.push(`<section class="rp">
-    <h1 style="position:absolute;left:80px;top:96px;font-size:60px;line-height:1.25"><span class="hl pink" style="padding:0 6px">Who Pays</span><br>for the Training</h1>
-    <div style="position:absolute;left:820px;top:104px;font-size:24px;line-height:1.5">Training price (funding band):<br><b>${band?money(band):'—'}</b><br>Ann Summers cash today:<br><b>${band?money(o.c.cash):'—'}</b> <i style="font-weight:700">${o.mil&&band?`(${money(o.m.cash)} if Milburn)`:''}</i></div>
-    <div style="position:absolute;left:0;right:0;top:330px;display:flex;justify-content:space-around;padding:0 40px">
-      ${gauges.map(g=>`<div class="gauge">${gaugeSVG(g.v==null?0:g.v)}<div class="gv">${g.v==null?'—':g.v+'%'}</div><h3>${g.t}</h3><p>${g.p}</p></div>`).join('')}</div>
-    ${foot(pages.length+1)}</section>`);
-
-  // 5. role match (only when the JD matcher was used)
-  if(role){
-    const others=S.jd.ranked.filter(x=>!std||x.ref!==std.r).slice(0,3);
-    const gaps=role.none?[]:role.gaps;
-    pages.push(`<section class="rp dark">
-      <h1 style="position:absolute;left:76px;top:140px;font-size:64px;line-height:1.15">The Role<br><span class="hl low">Match</span></h1>
-      <div class="deco" style="left:586px;top:0">${grid()}</div>
-      <div style="position:absolute;left:560px;top:84px;width:880px;height:250px;background:#1a1a1a;display:flex;align-items:center;gap:40px;padding:0 50px">
-        <div style="font-family:Montserrat,Arial;font-weight:800;font-size:96px;color:#fff">${role.none?'—':role.score+'%'}</div>
-        <div style="font-size:21px;line-height:1.5;color:#ddd">${role.none?`${esc(role.name)} has no skills list stored, so the match can't be scored.`:`<b style="color:#fff">${role.covered} of ${role.total}</b> of the skills in <b style="color:#fff">${esc(std.n)}</b> appear in the job description.${role.title?'<br><b style="color:#fff">The job title matches.</b>':''}`}</div></div>
-      <div class="c3">
-        <div><h3>Job Description</h3><p>${esc(S.jd.title||'No title line')}</p><p>Ranked across ${S.jd.considered} standards with skills lists. Job-title matches come first, then the closest wording.</p></div>
-        <div><h3>Other Close Matches</h3>${others.map(x=>`<p>${esc(x.name)} (Level ${x.level}): ${x.score}%</p>`).join('')||'<p>None.</p>'}</div>
-        <div><h3>Skills to Develop</h3><p>${gaps.length} not in the job description. Plan real tasks so the apprentice can practise and evidence them${gaps.length?':':'.'}</p>${gaps.slice(0,3).map(g=>`<p style="font-style:normal;font-size:15px;color:#ccc"><b style="color:#fff">${esc(g.id)}</b> ${esc(g.d.length>70?g.d.slice(0,68)+'…':g.d)}</p>`).join('')}${gaps.length>3?`<p style="font-size:15px">…and ${gaps.length-3} more (listed in the checker).</p>`:''}</div>
-      </div>
-      ${foot(pages.length+1,true)}</section>`);
+  // ---------- 4. who pays ----------
+  if(o.band){
+    const cNet=o.c.cash-o.c.inc, mNet=o.m.cash-o.m.inc-o.m.hire, f=v=>typeof v==='number'?money(v):esc(v);
+    const wr=[['Training price (funding band)',money(o.band),money(o.band)],['Who pays',esc(o.c.who),esc(o.m.who)],['Ann Summers cash',f(o.c.cash),f(o.m.cash)],
+      ['Employer payments',o.c.inc?money(o.c.inc):esc(o.c.incTxt),o.m.inc?money(o.m.inc):esc(o.m.incTxt)],['Hiring payment',esc(o.c.hireTxt),o.m.hire?money(o.m.hire):esc(o.m.hireTxt)],
+      [`<b>Net cost to Ann Summers</b>`,`<b>${cNet<0?money(-cNet)+' back':money(cNet)}</b>`,`<b>${mNet<0?money(-mNet)+' back':money(mNet)}</b>`]];
+    pages.push(page('Financial summary · Who pays','Who pays for the training',`
+      <p class="bd-sum">${o.c.cash?`Under current rules Ann Summers pays ${money(o.c.cash)}.`:'Under current rules Ann Summers pays nothing: the training is paid from the levy or by government.'}${o.mil&&o.m.cash>o.c.cash?` If the Milburn Review is adopted, that would rise to about ${money(o.m.cash)}.`:''}</p>
+      <div class="bd-full">${table(o.mil?['','Current rules','If Milburn adopted (proposed)']:['','Current rules'],o.mil?wr:wr.map(r=>r.slice(0,2)),'money')}</div>
+      <p class="bd-note">Employers pay no National Insurance on under-25 apprentices’ pay up to £50,270, until they turn 25.${o.mil?' The Milburn Review recommends cutting government funding for over-25s by 25% (para 470) without saying how; this report assumes the employer covers it. Not law yet.':''}</p>`,false));
   }
 
-  // 6. how we worked it out
-  const n=pages.length+1;
-  pages.push(`<section class="rp">
-    ${tri('1010,0 1440,0 1225,140','#000')}${tri('1440,300 1000,610 1440,810','#000')}
-    <div class="deco" style="right:0;top:150px;opacity:.6">${waves(460,260,'#bbb',18)}</div>
-    <h1 style="position:absolute;left:68px;top:78px;font-size:58px">How We Worked It Out</h1>
-    <div class="slab" style="top:178px">Rules, sources and assumptions.</div>
-    <div style="position:absolute;left:68px;top:270px;width:840px;font-size:19px;line-height:1.6">
-      <p style="margin:0 0 22px"><b>01</b> Eligibility follows the <b>Apprenticeship funding rules 2026 to 2027 (version 3)</b>: age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</p>
-      <p style="margin:0 0 22px"><b>02</b> Dates come from their birthday cut-offs. <b>Earliest sensible start</b> allows 4 weeks for the provider to sign them up; that is a planning assumption, not a rule. The recommended date also avoids the months you marked as busy.</p>
-      <p style="margin:0"><b>03</b> Costs use the standard's funding band. The <b>Milburn Review</b> (November 2026) is a proposal, not law: it recommends cutting government funding for over-25s by 25%, which this report assumes the employer covers. This report is guidance, not a funding decision; the training provider confirms eligibility at sign-up.</p></div>
-    ${foot(n)}</section>`);
+  // ---------- 5. role match ----------
+  if(role){
+    const others=S.jd.ranked.filter(x=>!std||x.ref!==std.r).slice(0,4);
+    const gaps=role.none?[]:role.gaps.slice(0,7);
+    pages.push(page('Role analysis · Job description match','Role match',`
+      <p class="bd-sum">${role.none?`${esc(role.name)} has no skills list stored, so the match can't be scored.`:`<b>${role.covered} of ${role.total}</b> of the skills in ${esc(std.n)} appear in the job description “${esc(S.jd.title||'Job description')}” (<b>${role.score}%</b>)${role.title?', and the job title matches':''}.`}</p>
+      <div class="bd-left">${table(['Other close matches','Level','Skills match'],others.map(x=>[esc(x.name),String(x.level),x.score+'%']).concat(others.length?[]:[['None','','']]))}</div>
+      <div class="bd-right"><div class="bd-rec"><h3>Skills to develop on the job (${role.none?0:role.gaps.length})</h3>${gaps.length?`<ul class="bd-gaps">${gaps.map(g=>`<li><b>${esc(g.id)}</b> ${esc(g.d.length>78?g.d.slice(0,76)+'…':g.d)}</li>`).join('')}</ul>${role.gaps.length>7?`<p class="bd-more">…and ${role.gaps.length-7} more, listed in the checker.</p>`:''}`:'<p>None.</p>'}</div></div>`,false));
+  }
+
+  // ---------- 6. method and sources ----------
+  pages.push(page('Method · Rules, sources and assumptions','How this was worked out',`
+    <ol class="bd-method">
+      <li><b>Eligibility</b> follows the Apprenticeship funding rules 2026 to 2027 (version 3): age at the start date, residency and right to work, at least half of working hours in England, a contract that lasts to the end, no overlapping government-funded learning, and prior learning. Paragraph numbers are shown in the checker.</li>
+      <li><b>Standards</b> must be approved for delivery and eligible for funding (para 68). Sixteen standards lost funding for all new starts from 1 September 2026 (GOV.UK Growth and Skills Levy factsheet). Statuses and funding bands come from the Skills England apprenticeships export.</li>
+      <li><b>Dates</b> come from birthday cut-offs. The earliest sensible start allows 4 weeks for provider sign-up; that is a planning assumption, not a rule. The recommended date also avoids the months marked as busy.</li>
+      <li><b>Costs</b> use the standard's funding band. The Milburn Review (November 2026) is a proposal, not law; the 25% cut for over-25s is assumed to fall on the employer.</li>
+      <li>This report is guidance, not a funding decision. The training provider confirms eligibility at sign-up.</li>
+    </ol>`,false));
   return pages;
 }
 function fitReport(){ const box=$('rvPages'); const sc=Math.min(1,(box.clientWidth||window.innerWidth-48)/1440);
