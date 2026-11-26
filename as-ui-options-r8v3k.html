@@ -547,7 +547,7 @@ footer a{color:var(--pink-deep)}
 :root .journey .n{display:inline;border:0!important;background:none!important;width:auto;height:auto;color:var(--muted)!important;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:14px}
 :root .journey .n::before{content:"0"}
 :root .journey li.res .n::before{content:""}
-:root .journey li.done .n{color:var(--mag)!important}
+:root .journey li.done .n{color:var(--muted)!important}   /* plain like the rest until selected */
 :root .journey li.current a{border-bottom-color:var(--mag);color:var(--ink)}
 :root .journey li + li::before{width:18px}
 :root .journey li.res a{background:#000!important;color:#fff;padding:6px 12px;border:0}
@@ -869,14 +869,11 @@ table.tvf .rm:hover{color:var(--bad)}
 @media (max-width:1200px){.tv-in{grid-template-columns:minmax(0,1fr)}}   /* after the base rule above, so it wins */
 
 /* Start again lives at the right-hand end of the journey bar */
-.journey li.jreset .btn{padding:6px 14px;font-size:13px;white-space:nowrap}
 
 /* section numbers light up when a section is complete */
 @keyframes jLit{0%{transform:scale(.6);box-shadow:0 0 0 0 var(--pink)}55%{transform:scale(1.18);box-shadow:0 0 0 7px transparent}100%{transform:scale(1);box-shadow:0 0 0 0 transparent}}
-:root .journey li.done .n{background:var(--pink)!important;color:#fff!important;padding:2px 6px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
-:root[data-theme=dark] .journey li.done .n{color:#141013!important}
 /* the selected section (.card.sel) is shown by the journey bar's gliding underline, not on the heading */
-@media (prefers-reduced-motion:reduce){:root .journey li.done .n,:root .card.done .step b{animation:none}}
+
 
 /* journey bar: steps spread across the full app width; connectors fill as steps complete; an underline glides to the active step */
 :root .journey ol{gap:0}
@@ -884,8 +881,7 @@ table.tvf .rm:hover{color:var(--bad)}
 :root .journey li:first-child{flex:0 0 auto}
 /* every later part grows by the same amount, and its connector takes the growth, so the gaps are all equal;
    Start again gets an invisible connector of the same size, which pins it to the far right */
-:root .journey li.jreset{margin-left:0;padding-left:0}
-:root .journey li.jreset::before{display:block!important;background:none!important}
+
 :root .journey li + li::before{flex:1 1 auto;width:auto;min-width:18px;height:3px;margin:0 12px;border-radius:2px;background:linear-gradient(var(--pink),var(--pink)) 0 0/0% 100% no-repeat,var(--line);transition:background-size .55s cubic-bezier(.6,0,.2,1)}
 :root .journey li.done + li::before{background:linear-gradient(var(--pink),var(--pink)) 0 0/100% 100% no-repeat,var(--line)}
 :root[data-ui=boardroom] .journey li + li::before{background-image:linear-gradient(#9C3064,#9C3064)}
@@ -929,6 +925,11 @@ table.tvf .rm:hover{color:var(--bad)}
 .when .v,#tl .d,#tl li.gap .e span{font-family:var(--font,inherit)!important;letter-spacing:normal;font-variant-numeric:tabular-nums}
 .when .v{font-weight:600}
 #tl .d{font-weight:600;font-size:13px}
+
+/* header with Start again: keep it on one line on smaller laptops */
+@media (max-width:1200px){header .right{gap:10px}header .pw .pwt{display:none}}
+@media (max-width:1100px){#teamBtn .lbl-t{display:none}#teamBtn{padding:7px 11px}}
+@media (max-width:480px){header{gap:6px}header .hlogo{--lw:96px}header .right{gap:6px}.dbtn{padding:6px 8px}}   /* phones: keep the one-row header with Start again on it */
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -1015,6 +1016,7 @@ body{padding-top:52px}
     <button class="dbtn" id="teamBtn" type="button" aria-haspopup="dialog"><span class="aa">⁂</span><span class="lbl-t"> Team check</span></button>
     <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel"><span class="aa">Aa</span><span class="lbl-t"> Display &amp; reading</span></button>
     <div class="pw" title="Powered by Fundable"><span class="pwt">Powered by </span><svg role="img" aria-label="Fundable" viewBox="0 0 304 297"><use href="#fd-icon"/></svg></div>
+    <button class="dbtn" id="reset" type="button" title="Clear everything and start again"><span class="aa">↺</span><span class="lbl-t"> Start again</span></button>
   </div>
   <div class="dpanel hide" id="dpanel" role="dialog" aria-label="Display and reading options">
     <button class="close" id="dclose" type="button" aria-label="Close">×</button>
@@ -1046,7 +1048,6 @@ body{padding-top:52px}
   <li data-k="c"><a href="#c-checks"><span class="n">3</span>Checks <span class="s" id="jChecks"></span></a></li>
   <li data-k="d" class="opt"><a href="#c-timing"><span class="n">4</span>Timing <span class="s">optional</span></a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
-  <li class="jreset"><button type="button" class="btn ghost sm" id="reset">↺ Start again</button></li>
 </ol></nav>
 
 <div id="cover" aria-hidden="true"></div>
