@@ -1266,12 +1266,7 @@ function render(){
     W.innerHTML=''; N.innerHTML=`<p class="callout bad">Sort out the blocking items above first. No start date works until they're resolved.</p>`;
   } else {
     const untilV = o.until ? fmt(o.until) : 'No deadline';
-    // say what the deadline protects: a hard funding cut-off reads very differently from a lost payment
-    function untilSub(o){ const k=o.untilWhy; if(!k) return 'No age cut-off for funding';
-      if(k.elig) return 'Funding stops after this';
-      if(/£1,000/.test(k.what)) return 'To keep the £1,000 payment. Still funded after';
-      if(/co-investment/.test(k.what)) return `Then Ann Summers pays 25%${k.cost?' ('+money(k.cost)+')':''}. Still funded`;
-      return esc(k.what); }
+
     W.innerHTML=`<div><div class="l">Earliest sensible start</div><div class="v">${fmt(o.from)}</div></div>
       <div class="best"><div class="l">Chosen start date</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
@@ -1443,6 +1438,13 @@ $('jdGo').onclick=async()=>{
 $('jdOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-ref]'); if(!b) return; if(b.hasAttribute('data-route')) S.mgrRoute=true; const s=STDS.find(x=>x.r===b.dataset.ref);
   $('std').value = s ? `${s.n} (${s.r})` : `${b.dataset.ref}`; render(); drawJdResults(); });
 
+// say what the deadline protects: a hard funding cut-off reads very differently from a lost payment
+function untilSub(o){ const k=o.untilWhy; if(!k) return 'No age cut-off for funding';
+  if(k.elig) return 'Funding stops after this';
+  if(/£1,000/.test(k.what)) return 'To keep the £1,000 payment. Still funded after';
+  if(/co-investment/.test(k.what)) return `Then Ann Summers pays 25%${k.cost?' ('+money(k.cost)+')':''}. Still funded`;
+  return esc(k.what); }
+
 function renderRole(o){
   const card=$('roleCard'), J=S.jd, std=o.std;
   if(!J || !std || !o.dob || o.badDob){ card.classList.add('hide'); return; }
@@ -1580,10 +1582,11 @@ function buildReport(o){
     if(iso(o.start)!==iso(o.rec)) dr.push([fmt(o.start),'Planned start',o.start<o.today?'In the past: choose a new date':(o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur')?'Too late for a funding deadline':'Works')]);
   }
   o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>dr.push([fmt(k.date),esc(k.what.replace('Milburn: ','If Milburn adopted: ')),k.elig?'Funding changes':`Worth ${money(k.cost)}`]));
+  if(!o.blocked) dr.push(o.until?[`<b>${fmt(o.until)}</b>`,'<b>Start no later than</b>',untilSub(o)]:['—','<b>Start no later than</b>','No deadline: no age cut-off for funding']);
   if(o.end) dr.push([fmt(o.end),'Earliest contract end','Plus the end-point assessment period']);
   dr.sort((x,y)=>0);
   pages.push(page('Timeline · Key dates','Key dates and deadlines',`
-    <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>: after that the ${esc(o.untilWhy.what.toLowerCase())}.`:'There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
+    <p class="bd-sum">${o.until?`Start no later than <b>${fmt(o.until)}</b>. <b>${untilSub(o)}.</b> On ${fmt(o.untilWhy.date)} the ${esc(o.untilWhy.what.toLowerCase())}.`:'<b>No age cut-off for funding.</b> There is no age deadline under current rules; use levy funds before they expire (12 months after they enter the account).'}</p>
     <div class="bd-full">${table(['Date','Event','What it means'],dr)}</div>`,false));
 
   // ---------- 4. who pays ----------
@@ -1725,6 +1728,32 @@ function devFill(){
   $('assumeAll').click(); render();
   const r=document.querySelector('section.results'); if(r) r.scrollIntoView({block:'start'});
 }
+/* dev only: run the JD matcher against Assistant accountant with a strong (~77%) or a poor (0%) job description */
+const DEV_JD={good:`Assistant Accountant
+Ann Summers Head Office, Finance team
+- Process purchase and sales ledger transactions, supplier invoices and credit notes
+- Prepare bank reconciliations and month-end journals for the management accounts
+- Maintain the general ledger, accruals, prepayments and fixed asset register
+- Support VAT returns and payroll reconciliations, applying accounting principles and regulations
+- Prepare budgets, forecasts and variance analysis for store and head office managers
+- Use accounting software and Excel spreadsheets to produce accurate financial reports
+- Communicate with suppliers, colleagues and stakeholders, keeping data confidential and secure
+- Follow ethical standards, internal controls and policies; identify and report errors or fraud risk
+- Manage your own workload to meet deadlines and take responsibility for continuing professional development`,
+bad:`Retail Sales Assistant
+Ann Summers store, Oxford Street
+- Greet customers and help them find products on the shop floor
+- Run the till, take payments and process returns
+- Replenish stock, merchandise displays and keep the store tidy
+- Hit personal sales targets and promote seasonal offers
+- Work weekends and late shifts during peak trading`};
+async function devJd(kind){
+  devFill();
+  $('jdm').open=true; $('jdText').value=DEV_JD[kind];
+  await $('jdGo').onclick();
+  const s=STDS.find(x=>x.r==='ST0002'); if(s){ $('std').value=`${s.n} (${s.r})`; render(); }
+  const c=$('roleCard'); if(c&&!c.classList.contains('hide')) c.scrollIntoView({block:'start'});
+}
 function applyUI(ui,persist){
   if(ui==='boardroom') document.documentElement.setAttribute('data-ui','boardroom'); else document.documentElement.removeAttribute('data-ui');
   // header Fundable mark: the white version disappears on a white header
@@ -1738,10 +1767,11 @@ function applyUI(ui,persist){
   try{ dev=localStorage.getItem('asElig.dev')==='1'; if(localStorage.getItem('asElig.ui2')==='current') ui='current'; localStorage.removeItem('asElig.ui'); }catch(e){}
   if(dev){
     const bar=document.createElement('div'); bar.className='devbar'; bar.setAttribute('role','toolbar'); bar.setAttribute('aria-label','Developer UI switch');
-    bar.innerHTML='<b>DEV</b><span>UI</span><button type="button" data-ui="current">Current</button><button type="button" data-ui="boardroom">Boardroom</button><button type="button" data-fill>Complete form</button><button type="button" class="x" data-exit>Exit dev</button>';
+    bar.innerHTML='<b>DEV</b><span>UI</span><button type="button" data-ui="current">Current</button><button type="button" data-ui="boardroom">Boardroom</button><button type="button" data-fill>Complete form</button><button type="button" data-jd="good">JD: good match</button><button type="button" data-jd="bad">JD: bad match</button><button type="button" class="x" data-exit>Exit dev</button>';
     bar.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
       if(b.hasAttribute('data-exit')){ try{ localStorage.removeItem('asElig.dev'); localStorage.removeItem('asElig.ui2'); localStorage.removeItem('asElig.ui'); }catch(x){} location.href=location.pathname; return; }
       if(b.hasAttribute('data-fill')){ devFill(); return; }
+      if(b.dataset.jd){ devJd(b.dataset.jd); return; }
       applyUI(b.dataset.ui,true); });
     document.body.appendChild(bar);
   }
