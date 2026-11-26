@@ -560,6 +560,16 @@ table.refs th{text-align:left;font-size:12px;letter-spacing:.12em;text-transform
 table.refs td{padding:7px 8px 7px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
 table.refs td.para,table.refs th:last-child{width:150px;white-space:nowrap;font-family:var(--mono);font-size:13px;letter-spacing:0}
 table.refs th:last-child{font-family:inherit;font-size:12px;letter-spacing:.12em}
+
+.route{border:1px solid var(--line);border-left:4px solid var(--pink-deep);background:var(--blush);border-radius:4px;padding:12px 14px;margin:0 0 14px}
+.route .rt,.jdalt .rt{display:block;font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:15px;color:var(--ink);margin-bottom:6px}
+.route p{margin:0 0 8px;font-size:14.5px;color:var(--ink);line-height:1.55}
+.route p.small{font-size:13.5px;color:var(--muted)}
+.route.on{border-left-color:var(--ok);background:var(--ok-bg)}
+.route.on p{margin:0}
+.combo li em.route{color:var(--pink-deep);font-weight:600}
+.jdalt{margin:12px 0 4px}
+.jdalt li{border-color:var(--pink-deep);border-left-width:4px}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -701,6 +711,7 @@ body{padding-top:52px}
         <div class="combo"><input type="text" id="std" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stdlist" placeholder="e.g. accounts assistant level 3, or ST0002" autocomplete="off">
         <ul id="stdlist" role="listbox" class="hide"></ul></div></label>
       <div class="stdinfo" id="stdinfo"></div>
+      <div id="mgrRoute"></div>
       <details class="jdm" id="jdm"><summary><span>Not sure which apprenticeship?</span> <b>Match a job description</b></summary>
         <div class="jdm-body">
           <label class="f"><span>Paste the job description</span>
@@ -848,6 +859,26 @@ const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* ---------- build UI ---------- */
+/* ---------- funded route for new managers ----------
+   The leadership standards lost funding on 1 Sept 2026. Business administrator (L3, ST0070) is still fully funded and is the
+   standard behind funded new-manager programmes; some providers include management content and CMI awards for every learner
+   (e.g. BPP Management and Business Foundations). It must fit the job: the role has to involve running day-to-day operations. */
+const MGR_ROUTE='ST0070';
+const MGR_RX=/\b(team ?leaders?|leaders?|leadership|supervisors?|supervising|managers?|management|managing)\b/i;
+const LEAD_DEFUNDED=new Set(['ST0384','ST0385','ST0272','ST0809','ST0192','ST0556']);
+function mgrIntent(){ const q=$('std').value, cur=findStd(q); return (cur&&LEAD_DEFUNDED.has(cur.r)) || (!cur&&MGR_RX.test(q)) || !!(S.jd&&MGR_RX.test(S.jd.title||'')); }
+const ROUTE_COPY=`<b>Business administrator</b> (Level 3, ST0070, £5,000 band, about 15–18 months) is still fully funded and is the standard behind funded new-manager programmes. Some providers include management content and CMI awards for every learner at no extra cost: for example, BPP's <i>Management and Business Foundations</i> comes with a CMI Leadership Academy qualification, CMI Foundation Chartered Manager status and Leader as Coach accreditation. That's the provider's offer, so confirm what's included with them.`;
+function renderRoute(){
+  const box=$('mgrRoute'), cur=findStd($('std').value), r=STDS.find(x=>x.r===MGR_ROUTE);
+  if(!r||fundBlock(r)){ box.innerHTML=''; return; }
+  if(cur&&cur.r===MGR_ROUTE&&S.mgrRoute){ box.innerHTML=`<div class="route on"><b class="rt">✓ Funded route for new managers</b><p>Confirm the role includes running day-to-day business operations, and ask your provider which management content and CMI awards they include.</p></div>`; return; }
+  if(!mgrIntent()){ box.innerHTML=''; return; }
+  box.innerHTML=`<div class="route"><b class="rt">Funded route for new managers</b><p>${ROUTE_COPY}</p>
+    <p class="small">Use it where the role genuinely involves running day-to-day business operations: the apprenticeship has to fit the job.</p>
+    <button type="button" class="btn sm" data-route>Use Business administrator</button></div>`;
+}
+$('mgrRoute').addEventListener('click',e=>{ if(!e.target.closest('button[data-route]')) return; const r=STDS.find(x=>x.r===MGR_ROUTE); S.mgrRoute=true; $('std').value=`${r.n} (${r.r})`; render(); if(S.jd) drawJdResults(); });
+
 /* ---------- can this standard be funded for a new start? (funding rules 2026-27, para 68; 32; 33) ---------- */
 /* 16 standards defunded for ALL new starts (any age) from 1 Sept 2026 - GOV.UK Growth and Skills Levy factsheet
    (updated 25 Nov 2026); Skills England Team leader page gives 1st September 2026. Existing apprentices finish funded. */
@@ -894,15 +925,16 @@ function searchStds(q){
 (function(){
   const inp=$('std'), ul=$('stdlist'); let list=[], ix=-1;
   const close=()=>{ ul.classList.add('hide'); inp.setAttribute('aria-expanded','false'); inp.removeAttribute('aria-activedescendant'); ix=-1; };
-  const pick=s=>{ if(fundBlock(s)) return; inp.value=`${s.n} (${s.r})`; close(); render(); };
+  const pick=s=>{ if(fundBlock(s)) return; if(s.r===MGR_ROUTE&&MGR_RX.test(inp.value)) S.mgrRoute=true; inp.value=`${s.n} (${s.r})`; close(); render(); };
+  const withRoute=l=>{ if(!MGR_RX.test(inp.value)) return l; const r=STDS.find(x=>x.r===MGR_ROUTE); return r&&!fundBlock(r)?[r].concat(l.filter(x=>x.r!==MGR_ROUTE)):l; };
   const order=l=>{ const ok=l.filter(x=>!fundBlock(x)), no=l.filter(x=>fundBlock(x)); return ok.concat(no); };
   const firstOk=()=>list.findIndex(x=>!fundBlock(x));
-  const paint=()=>{ ul.innerHTML = list.length ? list.map((s,i)=>{ const b=fundBlock(s); return `<li role="option" id="opt${i}" aria-selected="${i===ix}" data-i="${i}"${b?' class="off" aria-disabled="true"':''}><span>${esc(s.n)}${b?`<em>Can't be funded: ${esc(b)}</em>`:(s.l===7&&!(lastO&&lastO.dob)?'<em class="cond">Only funded if under 22 at the start (under 25 with an EHC plan or care experience)</em>':'')}</span><small>L${s.l} · ${s.r}</small></li>`; }).join('')
+  const paint=()=>{ ul.innerHTML = list.length ? list.map((s,i)=>{ const b=fundBlock(s); return `<li role="option" id="opt${i}" aria-selected="${i===ix}" data-i="${i}"${b?' class="off" aria-disabled="true"':''}><span>${esc(s.n)}${s.r===MGR_ROUTE&&MGR_RX.test(inp.value)?'<em class="route">★ Funded route for new managers</em>':''}${b?`<em>Can't be funded: ${esc(b)}</em>`:(s.l===7&&!(lastO&&lastO.dob)?'<em class="cond">Only funded if under 22 at the start (under 25 with an EHC plan or care experience)</em>':'')}</span><small>L${s.l} · ${s.r}</small></li>`; }).join('')
       : '<li class="empty">No matches. Try fewer words, or an ST code.</li>';
     ul.classList.remove('hide'); inp.setAttribute('aria-expanded','true');
     if(ix>=0){ inp.setAttribute('aria-activedescendant','opt'+ix); const el=$('opt'+ix); el&&el.scrollIntoView({block:'nearest'}); } else inp.removeAttribute('aria-activedescendant'); };
-  inp.addEventListener('input',()=>{ if(/\(ST\d{4}\)$/.test(inp.value)&&findStd(inp.value)){close();return;} list=order(searchStds(inp.value)); ix=firstOk(); inp.value.trim()?paint():close(); });
-  inp.addEventListener('focus',()=>{ if(inp.value.trim() && !findStd(inp.value)){ list=order(searchStds(inp.value)); ix=firstOk(); paint(); } });
+  inp.addEventListener('input',()=>{ if(/\(ST\d{4}\)$/.test(inp.value)&&findStd(inp.value)){close();return;} list=withRoute(order(searchStds(inp.value))); ix=firstOk(); inp.value.trim()?paint():close(); });
+  inp.addEventListener('focus',()=>{ if(inp.value.trim() && !findStd(inp.value)){ list=withRoute(order(searchStds(inp.value))); ix=firstOk(); paint(); } });
   inp.addEventListener('keydown',e=>{
     if(ul.classList.contains('hide')) return;
     if(e.key==='ArrowDown'){ e.preventDefault(); ix=Math.min(list.length-1,ix+1); paint(); }
@@ -956,6 +988,7 @@ function compute(){
   // --- age / programme rules
   if(start<earliest) add('bad',`<b>Too young to start on ${fmt(start)}.</b> The earliest start date is <b>${fmt(earliest)}</b> (the day after the last Friday in June of the school year they turn 16).`,'30.1',{notyet:true});
   if(std && std.s==='InDevelopment') add('bad',`<b>${esc(std.n)} isn't approved for delivery yet</b>, so nobody can start it. Check with your provider when it will be.`,'Skills England');
+  if(std && std.r===MGR_ROUTE && S.mgrRoute) add('info','<b>Funded route for new managers.</b> Confirm the role includes running day-to-day business operations: the apprenticeship has to fit the job. Ask your provider which management content and CMI awards they include.','');
   if(std && isDefunded(std)) add('bad',`<b>${esc(std.n)} lost government funding for new starts on 1 September 2026.</b> Existing apprentices finish with funding; a new start would be paid for in full by Ann Summers. Choose another standard.`,'Growth and Skills Levy factsheet',{unfunded:true});
   if(std && (std.s==='Retired'||std.s==='Withdrawn')) add('bad',`<b>${esc(std.n)} is ${std.s.toLowerCase()}</b>, so new apprentices can't start it. Choose another standard.`,'68');
   if(std && std.s==='ApprovedForDelivery-Paused') add('bad',`<b>New starts on ${esc(std.n)} are paused.</b> Choose another standard or wait for it to reopen.`,'Skills England');
@@ -1058,6 +1091,7 @@ function compute(){
 
 /* ---------- render ---------- */
 function render(){
+  { const c=findStd($('std').value); if(!c||c.r!==MGR_ROUTE) S.mgrRoute=false; }
   let o=compute(); lastO=o;
   { const cur=findStd($('std').value); const b=cur&&fundBlock(cur);
     if(b && /age|ages/.test(b)){ S.removed={n:cur.n,why:b}; $('std').value=''; o=compute(); lastO=o; } }
@@ -1073,6 +1107,7 @@ function render(){
   const has=!!o.dob&&!o.badDob;
   $('actions').classList.toggle('hide',!has);
   updateVbar(o);
+  renderRoute();
   lastO=o;
   renderRole(o); renderPrintHead(o);
   if(!has){ V.className='verdict v-empty'; V.innerHTML=`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
@@ -1254,6 +1289,10 @@ function drawJdResults(){
   const J=S.jd; if(!J) return; const cur=findStd($('std').value);
   $('jdOut').innerHTML = `<p class="jdmsg">Ranked across ${J.considered} standards with skills lists. Job-title matches come first, then the closest wording.</p>
     ${J.left&&J.left.length?`<p class="jdmsg">Left out because they can't be funded: ${J.left.map(l=>`${esc(l.name)} (${esc(l.why.charAt(0).toLowerCase()+l.why.slice(1))})`).join('; ')}.</p>`:''}
+    ${J.alt?`<div class="jdalt"><b class="rt">Funded alternative for new managers</b>
+      <ol class="jdr"><li class="${cur&&cur.r===J.alt.ref?'on':''}"><span class="rk">★</span><span><div class="nm">${esc(J.alt.name)}</div>
+      <div class="mt">Level ${J.alt.level} · ${J.alt.ref} · ${J.alt.dur} months · ${money(J.alt.band)} · <b>${J.alt.covered} of ${J.alt.total}</b> skills in the job description (${J.alt.score}%). Some providers add management content and CMI awards for every learner.</div></span>
+      <button type="button" data-ref="${J.alt.ref}" data-route>${cur&&cur.r===J.alt.ref?'✓ Selected':'Use this'}</button></li></ol></div>`:''}
     <ol class="jdr">${J.ranked.map((x,i)=>`<li class="${cur&&cur.r===x.ref?'on':''}"><span class="rk">${i+1}</span>
       <span><div class="nm">${esc(x.name)}${x.title?'<span class="tm">Job title matches</span>':''}</div>
       <div class="mt">Level ${x.level} · ${x.ref}${x.dur?' · '+x.dur+' months':''}${x.band?' · '+money(x.band):''} · <b>${x.covered} of ${x.total}</b> skills in the job description (${x.score}%)${x.status&&x.status!=='ApprovedForDelivery'?' · <span style="color:var(--bad)">'+(x.status==='InDevelopment'?'in development':'starts paused')+'</span>':''}</div></span>
@@ -1270,9 +1309,10 @@ $('jdGo').onclick=async()=>{
   r.ranked=ok; r.left=left;
   if(!r.ranked.length){ out.innerHTML='<p class="jdmsg">No standards matched. Try adding the duties, not just the title.</p>'; return; }
   S.jd={text,title:JDM.titleLine(text),ranked:r.ranked,considered:r.considered,left:r.left};
+  if(MGR_RX.test(S.jd.title||'')){ const c=JDM.coverage(MGR_ROUTE,text), rr=STDS.find(x=>x.r===MGR_ROUTE); if(c&&!c.none&&rr&&!fundBlock(rr)) S.jd.alt={ref:MGR_ROUTE,name:rr.n,level:rr.l,dur:rr.d,band:rr.f,covered:c.covered,total:c.total,score:c.score}; }
   drawJdResults(); render();
 };
-$('jdOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-ref]'); if(!b) return; const s=STDS.find(x=>x.r===b.dataset.ref);
+$('jdOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-ref]'); if(!b) return; if(b.hasAttribute('data-route')) S.mgrRoute=true; const s=STDS.find(x=>x.r===b.dataset.ref);
   $('std').value = s ? `${s.n} (${s.r})` : `${b.dataset.ref}`; render(); drawJdResults(); });
 
 function renderRole(o){
@@ -1350,6 +1390,7 @@ function buildReport(o){
   const order={bad:0,warn:1,ok:2,info:3};
   const keys=o.items.slice().sort((a,b)=>order[a.sev]-order[b.sev]).slice(0,3);
   const details=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],['Apprenticeship',std?`${esc(std.n)}, ${std.r}, ${std.d||'?'} months`:stdTxt],
+    ...(std&&std.r===MGR_ROUTE&&S.mgrRoute?[['Route','Funded route for new managers. Providers may include management content and CMI awards; confirm with the provider.']]:[]),
     ['Planned start',`${fmt(o.start)}, ${o.hoursAssumed?'37.5 (assumed)':o.hours} hours a week`],['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assumed eligible)':''}`]];
   pages.push(`<section class="rp">
     ${tri('900,0 1440,0 1440,300','#000')}${tri('1440,420 1050,810 1440,810','#000')}

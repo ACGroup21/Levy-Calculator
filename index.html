@@ -9852,7 +9852,9 @@ function parseIntent(q){
 }
 
 function matchStandards(intent,queryWords){
-  return STANDARDS.filter(s=>s.band>0&&!s.defunded&&s.fundable!==false).map(s=>{
+  // Leadership standards lost funding on 1 Sept 2026: Business administrator (L3, ST0070) is the funded route for new managers
+  const lead=/\b(team ?leaders?|leaders?|leadership|supervis\w*|managers?|management|managing)\b/i.test((intent.roleKeywords||[]).join(' ')+' '+(queryWords||[]).join(' '));
+  let ranked=STANDARDS.filter(s=>s.band>0&&!s.defunded&&s.fundable!==false).map(s=>{
     let score=0;
     if(intent.level&&s.level===intent.level)score+=10;
     else if(intent.level&&Math.abs(s.level-intent.level)===1)score+=3;
@@ -9866,7 +9868,10 @@ function matchStandards(intent,queryWords){
     // Push defunded standards down — they can't take new funded starts after Sep 2026
     if(s.defunded)score-=8;
     return{...s,score};
-  }).sort((a,b)=>b.score-a.score).filter(s=>s.score>0).slice(0,3);
+  }).sort((a,b)=>b.score-a.score).filter(s=>s.score>0);
+  // pin the funded route first for leadership asks (KSB wording scores would otherwise bury it)
+  if(lead){ const ba=STANDARDS.find(x=>x.ref==='ST0070'&&x.fundable!==false&&!x.defunded); if(ba){ const got=ranked.find(x=>x.ref==='ST0070')||{...ba,score:1}; ranked=[got,...ranked.filter(x=>x.ref!=='ST0070')]; } }
+  return ranked.slice(0,3);
 }
 
 function checkAffordability(std,count,months){
@@ -10000,6 +10005,9 @@ function processQuery(q){
     html+=`<div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-style:italic">${primary.occupation_summary.slice(0,160)}…</div>`;
   }
 
+  if(primary.ref==='ST0070'&&/\b(team ?leaders?|leaders?|leadership|supervis\w*|managers?|management|managing)\b/i.test(qWords.join(' ')+' '+(intent.roleKeywords||[]).join(' '))){
+    html+=`<div style="font-size:12px;line-height:1.5;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(45,212,178,0.08);border:1px solid rgba(45,212,178,0.35);color:var(--text2)"><strong style="color:var(--teal)">Funded route for new managers.</strong> The leadership standards (Team leader, Operations manager, Chartered manager) lost funding for new starts on 1 Sept 2026. Business administrator (Level 3) is still fully funded and is the standard behind funded new-manager programmes. Some providers include management content and CMI awards for every learner at no extra cost, for example BPP&rsquo;s Management and Business Foundations. Confirm what&rsquo;s included, and that the role involves running day-to-day business operations.</div>`;
+  }
   // Policy warnings — defunding & Level 7 age restriction
   if(primary.defunded){
     html+=`<div style="font-size:12px;line-height:1.45;margin-bottom:8px;padding:8px 10px;border-radius:6px;background:rgba(255,76,106,0.08);border:1px solid rgba(255,76,106,0.35);color:#ff8fa3"><strong>⚠ Defunded from 1 Sept 2026.</strong> No new levy-funded starts after this date. Consider an alternative below or enrol before the deadline.</div>`;
