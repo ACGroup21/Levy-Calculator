@@ -769,6 +769,32 @@ table.bd-t.money td:not(:first-child){width:36%}
 .rp .bd-stem li.gap .e span{font-size:12.5px;color:#666;border-color:#ddd;background:#fff}
 .rp .bd-stem.dense li{min-height:31px}
 .rp .bd-stem.dense .e{padding-bottom:6px;font-size:14.5px}
+
+/* ---------- verdict heart seal (concept A, 26 Nov 2026) ---------- */
+.verdict{position:relative;padding-left:112px!important;min-height:132px}
+.verdict .seal{position:absolute;left:24px;top:24px;width:68px;height:68px}
+.verdict .seal svg{width:100%;height:100%;overflow:visible}
+.seal{--c:var(--pink)}
+.seal.s-ok{--c:var(--ok)}.seal.s-warn{--c:var(--warn)}.seal.s-bad{--c:var(--bad)}.seal.s-notyet{--c:var(--pink)}
+.seal .heart{fill:none;stroke:var(--c);stroke-width:3}
+.seal.s-empty .heart{stroke-dasharray:4 5;opacity:.8}
+.seal .fill{fill:var(--c);clip-path:inset(100% 0 0 0);animation:sealFill 1s .15s cubic-bezier(.6,0,.2,1) forwards}
+.seal .mark{fill:none;stroke:#fff;stroke-width:6.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:80;stroke-dashoffset:80;animation:sealDraw .45s 1.05s ease-out forwards}
+.seal.s-notyet .mark{stroke-width:5}
+.seal .ring{fill:none;stroke:var(--c);stroke-width:2;opacity:0;transform-box:fill-box;transform-origin:center;animation:sealPing .9s 1.4s ease-out}
+.seal .fillb{fill:var(--c)}
+.seal .half{transform-box:view-box;transform-origin:50px 88px;opacity:0;animation:sealIn .35s .1s ease-out forwards}
+.seal .half.l{animation:sealIn .35s .1s ease-out forwards,sealBreakL .55s .65s cubic-bezier(.3,1.5,.5,1) forwards}
+.seal .half.r{animation:sealIn .35s .1s ease-out forwards,sealBreakR .55s .65s cubic-bezier(.3,1.5,.5,1) forwards}
+@keyframes sealFill{to{clip-path:inset(0 0 0 0)}}
+@keyframes sealDraw{to{stroke-dashoffset:0}}
+@keyframes sealPing{0%{opacity:.7;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
+@keyframes sealIn{to{opacity:1}}
+@keyframes sealBreakL{to{transform:translate(-4px,1px) rotate(-9deg)}}
+@keyframes sealBreakR{to{transform:translate(4px,1px) rotate(9deg)}}
+@media (prefers-reduced-motion:reduce){.seal *{animation-duration:0s!important;animation-delay:0s!important}}
+@media (max-width:480px){.verdict{padding-left:88px!important}.verdict .seal{left:18px;width:54px;height:54px}}
+@media print{.verdict{padding-left:24px!important;min-height:0}.verdict .seal{display:none}}
 </style>
 </head>
 <body>
@@ -913,7 +939,7 @@ table.bd-t.money td:not(:first-child){width:36%}
   <!-- ================= RESULTS ================= -->
   <section class="results" aria-live="polite" aria-label="Result">
     <div class="print-head" id="printHead"></div>
-    <div id="verdict" class="verdict v-empty"><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
+    <div id="verdict" class="verdict v-empty"><div class="seal s-empty" aria-hidden="true"></div><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
 
     <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
@@ -1310,7 +1336,7 @@ function render(){
   renderRoute();
   lastO=o;
   renderRole(o); renderPrintHead(o);
-  if(!has){ V.className='verdict v-empty'; V.innerHTML=`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
+  if(!has){ V.className='verdict v-empty'; V.innerHTML=sealSvg('empty')+`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
     <ul class="preview"><li><i>✓</i><span><b>Whether they can be funded</b>, and the rule behind each answer</span></li><li><i>📅</i><span><b>The best date to start</b>, and the last date before funding changes</span></li><li><i>£</i><span><b>Who pays</b>, today and if the Milburn Review is adopted</span></li></ul>`; return; }
   const ageTxt=`${o.age} at the planned start (${fmt(o.start)})`;
   const map={
@@ -1323,7 +1349,9 @@ function render(){
   if(o.verdict==='no' && !o.blocked && o.items.filter(i=>i.sev==='bad').every(i=>i.unfunded||i.notyet) && o.until && o.start>o.until)
     map[2]+=` <b>Starting by ${fmt(o.until)} fixes this.</b>`;
   V.className='verdict '+map[0];
-  V.innerHTML=`<div class="k">${o.verdict==='yes'||o.verdict==='check'?'Funding eligibility':'Funding eligibility'}</div><h2>${map[1]}</h2><p>${map[2]}</p>`;
+  const prevSeal=V.querySelector('.seal[data-k]');
+  V.innerHTML=sealSvg({yes:'ok',check:'warn',no:'bad',notyet:'notyet'}[o.verdict])+`<div class="k">Funding eligibility</div><h2>${map[1]}</h2><p>${map[2]}</p>`;
+  { const ns=V.querySelector('.seal'); if(prevSeal&&ns&&prevSeal.dataset.k===ns.dataset.k) ns.replaceWith(prevSeal); }
 
   const ic={bad:['i-bad','✕'],warn:['i-warn','!'],ok:['i-ok','✓'],info:['i-info','i']};
   const order={bad:0,warn:1,ok:2,info:3};
@@ -1419,6 +1447,18 @@ function stemHtml(rows){
     ? `<li class="${r.k}"><span class="d">${r.d}</span><span class="s${r.win?' win':''}"><i></i></span><span class="e"><b>${esc(r.t)}</b>${r.s?`<small>${r.s}</small>`:''}</span></li>`
     : `<li class="${r.type}"><span class="d"></span><span class="s"></span><span class="e"><span>${esc(r.text)}</span></span></li>`).join('');
 }
+/* ---------- verdict heart seal: render() keeps the existing seal node when the verdict is unchanged, so it animates once per change ---------- */
+const SEAL_HEART='M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C39 8 46 13 50 20 C54 13 61 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 Z';
+const SEAL_L='M50 88 C20 66 6 50 6 32 C6 18 17 8 30 8 C39 8 46 13 50 20 L43 35 L55 47 L44 61 Z';
+const SEAL_R='M50 20 C54 13 61 8 70 8 C83 8 94 18 94 32 C94 50 80 66 50 88 L44 61 L55 47 L43 35 Z';
+function sealSvg(kind){
+  const mark = {ok:'<path d="M31 47 L45 60 L70 34"/>', warn:'<path d="M50 28 V50"/><path d="M50 63 V64"/>', notyet:'<circle cx="50" cy="44" r="17"/><path d="M50 35 V44 L57 49"/>'}[kind]||'';
+  const body = kind==='bad'
+    ? `<g class="half l"><path class="fillb" d="${SEAL_L}"/></g><g class="half r"><path class="fillb" d="${SEAL_R}"/></g>`
+    : `<path class="heart" d="${SEAL_HEART}"/>${kind==='empty'?'':`<path class="fill" d="${SEAL_HEART}"/><g class="mark">${mark}</g><circle class="ring" cx="50" cy="50" r="46"/>`}`;
+  return `<div class="seal s-${kind}" data-k="${kind}" aria-hidden="true"><svg viewBox="0 0 100 100">${body}</svg></div>`;
+}
+
 function drawTimeline(o){
   const T=$('tl'); if(o.blocked||!o.from){T.innerHTML='';return;}
   T.innerHTML=stemHtml(stemRows(o,false));
