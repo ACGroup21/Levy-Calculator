@@ -880,12 +880,8 @@ table.tvf .rm:hover{color:var(--bad)}
 :root .card.done .step b{background:var(--pink);color:#fff;padding:0 8px;border-radius:3px;display:inline-block;animation:jLit .6s ease-out}
 :root[data-ui=boardroom] .card.done .step b{background:#9C3064;color:#fff}
 :root[data-ui=boardroom][data-theme=dark] .card.done .step b{background:#E58AB8;color:#141013}
-/* the selected section: pink box round its heading */
-.inputs .card.sel .step{outline:2px solid var(--pink);outline-offset:6px;border-radius:3px}
-:root[data-ui=boardroom] .inputs .card.sel .step{outline-color:#9C3064}
-:root[data-ui=boardroom][data-theme=dark] .inputs .card.sel .step{outline-color:#E58AB8}
+/* the selected section (.card.sel) is shown by the journey bar's gliding underline, not on the heading */
 @media (prefers-reduced-motion:reduce){:root .journey li.done .n,:root .card.done .step b{animation:none}}
-@media print{.inputs .card.sel .step{outline:0}}
 
 /* journey bar: steps spread across the full app width; connectors fill as steps complete; an underline glides to the active step */
 :root .journey ol{gap:0}
