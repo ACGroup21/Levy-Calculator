@@ -1220,7 +1220,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       <div class="step"><b>1</b>The apprentice</div>
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
         <input type="text" id="name" autocomplete="off" placeholder="e.g. Jordan Michael">
-        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>. New here? <a href="#" id="tourLink">Take the tour</a> or <a href="#" data-demo>watch a demo</a>.</small></label>
+        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>.</small></label>
       <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
       <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small>Extends several age limits to 24.</small></span></label>
       <label class="tick"><input type="checkbox" id="newhire" checked><span>They're a <b>new hire</b> (with us 90 days or less at the start) <small>Affects hiring payments.</small></span></label>
@@ -2375,7 +2375,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@db8b005d81';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@66a84ca435';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2783,7 +2783,6 @@ $('helpView').addEventListener('click',e=>{ if(e.target===$('helpView')) closeHe
 $('hvPrint').onclick=()=>{ document.body.classList.add('printing-guide'); window.print(); setTimeout(()=>document.body.classList.remove('printing-guide'),400); };
 $('hvTour').onclick=()=>{ closeHelp(); startTour(false); };
 $('hvDemo').onclick=()=>{ closeHelp(); startTour(true); };
-$('tourLink').addEventListener('click',e=>{ e.preventDefault(); startTour(false); });
 
 /* =================== walkthrough (and the auto-play demo, which runs the same steps and fills an example) =================== */
 const TOUR=[
