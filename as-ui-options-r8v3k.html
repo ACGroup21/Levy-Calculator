@@ -1236,7 +1236,7 @@ body{padding-top:52px}
     <div class="card" id="c-apprentice">
       <div class="step"><b>1</b>The apprentice</div>
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
-        <input type="text" id="name" autocomplete="off" placeholder="e.g. Jordan">
+        <input type="text" id="name" autocomplete="off" placeholder="e.g. Jane Smith">
         <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>. New here? <a href="#" id="tourLink">Take the tour</a>.</small></label>
       <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
       <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small>Extends several age limits to 24.</small></span></label>
@@ -2384,7 +2384,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@2bac85022b';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@8d2195b3a5';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2441,7 +2441,7 @@ window.addEventListener('load',render); window.addEventListener('pageshow',rende
 /* ---------- developer switch: Current | Boardroom (per browser; ?dev=1 to show, Exit dev to remove) ---------- */
 /* dev only: fill a typical eligible case and jump to the result */
 function devFill(){
-  const t=utcToday(); $('name').value='Jordan'; $('dob').value=iso(addMonths(addYears(t,-19),-3));
+  const t=utcToday(); $('name').value='Jane Smith'; $('dob').value=iso(addMonths(addYears(t,-19),-3));
   $('care').checked=false; $('newhire').checked=true; $('foundation').checked=false; $('levyok').checked=true; $('levybal').value='';
   const s=STDS.find(x=>x.r==='ST0002')||STDS.find(x=>!fundBlock(x)); $('std').value=`${s.n} (${s.r})`;
   $('hours').value='37.5'; $('start').value=iso(addMonths(t,2));
@@ -2798,7 +2798,7 @@ $('tourLink').addEventListener('click',e=>{ e.preventDefault(); startTour(false)
 const TOUR=[
  {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This tour takes about a minute.'},
  {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
- {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async()=>{ await typeInto('name','Jordan'); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
+ {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async()=>{ await typeInto('name','Jane Smith'); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
  {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async()=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ await typeInto('std',`${s.n} (${s.r})`); } }},
  {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ $('assumeAll').click(); }},
  {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
