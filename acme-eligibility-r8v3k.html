@@ -1069,7 +1069,9 @@ header{position:sticky;top:0;z-index:45}
 #tour.playing .tr-nav{display:none}   /* the bar has the controls while a demo plays */
 #tour.playing.last .tr-nav{display:flex}
 #tour .tr-nav #trAgain{display:none}
-#tour.playing.last .tr-nav .tr-dots,#tour.playing.last #dbPause{display:none}   /* the end: just the two choices */
+.demo-bar .db-step{padding:7px 11px;font-size:16px;line-height:1}
+.demo-bar .db-step:disabled{opacity:.35;cursor:default}
+#tour.playing.last .tr-nav .tr-dots,#tour.playing.last #dbPause,#tour.playing.last #dbNext{display:none}   /* the end: just the two choices */
 #tour.playing.last .tr-nav #trSkip{margin-right:auto}
 .tr-nav .btn{white-space:nowrap}
 #tour.playing.last .tr-nav #trAgain{display:inline-flex}
@@ -1329,8 +1331,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <div class="tv-panel hv-panel">
     <div class="tv-head"><h2 id="hvTitle">How to use the Eligibility Checker</h2><button type="button" class="tv-x" id="hvClose" aria-label="Close the guide">×</button></div>
     <div class="hv-start">
-      <button type="button" class="btn sm hv-go" id="hvTour">▶ Show me around</button>
-      <button type="button" class="btn ghost sm" id="hvDemo">Watch a 1-minute demo</button>
+      <button type="button" class="btn sm hv-go" id="hvTour">▶ See a demo</button>
       <button type="button" class="btn ghost sm" id="hvPrint">Print this guide</button>
     </div>
     <div class="hv-body" id="hvBody"></div>
@@ -1347,7 +1348,9 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <div class="demo-bar" id="demoBar" role="region" aria-label="Demo controls">
     <span class="rec"><i></i>Demo</span>
     <div class="db-mid"><span class="db-now" id="dbNow">Watching an example check</span><span class="db-prog" id="dbProg" aria-hidden="true"></span></div>
+    <button type="button" class="db-ctl db-step" id="dbBack" aria-label="Previous step">‹</button>
     <button type="button" class="db-ctl" id="dbPause">Pause</button>
+    <button type="button" class="db-ctl db-step" id="dbNext" aria-label="Next step">›</button>
     <button type="button" class="db-ctl" id="dbClose">Close</button>
     <button type="button" class="db-real" id="dbReal">Do it for real →</button>
   </div>
@@ -2375,7 +2378,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@66a84ca435';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@b93f1a8699';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2781,12 +2784,11 @@ $('hvClose').onclick=()=>{ closeHelp(); $('helpBtn').focus(); };
 $('helpView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('hvClose').onclick(); });
 $('helpView').addEventListener('click',e=>{ if(e.target===$('helpView')) closeHelp(); });
 $('hvPrint').onclick=()=>{ document.body.classList.add('printing-guide'); window.print(); setTimeout(()=>document.body.classList.remove('printing-guide'),400); };
-$('hvTour').onclick=()=>{ closeHelp(); startTour(false); };
-$('hvDemo').onclick=()=>{ closeHelp(); startTour(true); };
+$('hvTour').onclick=()=>{ closeHelp(); startTour(); };
 
 /* =================== walkthrough (and the auto-play demo, which runs the same steps and fills an example) =================== */
 const TOUR=[
- {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. The tour fills in an example as it goes, so you can see every part working. Your own entries come back when it ends.'},
+ {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This demo fills in an example as it plays, so you can see every part working. Pause it, or step through with ‹ and ›, at any time. Your own entries come back when it ends.'},
  {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
  {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async(fast)=>{ await typeInto('name','Jordan Michael',fast); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
  {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
@@ -2830,7 +2832,8 @@ async function showStep(i){
   TR.i=Math.max(0,Math.min(TOUR.length-1,i)); const st=TOUR[TR.i];
   $('trK').textContent=st.k; $('trTitle').textContent=st.t; $('trText').textContent=st.x; $('trDots').textContent=`${TR.i+1} of ${TOUR.length}`;
   $('trBack').disabled=TR.i===0; $('trNext').textContent=TR.i===TOUR.length-1?(TR.playing?'Do it for real →':'Finish'):(TR.demo?'Pause':'Next');
-  if(TR.playing){ $('dbProg').querySelectorAll('b').forEach((b,k)=>b.classList.toggle('on',k<=TR.i)); $('dbNow').textContent=`${st.k}: ${st.t}`; $('tour').classList.toggle('last',TR.i===TOUR.length-1); }
+  $('dbBack').disabled=TR.i===0;
+  if(TR.playing){ $('dbProg').querySelectorAll('b').forEach((b,k)=>b.classList.toggle('on',k<=TR.i)); $('dbNow').textContent=TR.i===TOUR.length-1?'That’s the whole check. Your turn?':`${st.k}: ${st.t}`; $('tour').classList.toggle('last',TR.i===TOUR.length-1); }
   clearTimeout(TR.timer); const tok=++TR.tok;
   // fill the example up to this step: earlier steps at once (if skipped past), this step typed so you can watch it
   for(let j=0;j<TR.i;j++) if(TOUR[j].demo&&!TR.done.has(j)){ await TOUR[j].demo(true); TR.done.add(j); }
@@ -2842,8 +2845,8 @@ async function showStep(i){
     if(TR.playing&&TR.i===TOUR.length-1){ clearTimeout(TR.timer); $('dbNow').textContent='That’s the whole check. Your turn?'; $('trNext').focus(); } }
   else $('trNext').focus();
 }
-function startTour(demo){
-  if(TR.running) endTour(); TR={i:0,demo,playing:demo,timer:0,saved:null,running:true,tok:0,done:new Set()};
+function startTour(){   // one guided demo: plays itself; pause or step through it at any time
+  const demo=true; if(TR.running) endTour(); TR={i:0,demo,playing:demo,timer:0,saved:null,running:true,tok:0,done:new Set()};
   $('dbProg').innerHTML=TOUR.map(()=>'<b></b>').join(''); $('dbPause').textContent='Pause'; $('tour').classList.toggle('playing',demo); $('tour').classList.remove('paused','last');
   TR.saved=snapshot(); $('name').value=''; $('dob').value=''; $('std').value=''; S.answers={}; S.assumed=false; syncQs(); render();   // start from a clean example; restored at the end
   $('tour').classList.remove('hide'); $('tour').classList.toggle('demo',demo); document.body.classList.add('touring'); showStep(0);
@@ -2860,7 +2863,7 @@ $('trNext').onclick=()=>{ if(TR.playing&&TR.i===TOUR.length-1){ doItForReal(); r
 $('trBack').onclick=()=>showStep(TR.i-1);
 $('trSkip').onclick=()=>endTour();
 // See a demo: plays the whole check with an example, then hands over
-document.addEventListener('click',e=>{ const d=e.target.closest('[data-demo]'); if(!d) return; e.preventDefault(); startTour(true); });
+document.addEventListener('click',e=>{ const d=e.target.closest('[data-demo]'); if(!d) return; e.preventDefault(); startTour(); });
 function pauseDemo(){ if(!TR.running||!TR.playing) return;
   if(TR.demo){ clearTimeout(TR.timer); TR.demo=false; $('dbPause').textContent='Play'; $('tour').classList.add('paused'); }
   else { TR.demo=true; $('dbPause').textContent='Pause'; $('tour').classList.remove('paused'); showStep(TR.i); } }
@@ -2868,8 +2871,10 @@ async function doItForReal(){   // leave the demo: the example goes, your own (e
   await endTour(); const c=$('c-apprentice'); if(!c) return; c.classList.remove('your-turn'); void c.offsetWidth; c.classList.add('your-turn');
   setTimeout(()=>c.classList.remove('your-turn'),2600); const f=$('name'); if(f) f.focus({preventScroll:true}); }
 $('dbPause').onclick=pauseDemo; $('dbClose').onclick=()=>endTour(); $('dbReal').onclick=doItForReal;
-$('trAgain').onclick=()=>startTour(true);
-document.addEventListener('keydown',e=>{ if(!TR.running) return; if(e.key==='Escape') endTour(); else if(e.key===' '&&TR.playing&&!e.target.closest('input,textarea,button,select')){ e.preventDefault(); pauseDemo(); } else if(e.key==='ArrowRight'&&!TR.demo) $('trNext').onclick(); else if(e.key==='ArrowLeft'&&!TR.demo) showStep(TR.i-1); });
+$('trAgain').onclick=()=>startTour();
+function stepDemo(d){ if(!TR.running) return; if(TR.demo) pauseDemo(); showStep(TR.i+d); }   // stepping by hand pauses the playback
+$('dbBack').onclick=()=>stepDemo(-1); $('dbNext').onclick=()=>stepDemo(1);
+document.addEventListener('keydown',e=>{ if(!TR.running) return; const inField=e.target.closest?e.target.closest.bind(e.target):()=>null; if(e.key==='Escape') endTour(); else if(e.key===' '&&TR.playing&&!inField('input,textarea,button,select')){ e.preventDefault(); pauseDemo(); } else if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&!inField('input,textarea,select')){ e.preventDefault(); stepDemo(e.key==='ArrowRight'?1:-1); } });
 window.addEventListener('resize',placeTour); window.addEventListener('scroll',placeTour,{passive:true}); document.addEventListener('scroll',placeTour,{passive:true,capture:true});
 
 /* =================== report sign-off: e-signature, printed name and date =================== */
