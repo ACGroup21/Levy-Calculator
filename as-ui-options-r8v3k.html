@@ -12,7 +12,7 @@ var u=q.get('ui');if(u==='boardroom'||u==='current')localStorage.setItem('asElig
 if(localStorage.getItem('asElig.ui2')==='current')ui='current';}catch(e){}
 if(ui==='boardroom')document.documentElement.setAttribute('data-ui','boardroom');})();</script>
 <script>/* apply saved display settings before first paint (no flash) */
-(function(){var d={};try{d=JSON.parse(localStorage.getItem('asElig.display.v1')||'{}')}catch(e){}
+(function(){var d={};try{d=JSON.parse(localStorage.getItem('asElig.display.v2')||'null');if(!d){d=JSON.parse(localStorage.getItem('asElig.display.v1')||'{}');delete d.theme;}}catch(e){d={}}   /* v2: an old saved theme (often Auto, from when Auto was the default) is dropped, so the app opens light; other display choices carry over */
 var t=d.theme||'light';   /* light by default (user, 26 Nov 2026); Auto/Dark still selectable */if(t==='auto')t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
 document.documentElement.setAttribute('data-theme',t);if(d.spacing)document.documentElement.classList.add('spacing');
 if(d.font&&d.font!=='brand'){document.documentElement.setAttribute('data-font',d.font);window.__loadFont&&0;}
@@ -2326,9 +2326,9 @@ function updateJourney(o){
 }
 
 /* ---------- display & reading: theme, screen cover, reading ruler, spacing (saved per viewer) ---------- */
-const DKEY='asElig.display.v1';
+const DKEY='asElig.display.v2';
 const COVERS=[['none','None',''],['cream','Cream','#FFF1C9'],['yellow','Yellow','#FFE66B'],['peach','Peach','#FFCBA4'],['pink','Pink','#FFC2DC'],['lilac','Lilac','#D8C7FF'],['blue','Blue','#A9D6FF'],['aqua','Aqua','#A6EEE4'],['green','Green','#BDEFB8'],['grey','Grey','#CFCFCF']];
-const D=(()=>{ let d={}; try{ d=JSON.parse(localStorage.getItem(DKEY)||'{}'); }catch(e){} return Object.assign({theme:'light',cover:'none',strength:30,ruler:false,spacing:false,font:'brand'},d); })();
+const D=(()=>{ let d={}; try{ d=JSON.parse(localStorage.getItem(DKEY)||'null'); if(!d){ d=JSON.parse(localStorage.getItem('asElig.display.v1')||'{}'); delete d.theme; } }catch(e){ d={}; } return Object.assign({theme:'light',cover:'none',strength:30,ruler:false,spacing:false,font:'brand'},d); })();
 const saveD=()=>{ try{ localStorage.setItem(DKEY,JSON.stringify(D)); }catch(e){} };
 const mq=window.matchMedia?matchMedia('(prefers-color-scheme: dark)'):null;
 function setBg(){   // starlights chosen 26 Nov 2026; the viewer can switch them off in Display & reading; dev mode can preview dots/plain
@@ -2384,7 +2384,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@cd2c5dbaf2';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@2bac85022b';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
