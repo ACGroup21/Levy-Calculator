@@ -1047,6 +1047,43 @@ header{position:sticky;top:0;z-index:45}
 :root[data-theme=dark] .hv-start .btn.ghost,:root[data-theme=dark] .tr-nav .btn.ghost{color:var(--ink)}   /* dark mode: never black text on a dark button */
 .tr-nav #trNext{background:#F39AC2;border-color:#F39AC2;font-weight:600;color:#000}
 #tour.demo .tr-nav #trBack{display:none}
+/* See a demo: a 'now playing' bar with its own controls, and a 'your turn' hand-over at the end */
+.demo-bar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:270;pointer-events:auto;display:none;align-items:center;gap:12px;
+  width:min(720px,calc(100vw - 24px));padding:10px 12px 10px 16px;background:#141013;color:#fff;border-radius:999px;box-shadow:0 18px 40px rgba(0,0,0,.4);font-size:14px}
+#tour.playing .demo-bar{display:flex}
+.demo-bar .rec{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#F39AC2;white-space:nowrap}
+.demo-bar .rec i{width:8px;height:8px;border-radius:50%;background:#F39AC2;box-shadow:0 0 0 0 rgba(243,154,194,.6);animation:recPulse 1.6s ease-out infinite}
+#tour.paused .demo-bar .rec i{animation:none;opacity:.5}
+@keyframes recPulse{0%{box-shadow:0 0 0 0 rgba(243,154,194,.6)}100%{box-shadow:0 0 0 9px rgba(243,154,194,0)}}
+.demo-bar .db-mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.demo-bar .db-now{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#E9E2E6}
+.demo-bar .db-prog{display:flex;gap:3px}
+.demo-bar .db-prog b{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.2);transition:background .3s}
+.demo-bar .db-prog b.on{background:#F39AC2}
+.demo-bar button{font:inherit;font-size:13.5px;font-weight:600;border-radius:999px;cursor:pointer;white-space:nowrap;padding:7px 14px}
+.demo-bar .db-ctl{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.demo-bar .db-ctl:hover{border-color:#fff}
+.demo-bar .db-real{background:#F39AC2;color:#000;border:1px solid #F39AC2}
+.demo-bar .db-real:hover{background:#F6ADCD}
+.demo-bar button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+#tour.playing .tr-nav{display:none}   /* the bar has the controls while a demo plays */
+#tour.playing.last .tr-nav{display:flex}
+#tour .tr-nav #trAgain{display:none}
+#tour.playing.last .tr-nav .tr-dots,#tour.playing.last #dbPause{display:none}   /* the end: just the two choices */
+#tour.playing.last .tr-nav #trSkip{margin-right:auto}
+.tr-nav .btn{white-space:nowrap}
+#tour.playing.last .tr-nav #trAgain{display:inline-flex}
+@media (max-width:640px){.demo-bar{border-radius:14px;flex-wrap:wrap}.demo-bar .db-mid{order:3;flex-basis:100%}}
+/* the start panel's demo button */
+.demo-cta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.demo-cta span{color:var(--muted);font-size:14px}
+.demo-cta .btn{background:#F39AC2;border-color:#F39AC2;color:#000;font-weight:600}
+.demo-cta .btn:hover{background:#F6ADCD;border-color:#000}
+/* your turn: the first section glows once when you leave the demo to do it for real */
+@keyframes yourTurn{0%,100%{box-shadow:0 0 0 0 rgba(243,154,194,0)}30%{box-shadow:0 0 0 6px rgba(243,154,194,.55)}}
+.card.your-turn{animation:yourTurn 1.2s ease-in-out 2}
+@media (prefers-reduced-motion:reduce){.demo-bar .rec i,.card.your-turn{animation:none}}
+@media print{.demo-bar{display:none!important}}
 @media (prefers-reduced-motion:reduce){.tr-spot,.tr-card{transition:none}}
 @media print{#tour,#helpView{display:none!important}}
 @media (max-width:480px){#helpBtn{display:none}}   /* phones: the guide opens from the links in the page */
@@ -1237,7 +1274,7 @@ body{padding-top:52px}
       <div class="step"><b>1</b>The apprentice</div>
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
         <input type="text" id="name" autocomplete="off" placeholder="e.g. Jane Smith">
-        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>. New here? <a href="#" id="tourLink">Take the tour</a>.</small></label>
+        <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>. New here? <a href="#" id="tourLink">Take the tour</a> or <a href="#" data-demo>watch a demo</a>.</small></label>
       <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
       <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small>Extends several age limits to 24.</small></span></label>
       <label class="tick"><input type="checkbox" id="newhire" checked><span>They're a <b>new hire</b> (with us 90 days or less at the start) <small>Affects hiring payments.</small></span></label>
@@ -1359,7 +1396,14 @@ body{padding-top:52px}
     <div class="tr-k" id="trK"></div>
     <h3 id="trTitle"></h3>
     <p id="trText"></p>
-    <div class="tr-nav"><button type="button" class="lnk" id="trSkip">Close</button><span class="tr-dots" id="trDots"></span><button type="button" class="btn ghost sm" id="trBack">Back</button><button type="button" class="btn sm" id="trNext">Next</button></div>
+    <div class="tr-nav"><button type="button" class="lnk" id="trSkip">Close</button><span class="tr-dots" id="trDots"></span><button type="button" class="btn ghost sm" id="trAgain">Watch again</button><button type="button" class="btn ghost sm" id="trBack">Back</button><button type="button" class="btn sm" id="trNext">Next</button></div>
+  </div>
+  <div class="demo-bar" id="demoBar" role="region" aria-label="Demo controls">
+    <span class="rec"><i></i>Demo</span>
+    <div class="db-mid"><span class="db-now" id="dbNow">Watching an example check</span><span class="db-prog" id="dbProg" aria-hidden="true"></span></div>
+    <button type="button" class="db-ctl" id="dbPause">Pause</button>
+    <button type="button" class="db-ctl" id="dbClose">Close</button>
+    <button type="button" class="db-real" id="dbReal">Do it for real →</button>
   </div>
 </div>
 
@@ -1799,7 +1843,8 @@ function render(){ syncLevyTick();
   lastO=o;
   renderRole(o); renderPrintHead(o); renderRulesWatch(o);
   if(!has){ V.className='verdict v-empty'; V.innerHTML=sealSvg('empty')+`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
-    <ul class="preview"><li><i>✓</i><span><b>Whether they can be funded</b>, and the rule behind each answer</span></li><li><i>📅</i><span><b>The best date to start</b>, and the last date before funding changes</span></li><li><i>£</i><span><b>Who pays</b>, today and if the Milburn Review is adopted</span></li></ul>`; return; }
+    <ul class="preview"><li><i>✓</i><span><b>Whether they can be funded</b>, and the rule behind each answer</span></li><li><i>📅</i><span><b>The best date to start</b>, and the last date before funding changes</span></li><li><i>£</i><span><b>Who pays</b>, today and if the Milburn Review is adopted</span></li></ul>
+    <div class="demo-cta"><button type="button" class="btn" data-demo>▶ See a demo</button><span>Watch a full example check in about a minute, then do your own.</span></div>`; return; }
   const ageTxt=`${o.age} at the planned start (${fmt(o.start)})`;
   const map={
     yes:['v-ok','Eligible',`${who} is eligible for apprenticeship funding. They'll be ${ageTxt}.`],
@@ -2384,7 +2429,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@8d2195b3a5';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@db8b005d81';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2796,11 +2841,12 @@ $('tourLink').addEventListener('click',e=>{ e.preventDefault(); startTour(false)
 
 /* =================== walkthrough (and the auto-play demo, which runs the same steps and fills an example) =================== */
 const TOUR=[
- {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This tour takes about a minute.'},
+ {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. The tour fills in an example as it goes, so you can see every part working. Your own entries come back when it ends.'},
  {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
- {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async()=>{ await typeInto('name','Jane Smith'); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
- {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async()=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ await typeInto('std',`${s.n} (${s.r})`); } }},
- {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ $('assumeAll').click(); }},
+ {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async(fast)=>{ await typeInto('name','Jane Smith',fast); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
+ {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
+     await typeInto('std',`${s.n} (${s.r})`,true); } }},
+ {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
  {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
  {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
  {el:'#reasonsCard',k:'The reasons',t:'Why',x:'Every reason in plain English. Tell me why shows the funding-rule paragraph behind each one.'},
@@ -2810,9 +2856,12 @@ const TOUR=[
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
  {el:'#dbtn',k:'Your way',t:'Display and reading',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
-let TR={i:0,demo:false,timer:0,saved:null,running:false};
+let TR={i:0,demo:false,timer:0,saved:null,running:false,tok:0,done:new Set()};
 const setVal=(id,v)=>{ const el=$(id); el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); };
-async function typeInto(id,text){ const el=$(id); el.value=''; for(const ch of text){ if(!TR.running) return; el.value+=ch; el.dispatchEvent(new Event('input',{bubbles:true})); await new Promise(r=>setTimeout(r,text.length>20?18:60)); } const ul=$('stdlist'); if(ul) ul.classList.add('hide'); }
+async function typeInto(id,text,fast){ const el=$(id), tok=TR.tok;
+  if(fast){ el.value=text; el.dispatchEvent(new Event('input',{bubbles:true})); const ul=$('stdlist'); if(ul) ul.classList.add('hide'); return; }
+  el.value=''; for(const ch of text){ if(!TR.running||TR.tok!==tok) return;   // stop if the tour moved on (the next step fills it at once)
+    el.value+=ch; el.dispatchEvent(new Event('input',{bubbles:true})); await new Promise(r=>setTimeout(r,text.length>20?18:60)); } const ul=$('stdlist'); if(ul) ul.classList.add('hide'); }
 function tourTarget(st){ for(const sel of st.el.split(',')){ const el=document.querySelector(sel.trim()); if(el&&el.getBoundingClientRect().width>0) return el; } return document.querySelector('header'); }
 function placeTour(){
   if(!TR.running) return; const el=tourTarget(TOUR[TR.i]); const r=el.getBoundingClientRect(), pad=6, spot=$('trSpot'), card=$('trCard');
@@ -2835,28 +2884,47 @@ function bringIntoView(el){
 async function showStep(i){
   TR.i=Math.max(0,Math.min(TOUR.length-1,i)); const st=TOUR[TR.i];
   $('trK').textContent=st.k; $('trTitle').textContent=st.t; $('trText').textContent=st.x; $('trDots').textContent=`${TR.i+1} of ${TOUR.length}`;
-  $('trBack').disabled=TR.i===0; $('trNext').textContent=TR.i===TOUR.length-1?'Finish':(TR.demo?'Pause':'Next');
-  const el=tourTarget(st); bringIntoView(el); placeTour(); setTimeout(placeTour,60); setTimeout(placeTour,400);
-  if(TR.demo){ clearTimeout(TR.timer); if(st.demo){ await st.demo(); placeTour(); } if(!TR.running||!TR.demo) return;
-    TR.timer=setTimeout(()=>{ if(!TR.running) return; if(TR.i<TOUR.length-1) showStep(TR.i+1); else endTour(); }, 3600); }
+  $('trBack').disabled=TR.i===0; $('trNext').textContent=TR.i===TOUR.length-1?(TR.playing?'Do it for real →':'Finish'):(TR.demo?'Pause':'Next');
+  if(TR.playing){ $('dbProg').querySelectorAll('b').forEach((b,k)=>b.classList.toggle('on',k<=TR.i)); $('dbNow').textContent=`${st.k}: ${st.t}`; $('tour').classList.toggle('last',TR.i===TOUR.length-1); }
+  clearTimeout(TR.timer); const tok=++TR.tok;
+  // fill the example up to this step: earlier steps at once (if skipped past), this step typed so you can watch it
+  for(let j=0;j<TR.i;j++) if(TOUR[j].demo&&!TR.done.has(j)){ await TOUR[j].demo(true); TR.done.add(j); }
+  if(tok!==TR.tok||!TR.running) return;
+  let el=tourTarget(st); bringIntoView(el); placeTour(); setTimeout(placeTour,60); setTimeout(placeTour,400);
+  if(st.demo&&!TR.done.has(TR.i)){ await st.demo(false); if(tok!==TR.tok||!TR.running) return; TR.done.add(TR.i); placeTour(); }   // only counts as done once it finished
+  if(TR.demo){ if(!TR.running||!TR.demo) return;
+    TR.timer=setTimeout(()=>{ if(!TR.running) return; if(TR.i<TOUR.length-1) showStep(TR.i+1); else if(!TR.playing) endTour(); }, 3600);
+    if(TR.playing&&TR.i===TOUR.length-1){ clearTimeout(TR.timer); $('dbNow').textContent='That’s the whole check. Your turn?'; $('trNext').focus(); } }
   else $('trNext').focus();
 }
 function startTour(demo){
-  if(TR.running) endTour(); TR={i:0,demo,timer:0,saved:null,running:true};
-  if(demo){ TR.saved=snapshot(); $('name').value=''; $('dob').value=''; $('std').value=''; S.answers={}; S.assumed=false; syncQs(); render(); }
+  if(TR.running) endTour(); TR={i:0,demo,playing:demo,timer:0,saved:null,running:true,tok:0,done:new Set()};
+  $('dbProg').innerHTML=TOUR.map(()=>'<b></b>').join(''); $('dbPause').textContent='Pause'; $('tour').classList.toggle('playing',demo); $('tour').classList.remove('paused','last');
+  TR.saved=snapshot(); $('name').value=''; $('dob').value=''; $('std').value=''; S.answers={}; S.assumed=false; syncQs(); render();   // start from a clean example; restored at the end
   $('tour').classList.remove('hide'); $('tour').classList.toggle('demo',demo); document.body.classList.add('touring'); showStep(0);
 }
 async function endTour(){
-  clearTimeout(TR.timer); const wasDemo=TR.demo, saved=TR.saved; TR.running=false; $('tour').classList.add('hide'); document.body.classList.remove('touring');
-  if(wasDemo&&saved){ try{ await restore(saved); }catch(e){} }   // put their own entries back
+  clearTimeout(TR.timer); const saved=TR.saved; TR.running=false; TR.playing=false; $('tour').classList.add('hide'); $('tour').classList.remove('playing','paused','last'); document.body.classList.remove('touring');
+  TR.tok++; if(saved){ try{ await restore(saved); }catch(e){} }   // put their own entries back
   window.scrollTo(0,0);
 }
-$('trNext').onclick=()=>{ if(TR.demo&&TR.i<TOUR.length-1){ // demo: Pause / Resume
+$('trNext').onclick=()=>{ if(TR.playing&&TR.i===TOUR.length-1){ doItForReal(); return; }
+  if(TR.demo&&TR.i<TOUR.length-1){ // demo: Pause / Resume
     if($('trNext').textContent==='Pause'){ clearTimeout(TR.timer); TR.demo=false; $('trNext').textContent='Next'; $('tour').classList.remove('demo'); return; } }
   if(TR.i<TOUR.length-1) showStep(TR.i+1); else endTour(); };
 $('trBack').onclick=()=>showStep(TR.i-1);
 $('trSkip').onclick=()=>endTour();
-document.addEventListener('keydown',e=>{ if(!TR.running) return; if(e.key==='Escape') endTour(); else if(e.key==='ArrowRight'&&!TR.demo) $('trNext').onclick(); else if(e.key==='ArrowLeft'&&!TR.demo) showStep(TR.i-1); });
+// See a demo: plays the whole check with an example, then hands over
+document.addEventListener('click',e=>{ const d=e.target.closest('[data-demo]'); if(!d) return; e.preventDefault(); startTour(true); });
+function pauseDemo(){ if(!TR.running||!TR.playing) return;
+  if(TR.demo){ clearTimeout(TR.timer); TR.demo=false; $('dbPause').textContent='Play'; $('tour').classList.add('paused'); }
+  else { TR.demo=true; $('dbPause').textContent='Pause'; $('tour').classList.remove('paused'); showStep(TR.i); } }
+async function doItForReal(){   // leave the demo: the example goes, your own (empty or saved) form comes back, and step 1 lights up
+  await endTour(); const c=$('c-apprentice'); if(!c) return; c.classList.remove('your-turn'); void c.offsetWidth; c.classList.add('your-turn');
+  setTimeout(()=>c.classList.remove('your-turn'),2600); const f=$('name'); if(f) f.focus({preventScroll:true}); }
+$('dbPause').onclick=pauseDemo; $('dbClose').onclick=()=>endTour(); $('dbReal').onclick=doItForReal;
+$('trAgain').onclick=()=>startTour(true);
+document.addEventListener('keydown',e=>{ if(!TR.running) return; if(e.key==='Escape') endTour(); else if(e.key===' '&&TR.playing&&!e.target.closest('input,textarea,button,select')){ e.preventDefault(); pauseDemo(); } else if(e.key==='ArrowRight'&&!TR.demo) $('trNext').onclick(); else if(e.key==='ArrowLeft'&&!TR.demo) showStep(TR.i-1); });
 window.addEventListener('resize',placeTour); window.addEventListener('scroll',placeTour,{passive:true}); document.addEventListener('scroll',placeTour,{passive:true,capture:true});
 
 /* =================== report sign-off: e-signature, printed name and date =================== */
