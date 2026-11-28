@@ -1431,7 +1431,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   </section>
 </main>
 <div id="rvGuide" aria-hidden="true"><div class="rv-rail"><i class="rv-thumb"></i><i class="rv-arrow"></i></div></div>
-<button type="button" class="rv-pill" id="rvPill">Jump to your final report <span class="rv-dn" aria-hidden="true">↓</span></button>
+<button type="button" class="rv-pill" id="rvPill">Jump to final report <span class="rv-dn" aria-hidden="true">↓</span></button>
 
 <div id="helpView" class="hide" role="dialog" aria-modal="true" aria-labelledby="hvTitle">
   <div class="tv-panel hv-panel">
@@ -2582,7 +2582,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@a441db6152';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@f61cba5864';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
