@@ -250,8 +250,8 @@ main > section{min-width:0}
   .vbar a{margin-left:auto;color:#fff;background:var(--pink);border-radius:999px;padding:6px 12px;text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap}
   footer{padding-bottom:90px}
 }
-/* 4. phones: one-row header */
-@media (max-width:640px){
+/* 4. phones + tablets: one-row header (tablets used to wrap onto 2 rows, fixed 28 Nov 2026) */
+@media (max-width:900px){
   header{padding:10px 14px;gap:10px;flex-wrap:nowrap}
   header .hlogo{--lw:108px}
   header{padding:16px 14px 10px}
@@ -262,6 +262,10 @@ main > section{min-width:0}
   .dbtn{padding:7px 10px}
   .dbtn .lbl-t{display:none}
 }
+@media (min-width:641px) and (max-width:900px){header .hlogo{--lw:130px}}
+@media (max-width:400px){:root header{gap:6px;padding-left:10px;padding-right:10px}:root header .hlogo{--lw:84px}:root header .app{letter-spacing:.06em;padding-left:8px}:root header .pw{display:none}:root header .right{gap:5px}:root .dbtn{padding:6px 8px}}   /* small Androids (320-400) */
+@media (max-width:340px){:root header .hlogo{--lw:72px}:root header .app{font-size:9px;letter-spacing:.02em;padding-left:6px}:root header .right{gap:4px}:root .dbtn{padding:5px 7px}}   /* 320px phones */
+@media (min-width:700px) and (max-width:900px){#reset .lbl-t{display:inline}#reset.dbtn{padding:7px 14px}}
 /* 5. use the recommended date */
 .when .best .use{margin-top:8px;border:1px solid var(--pink);background:transparent;color:#FF8CC6;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.02em}
 .when .best .use:hover{background:var(--pink);color:#fff}
@@ -863,7 +867,7 @@ table.tv button:hover{border-color:var(--pink)}
 @media (max-width:760px){.tv-in{grid-template-columns:minmax(0,1fr)}.tv-panel{padding:18px 16px}#teamView{padding:12px 8px}}
 .tv-in > *,.tv-side,.tv-side .f{min-width:0}
 .tv-side select{max-width:100%}
-@media (max-width:480px){#teamBtn{display:none}}   /* header is full on phones: the form's "Check a whole team" link opens it */
+@media (max-width:560px){#teamBtn{display:none}}   /* header is full on phones: the form's "Check a whole team" link opens it */
 @media print{#teamView{display:none!important}}
 /* save / open, rules line */
 .disclaimer{margin:12px 0 16px;padding:11px 14px;background:var(--blush);border:1px solid var(--empty-line);border-left:5px solid var(--plum);border-radius:4px;font-size:14px;line-height:1.5;color:var(--ink)}
@@ -871,7 +875,7 @@ table.tv button:hover{border-color:var(--pink)}
 #openBtn .ico-open{width:15px;height:15px;display:block}
 .phone-links{display:none;margin:-6px 0 16px;font-size:14px}
 .phone-links a{color:var(--pink-deep)}
-@media (max-width:480px){#openBtn{display:none}.phone-links{display:block}}   /* phones: no room in the header, so the guide + Open File live here */
+@media (max-width:560px){#openBtn{display:none}.phone-links{display:block}}   /* phones: no room in the header, so the guide + Open file live here */
 @media (max-width:1319px){#openBtn .lbl-t,#dbtn .lbl-t{display:none}#openBtn,#dbtn{padding:7px 11px}}   /* 5 labelled buttons only fit from ~1310px (measured) */
 /* rules watch */
 .rwatch{border:1px solid var(--warn);border-left:6px solid var(--warn);background:var(--warn-bg);color:var(--ink);border-radius:2px;padding:12px 16px;margin:0 0 14px;font-size:14.5px}
@@ -1093,7 +1097,7 @@ header{position:sticky;top:0;z-index:45}
 @media print{.demo-bar{display:none!important}}
 @media (prefers-reduced-motion:reduce){.tr-spot,.tr-card{transition:none}}
 @media print{#tour,#helpView{display:none!important}}
-@media (max-width:480px){#helpBtn{display:none}}   /* phones: the guide opens from .phone-links under the disclaimer */
+@media (max-width:560px){#helpBtn{display:none}}   /* phones: the guide opens from .phone-links under the disclaimer */
 @media (max-width:1100px){#helpBtn .lbl-t{display:none}#helpBtn{padding:7px 11px}}
 
 table.bd-t.crit th:first-child{width:250px}
@@ -1177,7 +1181,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <div class="pw" title="Powered by Fundable"><span class="pwt">Powered by </span><svg role="img" aria-label="Fundable" viewBox="0 0 304 297"><use href="#fd-icon"/></svg></div>
   <div class="right">
     <button class="dbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span class="aa">?</span><span class="lbl-t"> How to use</span></button>
-    <button class="dbtn" id="openBtn" type="button" title="Open a saved check" aria-label="Open File"><svg class="ico-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5h-7.2L10.5 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg><span class="lbl-t"> Open File</span></button>
+    <button class="dbtn" id="openBtn" type="button" title="Open a saved check" aria-label="Open file"><svg class="ico-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5h-7.2L10.5 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg><span class="lbl-t"> Open file</span></button>
     <button class="dbtn" id="teamBtn" type="button" aria-haspopup="dialog"><span class="aa">⁂</span><span class="lbl-t"> Team check</span></button>
     <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel" aria-label="Display and reading" title="Display and reading"><span class="aa">Aa</span><span class="lbl-t"> Display &amp; reading</span></button>
     <button class="dbtn" id="reset" type="button" title="Clear everything and start again"><span class="aa">↺</span><span class="lbl-t"> Start again</span></button>
@@ -1305,7 +1309,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="seal s-empty" aria-hidden="true"></div><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
     <div class="disclaimer" role="note"><b>Guidance, not a funding decision.</b> Your training provider confirms eligibility at sign-up. <span id="rulesLine"></span></div>
-    <p class="phone-links"><a href="#" id="helpLinkM">How to use</a> · <a href="#" id="openLinkM">Open File</a></p>
+    <p class="phone-links"><a href="#" id="helpLinkM">How to use</a> · <a href="#" id="openLinkM">Open file</a></p>
 
     <div class="card" id="reasonsCard"><h3>What we checked</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
@@ -2396,7 +2400,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@f35386bbc0';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@dcd14bec45';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2789,7 +2793,7 @@ function guideHtml(){
   <h3><span class="num">05</span> Final reports</h3>
   <ul><li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
-  <li><b>Save this check</b> downloads a small file; <b>Open File</b> at the top brings it all back.</li></ul>
+  <li><b>Save this check</b> downloads a small file; <b>Open file</b> at the top brings it all back.</li></ul>
   <h3>Team check</h3>
   <p>Check several people at once: type them in, or download the template, fill it in Excel, save as CSV and choose it. Results are ranked by the nearest deadline, and you can download them or add every deadline to your calendar. <b>Open</b> loads a person into the main form.</p>
   <h3>Display and reading</h3>
