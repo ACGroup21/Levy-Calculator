@@ -403,8 +403,8 @@ table.money tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--field-line)}
 footer{max-width:1320px;margin:0 auto;padding:8px 24px 40px;font-size:13px;color:var(--muted)}
 /* Powered by Fundable: moved from the header to below the rules (user, 28 Nov) */
-.foot-pw{display:flex;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font:500 10px/1 Jost,'Futura PT',Futura,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.foot-pw svg{height:18px;width:auto;display:block}
+.foot-pw{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font:500 10px/1 Jost,'Futura PT',Futura,system-ui,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.foot-pw svg{height:29px;width:auto;display:block}   /* FUNDABLE letters are 23.9% of the mark: 29px = 6.9px letters = the POWERED BY capitals (7px, measured 28 Nov) */
 .foot-rules{margin:0;font-size:13px;line-height:1.55}   /* the rules sit in the same disclaimer box as the result's (user, 28 Nov) */
 .foot-rules a{color:var(--pink-deep)}
 .foot-pw .on-dark{display:none}:root[data-theme=dark] .foot-pw .on-light{display:none}:root[data-theme=dark] .foot-pw .on-dark{display:block}
@@ -2571,7 +2571,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@8fea870b81';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@55c2484efa';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
