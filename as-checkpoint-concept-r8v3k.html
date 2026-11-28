@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Journey Checkpoint Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--pink:#FF4FA3;--pinkText:#CC0874;--plum:#9C3064;--ink:#000;--muted:#6B5F66;--line:#E4DCE0;--card:#fff;--bg:#F4F1F2;--off:#C9BFC4}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--pinkText:#FF77BC;--plum:#E58AB8;--ink:#F3EEF1;--muted:#B3A5AD;--line:#3A2E35;--card:#1B1418;--bg:#120D10;--off:#5A4C54}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Open Sans",Arial,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 60px}
+h1{font:800 30px/1.15 Montserrat,sans-serif;margin:0 0 6px}
+.intro{color:var(--muted);max-width:860px;margin:0 0 18px}
+.ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 22px}
+.ctl button{border:1px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.ctl button.pri{background:var(--pink);border-color:var(--pink);color:#000}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:2px;padding:18px 22px 16px;margin:0 0 16px}
+.opt.rec{border-left:5px solid var(--plum)}
+.opt .tag{font:700 11px/1 "Open Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
+.opt h2{font:800 18px/1.2 Montserrat,sans-serif;margin:4px 0 2px}
+.opt p{margin:0 0 12px;color:var(--muted);font-size:14px;max-width:900px}
+.pros{display:flex;flex-wrap:wrap;gap:4px 18px;margin:10px 0 0;padding:0;list-style:none;font-size:13.5px}
+.pros li::before{font-weight:700;margin-right:6px}
+.pros .p::before{content:"+";color:#1F7A4D}.pros .c::before{content:"–";color:#C62828}
+
+/* ---- the bar: a copy of the live one (Montserrat 600 13.5px, black titles, lines fill pink up to the current step) ---- */
+.jb{position:relative;display:flex;align-items:center;padding:12px 4px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);user-select:none}
+.st{display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;cursor:pointer;font:600 13.5px/1.2 Montserrat,Arial,sans-serif;color:var(--ink);padding:6px 2px;background:none;border:0;transition:color .2s}
+.st .n{position:relative;display:inline-grid;place-items:center;font-variant-numeric:tabular-nums;transition:color .2s,background .2s}
+.res{background:var(--plum);color:#fff;border-radius:2px;padding:6px 12px;font:700 13.5px Montserrat,sans-serif}
+:root:not([data-theme=light]) .res{color:#fff}
+.ln{position:relative;flex:1 1 auto;height:3px;margin:0 12px;border-radius:2px;background:var(--line);overflow:hidden}
+.ln i{position:absolute;inset:0;background:var(--pink);transform:scaleX(0);transform-origin:left;transition:transform .5s linear}
+.ln.on i{transform:scaleX(1)}
+
+/* A: today - a light inside the 0 */
+.z{position:relative;display:inline-block}
+.led{position:absolute;left:50%;top:54%;width:3px;height:6px;border-radius:50%;transform:translate(-50%,-50%);background:var(--pink);opacity:0;transition:opacity .18s}
+.m-led .st.cur .led{opacity:1}
+
+/* B: pink step - the current number and title turn deep pink, nothing else */
+.m-pink .st.cur{color:var(--pinkText)}
+
+/* C: ticks - finished steps swap their number for a tick; current step pink */
+.st .tk{display:none;color:var(--pinkText);font-weight:800}
+.m-tick .st.done .num{display:none}
+.m-tick .st.done .tk{display:inline}
+.m-tick .st.cur{color:var(--pinkText)}
+
+/* D: checkpoint dots - a small marker before each number; numbers stay black */
+.cp{display:none;width:11px;height:11px;border-radius:50%;border:2px solid var(--off);background:transparent;flex:none;transition:background .2s,border-color .2s,box-shadow .2s}
+.m-dot .cp{display:inline-block}
+.m-dot .st.done .cp{background:var(--pink);border-color:var(--pink)}
+.m-dot .st.cur .cp{border-color:var(--pink);background:var(--card);box-shadow:inset 0 0 0 2px var(--card),inset 0 0 0 6px var(--pink)}
+
+/* E: plum tag - the current number sits in a small solid plum tag (no glow) */
+.m-tag .st .n{padding:2px 5px;border-radius:2px}
+.m-tag .st.cur .n{background:var(--plum);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]) .m-tag .st.cur .n{color:#120D10}}
+
+@media (max-width:640px){.st .lbl{display:none}.ln{margin:0 6px}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Journey checkpoint options</h1>
+  <p class="intro">Each bar is a working copy of the live top menu: same font, black titles, and the pink lines that fill up to the step you're on. Only the checkpoint changes: how the bar shows where you are. Click any step, or play the journey. Steps before the current one count as finished here; in the app a step counts as finished once its section is filled in.</p>
+  <div class="ctl"><button class="pri" id="play">▶ Play the journey on all</button><button id="reset">Back to 01</button></div>
+  <div id="opts"></div>
+</div>
+<script>
+const STEPS=[['1','Apprentice'],['2','Apprenticeship'],['3','Checks'],['4','Timing'],['5','Final reports']];
+const OPTS=[
+ {id:'led',tag:'Option A · live today',name:'Light in the 0',p:'A small pink light sits inside the 0 of the current step. Everything else stays black.',pro:['A nod to Fundable','Very quiet'],con:['Tiny: easy to miss, and hard to tell it is a light at all','Says nothing about which steps are finished']},
+ {id:'pink',tag:'Option B · recommended',rec:true,name:'Pink step',p:'The current step’s number and title turn deep pink. No box, no glow, nothing added. It matches the section headings on the left, which already turn pink when selected, and the pink line ends right at it.',pro:['Clearest at a glance with nothing new on screen','Same pink rule as the section headings','Deep pink text passes AA contrast'],con:['Only shows where you are, not what is finished (the pink line already does that)']},
+ {id:'tick',tag:'Option C',name:'Ticks for finished steps',p:'Finished steps swap their number for a pink tick, and the current step is pink. The bar becomes a small checklist, like a GOV.UK task list.',pro:['Shows exactly what is done','Very GOV.UK'],con:['Brings back done-badges, which you removed from the bar on 26 Nov','More pink in the bar at the end of a check']},
+ {id:'dot',tag:'Option D',name:'Checkpoint dots',p:'A small dot sits before each number, like stops on a route map. Empty = not reached, solid pink = passed, pink ring with a centre = you are here. Numbers and titles stay black.',pro:['Reads as checkpoints on a journey: the most literal fit','Numbers stay plain'],con:['Adds a new mark to every step']},
+ {id:'tag',tag:'Option E',name:'Plum tag',p:'The current step’s number sits in a small solid plum tag with a white number. No glow or pulse. Uses the same plum as the result pill.',pro:['Bold and unmissable','Ties to the plum result pill'],con:['Closest to the boxed number you turned down on 26 Nov (that one glowed)']}
+];
+function build(o){
+  const el=document.createElement('section'); el.className='opt'+(o.rec?' rec':'');
+  el.innerHTML=`<div class="tag">${o.tag}</div><h2>${o.name}</h2><p>${o.p}</p>
+   <div class="jb m-${o.id}">${STEPS.map(([n,l],i)=>`${i?'<span class="ln"><i></i></span>':''}<button type="button" class="st" data-i="${i}" aria-label="Step ${i+1}: ${l}"><span class="cp"></span><span class="n"><span class="num"><span class="z">0<i class="led"></i></span>${n}</span><span class="tk">✓</span></span><span class="lbl">${l}</span></button>`).join('')}<span class="ln"><i></i></span><span class="res">✓ Eligible</span></div>
+   <ul class="pros">${o.pro.map(x=>`<li class="p">${x}</li>`).join('')}${o.con.map(x=>`<li class="c">${x}</li>`).join('')}</ul>`;
+  const bar=el.querySelector('.jb'), sts=[...bar.querySelectorAll('.st')], lns=[...bar.querySelectorAll('.ln')].slice(0,STEPS.length-1);
+  let cur=0, busy=[];
+  const paint=(i,arrived)=>sts.forEach((s,k)=>{ s.classList.toggle('cur',arrived&&k===i); s.classList.toggle('done',k<i); s.setAttribute('aria-current',arrived&&k===i?'step':'false'); });
+  function go(to){ if(to===cur) return; const from=cur; cur=to; busy.forEach(clearTimeout); busy=[];
+    const fwd=to>from, n=Math.abs(to-from), t=.5/n;
+    paint(to,false); lns.forEach(l=>l.querySelector('i').style.transitionDuration=t+'s');
+    for(let m=0;m<n;m++){ const k=fwd?from+m:from-m-1; busy.push(setTimeout(()=>lns[k].classList.toggle('on',fwd),m*t*1000)); }
+    busy.push(setTimeout(()=>paint(to,true),n*t*1000)); }
+  sts.forEach((s,i)=>s.addEventListener('click',()=>go(i)));
+  el._go=go; el._reset=()=>{ busy.forEach(clearTimeout); cur=0; lns.forEach(l=>l.classList.remove('on')); paint(0,true); };
+  el._reset(); return el;
+}
+const box=document.getElementById('opts'); const els=OPTS.map(o=>{ const e=build(o); box.appendChild(e); return e; });
+let playing=0;
+document.getElementById('play').onclick=()=>{ clearInterval(playing); els.forEach(e=>e._reset()); let k=0; playing=setInterval(()=>{ k++; if(k>STEPS.length-1){ clearInterval(playing); setTimeout(()=>els.forEach(e=>e._go(0)),1200); return; } els.forEach(e=>e._go(k)); },1100); };
+document.getElementById('reset').onclick=()=>{ clearInterval(playing); els.forEach(e=>e._reset()); };
+</script>
+</body>
+</html>
