@@ -997,6 +997,8 @@ header{position:sticky;top:0;z-index:45}
 :root #journey li[data-k]:not(.res) .n{display:inline-block;padding:2px 5px!important;border-radius:2px;background:transparent!important;line-height:1.25;transition:background .2s,color .2s}
 :root #journey li.lit[data-k]:not(.res) .n{background:var(--plum)!important;color:#fff!important}
 :root[data-theme=dark] #journey li.lit[data-k]:not(.res) .n{color:#141013!important}
+:root #journey li.locked[data-k] a,:root #journey li.locked[data-k] .n{color:var(--muted)!important;cursor:not-allowed}   /* Final reports before there is a result */
+:root #journey li.locked[data-k] a:hover{background:none}
 @media (prefers-reduced-motion:reduce){:root #journey li[data-k]:not(.res) .n{transition:none}}
 /* connectors: solid ink; a pink light runs along them when you move between steps */
 :root .journey li + li::before,:root .journey li.done + li::before,
@@ -2398,6 +2400,9 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
+  { const E=document.querySelector('#journey li[data-k="e"]'), ea=E.querySelector('a'), ready=!!o.dob&&!o.badDob;   // 05 opens only once there is a result to report on
+    E.classList.toggle('locked',!ready); if(ready){ ea.removeAttribute('aria-disabled'); ea.removeAttribute('title'); }
+    else { ea.setAttribute('aria-disabled','true'); ea.title='Check eligibility first: enter a date of birth'; if(S.jSel==='e'){ S.jSel=null; } } }
   R.classList.toggle('elig', key==='yes'||key==='check');   // the final line lights once they are eligible
   moveJInd();
 }
@@ -2461,7 +2466,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@0dcfff23a7';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@c5e72d4391';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2995,7 +3000,7 @@ function signBlock(){
 })();
 
 /* 05 Final reports: the bar link glides to the report buttons; using any of them counts as done */
-document.querySelector('#journey li[data-k="e"] a').addEventListener('click',e=>{ e.preventDefault(); selectReports();
+document.querySelector('#journey li[data-k="e"] a').addEventListener('click',e=>{ e.preventDefault(); if(e.currentTarget.closest('li').classList.contains('locked')) return; selectReports();
   const el=$('actions'); if(typeof bringIntoView==='function') bringIntoView(el); else el.scrollIntoView({block:'center'}); });
 $('actions').addEventListener('pointerdown',()=>selectReports());
 $('actions').addEventListener('focusin',()=>selectReports());
