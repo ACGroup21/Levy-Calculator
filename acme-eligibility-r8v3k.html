@@ -1322,7 +1322,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       <button class="btn ghost" id="saveBtn" type="button">Save this check</button>
       <button class="btn ghost" type="button" onclick="window.print()">Print / save as PDF</button>
     </div>
-    <p class="openline"><a href="#" id="openLink">Open a saved check</a> · <a href="#" id="helpLink">How to use</a> · <span id="rulesLine"></span></p>
+    <p class="openline"><a href="#" id="openLink">Open a saved check</a> · <span id="rulesLine"></span></p>
     <input type="file" id="openFile" accept=".json,application/json" hidden>
   </section>
 </main>
@@ -1493,6 +1493,15 @@ function skippedTags(a,b){ const t=[]; for(let x=new Date(a); x<b; x=addDays(x,1
   return t.length>1 ? t.slice(0,-1).join(', ')+' and '+t[t.length-1] : t[0]; }
 const nextWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<400) x=addDays(x,1); return x; };
 const prevWorkingDay = d => { let x=new Date(d), g=0; while(offDay(x)&&g++<400) x=addDays(x,-1); return x; };
+// does a date clash with the manager's own timing choices? {long, short} or null
+function planClash(d){ if(!d||isNaN(d)) return null;
+  const mon=d.toLocaleString('en-GB',{month:'long',timeZone:'UTC'}), w=d.getUTCDay(), h=ownHol(d), k=bankHol(d);
+  if(h) return {long:`falls in ${esc(h.name||'dates you set to avoid')}`, short:`Clashes with ${esc(h.name||'dates you avoid')}`};
+  if(xmasShut(d)) return {long:'falls in the Christmas shutdown', short:'Clashes with the Christmas shutdown'};
+  if(k) return {long:`is a bank holiday (${esc(k)})`, short:`Bank holiday: ${esc(k)}`};
+  if(w===0||w===6) return {long:`is a ${w===0?'Sunday':'Saturday'}`, short:'Falls on a weekend'};
+  if(S.busy.has(d.getUTCMonth())) return {long:`is in ${mon}, a month you marked as busy`, short:`Clashes with your busy month (${mon})`};
+  return null; }
 const offWhy = d => bankHol(d) ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : xmasShut(d) ? `${fmt(d)} falls in the Christmas shutdown` : ownHol(d) ? `${fmt(d)} falls in ${ownHol(d).name||'dates you are avoiding'}` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
 const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
 const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1841,7 +1850,9 @@ function render(){ syncLevyTick();
     if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the earliest start date or pick a new one.`]);
     else if(missCur.length) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.`]);
     else if(o.start<o.from && o.start>=o.earliest) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up, run the skills scan and approve the commitment.`]);
-    else if(!o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
+    const clash=planClash(o.start);
+    if(o.start>=o.today && !missCur.length && clash && !o.items.some(i=>i.notyet)) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> ${clash.long}. Funding is not affected, but it goes against your timing choices.${planClash(o.rec)?'':` The earliest start date, ${fmt(o.rec)}, avoids them.`}`]);
+    else if(o.start>=o.from && !missCur.length && !o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
     if(o.untilWhy) L.push(['warn',`<b>Start by ${fmt(o.until)}.</b> On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the ${o.untilWhy.what.toLowerCase()}${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.`]);
     else L.push(['ok','No age deadline under current rules. Use levy funds before they expire: 12 months after they arrive (24 months for funds already in the account before August 2026).']);
     if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
@@ -1877,7 +1888,7 @@ function stemRows(o,full){
   const ev=[{d:o.today,k:'today',t:full?'Today: report prepared':'Today'}];
   if(!o.blocked && o.from){
     const same=iso(o.rec)===iso(o.start);
-    const plannedSub = o.start<o.today ? 'In the past: choose a new date' : (o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur') ? 'Too late for a funding deadline' : 'Works');
+    const plannedSub = o.start<o.today ? 'In the past: choose a new date' : (o.missedByPlan&&o.missedByPlan.some(k=>k.scheme==='cur') ? 'Too late for a funding deadline' : (planClash(o.start)||{short:'Works'}).short);
     if(o.skipped) ev.push({skip:true,d:addDays(o.rec,-0.5)});   // sits just above the date it explains
     if(+o.from!==+o.rec) ev.push({d:o.from,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
     const busy=(o.recWhy||[]).some(w=>/busy months/.test(w));
@@ -2378,7 +2389,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@b7a225e6f7';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@0f0801c928';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2779,7 +2790,7 @@ function guideHtml(){
 }
 function openHelp(e){ if(e) e.preventDefault(); $('hvBody').innerHTML=guideHtml(); $('helpView').classList.remove('hide'); document.body.style.overflow='hidden'; $('hvClose').focus(); }
 function closeHelp(){ $('helpView').classList.add('hide'); document.body.style.overflow=''; }
-$('helpBtn').onclick=openHelp; $('helpLink').addEventListener('click',openHelp);
+$('helpBtn').onclick=openHelp;
 $('hvClose').onclick=()=>{ closeHelp(); $('helpBtn').focus(); };
 $('helpView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('hvClose').onclick(); });
 $('helpView').addEventListener('click',e=>{ if(e.target===$('helpView')) closeHelp(); });
