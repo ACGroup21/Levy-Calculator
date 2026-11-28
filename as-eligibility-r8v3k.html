@@ -418,6 +418,23 @@ h3{margin:0 0 12px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
 .sd-x:hover{background:var(--bg);color:var(--ink)}
 .sd-x:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .sd-field{padding-right:72px}
+/* ===== Windows high-contrast / forced colours (28 Nov): backgrounds and shadows are removed there, so state is shown with system colours, outlines and line styles ===== */
+@media (forced-colors: active){
+  .seg button[aria-pressed=true],.months button[aria-pressed=true],#signPanel .sp-tabs button[aria-pressed=true]{forced-color-adjust:none;background:Highlight!important;color:HighlightText!important;border-color:Highlight!important}
+  :root #journey li.lit[data-k]:not(.res) .n{forced-color-adjust:none;background:Highlight!important;color:HighlightText!important}
+  :root .journey li + li::before{forced-color-adjust:none;background:GrayText!important}
+  :root #journey li.fl::before,:root #journey li.res.elig::before{background:Highlight!important}
+  :root #journey li.locked[data-k] a,:root #journey li.locked[data-k] .n{color:GrayText!important}
+  .sd-day.sel{forced-color-adjust:none;background:Highlight!important;color:HighlightText!important}
+  .sd-day.early{outline:2px solid CanvasText;outline-offset:-4px}
+  .sd-day.dl{outline:2px dashed CanvasText;outline-offset:-4px}
+  .sd-day.past,.sd-day.soon,.sd-day.off{color:GrayText}
+  .sd-day.busy{text-decoration:underline dotted 2px}
+  .sd-day.late{color:GrayText;text-decoration:line-through}
+  .sd-leg i{display:none}
+  .sd-day .bh{forced-color-adjust:none;background:CanvasText}
+  .verdict{border:2px solid CanvasText}
+}
 .sd-msg{margin:10px 0 0;font-size:13.5px;min-height:20px;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.sd-cal{transition:none}}
 .when-date .wd{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink)}
@@ -731,7 +748,11 @@ table.bd-t.money td:not(:first-child){width:36%}
 .bd-gaps b{font-family:"JetBrains Mono",ui-monospace,monospace;color:#9C3064}
 .bd-method{position:absolute;left:70px;right:70px;top:150px;margin:0;padding-left:28px;font-size:17px;line-height:1.6;color:#333}
 .bd-method li{margin-bottom:14px}
-.bd-sign{position:absolute;left:70px;right:70px;bottom:34px;display:flex;justify-content:space-between;font-size:13px;color:#707070;border-top:1px solid #ddd;padding-top:12px}
+.bd-sign{position:absolute;left:70px;right:70px;bottom:34px;display:flex;justify-content:space-between;align-items:flex-end;gap:18px;font-size:13px;color:#707070;border-top:1px solid #ddd;padding-top:12px}
+.bd-signrow{position:absolute;left:70px;right:70px;bottom:104px;display:flex;justify-content:flex-start;font-size:13px;color:#707070}   /* sign-off sits two lines clear of the footer (user, 28 Nov); left-aligned under the criteria table: tested 48 checks, always 130px+ clear (right-aligned collided with the money panel) */
+.bd-foot-l{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}   /* one more space between 'Powered by' and FUNDABLE (user, 28 Nov) */
+.bd-fd{height:10px;width:auto;display:inline-block}
+.bd-pgn{margin-left:auto;white-space:nowrap;font-weight:600;color:#555}   /* on the footer line, far right (user, 28 Nov) */
 .bd-line{display:inline-block;width:220px;border-bottom:1px solid #707070;vertical-align:-2px}
 
 /* =================== UI STYLE: Boardroom (DEFAULT since 26 Nov 2026; matches the report) =================== */
@@ -1490,7 +1511,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
     <div class="card" id="whenCard">
       <h3>Best time to onboard</h3>
-      <div class="when-date hide" id="whenDateRow"><label class="wd"><span>Start date for this check</span><input type="hidden" class="sd-src" id="whenDate"></label><span class="wd-kind" id="whenKind"></span><button type="button" class="wd-reset hide" id="whenSuggest">Use the suggested date</button></div>
+      <div class="when-date hide" id="whenDateRow"><label class="wd"><span>Start date for this check</span><input type="hidden" class="sd-src" id="whenDate"></label><span class="wd-kind" id="whenKind"></span><button type="button" class="wd-reset hide" id="whenRevert"></button></div>
       <div class="when" id="when"></div>
       <div id="whenNotes"></div>
       <ol class="stem" id="tl" aria-label="Key dates"></ol>
@@ -1793,7 +1814,8 @@ const syncQs=()=>document.querySelectorAll('#qs .q').forEach(el=>el.querySelecto
 $('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'); if(!b) return; const id=b.closest('.q').dataset.q;
   S.answers[id] = S.answers[id]===b.dataset.v ? undefined : b.dataset.v; syncQs(); render();});
 // shortcut: every answer set to the eligible one (the opposite of each question's blocking answer)
-$('assumeAll').onclick=()=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no':'yes'; }); S.assumed=true; syncQs(); render(); };
+$('assumeAll').onclick=e=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no':'yes'; }); S.assumed=true; syncQs(); render();
+  if(e&&e.isTrusted&&!(typeof TR!=='undefined'&&TR.running)){ const c=$('c-timing'); selectCard(c); c.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); } };   // checks done: on to step 4 (user, 28 Nov); not for the demo or Complete form
 $('clearAll').onclick=()=>{ S.answers={}; S.assumed=false; syncQs(); render(); };
 /* ---- Timing: suggest a date, or check the user's own (busy periods only shape a suggestion) ---- */
 function setWhen(w,quiet){ S.when = w==='plan'?'plan':'suggest';
@@ -1801,6 +1823,7 @@ function setWhen(w,quiet){ S.when = w==='plan'?'plan':'suggest';
   $('planBox').classList.toggle('hide',S.when!=='plan'); $('suggestBox').classList.toggle('hide',S.when==='plan');
   if(S.when==='plan' && !$('start').value){ const o=lastO; $('start').value = iso(o&&o.rec&&!o.blocked ? o.rec : addMonths(utcToday(),2)); }
   if(!quiet) render(); }
+$('start').addEventListener('change',()=>{ S.prevStart=null; });
 $('whenSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-w]'); if(!b) return; setWhen(b.dataset.w); if(S.when==='plan') $('start')._sd.btn.focus(); });
 // the company's busy periods: asked once, saved on this computer, reopened with 'Change my busy periods'
 const TKEY='asElig.timing.v1';
@@ -2070,9 +2093,9 @@ function render(){ syncLevyTick(); if(typeof syncDob==='function') syncDob();
 
     { const wd=$('whenDate'); $('whenDateRow').classList.remove('hide'); if(!(wd._sd&&wd._sd.isOpen())) wd.value=iso(o.start);
       $('whenKind').textContent = o.startKind==='plan' ? 'Your date' : o.startKind==='rec' ? 'The earliest start date' : 'The first possible date';
-      $('whenSuggest').classList.toggle('hide', o.startKind!=='plan'); }
+      const pv=S.prevStart&&S.prevStart!==iso(o.start)?S.prevStart:null; $('whenRevert').classList.toggle('hide',!pv); if(pv) $('whenRevert').textContent='Back to '+fmt(parse(pv)); }
     W.innerHTML=`<div><div class="l">First possible date</div><div class="v">${fmt(o.from)}</div></div>
-      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span><button type="button" class="use" data-chg="1">Change date</button>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span><button type="button" class="use" data-chg="1">Change date</button>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button><button type="button" class="use" data-chg="1">Change date</button>`}</div>
+      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
@@ -2256,11 +2279,12 @@ const markEmpty=()=>document.querySelectorAll('input[type=date]').forEach(i=>i.c
 document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[type=date]')) e.target.classList.toggle('is-empty',!e.target.value); },true);
 document.addEventListener('change',e=>{ if(e.target.matches&&e.target.matches('input[type=date]')) e.target.classList.toggle('is-empty',!e.target.value); },true);
 setInterval(markEmpty,800); markEmpty();   // values set by code (demo, open a check, team rows) are picked up too
-$('whenDate').addEventListener('change',e=>{ const v=e.target.value; if(!v){ setWhen('suggest'); return; } $('start').value=v; setWhen('plan'); });
+$('whenDate').addEventListener('change',e=>{ S.prevStart=null; const v=e.target.value; if(!v){ setWhen('suggest'); return; } $('start').value=v; setWhen('plan'); });
 $('when').addEventListener('click',e=>{ const b=e.target.closest('button.use[data-date]'); if(b) setTimeout(()=>{ if(lastO&&lastO.start){ $('whenDate').value=iso(lastO.start); $('whenDate')._sd.show(); } },0); });   // 'Use this instead' updates the report field too   // the report and section 4 always agree
-$('whenSuggest').addEventListener('click',()=>{ setWhen('suggest'); const wd=$('whenDate'); if(lastO&&lastO.start) wd.value=iso(lastO.start); wd._sd.show(); wd._sd.btn.focus(); });   // show the suggested date straight away
+$('whenRevert').addEventListener('click',()=>{ const pv=S.prevStart; if(!pv) return; S.prevStart=null; $('start').value=pv; setWhen('plan'); const wd=$('whenDate'); wd.value=pv; wd._sd.show(); wd._sd.btn.focus(); });   // undo 'Use this instead'   // show the suggested date straight away
 $('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return;
   if(b.dataset.chg){ const i=$('whenDate'); i._sd.btn.scrollIntoView({block:'nearest'}); i._sd.open(); return; }   // 'Change date': change it right here in the report
+  if(S.when==='plan'&&$('start').value&&$('start').value!==b.dataset.date) S.prevStart=$('start').value;   // so 'Back to …' can restore it
   $('start').value=b.dataset.date; setWhen('plan'); });
 
 /* ---------- 2. phone verdict bar: shows the live verdict until the result card itself is on screen ---------- */
@@ -2445,7 +2469,7 @@ function buildReport(o){
   const page=(kick,title,body,sign)=>`<section class="rp bd"><div class="bd-side"></div>
       <div class="bd-kick">${kick}</div><div class="bd-logo">${logoInk(150)}</div>
       <h1 class="bd-h1" style="font-size:${h1Size(title)}px">${title}</h1>${body}
-      <div class="bd-sign"><span>Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by Fundable · page ${pages.length+1}</span>${sign?signBlock():''}</div></section>`;
+      ${sign?`<div class="bd-signrow">${signBlock()}</div>`:''}<div class="bd-sign"><span class="bd-foot-l">Ann Summers · Apprentice eligibility · Prepared ${fmt(o.today)} · Powered by <svg class="bd-fd" viewBox="372 112 830 88" role="img" aria-label="Fundable"><use href="#fd-logo-dark" width="1214" height="314"/></svg></span><span class="bd-pgn">Page ${pages.length+1} of {{PGTOT}}</span></div></section>`;   // Fundable = the lettering only (logo cropped); page number bottom right (user, 28 Nov)
   const table=(head,rows,cls)=>`<table class="bd-t ${cls||''}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const rag=k=>`<span class="bd-rag ${k}"></span>${RAG[k]}`;
 
@@ -2548,7 +2572,7 @@ function buildReport(o){
       <li><b>Costs</b> use the standard's funding band. The Milburn Review (November 2026) is a proposal, not law; the 25% cut for over-25s is assumed to fall on the employer.</li>
       <li>This report is guidance, not a funding decision. The training provider confirms eligibility at sign-up.</li>
     </ol>`,false));
-  return pages;
+  return pages.map(p=>p.replace(/\{\{PGTOT\}\}/g,pages.length));
 }
 function fitReport(){ const box=$('rvPages'); const sc=Math.min(1,(box.clientWidth||window.innerWidth-48)/1440);
   box.querySelectorAll('.rpw').forEach(w=>{ w.style.width=(1440*sc)+'px'; w.style.height=(810*sc)+'px'; w.firstElementChild.style.transform=`scale(${sc})`; }); }
@@ -2732,7 +2756,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@c9defcbf89';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@f61f14a3cc';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -3120,7 +3144,7 @@ function guideHtml(){
   <h3>Best time to onboard</h3>
   <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
   <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in.</li>
-  <li><b>Start date for this check</b>: change the date right here in the report and everything updates. <b>Use the suggested date</b> goes back to the app's pick.</li>
+  <li><b>Start date for this check</b>: change the date right here in the report and everything updates. If you swap in the earliest start date with <b>Use this instead</b>, <b>Back to</b> your date puts it back.</li>
   <li><b>Start no later than</b>: the last day before funding or a payment changes, and what that deadline protects.</li>
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
