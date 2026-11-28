@@ -269,7 +269,8 @@ main > section{min-width:0}
 /* 5. use the recommended date */
 .when .best .use{margin-top:8px;border:1px solid var(--pink);background:transparent;color:#FF8CC6;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.02em}
 .when .best .use:hover{background:var(--pink);color:#fff}
-.when .best .using{display:block;margin-top:8px;font-size:12px;color:#9be3bd}
+.when .best .using{display:inline-block;margin-top:8px;margin-right:8px;font-size:12.5px;font-weight:600;color:var(--ok)}   /* app green: dark on light cards, bright on dark */
+:root:not([data-theme=dark]) .when .best .using{color:#14593A}   /* deeper green in light mode (user: too light) */
 /* 6. empty state preview */
 .preview{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
 .preview li{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--ink)}
@@ -1969,7 +1970,7 @@ function render(){ syncLevyTick();
     const untilV = o.until ? fmt(o.until) : 'No deadline';
 
     W.innerHTML=`<div><div class="l">First possible date</div><div class="v">${fmt(o.from)}</div></div>
-      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button>`}</div>
+      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span><button type="button" class="use" data-chg="1">Change date</button>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span><button type="button" class="use" data-chg="1">Change date</button>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
@@ -2074,7 +2075,10 @@ function drawTimeline(o){
 }
 
 /* ---------- 5. use the recommended start date ---------- */
-$('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return; $('start').value=b.dataset.date; setWhen('plan'); });
+$('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return;
+  if(b.dataset.chg){ if(S.when!=='plan'){ $('start').value = lastO&&lastO.rec ? iso(lastO.rec) : ''; setWhen('plan'); }   // 'Change date': switch to your own date, starting from this one
+    const c=$('c-timing'); if(typeof selectCard==='function') selectCard(c); c.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); setTimeout(()=>$('start').focus({preventScroll:true}),350); return; }
+  $('start').value=b.dataset.date; setWhen('plan'); });
 
 /* ---------- 2. phone verdict bar: shows the live verdict until the result card itself is on screen ---------- */
 let verdictOnScreen=false;
@@ -2520,7 +2524,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@37012b7d9e';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@c211852057';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2905,7 +2909,7 @@ function guideHtml(){
   <p><b>What we checked</b> lists each point in plain English. <b>Show the funding rules</b> opens the funding-rule paragraph behind each one.</p>
   <h3>Best time to onboard</h3>
   <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
-  <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in.</li>
+  <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in. <b>Change date</b> takes you to Timing to pick your own.</li>
   <li><b>Start no later than</b>: the last day before funding or a payment changes, and what that deadline protects.</li>
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
