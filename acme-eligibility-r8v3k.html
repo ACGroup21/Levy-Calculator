@@ -877,6 +877,8 @@ table.tv button:hover{border-color:var(--pink)}
 .when-seg{flex-wrap:wrap}.when-seg button{white-space:nowrap}
 .busy-sum{margin:14px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:4px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;justify-content:space-between}
 .busy-sum p{margin:0;font-size:14.5px;color:var(--ink)}
+.rp-lead{margin:0 0 12px;font-size:15px;color:var(--text)}
+#reviewBtn:disabled{opacity:.45;cursor:not-allowed}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
 .phone-links{display:none;margin:-6px 0 16px;font-size:14px}
@@ -1232,7 +1234,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <li data-k="b"><a href="#c-programme"><span class="n"><span class="z">0<i class="led"></i></span>2</span>Apprenticeship</a></li>
   <li data-k="c"><a href="#c-checks"><span class="n"><span class="z">0<i class="led"></i></span>3</span>Checks <span class="s" id="jChecks"></span></a></li>
   <li data-k="d"><a href="#c-timing"><span class="n"><span class="z">0<i class="led"></i></span>4</span>Timing</a></li>
-  <li data-k="e"><a href="#actions"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final Reports</a></li>
+  <li data-k="e"><a href="#c-reports"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final Reports</a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
 </ol></nav>
 
@@ -1326,6 +1328,11 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       </div>
       </div>
       <label class="tick" style="margin-top:16px"><input type="checkbox" id="showmil" checked><span>Show what changes <b>if the Milburn Review is adopted</b></span></label>
+    </div>
+    <div class="card" id="c-reports">
+      <div class="step"><b>5</b>Final Reports</div>
+      <p class="rp-lead" id="rpLead">Your result appears once you enter a date of birth in section 1.</p>
+      <button type="button" class="btn" id="reviewBtn" disabled>Review the report</button>
     </div>
   </section>
 
@@ -2036,6 +2043,7 @@ function updateVbar(o){
   bar.classList.toggle('off', !lab || verdictOnScreen);
 }
 if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{ if(es[0].isIntersecting && !S.timingSeen && lastO && lastO.dob){ S.timingSeen=true; render(); } },{threshold:.25}).observe($('c-timing'));   // a quarter is enough: with the busy editor open the card is taller than the screen
   new IntersectionObserver(es=>{ verdictOnScreen=es[0].isIntersecting; render(); },{threshold:.4}).observe($('verdict'));
 }
 $('vbarGo').onclick=e=>{ e.preventDefault(); $('verdict').scrollIntoView({behavior:'smooth',block:'start'}); };
@@ -2323,7 +2331,7 @@ window.addEventListener('resize',()=>{ if(!$('reportView').classList.contains('h
 window.addEventListener('beforeprint',fillReport);
 
 /* ---------- journey bar ---------- */
-const JOURNEY_CARD={a:'c-apprentice',b:'c-programme',c:'c-checks',d:'c-timing',e:'actions'};
+const JOURNEY_CARD={a:'c-apprentice',b:'c-programme',c:'c-checks',d:'c-timing',e:'c-reports'};
 // the section being worked on gets a pink box round its heading: chosen from the bar, or by working inside it
 function selectCard(card){ S.jSel=null; document.querySelectorAll('.inputs .card.sel').forEach(c=>{ if(c!==card) c.classList.remove('sel'); }); if(card) card.classList.add('sel'); if(typeof moveJInd==='function') moveJInd(); }
 function selectReports(){ document.querySelectorAll('.inputs .card.sel').forEach(c=>c.classList.remove('sel')); S.jSel='e'; if(typeof moveJInd==='function') moveJInd(); }
@@ -2346,6 +2354,7 @@ function showDecision(){
 }
 document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.preventDefault(); showDecision(); });
 $('vstrip').addEventListener('click',showDecision);
+$('reviewBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.reviewed=true; showDecision(); render(); });
 // show the strip only while the decision card is out of view inside the results column
 function updateStrip(){ const strip=$('vstrip'), box=resultsBox(), v=$('verdict');
   if(!box||!lastO||!lastO.dob||lastO.badDob){ strip.classList.add('hide'); return; }
@@ -2390,11 +2399,11 @@ window.addEventListener('resize',moveJInd);
 window.addEventListener('load',moveJInd); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(moveJInd);   // fonts change the step widths
 
 function updateJourney(o){
-  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:!!S.timingTouched, e:!!S.reported};   // 05 is done once a report is previewed, printed or saved   // timing is optional: done once they change a preference
+  const done={a:!!o.dob&&!o.badDob, b:!!(o.std||o.fdn), d:!!(S.timingTouched||S.timingSeen||S.reviewed||S.reported), e:!!S.reported};   // timing: done once chosen OR seen (the default needs no click)   // 05 is done once a report is previewed, printed or saved   // timing is optional: done once they change a preference
   const answered=QS.filter(q=>S.answers[q.id]!==undefined).length;
   done.c = answered===QS.length;
   $('jChecks').textContent = `${answered}/${QS.length}`;
-  const order=['a','b','c']; const cur=order.find(k=>!done[k]) || 'r';
+  const order=['a','b','c','d','e']; const cur=order.find(k=>!done[k]) || 'r';   // 01 to 05 in order; the result pill is current only at the very end
   document.querySelectorAll('#journey li[data-k]').forEach(li=>{ const k=li.dataset.k;
     if(k==='r') return; li.classList.toggle('done',!!done[k]); li.classList.toggle('current',k===cur);
     const card=$(JOURNEY_CARD[k]); if(card) card.classList.toggle('done',!!done[k]);
@@ -2404,6 +2413,8 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
+  { const ready5=!!o.dob&&!o.badDob; $('reviewBtn').disabled=!ready5;
+    $('rpLead').textContent = !ready5 ? 'Your result appears once you enter a date of birth in section 1.' : S.reported ? 'Report done. Review the result again any time, or make another report from the buttons under Who pays.' : 'Your result is ready. Review it, then preview, print or save the report, or add the dates to your calendar.'; }
   { const E=document.querySelector('#journey li[data-k="e"]'), ea=E.querySelector('a'), ready=!!o.dob&&!o.badDob;   // 05 opens only once there is a result to report on
     E.classList.toggle('locked',!ready); if(ready){ ea.removeAttribute('aria-disabled'); ea.removeAttribute('title'); }
     else { ea.setAttribute('aria-disabled','true'); ea.title='Check eligibility first: enter a date of birth'; if(S.jSel==='e'){ S.jSel=null; } } }
@@ -2470,7 +2481,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@c211852057';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@ec77563914';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2861,7 +2872,8 @@ function guideHtml(){
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Acme Retail), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
   <h3><span class="num">05</span> Final Reports</h3>
-  <ul><li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
+  <ul><li>Section 5's <b>Review the report</b> button takes you to the top of the result.</li>
+  <li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
   <li><b>Save this check</b> downloads a small file; <b>Open file</b> at the top brings it all back.</li></ul>
   <h3>Team check</h3>
@@ -3004,8 +3016,7 @@ function signBlock(){
 })();
 
 /* 05 Final reports: the bar link glides to the report buttons; using any of them counts as done */
-document.querySelector('#journey li[data-k="e"] a').addEventListener('click',e=>{ e.preventDefault(); if(e.currentTarget.closest('li').classList.contains('locked')) return; selectReports();
-  const el=$('actions'); if(typeof bringIntoView==='function') bringIntoView(el); else el.scrollIntoView({block:'center'}); });
+document.querySelector('#journey li[data-k="e"] a').addEventListener('click',e=>{ if(e.currentTarget.closest('li').classList.contains('locked')){ e.preventDefault(); e.stopPropagation(); } });   // unlocked: behaves like the other steps (goes to section 5)
 $('actions').addEventListener('pointerdown',()=>selectReports());
 $('actions').addEventListener('focusin',()=>selectReports());
 ['previewBtn','icsBtn','saveBtn'].forEach(id=>$(id).addEventListener('click',()=>{ S.reported=true; render(); }));
