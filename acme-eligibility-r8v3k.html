@@ -991,6 +991,13 @@ header{position:sticky;top:0;z-index:45}
 :root .journey .z{position:relative;display:inline-block}
 :root .journey .z .led{position:absolute;left:50%;top:54%;width:3px;height:6px;border-radius:50%;transform:translate(-50%,-50%);background:#FFAC48;box-shadow:none;opacity:0;transition:opacity .18s}   /* Fundable's LED: lit = filled + glow */
 :root .journey li.lit .z .led{opacity:1}   /* only the active step's light is on */
+/* PLUM TAG (user chose option E, 28 Nov 2026): the current step's number sits in a solid plum tag, white number, no glow.
+   Replaces the light in the 0. Every number carries the same padding so nothing shifts when the tag moves. */
+:root #journey .z .led{display:none}
+:root #journey li[data-k]:not(.res) .n{display:inline-block;padding:2px 5px!important;border-radius:2px;background:transparent!important;line-height:1.25;transition:background .2s,color .2s}
+:root #journey li.lit[data-k]:not(.res) .n{background:var(--plum)!important;color:#fff!important}
+:root[data-theme=dark] #journey li.lit[data-k]:not(.res) .n{color:#141013!important}
+@media (prefers-reduced-motion:reduce){:root #journey li[data-k]:not(.res) .n{transition:none}}
 /* connectors: solid ink; a pink light runs along them when you move between steps */
 :root .journey li + li::before,:root .journey li.done + li::before,
 :root[data-ui=boardroom] .journey li + li::before,:root[data-ui=boardroom][data-theme=dark] .journey li + li::before{
@@ -2400,7 +2407,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@dcd14bec45';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@0dcfff23a7';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
