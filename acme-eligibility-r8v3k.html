@@ -461,7 +461,7 @@ footer a{color:var(--pink-deep)}
 .jdm{margin:2px 0 14px;border:1px dashed var(--field-line);border-radius:6px;background:var(--bg)}
 .jdm summary{cursor:pointer;padding:10px 12px;font-size:14.5px;color:var(--muted);list-style:none}
 .jdm summary::-webkit-details-marker{display:none}
-.jdm summary b{color:var(--pink-deep)}
+.jdm summary b{color:var(--pink-deep);display:block;padding-left:16px;white-space:nowrap}   /* its own line, never split (the form column is 440px on desktop) */
 .jdm summary::before{content:"+";display:inline-block;width:16px;font-weight:700;color:var(--pink-deep)}
 .jdm[open] summary::before{content:"–"}
 .jdm-body{padding:0 12px 12px}
@@ -2466,7 +2466,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@7dbd5e9e01';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@37012b7d9e';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
