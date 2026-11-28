@@ -914,8 +914,8 @@ table.tv button:hover{border-color:var(--pink)}
   :root header .app{white-space:nowrap;max-width:none;line-height:1.2;font-size:clamp(9px,2.6vw,11px);letter-spacing:.12em;padding-left:clamp(6px,2vw,10px)}
 }
 /* stage 5 reveal (user, 28 Nov): until Review / Jump, the results show the verdict, disclaimer and What we checked only */
-section.results.pre5 #roleCard,section.results.pre5 #whenCard,section.results.pre5 #moneyCard,section.results.pre5 #saveNote,section.results.pre5 .actions-cq{display:none!important}
-@media print{section.results.pre5 #whenCard,section.results.pre5 #moneyCard{display:block!important}}
+section.results.pre5 #reasonsCard,section.results.pre5 #roleCard,section.results.pre5 #whenCard,section.results.pre5 #moneyCard,section.results.pre5 #saveNote,section.results.pre5 .actions-cq{display:none!important}
+@media print{section.results.pre5 #reasonsCard,section.results.pre5 #whenCard,section.results.pre5 #moneyCard{display:block!important}}
 .pre5-hint{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0 0 16px;padding:12px 16px;border:1px dashed var(--field-line);border-radius:4px;color:var(--text);font-size:14.5px}
 .pre5-hint b{color:var(--ink)}
 /* section 4: the check on your own date sits under the field */
@@ -1407,7 +1407,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
     <div class="card" id="reasonsCard"><h3>What we checked</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
-    <div class="pre5-hint hide" id="pre5Hint"><span>Your <b>dates, costs and report</b> open at step 5.</span><button type="button" class="btn sm ghost" id="pre5Go">Go to step 5</button></div>
+    <div class="pre5-hint hide" id="pre5Hint"><span><b>What we checked</b>, your <b>dates, costs and report</b> open at step 5.</span><button type="button" class="btn sm ghost" id="pre5Go">Go to step 5</button></div>
     <div class="card hide" id="roleCard"><h3>Role match</h3><div id="roleBody"></div></div>
 
     <div class="card" id="whenCard">
@@ -1951,8 +1951,8 @@ function render(){ syncLevyTick();
   const ageTxt = o.startKind==='plan' ? `${o.age} at your planned start (${fmt(o.start)})` : o.startKind==='rec' ? `${o.age} on ${fmt(o.start)}, the earliest start date` : `${o.age} on ${fmt(o.start)}, the first possible start date`;
   const map={
     yes:['v-ok','Eligible',`${who} is eligible for apprenticeship funding. They'll be ${ageTxt}.`],
-    check:['v-warn','Eligible, with checks',`${who} looks eligible. Confirm the items below first. They'll be ${ageTxt}.`],
-    no:['v-bad','Not eligible for funding',`As things stand, ${who.toLowerCase()==='this apprentice'?'this apprentice':who} can't be funded. The reasons are below.`],
+    check:['v-warn','Eligible, with checks',S.reviewed?`${who} looks eligible. Confirm the items below first. They'll be ${ageTxt}.`:`${who} looks eligible. <b>${(o.items||[]).filter(i=>i.sev==='warn').length||'Some'} item${(o.items||[]).filter(i=>i.sev==='warn').length===1?'':'s'} to confirm</b>: you'll see them at step 5. They'll be ${ageTxt}.`],
+    no:['v-bad','Not eligible for funding',S.reviewed?`As things stand, ${who.toLowerCase()==='this apprentice'?'this apprentice':who} can't be funded. The reasons are below.`:(()=>{ const b=(o.items||[]).find(i=>i.sev==='bad'), r=b?String(b.text).replace(/<[^>]+>/g,'').split(/\.\s/)[0].split(/,\s*so\s/)[0].replace(/\.$/,''):''; return `As things stand, ${who.toLowerCase()==='this apprentice'?'this apprentice':who} can't be funded.${r?` Main reason: ${esc(r)}.`:''} Full reasons at step 5.`; })()],
     notyet:['v-bad','Not eligible yet',`${who} can start from ${fmt(o.earliest)}.`]
   }[o.verdict];
   if(o.verdict==='check' && o.nostd) { map[1]='Eligible so far'; map[2]=`${who} looks eligible so far. Pick the apprenticeship to finish the check. They'll be ${ageTxt}.`; }
@@ -2564,7 +2564,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@2439115463';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@bb6397388c';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2957,10 +2957,10 @@ function guideHtml(){
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Acme Retail), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
   <h3><span class="num">05</span> Final Reports</h3>
-  <ul><li>Until step 5 the result shows the verdict and what was checked. <b>Review the report</b> opens the dates, costs and report and takes you to the top; <b>Jump to final report</b> opens them and takes you straight to the report buttons.</li>
+  <ul><li>Until step 5 the result shows the verdict only, so you can focus on one thing at a time. <b>Review the report</b> opens what was checked, the dates, costs and report and takes you to the top; <b>Jump to final report</b> opens them and takes you straight to the report buttons.</li>
   <li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
-  <li><b>Save this check</b> downloads a small file; <b>Open check</b> at the top brings it all back.</li></ul>
+  <li><b>Save this check</b> downloads a small file; <b>Open check</b> at the top (in the ☰ menu on phones) brings it all back.</li></ul>
   <h3>Team check</h3>
   <p>Check several people at once: type them in, or download the template, fill it in Excel, save as CSV and choose it. Results are ranked by the nearest deadline, and you can download them or add every deadline to your calendar. <b>Open</b> loads a person into the main form.</p>
   <h3>Accessibility</h3>
@@ -2991,18 +2991,19 @@ $('hvTour').onclick=()=>{ closeHelp(); startTour(); };
 
 /* =================== walkthrough (and the auto-play demo, which runs the same steps and fills an example) =================== */
 const TOUR=[
- {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This demo fills in an example as it plays, so you can see every part working. Pause it, or step through with ‹ and ›, at any time. Your own entries come back when it ends.'},
+ {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Five short steps on the left, a live result on the right. This demo fills in an example as it plays, so you can see every part working. Pause it, or step through with ‹ and ›, at any time. Your own entries come back when it ends.'},
  {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
  {el:'#c-apprentice',k:'Step 1',t:'The Apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async(fast)=>{ await typeInto('name','Jordan Michael',fast); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
  {el:'#c-programme',k:'Step 2',t:'The Apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
      await typeInto('std',`${s.n} (${s.r})`,true); } }},
  {el:'#c-checks',k:'Step 3',t:'Quick Eligibility Checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
  {el:'#c-timing',k:'Step 4',t:'Timing',x:'Have a start date in mind? Enter it and we check it. If not, we suggest the earliest good date, avoiding your busy periods, and check eligibility on that date.'},
- {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
+ {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet. It shows on its own until step 5, so you can focus on one thing at a time.'},
+ {el:'#c-reports',k:'Step 5',t:'Final Reports',x:'Review the report opens what was checked, the dates and the costs, and takes you to the top. Jump to final report takes you straight to the report buttons.'},
  {el:'#reasonsCard',k:'What we checked',t:'What we checked',x:'Every point in plain English. Show the funding rules opens the funding-rule paragraph behind each one.'},
  {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest good start date, the last date before funding changes, and a timeline of key dates.'},
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
- {el:'#actions',k:'Step 5',t:'Final Reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
+ {el:'#actions',k:'Your report',t:'Report buttons',x:'Preview the Boardroom report, add the dates to your calendar, save this check to open later, or print it.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
  {el:'#dbtn,#menuBtn',k:'Your way',t:'Accessibility',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
