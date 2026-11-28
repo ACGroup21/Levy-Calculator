@@ -895,6 +895,14 @@ table.tv button:hover{border-color:var(--pink)}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(156,48,100,.6)}35%{box-shadow:0 0 0 9px rgba(156,48,100,.25)}100%{box-shadow:0 0 0 0 rgba(156,48,100,0)}}
 @media (prefers-reduced-motion:reduce){.verdict.rv-flash{animation:none!important}}
 .rp-btns{display:flex;flex-wrap:wrap;gap:8px}
+/* stage 5 reveal (user, 28 Nov): until Review / Jump, the results show the verdict, disclaimer and What we checked only */
+section.results.pre5 #roleCard,section.results.pre5 #whenCard,section.results.pre5 #moneyCard,section.results.pre5 #saveNote,section.results.pre5 .actions-cq{display:none!important}
+@media print{section.results.pre5 #whenCard,section.results.pre5 #moneyCard{display:block!important}}
+.pre5-hint{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0 0 16px;padding:12px 16px;border:1px dashed var(--field-line);border-radius:4px;color:var(--text);font-size:14.5px}
+.pre5-hint b{color:var(--ink)}
+/* section 4: the check on your own date sits under the field */
+.plan-check{margin:10px 0 0;padding:8px 12px;border-left:4px solid var(--line);border-radius:0 3px 3px 0;font-size:14px;color:var(--ink)}
+.plan-check.ok{border-color:var(--ok);background:var(--ok-bg)}.plan-check.warn{border-color:var(--warn);background:var(--warn-bg)}.plan-check.bad{border-color:var(--bad);background:var(--bad-bg)}
 #jumpBtn{font-weight:700}
 .save-note{margin:0 0 10px;padding:8px 12px;border-left:4px solid var(--ok);background:var(--ok-bg);color:var(--ink);font-size:14px;border-radius:0 3px 3px 0}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
@@ -1331,6 +1339,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       <div class="seg when-seg" role="group" aria-label="Do you have a start date in mind?" id="whenSeg"><button type="button" data-w="suggest" aria-pressed="true">No, suggest the best date</button><button type="button" data-w="plan" aria-pressed="false">Yes, I have a date</button></div>
       <div id="planBox" class="hide">
         <label class="f" style="margin-top:14px"><span>Planned start date</span><input type="date" id="start"></label>
+        <p class="plan-check hide" id="planCheck" role="status"></p>
         <p class="help" style="margin:6px 0 0;font-size:14px;color:var(--muted)">We check it against funding deadlines, the 4 weeks the provider needs to sign them up, weekends, bank holidays and the Christmas shutdown.</p>
       </div>
       <div id="suggestBox">
@@ -1380,6 +1389,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
     <div class="card" id="reasonsCard"><h3>What we checked</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
+    <div class="pre5-hint hide" id="pre5Hint"><span>Your <b>dates, costs and report</b> open at step 5.</span><button type="button" class="btn sm ghost" id="pre5Go">Go to step 5</button></div>
     <div class="card hide" id="roleCard"><h3>Role match</h3><div id="roleBody"></div></div>
 
     <div class="card" id="whenCard">
@@ -2394,6 +2404,7 @@ $('reviewBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.revi
 // Review the report: top of the Eligible card. Jump to final report: straight to the report buttons.
 function rvNudge(){ const box=resultsBox(); if(box){ const want=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+8, d=want-box.getBoundingClientRect().top; if(d>1) glide(()=>scrollY,x=>scrollTo(0,x),scrollY-d); } }   // at the foot of the page the sticky results column is pushed under the header
 function rvFlash(){ if(matchMedia('(prefers-reduced-motion: reduce)').matches||!$('verdict').animate) return; $('verdict').animate([{boxShadow:'0 0 0 0 rgba(156,48,100,.6)'},{boxShadow:'0 0 0 9px rgba(156,48,100,.25)',offset:.35},{boxShadow:'0 0 0 0 rgba(156,48,100,0)'}],{duration:1600,easing:'ease-out'}); }   // Web Animation: a re-render can't cancel it
+$('pre5Go').addEventListener('click',()=>{ const c=$('c-reports'); selectCard(c); c.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); });
 $('jumpBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.reviewed=true; render(); rvNudge();
   const box=resultsBox(), A=$('actions');
   if(box){ setTimeout(()=>{ const to=box.scrollTop+A.getBoundingClientRect().top-box.getBoundingClientRect().top-20; glide(()=>box.scrollTop,x=>{box.scrollTop=x;},to); },60); }
@@ -2458,6 +2469,15 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
+  { const has5=!!o.dob&&!o.badDob; document.querySelector('section.results').classList.toggle('pre5',!S.reviewed); $('pre5Hint').classList.toggle('hide',!!S.reviewed||!has5);
+    const pc=$('planCheck'), pl=has5&&o.startKind==='plan'&&!o.blocked&&!o.items.some(i=>i.notyet);
+    if(!pl){ pc.classList.add('hide'); } else {
+      const miss=(o.missedByPlan||[]).filter(k=>k.scheme==='cur'), cl=planClash(o.start); let k='ok', t=`✓ <b>${fmt(o.start)}</b> works.`;
+      if(o.start<o.today){ k='bad'; t=`✕ <b>${fmt(o.start)}</b> is in the past. Pick a new date.`; }
+      else if(miss.length){ k='bad'; t=`✕ <b>${fmt(o.start)}</b> is too late for the ${miss[0].what.toLowerCase()}. Start by ${fmt(miss[0].last)}.`; }
+      else if(o.start<o.from){ k='warn'; t=`! <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up.`; }
+      else if(cl){ k='warn'; t=`! <b>${fmt(o.start)}</b> ${cl.long}. Pick a working day.`; }
+      pc.className='plan-check '+k; pc.innerHTML=t; } }
   { const ready5=!!o.dob&&!o.badDob; $('reviewBtn').disabled=!ready5; $('jumpBtn').disabled=!ready5;
     $('rpLead').textContent = !ready5 ? 'Your result appears once you enter a date of birth in section 1.' : S.reported ? 'Report done. Review the result again any time, or make another report from the buttons under Who pays.' : 'Your result is ready. Review it, then preview, print or save the report, or add the dates to your calendar.'; }
   { const E=document.querySelector('#journey li[data-k="e"]'), ea=E.querySelector('a'), ready=!!o.dob&&!o.badDob;   // 05 opens only once there is a result to report on
@@ -2526,7 +2546,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@405c25b2d5';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@42ac65e64c';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2703,6 +2723,7 @@ function snapshot(){
 }
 async function restore(d){
   if(!d||d.app!=='as-eligibility'||!d.form) throw new Error('This file is not a saved eligibility check.');
+  S.reviewed=true;   // a saved check is a finished report: show it all
   SAVE_FIELDS.forEach(id=>{ if(!(id in d.form)) return; const el=$(id); if(el.type==='checkbox') el.checked=!!d.form[id]; else el.value=String(d.form[id]); });
   S.answers={}; QS.forEach(q=>{ const v=d.answers&&d.answers[q.id]; if(v==='yes'||v==='no'||v==='unsure') S.answers[q.id]=v; });
   S.assumed=!!d.assumed; S.busy=new Set((d.busy||[]).filter(m=>m>=0&&m<12)); S.mgrRoute=!!d.mgrRoute;
@@ -2857,7 +2878,7 @@ $('tvFile').addEventListener('change',async()=>{ const f=$('tvFile').files[0]; $
   importTeam(await f.text()); });
 $('tvOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-open]'); if(!b) return; const x=TEAM[+b.dataset.open]; if(!x) return;
   $('name').value=x.p.name; $('dob').value=iso(x.p.dob); $('care').checked=x.p.care; $('foundation').checked=false;
-  const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('pay').value=x.p.pay>0?String(x.p.pay):''; $('start').value=x.p.start?iso(x.p.start):''; setWhen(x.p.start?'plan':'suggest',true);
+  const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('pay').value=x.p.pay>0?String(x.p.pay):''; $('start').value=x.p.start?iso(x.p.start):''; setWhen(x.p.start?'plan':'suggest',true); S.reviewed=true;
   S.answers={}; S.assumed=false; syncQs(); S.jd=null; render(); closeTeam(); $('verdict').scrollIntoView({block:'start'}); });
 
 /* measure the frozen top so the journey bar and the sticky results column sit right under it at every width */
@@ -2918,7 +2939,7 @@ function guideHtml(){
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Ann Summers), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
   <h3><span class="num">05</span> Final Reports</h3>
-  <ul><li>Section 5's <b>Review the report</b> takes you to the top of the result; <b>Jump to final report</b> takes you straight to the report buttons.</li>
+  <ul><li>Until step 5 the result shows the verdict and what was checked. <b>Review the report</b> opens the dates, costs and report and takes you to the top; <b>Jump to final report</b> opens them and takes you straight to the report buttons.</li>
   <li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
   <li><b>Save this check</b> downloads a small file; <b>Open check</b> at the top brings it all back.</li></ul>
@@ -2999,12 +3020,14 @@ async function showStep(i){
 function startTour(){   // one guided demo: plays itself; pause or step through it at any time
   const demo=true; if(TR.running) endTour(); TR={i:0,demo,playing:demo,timer:0,saved:null,running:true,tok:0,done:new Set()};
   $('dbProg').innerHTML=TOUR.map(()=>'<b></b>').join(''); $('dbPause').textContent='Pause'; $('tour').classList.toggle('playing',demo); $('tour').classList.remove('paused','last');
+  TR.wasReviewed=!!S.reviewed; S.reviewed=true;   // the demo shows every part, then puts the reveal state back
   TR.saved=snapshot(); $('name').value=''; $('dob').value=''; $('std').value=''; S.answers={}; S.assumed=false; syncQs(); render();   // start from a clean example; restored at the end
   $('tour').classList.remove('hide'); $('tour').classList.toggle('demo',demo); document.body.classList.add('touring'); showStep(0);
 }
 async function endTour(){
   clearTimeout(TR.timer); const saved=TR.saved; TR.running=false; TR.playing=false; $('tour').classList.add('hide'); $('tour').classList.remove('playing','paused','last'); document.body.classList.remove('touring');
-  TR.tok++; if(saved){ try{ await restore(saved); }catch(e){} }   // put their own entries back
+  const wasRev=TR.wasReviewed; TR.tok++; if(saved){ try{ await restore(saved); }catch(e){} }   // put their own entries back
+  S.reviewed=!!wasRev; render();
   window.scrollTo(0,0);
 }
 $('trNext').onclick=()=>{ if(TR.playing&&TR.i===TOUR.length-1){ doItForReal(); return; }
