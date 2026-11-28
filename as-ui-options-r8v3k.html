@@ -204,6 +204,8 @@ header .pw svg{width:auto;height:18px}
 .dbtn{display:inline-flex;align-items:center;gap:8px;border:1px solid #555;background:#111;color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer}
 .dbtn:hover{border-color:var(--pink)}
 .dbtn .aa{font-weight:700;letter-spacing:0}
+#dbtn .ico-acc{width:17px;height:17px;display:block}
+#openBtn .ico-open{flex:none}
 
 /* display panel */
 .dpanel{position:absolute;right:24px;top:calc(100% + 8px);width:min(340px,calc(100vw - 32px));background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.25);padding:18px;z-index:60}
@@ -387,7 +389,8 @@ table.money tr.tot td{font-weight:600;border-top:2px solid var(--ink)}
 .note{font-size:14px;color:var(--muted);margin:10px 0 0}
 .badge{display:inline-block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;background:var(--pink);color:#fff;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px}
 :root[data-ui=boardroom][data-theme=dark] .badge{color:#000}   /* light pink badge in dark mode: dark text */
-.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.actions{display:flex;gap:clamp(4px,1.1cqw,8px);flex-wrap:wrap;margin-top:16px}
+.actions-cq{container-type:inline-size}   /* the report buttons size themselves to the space they have: no per-screen rules */
 .btn{border:1px solid var(--btn-bg);background:var(--btn-bg);color:var(--btn-fg);border-radius:999px;padding:9px 20px;cursor:pointer;font-weight:500;letter-spacing:.04em}
 .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--field-line)}
 footer{max-width:1320px;margin:0 auto;padding:8px 24px 40px;font-size:13px;color:var(--muted)}
@@ -904,12 +907,15 @@ section.results.rv-hide::-webkit-scrollbar{display:none}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(156,48,100,.6)}35%{box-shadow:0 0 0 9px rgba(156,48,100,.25)}100%{box-shadow:0 0 0 0 rgba(156,48,100,0)}}
 @media (prefers-reduced-motion:reduce){.rv-arrow,.rv-arrow::before,.rv-pill .rv-dn,.verdict.rv-flash{animation:none!important}.rv-pill{transition:none}}
 @media print{#rvGuide,.rv-pill{display:none!important}}
+.save-note{margin:0 0 10px;padding:8px 12px;border-left:4px solid var(--ok);background:var(--ok-bg);color:var(--ink);font-size:14px;border-radius:0 3px 3px 0}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
 .phone-links{display:none;margin:-6px 0 16px;font-size:14px}
 .phone-links a{color:var(--pink-deep)}
-@media (max-width:560px){#openBtn{display:none}.phone-links{display:block}}   /* phones: no room in the header, so the guide + Open file live here */
-@media (max-width:1319px){#openBtn .lbl-t,#dbtn .lbl-t{display:none}#openBtn,#dbtn{padding:7px 11px}}   /* 5 labelled buttons only fit from ~1310px (measured) */
+@media (max-width:560px){#openBtn{display:none}.phone-links{display:block}}   /* phones: no room in the header, so the guide + Open check live here */
+@media (max-width:1299px){#dbtn .lbl-t{display:none}#dbtn{padding:7px 11px}}   /* 'Accessibility' keeps its label from 1300px (measured 28 Nov) */
+@media (max-width:1180px){#helpBtn .lbl-t{display:none}#helpBtn{padding:7px 11px}}   /* '?' is understood; this keeps 'Open check' labelled on laptops */
+@media (max-width:1023px){#openBtn .lbl-t{display:none}#openBtn{padding:7px 11px}}   /* below 1024 (small tablet-landscape): icons only, like the rest */
 /* rules watch */
 .rwatch{border:1px solid var(--warn);border-left:6px solid var(--warn);background:var(--warn-bg);color:var(--ink);border-radius:2px;padding:12px 16px;margin:0 0 14px;font-size:14.5px}
 .rwatch b{display:block;margin-bottom:2px}
@@ -1175,7 +1181,8 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 :root .journey li.res a,:root .journey li.res.act a,:root .journey li.res.current a,:root .journey li.res a #jRes,:root .journey li.res a .n{color:#fff!important}
 
 /* bottom row under Who pays: every button styled like Preview report, back at their original sizes (15.5px semi-bold) */
-#actions .btn,:root[data-ui=boardroom] #actions .btn{font-weight:600!important;font-size:15.5px!important;background:#fff;border:1px solid #000;color:#000}
+#actions .btn,:root[data-ui=boardroom] #actions .btn{font-weight:600!important;font-size:clamp(11px,2.2cqw,13.5px)!important;padding:.6em .85em!important;white-space:nowrap;background:#fff;border:1px solid #000;color:#000}
+@media (max-width:1000px){#actions .btn,:root[data-ui=boardroom] #actions .btn{font-size:13.5px!important}}   /* one column (tablets/phones): keep readable size and wrap; phones get their own audit */
 /* dark mode: the same buttons drawn dark, so they don't glare; pink on hover stays */
 :root[data-theme=dark] #actions .btn,:root[data-theme=dark][data-ui=boardroom] #actions .btn,:root[data-theme=dark] #actions #previewBtn,:root[data-theme=dark][data-ui=boardroom] #actions #previewBtn,:root[data-theme=dark] #actions .btn.ghost,:root[data-theme=dark][data-ui=boardroom] #actions .btn.ghost{background:var(--card);border-color:var(--plum);color:var(--ink)}
 :root[data-theme=dark] #actions .btn:focus-visible{outline-color:var(--ink)}
@@ -1277,12 +1284,12 @@ body{padding-top:52px}
   <div class="pw" title="Powered by Fundable"><span class="pwt">Powered by </span><svg role="img" aria-label="Fundable" viewBox="0 0 304 297"><use href="#fd-icon"/></svg></div>
   <div class="right">
     <button class="dbtn" id="helpBtn" type="button" aria-haspopup="dialog"><span class="aa">?</span><span class="lbl-t"> How to use</span></button>
-    <button class="dbtn" id="openBtn" type="button" title="Open a saved check" aria-label="Open file"><svg class="ico-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5h-7.2L10.5 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg><span class="lbl-t"> Open file</span></button>
+    <button class="dbtn" id="openBtn" type="button" title="Open a saved check" aria-label="Open check"><svg class="ico-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5h-7.2L10.5 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg><span class="lbl-t"> Open check</span></button>
     <button class="dbtn" id="teamBtn" type="button" aria-haspopup="dialog"><span class="aa">⁂</span><span class="lbl-t"> Team check</span></button>
-    <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel" aria-label="Display and reading" title="Display and reading"><span class="aa">Aa</span><span class="lbl-t"> Display &amp; reading</span></button>
+    <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel" aria-label="Accessibility" title="Accessibility: theme, screen colour, reading ruler, spacing and fonts"><svg class="ico-acc" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="6.6" r="1.6" fill="currentColor"/><path d="M6.8 9.4l5.2 1.1 5.2-1.1M12 10.5v3.6l-2.4 4.6M12 14.1l2.4 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl-t"> Accessibility</span></button>
     <button class="dbtn" id="reset" type="button" title="Clear everything and start again"><span class="aa">↺</span><span class="lbl-t"> Start again</span></button>
   </div>
-  <div class="dpanel hide" id="dpanel" role="dialog" aria-label="Display and reading options">
+  <div class="dpanel hide" id="dpanel" role="dialog" aria-label="Accessibility options">
     <button class="close" id="dclose" type="button" aria-label="Close">×</button>
     <div class="grp"><h4>Theme</h4>
       <div class="seg" id="themeSeg" role="group" aria-label="Theme"><button type="button" data-t="auto" title="Auto matches your computer's light or dark setting" aria-describedby="autoHint">Auto</button><button type="button" data-t="light">Light</button><button type="button" data-t="dark">Dark</button></div>
@@ -1411,7 +1418,7 @@ body{padding-top:52px}
     <div class="card" id="c-reports">
       <div class="step"><b>5</b>Final Reports</div>
       <p class="rp-lead" id="rpLead">Your result appears once you enter a date of birth in section 1.</p>
-      <button type="button" class="btn" id="reviewBtn" disabled>Review the report</button>
+      <button type="button" class="btn sm" id="reviewBtn" disabled>Review the report</button>
     </div>
   </section>
 
@@ -1422,7 +1429,7 @@ body{padding-top:52px}
     <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="seal s-empty" aria-hidden="true"></div><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
     <div class="disclaimer" role="note"><b>Guidance, not a funding decision.</b> Your training provider confirms eligibility at sign-up. <span id="rulesLine"></span></div>
-    <p class="phone-links"><a href="#" id="helpLinkM">How to use</a> · <a href="#" id="openLinkM">Open file</a></p>
+    <p class="phone-links"><a href="#" id="helpLinkM">How to use</a> · <a href="#" id="openLinkM">Open check</a></p>
 
     <div class="card" id="reasonsCard"><h3>What we checked</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
@@ -1441,11 +1448,14 @@ body{padding-top:52px}
       <p class="note" id="moneyNote"></p>
     </div>
 
+    <p class="save-note hide" id="saveNote" role="status"></p>
+    <div class="actions-cq">
     <div class="actions" id="actions">
       <button class="btn" id="previewBtn" type="button">Preview report</button>
-      <button class="btn ghost" id="icsBtn" type="button">Add dates to calendar</button>
+      <button class="btn ghost" id="icsBtn" type="button">Add to calendar</button>
       <button class="btn ghost" id="saveBtn" type="button">Save this check</button>
       <button class="btn ghost" type="button" onclick="window.print()">Print / save as PDF</button>
+    </div>
     </div>
     <input type="file" id="openFile" accept=".json,application/json" hidden>
   </section>
@@ -2601,7 +2611,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@d718918e47';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@761068485a';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2792,7 +2802,8 @@ async function restore(d){
   const note = d.rules && d.rules!==RULES_META.rules.label ? ` It was saved under ${d.rules}; the result now uses ${RULES_META.rules.label}.` : '';
   return `Opened the check saved on ${fmt(parse(String(d.saved).slice(0,10)))}.${note}`;
 }
-$('saveBtn').onclick=()=>{ const d=snapshot(); downloadFile(`eligibility-check-${fileSafe(d.form.name)||'apprentice'}-${iso(utcToday())}.json`,JSON.stringify(d,null,1),'application/json'); };
+$('saveBtn').onclick=()=>{ const d=snapshot(); downloadFile(`eligibility-check-${fileSafe(d.form.name)||'apprentice'}-${iso(utcToday())}.json`,JSON.stringify(d,null,1),'application/json');
+  const n=$('saveNote'); n.innerHTML='<b>Saved.</b> To open it later, use <b>Open check</b> at the top.'; n.classList.remove('hide'); clearTimeout(n._t); n._t=setTimeout(()=>n.classList.add('hide'),12000); };
 $('openBtn').addEventListener('click',()=>$('openFile').click());
 $('openLinkM').addEventListener('click',e=>{ e.preventDefault(); $('openFile').click(); });
 $('openFile').addEventListener('change',async()=>{ const f=$('openFile').files[0]; $('openFile').value=''; if(!f) return;
@@ -2994,11 +3005,11 @@ function guideHtml(){
   <h3><span class="num">05</span> Final Reports</h3>
   <ul><li>Section 5's <b>Review the report</b> button takes you to the top of the result.</li>
   <li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
-  <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
-  <li><b>Save this check</b> downloads a small file; <b>Open file</b> at the top brings it all back.</li></ul>
+  <li><b>Add to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
+  <li><b>Save this check</b> downloads a small file; <b>Open check</b> at the top brings it all back.</li></ul>
   <h3>Team check</h3>
   <p>Check several people at once: type them in, or download the template, fill it in Excel, save as CSV and choose it. Results are ranked by the nearest deadline, and you can download them or add every deadline to your calendar. <b>Open</b> loads a person into the main form.</p>
-  <h3>Display and reading</h3>
+  <h3>Accessibility</h3>
   <p>Light or dark theme (Auto follows your computer), a coloured screen cover, a reading ruler, extra spacing and dyslexia-friendly fonts.</p>
   <div class="tip">This tool is guidance, not a funding decision. Your training provider confirms eligibility at sign-up. ${esc(RULES_META.rules.label)}.</div>`;
 }
@@ -3026,7 +3037,7 @@ const TOUR=[
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
  {el:'#actions',k:'Step 5',t:'Final Reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
- {el:'#dbtn',k:'Your way',t:'Display and reading',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
+ {el:'#dbtn',k:'Your way',t:'Accessibility',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
 let TR={i:0,demo:false,timer:0,saved:null,running:false,tok:0,done:new Set()};
 const setVal=(id,v)=>{ const el=$(id); el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); };
