@@ -1353,7 +1353,7 @@ body{padding-top:52px}
     <div class="print-head" id="printHead"></div>
     <div id="verdict" class="verdict v-empty"><div class="seal s-empty" aria-hidden="true"></div><div class="k">Start here</div><h2>Enter a date of birth to check eligibility</h2><p>The result updates as you fill in the form.</p></div>
 
-    <div class="card" id="reasonsCard"><h3>Why</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
+    <div class="card" id="reasonsCard"><h3>What we checked</h3><ul class="reasons" id="reasons"></ul><div id="whyRefs"></div></div>
 
     <div class="card hide" id="roleCard"><h3>Role match</h3><div id="roleBody"></div></div>
 
@@ -1874,7 +1874,7 @@ function render(){ syncLevyTick();
   const withRef=items.filter(i=>i.ref);
   const refTxt=r=>/^(Skills England|Annex|Growth)/.test(r)?r:'para '+r;
   const short=t=>{ const x=String(t).replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); return x.length>78?x.slice(0,76).replace(/\s\S*$/,'')+'…':x; };
-  $('whyRefs').innerHTML = withRef.length ? `<details class="fold whyfold"><summary>Tell me why</summary><div>
+  $('whyRefs').innerHTML = withRef.length ? `<details class="fold whyfold"><summary>Show the funding rules</summary><div>
       <table class="refs"><thead><tr><th>Point</th><th>Funding rule</th></tr></thead><tbody>
       ${withRef.map(i=>`<tr><td>${esc(short(i.text))}</td><td class="para">${esc(refTxt(i.ref))}</td></tr>`).join('')}</tbody></table>
       <p class="note" style="margin-top:8px">Paragraph numbers refer to the Apprenticeship funding rules 2026 to 2027 (version 3).</p></div></details>` : '';
@@ -2432,7 +2432,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@27185a4f27';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@b7a225e6f7';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2813,7 +2813,7 @@ function guideHtml(){
   <li>Tick <b>Milburn</b> to see what changes if the Milburn Review is adopted. It is a proposal, not law.</li></ul>
   <h3>Reading the result</h3>
   <div class="seals"><div>${seal('ok')}<span><b>Eligible</b></span></div><div>${seal('warn')}<span><b>Eligible, with checks</b>: confirm the items listed</span></div><div>${seal('bad')}<span><b>Not eligible</b>: the reasons are listed</span></div><div>${seal('notyet')}<span><b>Not eligible yet</b>: too young, shows when they can start</span></div></div>
-  <p><b>Why</b> lists each reason in plain English. <b>Tell me why</b> opens the funding-rule paragraph behind each one.</p>
+  <p><b>What we checked</b> lists each point in plain English. <b>Show the funding rules</b> opens the funding-rule paragraph behind each one.</p>
   <h3>Best time to onboard</h3>
   <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
   <li><b>Earliest start date</b>: the first working day that also avoids your busy months and holidays. <b>Use this date</b> copies it into the planned start.</li>
@@ -2850,7 +2850,7 @@ const TOUR=[
  {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
  {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
  {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
- {el:'#reasonsCard',k:'The reasons',t:'Why',x:'Every reason in plain English. Tell me why shows the funding-rule paragraph behind each one.'},
+ {el:'#reasonsCard',k:'What we checked',t:'What we checked',x:'Every point in plain English. Show the funding rules opens the funding-rule paragraph behind each one.'},
  {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest start date that avoids busy months and holidays, the last date before funding changes, and a timeline of key dates.'},
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
  {el:'#actions',k:'Step 5',t:'Final reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
