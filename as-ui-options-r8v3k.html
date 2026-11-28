@@ -902,9 +902,7 @@ section.results.rv-hide{scrollbar-width:none}
 section.results.rv-hide::-webkit-scrollbar{display:none}
 .verdict.rv-flash{animation:rvFlash 1.6s ease-out}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(156,48,100,.6)}35%{box-shadow:0 0 0 9px rgba(156,48,100,.25)}100%{box-shadow:0 0 0 0 rgba(156,48,100,0)}}
-#actions.rv-glow button{animation:rvGlow 1.2s ease-out 2}
-@keyframes rvGlow{0%{box-shadow:0 0 0 0 rgba(255,79,163,.7)}100%{box-shadow:0 0 0 10px rgba(255,79,163,0)}}
-@media (prefers-reduced-motion:reduce){.rv-arrow,.rv-arrow::before,.rv-pill .rv-dn,.verdict.rv-flash,#actions.rv-glow button{animation:none!important}.rv-pill{transition:none}}
+@media (prefers-reduced-motion:reduce){.rv-arrow,.rv-arrow::before,.rv-pill .rv-dn,.verdict.rv-flash{animation:none!important}.rv-pill{transition:none}}
 @media print{#rvGuide,.rv-pill{display:none!important}}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
@@ -2450,8 +2448,8 @@ function rvUpdate(){ if(!RV.on) return;
     const r=box.getBoundingClientRect(), H=r.height, max=box.scrollHeight-box.clientHeight, y=box.scrollTop, k=max>0?y/max:1, th=Math.max(40,H*box.clientHeight/box.scrollHeight), top=k*(H-th), atEnd=y>=max-4;
     rail.style.display='block'; rail.style.left=(r.right-10)+'px'; rail.style.top=r.top+'px'; rail.style.height=H+'px';
     thumb.style.height=th+'px'; thumb.style.top=top+'px';
-    ar.classList.toggle('up',atEnd); if(atEnd) ar.classList.remove('calling');
-    ar.style.top=(atEnd?Math.max(0,top-18):Math.min(H-12,top+th+8))+'px';
+    if(atEnd) ar.classList.remove('calling');
+    ar.style.top=Math.min(H-12,top+th+8)+'px';   // always points down; the guide reverts once the report is reached
     pill.style.left=(r.left+r.width/2)+'px'; pill.style.bottom=Math.max(16,innerHeight-r.bottom+16)+'px';
     seen=A.top<r.bottom-40;
   } else {   // one column: the page scrolls, so only the pill (above the verdict bar when it shows)
@@ -2460,7 +2458,7 @@ function rvUpdate(){ if(!RV.on) return;
     seen=A.top<innerHeight-60;
   }
   pill.classList.toggle('show',!seen);
-  if(seen&&!RV.pulsed){ RV.pulsed=true; const el=$('actions'); el.classList.remove('rv-glow'); void el.offsetWidth; el.classList.add('rv-glow'); clearTimeout(RV.t); RV.t=setTimeout(rvOff,2500); }
+  if(seen) rvOff();   // reached the report: back to the normal scrollbar, no up arrow, no pulse (user, 28 Nov)
 }
 window.__rvUpd=rvUpdate;
 function rvOn(){ RV.on=true; RV.pulsed=false; RV.quiet=Date.now()+800; clearTimeout(RV.t);   // our own glide to the top is not the user scrolling
@@ -2603,7 +2601,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@73c469cc1f';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@d718918e47';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
