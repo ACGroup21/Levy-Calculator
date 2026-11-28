@@ -54,6 +54,12 @@ h1{font:800 28px/1.15 Montserrat,sans-serif;margin:0 0 6px}
 .arrow.up{border-top:0;border-bottom:9px solid var(--pink)}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
 .arrow.up{animation-name:bobUp}@keyframes bobUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+/* calling: until the user scrolls, the arrow flashes and a pink trail streaks down into it */
+.arrow::before{content:"";position:absolute;left:-1.5px;bottom:9px;width:3px;height:34px;border-radius:2px;background:linear-gradient(to bottom,transparent,var(--pink));opacity:0}
+.arrow.calling{animation:flashA 1.1s ease-in-out infinite}
+.arrow.calling::before{animation:trail 1.1s ease-in infinite}
+@keyframes flashA{0%,100%{opacity:1;transform:translateY(0)}45%{opacity:.25;transform:translateY(0)}70%{opacity:1;transform:translateY(4px)}}
+@keyframes trail{0%{opacity:0;transform:translateY(-26px) scaleY(.4)}55%{opacity:1;transform:translateY(0) scaleY(1)}100%{opacity:0;transform:translateY(6px) scaleY(.6)}}
 
 /* A: floating pill at the bottom of the results column */
 .pill{position:absolute;left:50%;bottom:14px;transform:translate(-50%,20px) scale(.9);opacity:0;pointer-events:none;background:var(--plum);color:#fff;border-radius:999px;padding:9px 16px;font:600 14px "Open Sans";box-shadow:0 6px 18px rgba(0,0,0,.18);transition:opacity .25s,transform .35s cubic-bezier(.2,1.4,.4,1);white-space:nowrap;cursor:pointer;border:0}
@@ -82,7 +88,7 @@ h1{font:800 28px/1.15 Montserrat,sans-serif;margin:0 0 6px}
 <body>
 <div class="wrap">
   <h1>Review the report: scroll cue options</h1>
-  <p class="intro">A working mock of the checker. Click <b>Review the report</b> in section 5: the results column jumps to the top of the Eligible card, the card flashes, and a scroll rail appears on its right with an arrow that points down while there is more below (and turns round at the bottom). The three options differ in the pop-up badge. Scroll the results column to see each one react.</p>
+  <p class="intro">A working mock of the checker. Click <b>Review the report</b> in section 5: the results column jumps to the top of the Eligible card, the card flashes, and a grey scroll rail appears on its right with a pink arrow. Until you scroll, the arrow flashes with a pink trail streaking down into it; once you scroll it settles, follows the rail, and turns round at the bottom. The three options differ in the pop-up badge. Scroll the results column to see each one react.</p>
   <div class="tabs" role="group" aria-label="Option">
     <button type="button" data-o="A" aria-pressed="true">A · Scroll pill</button>
     <button type="button" data-o="B" aria-pressed="false">B · Badge on the card</button>
@@ -133,7 +139,7 @@ function update(){
   const max=R.scrollHeight-R.clientHeight, y=R.scrollTop, k=max>0?y/max:1;
   const th=Math.max(36,H*R.clientHeight/R.scrollHeight), top=k*(H-th);
   thumb.style.height=th+'px'; thumb.style.top=top+'px';
-  const atEnd=y>=max-4; arrow.classList.toggle('up',atEnd);
+  const atEnd=y>=max-4; arrow.classList.toggle('up',atEnd); if(atEnd) arrow.classList.remove('calling');
   arrow.style.top=(atEnd? Math.max(0,top-16) : Math.min(H-10,top+th+6))+'px';
   if(!armed) return;
   const act=$('actionsCard'), seen=act.offsetTop < y+R.clientHeight-60;
@@ -148,11 +154,11 @@ function update(){
     tip.style.top=(parseFloat(nd.style.top)-6)+'px'; tip.classList.add('show'); }
   if(seen && !act._pulsed){ act._pulsed=true; $('actions').classList.remove('glow'); void $('actions').offsetWidth; $('actions').classList.add('glow'); }
 }
-function reset(){ armed=false; R.scrollTop=0; [pill,badge,counter,tip].forEach(e=>e.classList.remove('show')); rail.classList.remove('on'); dots.classList.remove('on'); $('actionsCard')._pulsed=false; $('actions').classList.remove('glow'); update(); }
+function reset(){ armed=false; arrow.classList.remove('calling'); R.scrollTop=0; [pill,badge,counter,tip].forEach(e=>e.classList.remove('show')); rail.classList.remove('on'); dots.classList.remove('on'); $('actionsCard')._pulsed=false; $('actions').classList.remove('glow'); update(); }
 function setOpt(o){ opt=o; document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.o===o))); $('desc').innerHTML=DESC[o]; reset(); }
 document.querySelector('.tabs').addEventListener('click',e=>{ const b=e.target.closest('button[data-o]'); if(b) setOpt(b.dataset.o); });
 $('review').addEventListener('click',()=>{
-  reset(); armed=true;
+  reset(); armed=true; arrow.classList.add('calling'); quietUntil=Date.now()+700;   // our own jump to the top must not count as the user scrolling
   // put the user at the top of the Eligible card (even when already there, the flash shows it happened)
   R.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
   const v=$('verdict'); v.classList.remove('flash'); void v.offsetWidth; v.classList.add('flash');
@@ -162,7 +168,8 @@ $('review').addEventListener('click',()=>{
   if(window.innerWidth<=820) $('resWrap').scrollIntoView({behavior:'smooth',block:'start'});
 });
 pill.addEventListener('click',()=>R.scrollTo({top:$('actionsCard').offsetTop-20,behavior:'smooth'}));
-R.addEventListener('scroll',update,{passive:true});
+let quietUntil=0;
+R.addEventListener('scroll',()=>{ if(Date.now()>quietUntil) arrow.classList.remove('calling'); update(); },{passive:true});
 setOpt('A');
 </script>
 </body>
