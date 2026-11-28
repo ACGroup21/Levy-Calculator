@@ -890,31 +890,11 @@ table.tv button:hover{border-color:var(--pink)}
 .busy-sum p{margin:0;font-size:14.5px;color:var(--ink)}
 .rp-lead{margin:0 0 12px;font-size:15px;color:var(--text)}
 #reviewBtn:disabled{opacity:.45;cursor:not-allowed}
-/* Review the report (option A, chosen 28 Nov 2026): card flash, grey rail with a pink arrow that calls until you scroll, plum pill */
-#rvGuide{position:fixed;inset:0;pointer-events:none;z-index:40;display:none}
-#rvGuide.on{display:block}
-.rv-rail{position:fixed;width:8px;border-radius:4px;background:var(--line)}
-.rv-thumb{position:absolute;left:0;width:8px;border-radius:4px;background:var(--muted);transition:top .08s linear}
-.rv-arrow{position:absolute;left:50%;width:0;height:0;margin-left:-9px;border-left:9px solid transparent;border-right:9px solid transparent;border-top:12px solid #FFAC48;animation:rvBob 1s ease-in-out infinite}
-.rv-arrow.up{border-top:0;border-bottom:12px solid #FFAC48;animation-name:rvBobUp}
-.rv-arrow::before{content:"";position:absolute;left:-2px;bottom:12px;width:4px;height:40px;border-radius:2px;background:linear-gradient(to bottom,transparent,#FFAC48);opacity:0}
-.rv-arrow.calling{animation:rvFlashA 1.1s ease-in-out infinite}
-.rv-arrow.calling::before{animation:rvTrail 1.1s ease-in infinite}
-@keyframes rvBob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
-@keyframes rvBobUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@keyframes rvFlashA{0%,100%{opacity:1;transform:translateY(0)}45%{opacity:.25;transform:translateY(0)}70%{opacity:1;transform:translateY(4px)}}
-@keyframes rvTrail{0%{opacity:0;transform:translateY(-28px) scaleY(.4)}55%{opacity:1;transform:translateY(0) scaleY(1)}100%{opacity:0;transform:translateY(6px) scaleY(.6)}}
-.rv-pill{position:fixed;left:50%;bottom:16px;z-index:46;transform:translate(-50%,20px) scale(.9);opacity:0;pointer-events:none;border:0;background:var(--plum);color:#fff;border-radius:999px;padding:10px 18px;font:600 14px/1.2 var(--font,inherit);box-shadow:0 6px 18px rgba(0,0,0,.22);white-space:nowrap;cursor:pointer;transition:opacity .25s,transform .35s cubic-bezier(.2,1.4,.4,1)}
-.rv-pill.show{opacity:1;transform:translate(-50%,0) scale(1);pointer-events:auto}
-:root[data-theme=dark] .rv-pill{color:#141013}
-.rv-pill .rv-dn{display:inline-block;margin-left:6px;animation:rvBob 1s ease-in-out infinite}
-.rv-pill:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
-section.results.rv-hide{scrollbar-width:none}
-section.results.rv-hide::-webkit-scrollbar{display:none}
+/* Review the report: the Eligible card flashes so the click visibly lands (pill/rail guide removed 28 Nov at the user's request) */
 .verdict.rv-flash{animation:rvFlash 1.6s ease-out}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(0,59,128,.6)}35%{box-shadow:0 0 0 9px rgba(0,59,128,.25)}100%{box-shadow:0 0 0 0 rgba(0,59,128,0)}}
-@media (prefers-reduced-motion:reduce){.rv-arrow,.rv-arrow::before,.rv-pill .rv-dn,.verdict.rv-flash{animation:none!important}.rv-pill{transition:none}}
-@media print{#rvGuide,.rv-pill{display:none!important}}
+@media (prefers-reduced-motion:reduce){.verdict.rv-flash{animation:none!important}}
+.rp-btns{display:flex;flex-wrap:wrap;gap:8px}
 .save-note{margin:0 0 10px;padding:8px 12px;border-left:4px solid var(--ok);background:var(--ok-bg);color:var(--ink);font-size:14px;border-radius:0 3px 3px 0}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
@@ -1384,7 +1364,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     <div class="card" id="c-reports">
       <div class="step"><b>5</b>Final Reports</div>
       <p class="rp-lead" id="rpLead">Your result appears once you enter a date of birth in section 1.</p>
-      <button type="button" class="btn sm" id="reviewBtn" disabled>Review the report</button>
+      <div class="rp-btns"><button type="button" class="btn sm" id="reviewBtn" disabled>Review the report</button><button type="button" class="btn sm ghost" id="jumpBtn" disabled>Jump to final report</button></div>
     </div>
   </section>
 
@@ -1426,8 +1406,6 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     <input type="file" id="openFile" accept=".json,application/json" hidden>
   </section>
 </main>
-<div id="rvGuide" aria-hidden="true"><div class="rv-rail"><i class="rv-thumb"></i><i class="rv-arrow"></i></div></div>
-<button type="button" class="rv-pill" id="rvPill">Jump to final report <span class="rv-dn" aria-hidden="true">↓</span></button>
 
 <div id="helpView" class="hide" role="dialog" aria-modal="true" aria-labelledby="hvTitle">
   <div class="tv-panel hv-panel">
@@ -2098,7 +2076,6 @@ function updateVbar(o){
   const lab={yes:['r-ok','Eligible'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks'],no:['r-bad','Not eligible'],notyet:['r-bad','Not eligible yet']}[has?o.verdict:''];
   if(lab){ bar.classList.add(lab[0]); $('vbarText').innerHTML=`<b>${lab[1]}</b>${o.name?' · '+esc(o.name):''}`; }
   bar.classList.toggle('off', !lab || verdictOnScreen);
-  if(window.__rvUpd) window.__rvUpd();   // the Review pill sits above this bar when it shows
 }
 if('IntersectionObserver' in window){
   new IntersectionObserver(es=>{ if(es[0].isIntersecting && !S.timingSeen && lastO && lastO.dob){ S.timingSeen=true; render(); } },{threshold:.25}).observe($('c-timing'));   // a quarter is enough: with the busy editor open the card is taller than the screen
@@ -2412,45 +2389,15 @@ function showDecision(){
 }
 document.querySelector('#journey li.res a').addEventListener('click',e=>{ e.preventDefault(); showDecision(); });
 $('vstrip').addEventListener('click',showDecision);
-$('reviewBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.reviewed=true; render(); showDecision(); rvOn();
-  // at the foot of the page the sticky results column gets pushed up under the header, hiding the top of the Eligible card: nudge the page up until it is fully in view
-  const box=resultsBox(); if(box){ const want=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+8, d=want-box.getBoundingClientRect().top; if(d>1) glide(()=>scrollY,x=>scrollTo(0,x),scrollY-d); } });
-/* the guide after 'Review the report': it must ALWAYS show something, because the results are usually already at the top */
-const RV={on:false,quiet:0,pulsed:false,t:0};
-function rvUpdate(){ if(!RV.on) return;
-  const g=$('rvGuide'), rail=g.querySelector('.rv-rail'), thumb=g.querySelector('.rv-thumb'), ar=g.querySelector('.rv-arrow'), pill=$('rvPill'), box=resultsBox(), A=$('actions').getBoundingClientRect();
-  let seen;
-  if(box){   // desktop: the results column scrolls by itself, so the rail sits over its right edge
-    const r=box.getBoundingClientRect(), H=r.height, max=box.scrollHeight-box.clientHeight, y=box.scrollTop, k=max>0?y/max:1, th=Math.max(40,H*box.clientHeight/box.scrollHeight), top=k*(H-th), atEnd=y>=max-4;
-    rail.style.display='block'; rail.style.left=(r.right-10)+'px'; rail.style.top=r.top+'px'; rail.style.height=H+'px';
-    thumb.style.height=th+'px'; thumb.style.top=top+'px';
-    if(atEnd) ar.classList.remove('calling');
-    ar.style.top=Math.min(H-12,top+th+8)+'px';   // always points down; the guide reverts once the report is reached
-    pill.style.left=(r.left+r.width/2)+'px'; pill.style.bottom=Math.max(16,innerHeight-r.bottom+16)+'px';
-    seen=A.top<r.bottom-40||atEnd||A.bottom<=r.bottom+1;   // reached: the report row is in view, or you are at the bottom
-  } else {   // one column: the page scrolls, so only the pill (above the verdict bar when it shows)
-    rail.style.display='none'; const vb=$('vbar'), vbOn=vb&&!vb.classList.contains('off')&&getComputedStyle(vb).display!=='none';
-    pill.style.left='50%'; pill.style.bottom=(vbOn?84:16)+'px';
-    seen=A.top<innerHeight-60||A.bottom<=innerHeight||(innerHeight+scrollY>=document.documentElement.scrollHeight-4);
-  }
-  pill.classList.toggle('show',!seen&&!RV.pillDone);   // the pill leaves on the user's first scroll (user, 28 Nov); rail + arrow stay until the report
-  if(seen) rvOff();   // reached the report: back to the normal scrollbar, no up arrow, no pulse (user, 28 Nov)
-}
-window.__rvUpd=rvUpdate;
-function rvOn(){ RV.on=true; RV.pulsed=false; RV.pillDone=false; RV.quiet=Date.now()+800; clearTimeout(RV.t);   // our own glide to the top is not the user scrolling
-  const g=$('rvGuide'); g.classList.add('on'); g.querySelector('.rv-arrow').classList.add('calling');
-  const box=resultsBox(); if(box) box.classList.add('rv-hide');
-  const v=$('verdict'); v.classList.remove('rv-flash'); void v.offsetWidth; v.classList.add('rv-flash');
-  requestAnimationFrame(rvUpdate); setTimeout(rvUpdate,450); }
-function rvOff(){ RV.on=false; $('rvGuide').classList.remove('on'); $('rvPill').classList.remove('show'); document.querySelector('section.results').classList.remove('rv-hide'); }
-const rvScroll=()=>{ if(!RV.on) return; if(Date.now()>RV.quiet){ $('rvGuide').querySelector('.rv-arrow').classList.remove('calling'); RV.pillDone=true; } rvUpdate(); };
-document.querySelector('section.results').addEventListener('scroll',rvScroll,{passive:true});
-window.addEventListener('scroll',rvScroll,{passive:true});
-window.addEventListener('resize',()=>{ if(RV.on) rvUpdate(); });
-$('rvPill').addEventListener('click',()=>{ const box=resultsBox(), A=$('actions');
-  if(box){ const to=box.scrollTop+A.getBoundingClientRect().top-box.getBoundingClientRect().top-20; glide(()=>box.scrollTop,x=>{box.scrollTop=x;},to); }
-  else { const topH=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+12; glide(()=>scrollY,x=>scrollTo(0,x),scrollY+A.getBoundingClientRect().top-topH); } });
-document.querySelector('.inputs').addEventListener('pointerdown',e=>{ if(RV.on && !e.target.closest('#reviewBtn')) rvOff(); });   // back to the form: the guide steps aside
+$('reviewBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.reviewed=true; render(); showDecision(); rvFlash(); rvNudge(); });
+// Review the report: top of the Eligible card. Jump to final report: straight to the report buttons.
+function rvNudge(){ const box=resultsBox(); if(box){ const want=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+8, d=want-box.getBoundingClientRect().top; if(d>1) glide(()=>scrollY,x=>scrollTo(0,x),scrollY-d); } }   // at the foot of the page the sticky results column is pushed under the header
+function rvFlash(){ if(matchMedia('(prefers-reduced-motion: reduce)').matches||!$('verdict').animate) return; $('verdict').animate([{boxShadow:'0 0 0 0 rgba(0,59,128,.6)'},{boxShadow:'0 0 0 9px rgba(0,59,128,.25)',offset:.35},{boxShadow:'0 0 0 0 rgba(0,59,128,0)'}],{duration:1600,easing:'ease-out'}); }   // Web Animation: a re-render can't cancel it
+$('jumpBtn').addEventListener('click',()=>{ selectCard($('c-reports')); S.reviewed=true; render(); rvNudge();
+  const box=resultsBox(), A=$('actions');
+  if(box){ setTimeout(()=>{ const to=box.scrollTop+A.getBoundingClientRect().top-box.getBoundingClientRect().top-20; glide(()=>box.scrollTop,x=>{box.scrollTop=x;},to); },60); }
+  else { const topH=(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topH'))||64)+12; glide(()=>scrollY,x=>scrollTo(0,x),scrollY+A.getBoundingClientRect().top-topH); }
+  setTimeout(()=>{ const b=$('previewBtn'); if(b) b.focus({preventScroll:true}); },450); });   // keyboard users land on Preview report
 // show the strip only while the decision card is out of view inside the results column
 function updateStrip(){ const strip=$('vstrip'), box=resultsBox(), v=$('verdict');
   if(!box||!lastO||!lastO.dob||lastO.badDob){ strip.classList.add('hide'); return; }
@@ -2510,7 +2457,7 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
-  { const ready5=!!o.dob&&!o.badDob; $('reviewBtn').disabled=!ready5;
+  { const ready5=!!o.dob&&!o.badDob; $('reviewBtn').disabled=!ready5; $('jumpBtn').disabled=!ready5;
     $('rpLead').textContent = !ready5 ? 'Your result appears once you enter a date of birth in section 1.' : S.reported ? 'Report done. Review the result again any time, or make another report from the buttons under Who pays.' : 'Your result is ready. Review it, then preview, print or save the report, or add the dates to your calendar.'; }
   { const E=document.querySelector('#journey li[data-k="e"]'), ea=E.querySelector('a'), ready=!!o.dob&&!o.badDob;   // 05 opens only once there is a result to report on
     E.classList.toggle('locked',!ready); if(ready){ ea.removeAttribute('aria-disabled'); ea.removeAttribute('title'); }
@@ -2578,7 +2525,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@3c15accca5';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@381de14e37';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2970,7 +2917,7 @@ function guideHtml(){
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Acme Retail), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
   <h3><span class="num">05</span> Final Reports</h3>
-  <ul><li>Section 5's <b>Review the report</b> button takes you to the top of the result.</li>
+  <ul><li>Section 5's <b>Review the report</b> takes you to the top of the result; <b>Jump to final report</b> takes you straight to the report buttons.</li>
   <li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
   <li><b>Save this check</b> downloads a small file; <b>Open check</b> at the top brings it all back.</li></ul>
