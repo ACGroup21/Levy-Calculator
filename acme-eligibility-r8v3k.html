@@ -872,6 +872,11 @@ table.tv button:hover{border-color:var(--pink)}
 /* save / open, rules line */
 .disclaimer{margin:12px 0 16px;padding:11px 14px;background:var(--blush);border:1px solid var(--empty-line);border-left:5px solid var(--plum);border-radius:4px;font-size:14px;line-height:1.5;color:var(--ink)}
 .disclaimer b{font-weight:700}
+.when-q{margin:0 0 8px;font-size:15.5px;color:var(--ink);font-weight:500}
+.when-seg{flex-wrap:wrap}.when-seg button{white-space:nowrap}
+.busy-sum{margin:14px 0 0;padding:10px 14px;border:1px solid var(--line);border-radius:4px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;justify-content:space-between}
+.busy-sum p{margin:0;font-size:14.5px;color:var(--ink)}
+.busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
 .phone-links{display:none;margin:-6px 0 16px;font-size:14px}
 .phone-links a{color:var(--pink-deep)}
@@ -1225,7 +1230,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
   <li data-k="a"><a href="#c-apprentice"><span class="n"><span class="z">0<i class="led"></i></span>1</span>Apprentice</a></li>
   <li data-k="b"><a href="#c-programme"><span class="n"><span class="z">0<i class="led"></i></span>2</span>Apprenticeship</a></li>
   <li data-k="c"><a href="#c-checks"><span class="n"><span class="z">0<i class="led"></i></span>3</span>Checks <span class="s" id="jChecks"></span></a></li>
-  <li data-k="d" class="opt"><a href="#c-timing"><span class="n"><span class="z">0<i class="led"></i></span>4</span>Timing <span class="s">optional</span></a></li>
+  <li data-k="d"><a href="#c-timing"><span class="n"><span class="z">0<i class="led"></i></span>4</span>Timing</a></li>
   <li data-k="e"><a href="#actions"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final Reports</a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
 </ol></nav>
@@ -1265,7 +1270,6 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       </details>
       <label class="tick"><input type="checkbox" id="foundation"><span>This is a <b>foundation apprenticeship</b></span></label>
       <div class="row2">
-        <label class="f"><span>Planned start date</span><input type="date" id="start"></label>
         <label class="f"><span>Contracted hours / week</span><input type="number" id="hours" min="1" max="60" step="0.5" value="37.5"></label>
       </div>
       <label class="f"><span>Annual pay £ <em style="font-weight:400;color:var(--muted)">(optional)</em></span><input type="number" id="pay" min="0" max="200000" step="100" inputmode="numeric" placeholder="e.g. 24000">
@@ -1286,8 +1290,18 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     </div>
 
     <div class="card" id="c-timing">
-      <div class="step"><b>4</b>Timing Preferences</div>
-      <p style="margin:0 0 8px;font-size:15.5px;color:var(--ink);font-weight:500">Avoid starting in these months</p>
+      <div class="step"><b>4</b>Timing</div>
+      <p class="when-q">Do you have a start date in mind?</p>
+      <div class="seg when-seg" role="group" aria-label="Do you have a start date in mind?" id="whenSeg"><button type="button" data-w="suggest" aria-pressed="true">No, suggest the best date</button><button type="button" data-w="plan" aria-pressed="false">Yes, I have a date</button></div>
+      <div id="planBox" class="hide">
+        <label class="f" style="margin-top:14px"><span>Planned start date</span><input type="date" id="start"></label>
+        <p class="help" style="margin:6px 0 0;font-size:14px;color:var(--muted)">We check it against funding deadlines, the 4 weeks the provider needs to sign them up, weekends, bank holidays and the Christmas shutdown.</p>
+      </div>
+      <div id="suggestBox">
+      <p class="help" style="margin:10px 0 0;font-size:14px;color:var(--muted)">We pick the earliest good date and check eligibility on that date.</p>
+      <div id="busySum" class="busy-sum hide"><p><b>Your busy periods:</b> <span id="busySumTxt"></span></p><button type="button" class="btn sm ghost" id="busyEdit">Change my busy periods</button></div>
+      <div id="busyEditor">
+      <p style="margin:16px 0 8px;font-size:15.5px;color:var(--ink);font-weight:500">Avoid starting in these months</p>
       <p class="help" style="margin:0 0 10px;font-size:14px;color:var(--muted)">Pre-set to the run-up to Christmas. Change them to fit your team.</p>
       <div class="months" id="months"></div>
       <div class="hol">
@@ -1306,6 +1320,9 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
           </div>
           <small class="hol-err" id="holErr" role="alert"></small>
         </div>
+      </div>
+      <div class="busy-save"><button type="button" class="btn sm" id="busySave">Save my busy periods</button><small>Saved on this computer, so you only set them once.</small></div>
+      </div>
       </div>
       <label class="tick" style="margin-top:16px"><input type="checkbox" id="showmil" checked><span>Show what changes <b>if the Milburn Review is adopted</b></span></label>
     </div>
@@ -1473,7 +1490,7 @@ const QS = [
 const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ---------- state ---------- */
-const S = {answers:{}, busy:new Set([10, 11]), hol:{bank:true, xmas:true, own:[]}};   // hol.own: [{from,to,name}] ISO strings
+const S = {answers:{}, busy:new Set([10, 11]), hol:{bank:true, xmas:true, own:[]}, when:'suggest'};   // when: 'suggest' = app picks the date; 'plan' = the user has a date (busy periods don't apply)   // hol.own: [{from,to,name}] ISO strings
 const $ = id => document.getElementById(id);
 
 /* ---------- date utils (UTC, no timezone drift) ---------- */
@@ -1501,9 +1518,10 @@ const RULES_META={   // what this checker was built on (read by the rules watch)
   milburn:{label:'Milburn Review',status:'a proposal, not law',url:'https://assets.publishing.service.gov.uk/media/6afb1fc5ccb3ea58ac8743c1/from-a-welfare-state-to-a-working-state-full-report.pdf'},
   bank:{label:'England bank holidays (GOV.UK)',url:'https://www.gov.uk/bank-holidays'}
 };
-const xmasShut = d => S.hol.xmas && d.getUTCMonth()===11 && d.getUTCDate()>=24;   // Christmas Eve to New Year's Eve: providers and offices close
-const bankHol = d => S.hol.bank && BANK_HOLIDAYS_EW[iso(d)];
-const ownHol = d => { const k=iso(d); return S.hol.own.find(h=>k>=h.from&&k<=h.to); };
+const xmasShut = d => (S.hol.xmas||S.when==='plan') && d.getUTCMonth()===11 && d.getUTCDate()>=24;   // Christmas Eve to New Year's Eve: providers and offices close
+const bankHol = d => (S.hol.bank||S.when==='plan') && BANK_HOLIDAYS_EW[iso(d)];
+const ownHol = d => { if(S.when==='plan') return null; const k=iso(d); return S.hol.own.find(h=>k>=h.from&&k<=h.to); };
+const busyNow = () => S.when==='plan' ? new Set() : S.busy;   // busy months only shape a suggested date
 const offDay = d => { const w=d.getUTCDay(); return w===0||w===6||!!bankHol(d)||xmasShut(d)||!!ownHol(d); };
 // what was skipped between two dates, named once each: "the Christmas shutdown, New Year's Day and Stocktake"
 function skippedTags(a,b){ const t=[]; for(let x=new Date(a); x<b; x=addDays(x,1)){ const h=ownHol(x), k=bankHol(x);
@@ -1520,7 +1538,7 @@ function planClash(d){ if(!d||isNaN(d)) return null;
   if(xmasShut(d)) return {long:'falls in the Christmas shutdown', short:'Clashes with the Christmas shutdown'};
   if(k) return {long:`is a bank holiday (${esc(k)})`, short:`Bank holiday: ${esc(k)}`};
   if(w===0||w===6) return {long:`is a ${w===0?'Sunday':'Saturday'}`, short:'Falls on a weekend'};
-  if(S.busy.has(d.getUTCMonth())) return {long:`is in ${mon}, a month you marked as busy`, short:`Clashes with your busy month (${mon})`};
+  if(busyNow().has(d.getUTCMonth())) return {long:`is in ${mon}, a month you marked as busy`, short:`Clashes with your busy month (${mon})`};
   return null; }
 const offWhy = d => bankHol(d) ? `${fmt(d)} is ${BANK_HOLIDAYS_EW[iso(d)]}, a bank holiday` : xmasShut(d) ? `${fmt(d)} falls in the Christmas shutdown` : ownHol(d) ? `${fmt(d)} falls in ${ownHol(d).name||'dates you are avoiding'}` : `${fmt(d)} is a ${d.getUTCDay()===0?'Sunday':'Saturday'}`;
 const ord = n => n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
@@ -1616,7 +1634,7 @@ function searchStds(q){
 $('qs').innerHTML = QS.map(q=>`<div class="q" data-q="${q.id}"><p>${q.q}</p><div class="help">${q.help}</div>
   <div class="seg" role="group" aria-label="${esc(q.q)}">${['yes','no','unsure'].map(v=>`<button type="button" data-v="${v}" aria-pressed="false">${v==='unsure'?'Not sure':v[0].toUpperCase()+v.slice(1)}</button>`).join('')}</div></div>`).join('');
 $('months').innerHTML = MONTHS.map((m,i)=>`<button type="button" data-m="${i}" aria-pressed="${S.busy.has(i)}">${m}</button>`).join('');
-$('start').value = iso(addMonths(utcToday(),2));
+$('start').value = '';   // no invented date: the planned date only exists once someone says they have one
 
 const syncQs=()=>document.querySelectorAll('#qs .q').forEach(el=>el.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===S.answers[el.dataset.q]))));
 $('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]'); if(!b) return; const id=b.closest('.q').dataset.q;
@@ -1624,6 +1642,31 @@ $('qs').addEventListener('click',e=>{const b=e.target.closest('button[data-v]');
 // shortcut: every answer set to the eligible one (the opposite of each question's blocking answer)
 $('assumeAll').onclick=()=>{ QS.forEach(q=>{ S.answers[q.id] = q.bad==='yes'?'no':'yes'; }); S.assumed=true; syncQs(); render(); };
 $('clearAll').onclick=()=>{ S.answers={}; S.assumed=false; syncQs(); render(); };
+/* ---- Timing: suggest a date, or check the user's own (busy periods only shape a suggestion) ---- */
+function setWhen(w,quiet){ S.when = w==='plan'?'plan':'suggest';
+  document.querySelectorAll('#whenSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.w===S.when)));
+  $('planBox').classList.toggle('hide',S.when!=='plan'); $('suggestBox').classList.toggle('hide',S.when==='plan');
+  if(S.when==='plan' && !$('start').value){ const o=lastO; $('start').value = iso(o&&o.rec&&!o.blocked ? o.rec : addMonths(utcToday(),2)); }
+  if(!quiet) render(); }
+$('whenSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-w]'); if(!b) return; setWhen(b.dataset.w); if(S.when==='plan') $('start').focus(); });
+// the company's busy periods: asked once, saved on this computer, reopened with 'Change my busy periods'
+const TKEY='acmeElig.timing.v1';
+function busySummary(){ const m=[...S.busy].sort((a,b)=>a-b).map(i=>MONTHS[i]); const x=[];
+  x.push(m.length?m.join(', '):'no busy months');
+  const sk=[S.hol.bank?'bank holidays':'',S.hol.xmas?'the Christmas shutdown':''].filter(Boolean); if(sk.length) x.push('skips '+sk.join(' and '));
+  S.hol.own.forEach(h=>x.push(`${esc(h.name||'your dates')} ${fmt(parse(h.from))}${h.to!==h.from?' to '+fmt(parse(h.to)):''}`));
+  return x.join(' · '); }
+function showBusy(saved){ $('busyEditor').classList.toggle('hide',!!saved); $('busySum').classList.toggle('hide',!saved); if(saved) $('busySumTxt').innerHTML=busySummary(); }
+function saveBusy(){ try{ localStorage.setItem(TKEY,JSON.stringify({busy:[...S.busy],bank:S.hol.bank,xmas:S.hol.xmas,own:S.hol.own})); }catch(e){} showBusy(true); }
+function loadBusy(){ let d=null; try{ d=JSON.parse(localStorage.getItem(TKEY)||'null'); }catch(e){}
+  if(!d) return false;
+  S.busy=new Set((d.busy||[]).filter(m=>m>=0&&m<12)); S.hol.bank=d.bank!==false; S.hol.xmas=d.xmas!==false;
+  S.hol.own=(Array.isArray(d.own)?d.own:[]).filter(h=>h&&/^\d{4}-\d{2}-\d{2}$/.test(h.from)&&/^\d{4}-\d{2}-\d{2}$/.test(h.to)).map(h=>({from:h.from,to:h.to,name:String(h.name||'').replace(/[<>&"]/g,'').slice(0,40)}));
+  $('holBank').checked=S.hol.bank; $('holXmas').checked=S.hol.xmas;
+  document.querySelectorAll('#months button').forEach(b=>b.setAttribute('aria-pressed',String(S.busy.has(+b.dataset.m))));
+  return true; }
+$('busySave').addEventListener('click',()=>{ saveBusy(); render(); });
+$('busyEdit').addEventListener('click',()=>{ showBusy(false); const f=$('months').querySelector('button'); if(f) f.focus(); });
 $('months').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; const m=+b.dataset.m; S.busy.has(m)?S.busy.delete(m):S.busy.add(m); b.setAttribute('aria-pressed',String(S.busy.has(m))); render();});
 ['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','levybal','showmil'].forEach(id=>$(id).addEventListener('input',render));
 function syncLevyTick(){ const on=$('levybal').value.trim()!==''; $('levyokL').style.opacity=on?'.45':''; $('levyokL').title=on?'Using the balance you typed below':''; }
@@ -1643,6 +1686,7 @@ $('levybal').addEventListener('input',syncLevyTick);
     S.hol.own.push({from:f,to:t,name:n}); S.hol.own.sort((a,b)=>a.from<b.from?-1:1);
     $('holFrom').value=$('holTo').value=$('holName').value=''; draw(); render(); };
   $('holList').addEventListener('click',e=>{ const b=e.target.closest('button[data-i]'); if(!b) return; S.hol.own.splice(+b.dataset.i,1); draw(); render(); });
+  if(loadBusy()){ draw(); showBusy(true); }
   $('holList').addEventListener('redraw',draw);
 })();
 $('reset').onclick=()=>{ if(!confirm('Clear everything and start again?')) return; location.reload(); };
@@ -1650,7 +1694,16 @@ $('reset').onclick=()=>{ if(!confirm('Clear everything and start again?')) retur
 function findStd(v){ const m=/(ST\d{4})/i.exec(v||''); return m ? STDS.find(s=>s.r===m[1].toUpperCase()) : null; }
 
 /* ---------- engine ---------- */
+// suggest mode judges eligibility on the date the app picks (two passes: find it, then judge on it); plan mode judges on the user's date
 function compute(){
+  if(S.when==='plan'){ const o=computeAt(null); o.startKind='plan'; return o; }
+  const first=nextWorkingDay(addDays(utcToday(),R.leadDays));
+  let o=computeAt(first); o.startKind='first';
+  if(o.dob&&!o.badDob&&o.rec&&!o.blocked&&+o.rec!==+o.start){ o=computeAt(o.rec); }
+  if(o.rec&&+o.rec===+o.start) o.startKind='rec';
+  return o;
+}
+function computeAt(at){
   const today=utcToday();
   const dob=parse($('dob').value);
   const std=findStd($('std').value);
@@ -1659,7 +1712,7 @@ function compute(){
   const balRaw=$('levybal').value.trim(), levyBal=balRaw===''||!(parseFloat(balRaw)>=0)?null:parseFloat(balRaw);   // typed balance overrides the tick
   let levyOk=levyTick;
   const hoursRaw=parseFloat($('hours').value), hoursAssumed=!(hoursRaw>0), hours=hoursAssumed?37.5:hoursRaw;
-  const start=parse($('start').value) || addMonths(today,2);
+  const start=at || parse($('start').value) || addMonths(today,2);
   const name=$('name').value.trim();
   const out={dob,std,fdn,care,newHire,levyOk,levyBal,mil,hours,hoursAssumed,start,name,today,nostd:!std&&!fdn,items:[],cliffs:[]};
   if(!dob) return out;
@@ -1709,7 +1762,7 @@ function compute(){
   if(hours<R.minHours) add('warn',`<b>${hours} hours a week is under 30</b>, so the apprenticeship takes longer: about <b>${dur||'—'} months</b>${baseDur?` instead of ${baseDur}`:''} (an estimate; your provider sets the actual length).${dur&&baseDur&&dur>=baseDur*2?' <b>That is more than double the usual length, so check it is realistic with your provider before committing.</b>':''}`,'77.3, 80');
   if(hoursAssumed) add('info','<b>No weekly hours entered</b>, so 37.5 hours a week is assumed. Add their contracted hours for an accurate length.','');
   if(!std && !fdn) add('warn','<b>Pick the apprenticeship</b> to finish the check. Its level, length, funding band and some age limits all depend on it.','',{nostd:true});
-  if(start<today) add('warn',`<b>The planned start (${fmt(start)}) is in the past.</b> Choose a future date. The earliest start date is shown below.`,'',{past:true});
+  if(S.when==='plan' && start<today) add('warn',`<b>The planned start (${fmt(start)}) is in the past.</b> Choose a future date. The earliest start date is shown below.`,'',{past:true});
   if(out.end) add('info',`Their contract must run beyond <b>${fmt(out.end)}</b>, plus the end-point assessment period.`,'69');
 
   // --- verdict
@@ -1775,7 +1828,7 @@ function compute(){
   out.untilWhy = curAhead[0]||null;
   out.milAhead = ahead.find(k=>k.scheme==='mil')||null;
   // recommended: first non-busy date in window
-  let rec=new Date(from), guard=0; while(S.busy.has(rec.getUTCMonth()) && guard++<12) rec=new Date(Date.UTC(rec.getUTCFullYear(),rec.getUTCMonth()+1,1));
+  const BZ=busyNow(); let rec=new Date(from), guard=0; while(BZ.has(rec.getUTCMonth()) && guard++<12) rec=new Date(Date.UTC(rec.getUTCFullYear(),rec.getUTCMonth()+1,1));
   if(guard>=12) rec=new Date(from);
   const recRaw=new Date(rec); rec=nextWorkingDay(rec);
   const cap = out.until || null;
@@ -1788,7 +1841,7 @@ function compute(){
   // why the recommended date (shown to the manager)
   { const why=[]; const lead=addDays(today,R.leadDays);
     why.push(earliest>lead ? 'is the first date they are old enough to start' : 'leaves 4 weeks for the provider to sign them up');
-    if(+out.rec>+from && !out.busyClash) why.push(`avoids your busy months (${[...S.busy].sort((a,b)=>a-b).map(i=>MONTHS[i]).join(', ')})`);
+    if(+out.rec>+from && !out.busyClash) why.push(`avoids your busy months (${[...BZ].sort((a,b)=>a-b).map(i=>MONTHS[i]).join(', ')})`);
     if(out.until) why.push(`comes before the ${out.untilWhy.what.toLowerCase()} on ${fmt(out.untilWhy.date)}`);
     if(mil && out.milAhead && +out.rec<=+out.milAhead.last) why.push('is before the Milburn age-25 cut-off');
     why.push(out.skipped ? `is the first working day after ${out.skipped}` : 'is a working day, not a weekend or a holiday you are avoiding');
@@ -1823,7 +1876,7 @@ function render(){ syncLevyTick();
   if(!has){ V.className='verdict v-empty'; V.innerHTML=sealSvg('empty')+`<div class="k">Start here</div><h2>${o.badDob?'Check the date of birth':'Enter a date of birth to check eligibility'}</h2><p>The result updates as you fill in the form. You'll get:</p>
     <ul class="preview"><li><i>✓</i><span><b>Whether they can be funded</b>, and the rule behind each answer</span></li><li><i>📅</i><span><b>The best date to start</b>, and the last date before funding changes</span></li><li><i>£</i><span><b>Who pays</b>, today and if the Milburn Review is adopted</span></li></ul>
     <div class="demo-cta"><button type="button" class="btn" data-demo>▶ See a demo</button><span>Watch a full example check in about a minute, then do your own.</span></div>`; return; }
-  const ageTxt=`${o.age} at the planned start (${fmt(o.start)})`;
+  const ageTxt = o.startKind==='plan' ? `${o.age} at your planned start (${fmt(o.start)})` : o.startKind==='rec' ? `${o.age} on ${fmt(o.start)}, the earliest start date` : `${o.age} on ${fmt(o.start)}, the first possible start date`;
   const map={
     yes:['v-ok','Eligible',`${who} is eligible for apprenticeship funding. They'll be ${ageTxt}.`],
     check:['v-warn','Eligible, with checks',`${who} looks eligible. Confirm the items below first. They'll be ${ageTxt}.`],
@@ -1862,20 +1915,21 @@ function render(){ syncLevyTick();
     const untilV = o.until ? fmt(o.until) : 'No deadline';
 
     W.innerHTML=`<div><div class="l">First possible date</div><div class="v">${fmt(o.from)}</div></div>
-      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this date</button>`}</div>
+      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
     L.push(['info',`<b>Why ${fmt(o.rec)}?</b> It ${and(o.recWhy)}.`]);
-    if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the earliest start date or pick a new one.`]);
+    if(o.startKind!=='plan'){}   // suggest mode: the date is the app's own pick, so there is no plan to judge
+    else if(o.start<o.today) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is in the past. Use the earliest start date or pick a new one.`]);
     else if(missCur.length) L.push(['bad',`Your planned start of <b>${fmt(o.start)}</b> is too late for: ${missCur.map(k=>`${k.what.toLowerCase()}${k.elig?'':' ('+money(k.cost)+')'}`).join('; ')}. Bring it forward to ${fmt(missCur[0].last)} or earlier.`]);
     else if(o.start<o.from && o.start>=o.earliest) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up, run the skills scan and approve the commitment.`]);
-    const clash=planClash(o.start);
-    if(o.start>=o.today && !missCur.length && clash && !o.items.some(i=>i.notyet)) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> ${clash.long}. Funding is not affected, but it goes against your timing choices.${planClash(o.rec)?'':` The earliest start date, ${fmt(o.rec)}, avoids them.`}`]);
-    else if(o.start>=o.from && !missCur.length && !o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
+    const clash=o.startKind==='plan'?planClash(o.start):null;
+    if(o.startKind==='plan' && o.start>=o.today && !missCur.length && clash && !o.items.some(i=>i.notyet)) L.push(['warn',`Your planned start of <b>${fmt(o.start)}</b> ${clash.long}, when providers and offices are closed. Funding is not affected, but pick a working day: the earliest start date is ${fmt(o.rec)}.`]);
+    else if(o.startKind==='plan' && o.start>=o.from && !missCur.length && !o.items.some(i=>i.notyet)) L.push(['ok',`Your planned start of <b>${fmt(o.start)}</b> works.`]);
     if(o.untilWhy) L.push(['warn',`<b>Start by ${fmt(o.until)}.</b> On ${fmt(o.untilWhy.date)} (${ord(o.untilWhy.date.getUTCFullYear()-o.dob.getUTCFullYear())} birthday) the ${o.untilWhy.what.toLowerCase()}${o.untilWhy.elig?'':` (worth ${money(o.untilWhy.cost)})`}.`]);
     else L.push(['ok','No age deadline under current rules. Use levy funds before they expire: 12 months after they arrive (24 months for funds already in the account before August 2026).']);
-    if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
+    if(o.mil && o.milAhead) L.push(['mil',`If Milburn is adopted, starting before their 25th birthday (<b>${fmt(o.milAhead.date)}</b>) avoids about <b>${money(o.milAhead.cost)}</b>${o.startKind==='plan'&&o.start>o.milAhead.last?`; your planned start is after that birthday`:''}. Not law yet; the report's roadmap points to 2028.`]);
     if(o.busyClash) L.push(['warn','Every month before the deadline is marked as one to avoid, so the earliest start date ignores those preferences.']);
     if(o.passed.length) L.push(['info',`Too soon to catch: ${o.passed.map(k=>`${k.scheme==='mil'?'(Milburn) ':''}${k.what.replace('Milburn: ','').toLowerCase()} on ${fmt(k.date)}`).join('; ')}, because sign-up needs about 4 weeks.`]);
     const IC={ok:['i-ok','✓'],warn:['i-warn','!'],bad:['i-bad','✕'],info:['i-info','i'],mil:['i-mil','M']};
@@ -1912,9 +1966,9 @@ function stemRows(o,full){
     if(o.skipped) ev.push({skip:true,d:addDays(o.rec,-0.5)});   // sits just above the date it explains
     if(+o.from!==+o.rec) ev.push({d:o.from,k:'',t:'First possible date',s:'4 weeks for provider sign-up'});
     const busy=(o.recWhy||[]).some(w=>/busy months/.test(w));
-    ev.push({d:o.rec,k:'chosen',t:same?'Earliest start date = your planned start':'Earliest start date',
+    ev.push({d:o.rec,k:'chosen',t:same&&o.startKind==='plan'?'Earliest start date = your planned start':'Earliest start date',
       s: full ? (o.recWhy&&o.recWhy.length?esc('It '+o.recWhy.join('; ')):'') : (busy?'Avoids your busy months':'')});
-    if(!same) ev.push({d:o.start,k:'planned'+(plannedSub==='Works'?'':' late'),t:'Your planned start',s:plannedSub});
+    if(!same && o.startKind==='plan') ev.push({d:o.start,k:'planned'+(plannedSub==='Works'?'':' late'),t:'Your planned start',s:plannedSub});
     if(o.until) ev.push({d:o.until,k:'dl',t:'Start no later than',s:untilSub(o)});
   }
   o.cliffs.filter(k=>(k.scheme==='cur'||o.mil)&&k.date>=o.today).forEach(k=>ev.push({d:k.date,k:k.scheme==='mil'?'mil':'cliff',t:k.what.replace('Milburn: ','If Milburn adopted: '),s:k.scheme==='mil'?'Proposal, not law':(k.elig?'Funding changes':`Worth ${money(k.cost)}`)}));
@@ -1966,7 +2020,7 @@ function drawTimeline(o){
 }
 
 /* ---------- 5. use the recommended start date ---------- */
-$('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return; $('start').value=b.dataset.date; render(); });
+$('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return; $('start').value=b.dataset.date; setWhen('plan'); });
 
 /* ---------- 2. phone verdict bar: shows the live verdict until the result card itself is on screen ---------- */
 let verdictOnScreen=false;
@@ -2105,9 +2159,9 @@ function renderRole(o){
 function renderPrintHead(o){
   const P=$('printHead'); if(!o.dob||o.badDob){ P.innerHTML=''; return; }
   const logo=document.querySelector('header .hlogo'); const std=o.std;
-  const rows=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the planned start)`],
+  const rows=[['Apprentice',o.name?esc(o.name):'—'],['Date of birth',`${fmt(o.dob)} (${o.age} at the start date)`],
     ['Apprenticeship',std?`${esc(std.n)} (${std.r}), Level ${std.l}, ${std.d||'?'} months, band ${std.f?money(std.f):'n/a'}`:(o.fdn?'Foundation apprenticeship':'Not chosen yet')],
-    ['Planned start',`${fmt(o.start)}${o.hoursAssumed?' · 37.5 hours a week (assumed)':' · '+o.hours+' hours a week'}`],
+    [o.startKind==='plan'?'Planned start':'Start date',`${fmt(o.start)}${o.startKind==='plan'?'':o.startKind==='rec'?' (earliest start date)':' (first possible date)'}${o.hoursAssumed?' · 37.5 hours a week (assumed)':' · '+o.hours+' hours a week'}`],
     ['Circumstances',[o.care?'EHC plan or care-experienced':'',o.newHire?'New hire':'Existing employee',o.levyBal!==null?(o.band?`Levy balance ${money(o.levyBal)}${o.levyShort>0?` (${money(o.levyShort)} short)`:' (covers it)'}`:`Levy balance ${money(o.levyBal)}`):(o.levyOk?'Levy balance covers it':'Levy balance does not cover it')].filter(Boolean).join(' · ')],
     ['Checks',`${QS.filter(q=>S.answers[q.id]!==undefined).length} of ${QS.length} answered${S.assumed?' (assume-all-eligible shortcut used)':''}`]];
   if(S.jd&&std){ const c=JDM.coverage(std.r,S.jd.text); if(c&&!c.none) rows.push(['Role match',`“${esc(S.jd.title||'Job description')}”: ${c.covered} of ${c.total} skills evidenced (${c.score}%)${c.title?', job title matches':''}`]); }
@@ -2156,7 +2210,7 @@ function buildReport(o){
   // ---------- criteria (each row is read from the live result) ----------
   const crit=[];
   const ageBad=o.items.find(i=>i.sev==='bad'&&(i.notyet||i.unfunded)&&/age|young|ages/i.test(strip(i.text)));
-  crit.push(['Age at start',ageBad?'r':'g',ageBad?strip(ageBad.text).split('.')[0]:`${o.age} at the planned start`]);
+  crit.push(['Age at start',ageBad?'r':'g',ageBad?strip(ageBad.text).split('.')[0]:`${o.age} at the start date`]);
   if(!std&&!o.fdn) crit.push(['Apprenticeship','a','Not chosen yet']);
   else { const fb=std?fundBlock(std):null; crit.push(['Apprenticeship status',fb&&!/age|ages/i.test(fb)?'r':'g',fb&&!/age|ages/i.test(fb)?fb:`Approved for delivery${std&&std.f?' · band '+money(std.f):''}`]); }
   const QL={res:'Residency and right to work',eng:'Half of hours in England',con:'Contract to the end',oth:'No other funded programme',edu:'Not in full-time education',pri:'Prior learning'};
@@ -2412,7 +2466,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@8dc097060c';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@7dbd5e9e01';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2472,7 +2526,7 @@ function devFill(){
   const t=utcToday(); $('name').value='Jordan Michael'; $('dob').value=iso(addMonths(addYears(t,-19),-3));
   $('care').checked=false; $('newhire').checked=true; $('foundation').checked=false; $('levyok').checked=true; $('levybal').value='';
   const s=STDS.find(x=>x.r==='ST0002')||STDS.find(x=>!fundBlock(x)); $('std').value=`${s.n} (${s.r})`;
-  $('hours').value='37.5'; $('start').value=iso(addMonths(t,2));
+  $('hours').value='37.5';
   $('assumeAll').click(); render();
   const r=document.querySelector('section.results'); if(r) r.scrollIntoView({block:'start'});
 }
@@ -2585,7 +2639,7 @@ $('icsBtn').onclick=()=>{ const o=compute(); const ev=icsEventsFor(o,o.name);
 const SAVE_FIELDS=['name','dob','care','newhire','std','foundation','start','hours','pay','levyok','levybal','showmil'];
 function snapshot(){
   const f={}; SAVE_FIELDS.forEach(id=>{ const el=$(id); f[id]=el.type==='checkbox'?el.checked:el.value; });
-  return {app:'as-eligibility',v:1,saved:new Date().toISOString(),rules:RULES_META.rules.label,form:f,answers:S.answers,assumed:!!S.assumed,busy:[...S.busy],hol:S.hol,mgrRoute:!!S.mgrRoute,jd:$('jdText').value||''};
+  return {app:'as-eligibility',v:1,saved:new Date().toISOString(),rules:RULES_META.rules.label,form:f,answers:S.answers,assumed:!!S.assumed,busy:[...S.busy],hol:S.hol,when:S.when,mgrRoute:!!S.mgrRoute,jd:$('jdText').value||''};
 }
 async function restore(d){
   if(!d||d.app!=='as-eligibility'||!d.form) throw new Error('This file is not a saved eligibility check.');
@@ -2595,6 +2649,7 @@ async function restore(d){
   S.hol={bank:d.hol?d.hol.bank!==false:true, xmas:d.hol?d.hol.xmas!==false:true, own:(d.hol&&Array.isArray(d.hol.own)?d.hol.own:[]).filter(h=>/^\d{4}-\d{2}-\d{2}$/.test(h.from)&&/^\d{4}-\d{2}-\d{2}$/.test(h.to)).map(h=>({from:h.from,to:h.to,name:String(h.name||'').replace(/[<>&"]/g,'').slice(0,40)}))};
   $('holBank').checked=S.hol.bank; $('holXmas').checked=S.hol.xmas;
   document.querySelectorAll('#months button').forEach(b=>b.setAttribute('aria-pressed',String(S.busy.has(+b.dataset.m))));
+  setWhen(d.when ? d.when : (d.form && d.form.start ? 'plan' : 'suggest'), true);   // files from before 28 Nov 2026 always carried a date
   syncQs(); $('holList').dispatchEvent(new CustomEvent('redraw'));
   S.jd=null; $('jdText').value=d.jd||''; $('jdOut').innerHTML='';
   if(d.jd && d.jd.trim().length>=25){ $('jdm').open=true; try{ await $('jdGo').onclick(); }catch(e){} }
@@ -2613,17 +2668,16 @@ $('openFile').addEventListener('change',async()=>{ const f=$('openFile').files[0
 // run the real engine for one person by borrowing the form, then put the form back exactly as it was
 function checkPerson(p,defStd){
   const ids=['name','dob','std','care','start','foundation','pay','levybal'], keep={}; ids.forEach(id=>{ const el=$(id); keep[id]=el.type==='checkbox'?el.checked:el.value; });
-  const keepAns=S.answers, keepAssumed=S.assumed, keepJd=S.jd, keepMgr=S.mgrRoute;
+  const keepAns=S.answers, keepAssumed=S.assumed, keepJd=S.jd, keepMgr=S.mgrRoute, keepWhen=S.when;
   try{
     $('name').value=p.name; $('dob').value=p.dob?iso(p.dob):''; $('std').value=p.std?`${p.std.n} (${p.std.r})`:(defStd?`${defStd.n} (${defStd.r})`:''); $('care').checked=!!p.care; $('foundation').checked=false; $('pay').value=p.pay>0?String(p.pay):''; $('levybal').value='';
     S.answers={}; QS.forEach(q=>S.answers[q.id]=q.bad==='yes'?'no':'yes'); S.assumed=true; S.jd=null; S.mgrRoute=false;
-    $('start').value = p.start ? iso(p.start) : iso(addMonths(utcToday(),2));
+    $('start').value = p.start ? iso(p.start) : ''; S.when = p.start ? 'plan' : 'suggest';   // no date given = judged at their earliest start date
     let o=compute();
-    if(!p.start && o.rec && !o.blocked){ $('start').value=iso(o.rec); o=compute(); }   // judge them at their earliest start date
     return o;
   } finally {
     ids.forEach(id=>{ const el=$(id); if(el.type==='checkbox') el.checked=keep[id]; else el.value=keep[id]; });
-    S.answers=keepAns; S.assumed=keepAssumed; S.jd=keepJd; S.mgrRoute=keepMgr;
+    S.answers=keepAns; S.assumed=keepAssumed; S.jd=keepJd; S.mgrRoute=keepMgr; S.when=keepWhen;
   }
 }
 function parseUKDate(t){ t=String(t||'').trim(); let m;
@@ -2742,7 +2796,7 @@ $('tvFile').addEventListener('change',async()=>{ const f=$('tvFile').files[0]; $
   importTeam(await f.text()); });
 $('tvOut').addEventListener('click',e=>{ const b=e.target.closest('button[data-open]'); if(!b) return; const x=TEAM[+b.dataset.open]; if(!x) return;
   $('name').value=x.p.name; $('dob').value=iso(x.p.dob); $('care').checked=x.p.care; $('foundation').checked=false;
-  const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('pay').value=x.p.pay>0?String(x.p.pay):''; $('start').value=x.p.start?iso(x.p.start):(x.o.rec&&!x.o.blocked?iso(x.o.rec):$('start').value);
+  const st=x.o.std; $('std').value=st?`${st.n} (${st.r})`:''; $('pay').value=x.p.pay>0?String(x.p.pay):''; $('start').value=x.p.start?iso(x.p.start):''; setWhen(x.p.start?'plan':'suggest',true);
   S.answers={}; S.assumed=false; syncQs(); S.jd=null; render(); closeTeam(); $('verdict').scrollIntoView({block:'start'}); });
 
 /* measure the frozen top so the journey bar and the sticky results column sit right under it at every width */
@@ -2785,19 +2839,19 @@ function guideHtml(){
   <ul><li>Search by name or ST code. Apprenticeships that cannot be funded for new starts are blocked, with the reason.</li>
   <li>Not sure which one? Open <b>Match a job description</b>, paste the job advert, and pick from the best matches. The report then shows how well the role fits.</li>
   <li>For new managers, the funded <b>Business administrator</b> route is suggested where the leadership standards are no longer funded.</li>
-  <li>Set the <b>planned start date</b>, contracted <b>hours a week</b>, and whether the <b>levy balance</b> covers it.</li></ul>
+  <li>Set their contracted <b>hours a week</b>, and whether the <b>levy balance</b> covers it.</li></ul>
   <h3><span class="num">03</span> Quick Eligibility Checks</h3>
   <p>Six yes/no questions about residency, hours in England, the contract, other courses, full-time education and prior learning. Answer <b>Not sure</b> if you don’t know. <b>Assume all eligible</b> fills them all in; change any that aren’t true.</p>
-  <h3><span class="num">04</span> Timing <small>(optional)</small></h3>
-  <ul><li><b>Avoid starting in these months</b>: pre-set to peak trading.</li>
-  <li><b>Holidays to avoid</b>: bank holidays and the Christmas shutdown are skipped automatically; add your own dates (stocktake, launches).</li>
+  <h3><span class="num">04</span> Timing</h3>
+  <ul><li><b>Do you have a start date in mind?</b> Choose <b>No</b> and the checker picks the earliest good date and checks eligibility on it. Choose <b>Yes</b> to enter your own date; it is checked against funding deadlines, the 4 weeks the provider needs, weekends, bank holidays and the Christmas shutdown.</li>
+  <li><b>Your busy periods</b> (months to avoid, holidays, your own dates such as stocktake) shape the suggested date. Set them once and press <b>Save my busy periods</b>; they are remembered on this computer. <b>Change my busy periods</b> opens them again.</li>
   <li>Tick <b>Milburn</b> to see what changes if the Milburn Review is adopted. It is a proposal, not law.</li></ul>
   <h3>Reading the result</h3>
   <div class="seals"><div>${seal('ok')}<span><b>Eligible</b></span></div><div>${seal('warn')}<span><b>Eligible, with checks</b>: confirm the items listed</span></div><div>${seal('bad')}<span><b>Not eligible</b>: the reasons are listed</span></div><div>${seal('notyet')}<span><b>Not eligible yet</b>: too young, shows when they can start</span></div></div>
   <p><b>What we checked</b> lists each point in plain English. <b>Show the funding rules</b> opens the funding-rule paragraph behind each one.</p>
   <h3>Best time to onboard</h3>
   <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
-  <li><b>Earliest start date</b>: the first working day that also avoids your busy months and holidays. <b>Use this date</b> copies it into the planned start.</li>
+  <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in.</li>
   <li><b>Start no later than</b>: the last day before funding or a payment changes, and what that deadline protects.</li>
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
@@ -2829,10 +2883,10 @@ const TOUR=[
  {el:'#c-programme',k:'Step 2',t:'The Apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
      await typeInto('std',`${s.n} (${s.r})`,true); } }},
  {el:'#c-checks',k:'Step 3',t:'Quick Eligibility Checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
- {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
+ {el:'#c-timing',k:'Step 4',t:'Timing',x:'Have a start date in mind? Enter it and we check it. If not, we suggest the earliest good date, avoiding your busy periods, and check eligibility on that date.'},
  {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
  {el:'#reasonsCard',k:'What we checked',t:'What we checked',x:'Every point in plain English. Show the funding rules opens the funding-rule paragraph behind each one.'},
- {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest start date that avoids busy months and holidays, the last date before funding changes, and a timeline of key dates.'},
+ {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest good start date, the last date before funding changes, and a timeline of key dates.'},
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
  {el:'#actions',k:'Step 5',t:'Final Reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
