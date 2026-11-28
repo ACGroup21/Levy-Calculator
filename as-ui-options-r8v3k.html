@@ -895,6 +895,7 @@ table.tv button:hover{border-color:var(--pink)}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(156,48,100,.6)}35%{box-shadow:0 0 0 9px rgba(156,48,100,.25)}100%{box-shadow:0 0 0 0 rgba(156,48,100,0)}}
 @media (prefers-reduced-motion:reduce){.verdict.rv-flash{animation:none!important}}
 .rp-btns{display:flex;flex-wrap:wrap;gap:8px}
+#jumpBtn{font-weight:700}
 .save-note{margin:0 0 10px;padding:8px 12px;border-left:4px solid var(--ok);background:var(--ok-bg);color:var(--ink);font-size:14px;border-radius:0 3px 3px 0}
 .busy-save{margin:16px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.busy-save small{color:var(--muted);font-size:13px}
 #openBtn .ico-open{width:15px;height:15px;display:block}
@@ -2579,7 +2580,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@381de14e37';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@405c25b2d5';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
