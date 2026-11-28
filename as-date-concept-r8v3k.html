@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en-GB" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="color-scheme" content="light">
+<title>Date Picker Options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--plum:#9C3064;--pink:#FF4FA3;--pinkText:#CC0874;--blush:#F6E9E6;--ink:#000;--text:#3B3935;--muted:#6E6A64;--line:#E4DCD9;--field:#fff;--fieldLine:#CFC6C2;--card:#fff;--bg:#F9F9F9;--ok:#1F7A4D;--okbg:#E8F4EC;--warn:#A35F00;--warnbg:#FBF1E1;--bad:#C62828;--badbg:#FBE9E9;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Open Sans",Arial,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{font:800 28px/1.15 Montserrat,sans-serif;margin:0 0 6px}
+.sub{color:var(--text);margin:0 0 16px;max-width:860px}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 20px}
+@media (max-width:760px){.how{grid-template-columns:1fr}}
+.how div{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:10px 12px;font-size:14px;color:var(--text)}
+.how b.n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:2px;background:var(--plum);color:#fff;font:700 12px Montserrat;margin-right:6px}
+.scen{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--plum);border-radius:3px;padding:12px 16px;margin:0 0 20px;font-size:14.5px;color:var(--text)}
+.opt{background:var(--card);border:1px solid var(--line);border-radius:3px;padding:20px 22px;margin:0 0 18px}
+.opt.rec{border-left:5px solid var(--plum)}
+.tag{font:700 11px/1 "Open Sans";letter-spacing:.12em;text-transform:uppercase;color:var(--plum)}
+.opt h2{font:800 20px/1.2 Montserrat,sans-serif;margin:6px 0 4px}
+.opt p.d{margin:0 0 14px;color:var(--text);font-size:14.5px;max-width:820px}
+.pros{display:flex;flex-wrap:wrap;gap:4px 18px;margin:14px 0 0;padding:0;list-style:none;font-size:13.5px}
+.pros li::before{font-weight:700;margin-right:6px}.pros .p::before{content:"+";color:var(--ok)}.pros .c::before{content:"–";color:var(--bad)}
+.demo{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-start}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld > span{font-weight:600;font-size:15px}
+.fld small{color:var(--muted);font-size:13.5px}
+input[type=date],input.t{font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--fieldLine);border-radius:2px;background:var(--field);color:var(--ink);min-height:46px}
+input[type=date]{padding-right:44px;min-width:200px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6A64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:20px;position:relative}
+input[type=date]::-webkit-calendar-picker-indicator{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;opacity:0;cursor:pointer}
+input:focus-visible,button:focus-visible{outline:2px solid var(--plum);outline-offset:2px}
+/* GOV.UK day / month / year */
+.dmy{display:flex;gap:12px;align-items:flex-end}
+.dmy label{display:flex;flex-direction:column;gap:4px;font-size:15px}
+.dmy input{width:58px;text-align:left}.dmy input.y{width:84px}
+.out{font-size:14px;padding:8px 12px;border-left:4px solid var(--line);background:var(--bg);border-radius:0 3px 3px 0;min-width:260px}
+.out.ok{border-color:var(--ok);background:var(--okbg)}.out.warn{border-color:var(--warn);background:var(--warnbg)}.out.bad{border-color:var(--bad);background:var(--badbg)}
+/* smart calendar */
+.sc{position:relative}
+.sc-field{display:flex;align-items:center;gap:10px;min-width:230px;min-height:46px;padding:10px 12px;border:1px solid var(--fieldLine);border-radius:2px;background:var(--field);font:inherit;font-size:16px;color:var(--ink);cursor:pointer;text-align:left}
+.sc-field .ic{margin-left:auto;width:20px;height:20px;color:var(--plum)}
+.sc-field .ph{color:var(--muted)}
+.cal{position:absolute;left:0;top:calc(100% + 6px);z-index:5;width:min(340px,calc(100vw - 32px));background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.18);padding:12px}
+.cal[hidden]{display:none}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.cal-h b{font:700 15px Montserrat,sans-serif}
+.cal-h button{width:36px;height:36px;border:1px solid var(--line);border-radius:4px;background:#fff;font-size:18px;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.dow{font-size:11.5px;text-align:center;color:var(--muted);font-weight:700;padding:2px 0}
+.day{position:relative;height:40px;border:1px solid transparent;border-radius:4px;background:#fff;font:600 14px "Open Sans";color:var(--ink);cursor:pointer}
+.day:hover{border-color:var(--ink)}
+.day.out-m{visibility:hidden}
+.day.past{color:#B8B0AC;cursor:not-allowed;background:repeating-linear-gradient(135deg,#fff 0 4px,#F3EFEE 4px 6px)}
+.day.wknd{color:#8C8580;background:#F4F1F0}
+.day.bh,.day.shut{color:#8C8580;background:repeating-linear-gradient(135deg,#F4F1F0 0 4px,#E9E3E1 4px 6px)}
+.day.busy{background:var(--blush)}
+.day.late{color:#B8B0AC;background:var(--badbg);text-decoration:line-through}
+.day.early{box-shadow:inset 0 0 0 2px var(--ok)}
+.day.dl{box-shadow:inset 0 0 0 2px var(--bad)}
+.day.sel{background:var(--plum)!important;color:#fff!important;text-decoration:none}
+.day:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.day .dot{position:absolute;left:50%;bottom:4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--plum)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0 0;font-size:12px;color:var(--text)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px;border:1px solid var(--line)}
+.cal-msg{margin:10px 0 0;font-size:13.5px;min-height:20px}
+.play{border:0;background:var(--ink);color:#fff;border-radius:3px;padding:10px 16px;font:700 14px "Open Sans";cursor:pointer;margin:0 0 18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Date picker options</h1>
+  <p class="sub">Each option below works for real. Try them with the example apprentice, then pick one. Option D is what I recommend: it uses the best tool for each kind of date.</p>
+  <div class="how">
+    <div><b class="n">1</b>Read the example apprentice below.</div>
+    <div><b class="n">2</b>Try each option: type, click and use the keyboard (arrows, Enter, Esc).</div>
+    <div><b class="n">3</b>Press <b>▶ Play the smart calendar</b> to see option C chosen for you.</div>
+  </div>
+  <div class="scen"><b>Example apprentice:</b> born <b>15 Mar 2008</b> (turns 19 on 15 Mar 2027, when the £1,000 payment stops). Today is 28 Nov 2026. Earliest start: <b>4 Jan 2027</b> (4 weeks for sign-up, after the Christmas shutdown). Start no later than: <b>14 Mar 2027</b>. Busy month: <b>February</b>.</div>
+
+  <section class="opt">
+    <div class="tag">Option A · today</div><h2>The browser's own picker</h2>
+    <p class="d">What the app uses now, restyled to match. The field is ours; the pop-up calendar is drawn by the browser (grey on Windows, a scroll wheel on phones), so it can only follow light or dark mode.</p>
+    <div class="demo">
+      <label class="fld"><span>Date of birth</span><input type="date" id="aDob"></label>
+      <label class="fld"><span>Planned start date</span><input type="date" id="aStart"></label>
+      <div class="out" id="aOut">Pick a start date to see the check.</div>
+    </div>
+    <ul class="pros"><li class="p">Familiar on every device</li><li class="p">No extra code</li><li class="c">Pop-up looks generic; can't show the rules</li><li class="c">Clicking back 19 years for a birthday is slow</li></ul>
+  </section>
+
+  <section class="opt">
+    <div class="tag">Option B · GOV.UK pattern</div><h2>Day / Month / Year boxes</h2>
+    <p class="d">Three small boxes, no calendar. GOV.UK uses this for dates people already know, like a date of birth.</p>
+    <div class="demo">
+      <div class="fld"><span>Date of birth</span><small>For example, 15 3 2008</small>
+        <div class="dmy"><label>Day<input class="t" id="bD" inputmode="numeric" maxlength="2"></label><label>Month<input class="t" id="bM" inputmode="numeric" maxlength="2"></label><label>Year<input class="t y" id="bY" inputmode="numeric" maxlength="4"></label></div></div>
+      <div class="out" id="bOut">Type a date of birth.</div>
+    </div>
+    <ul class="pros"><li class="p">Fastest way to type a birthday</li><li class="p">Very accessible; GOV.UK standard</li><li class="c">Poor for picking a future date: you can't see the weekday</li></ul>
+  </section>
+
+  <section class="opt">
+    <div class="tag">Option C · custom</div><h2>Smart calendar</h2>
+    <p class="d">Our own calendar that shows the rules before you pick: weekends and bank holidays greyed, the Christmas shutdown and your busy months shaded, the earliest start date and the deadline ringed, and dates too late for funding struck through.</p>
+    <button type="button" class="play" id="play">▶ Play the smart calendar</button>
+    <div class="demo">
+      <div class="fld sc" id="scC"><span id="cLbl">Planned start date</span>
+        <button type="button" class="sc-field" id="cBtn" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="cLbl cVal"><span id="cVal" class="ph">Choose a date</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+        <div class="cal" id="cCal" role="dialog" aria-label="Choose a start date" hidden></div></div>
+      <div class="out" id="cOut">Open the calendar to choose a start date.</div>
+    </div>
+    <ul class="pros"><li class="p">Shows good and bad days before you choose</li><li class="p">Ann Summers look, light and dark</li><li class="p">Arrow keys, Enter and Esc work</li><li class="c">Biggest build; must be kept fully accessible</li></ul>
+  </section>
+
+  <section class="opt rec">
+    <div class="tag">Option D · recommended</div><h2>The mix: boxes for birthdays, smart calendar for start dates</h2>
+    <p class="d">Date of birth uses the GOV.UK Day / Month / Year boxes (you know it, you type it). Every start date (section 4, the report's date field, holiday ranges) uses the smart calendar (you're choosing, so you see the rules).</p>
+    <div class="demo">
+      <div class="fld"><span>Date of birth</span><small>For example, 15 3 2008</small>
+        <div class="dmy"><label>Day<input class="t" inputmode="numeric" maxlength="2" value="15"></label><label>Month<input class="t" inputmode="numeric" maxlength="2" value="3"></label><label>Year<input class="t y" inputmode="numeric" maxlength="4" value="2008"></label></div></div>
+      <div class="fld sc" id="scD"><span id="dLbl">Planned start date</span>
+        <button type="button" class="sc-field" id="dBtn" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="dLbl dVal"><span id="dVal" class="ph">Choose a date</span><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
+        <div class="cal" id="dCal" role="dialog" aria-label="Choose a start date" hidden></div></div>
+      <div class="out" id="dOut">Open the calendar to choose a start date.</div>
+    </div>
+  </section>
+  <p class="sr" aria-live="polite" id="live"></p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const D=(y,m,d)=>new Date(Date.UTC(y,m-1,d));
+const iso=d=>d.toISOString().slice(0,10);
+const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
+const TODAY=D(2026,11,28), EARLY=D(2027,1,4), DL=D(2027,3,14), BUSY=new Set([1]);   // Feb (0-based month)
+const BH={'2026-12-25':'Christmas Day','2026-12-28':'Boxing Day','2027-01-01':'New Year’s Day','2027-03-26':'Good Friday','2027-03-29':'Easter Monday','2027-05-03':'Early May bank holiday'};
+function classify(d){ const k=iso(d), wd=d.getUTCDay(), m=d.getUTCMonth(), dd=d.getUTCDate();
+  if(d<EARLY) return {c:'past',why:d<TODAY?'is in the past':'leaves less than 4 weeks for sign-up',k:'bad'};
+  if(d>DL) return {c:'late',why:'is after 14 Mar 2027: the £1,000 payment is lost',k:'bad'};
+  if(BH[k]) return {c:'bh',why:'is a bank holiday ('+BH[k]+')',k:'warn'};
+  if(m===11&&dd>=24) return {c:'shut',why:'is in the Christmas shutdown',k:'warn'};
+  if(wd===0||wd===6) return {c:'wknd',why:'is a '+(wd===0?'Sunday':'Saturday'),k:'warn'};
+  if(BUSY.has(m)) return {c:'busy',why:'is in February, a busy month',k:'warn'};
+  return {c:'',why:'works',k:'ok'}; }
+function verdict(d){ const r=classify(d); return {k:r.k, html:(r.k==='ok'?'✓ ':r.k==='warn'?'! ':'✕ ')+'<b>'+fmt(d)+'</b> '+r.why+'.'+(r.k!=='ok'&&d>=EARLY&&d<=DL?'':'')}; }
+
+// ---- Option A: native ----
+$('aStart').addEventListener('change',e=>{ const v=e.target.value; if(!v) return; const [y,m,d]=v.split('-').map(Number), r=verdict(D(y,m,d)); $('aOut').className='out '+r.k; $('aOut').innerHTML=r.html; });
+
+// ---- Option B: GOV.UK ----
+function bCheck(){ const d=+$('bD').value, m=+$('bM').value, y=+$('bY').value, o=$('bOut');
+  if(!$('bD').value&&!$('bM').value&&!$('bY').value){ o.className='out'; o.textContent='Type a date of birth.'; return; }
+  const dt=D(y,m,d); if(!(y>1900&&m>=1&&m<=12&&d>=1&&d<=31)||dt.getUTCDate()!==d){ o.className='out bad'; o.textContent='Date of birth must be a real date'; return; }
+  const age=2026-y-((11<m)||(11===m&&28<d)?1:0); o.className='out ok'; o.innerHTML='✓ <b>'+fmt(dt)+'</b>: aged '+age+' today.'; }
+['bD','bM','bY'].forEach((id,i,a)=>$(id).addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,''); if(e.target.value.length===e.target.maxLength&&a[i+1]) $(a[i+1]).focus(); bCheck(); }));
+
+// ---- Option C / D: smart calendar ----
+function smart(prefix){ const btn=$(prefix+'Btn'), cal=$(prefix+'Cal'), val=$(prefix+'Val'), out=$(prefix+'Out');
+  let view=D(2027,1,1), sel=null, focus=EARLY;
+  function draw(){ const y=view.getUTCFullYear(), m=view.getUTCMonth(), first=D(y,m+1,1), start=(first.getUTCDay()+6)%7, days=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    let h=`<div class="cal-h"><button type="button" data-nav="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString('en-GB',{month:'long',year:'numeric',timeZone:'UTC'})}</b><button type="button" data-nav="1" aria-label="Next month">›</button></div><div class="grid" role="grid">`;
+    ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(x=>h+=`<div class="dow" aria-hidden="true">${x}</div>`);
+    for(let i=0;i<start;i++) h+='<span class="day out-m"></span>';
+    for(let dd=1;dd<=days;dd++){ const d=D(y,m+1,dd), r=classify(d), k=iso(d);
+      const cls=['day',r.c,+d===+EARLY?'early':'',+d===+DL?'dl':'',sel&&+d===+sel?'sel':''].filter(Boolean).join(' ');
+      h+=`<button type="button" class="${cls}" data-d="${k}" tabindex="${+d===+focus?0:-1}" ${r.c==='past'?'aria-disabled="true"':''} aria-label="${fmt(d)}: ${r.why}">${dd}${BH[k]?'<span class="dot"></span>':''}</button>`; }
+    h+=`</div><div class="legend"><span><i style="box-shadow:inset 0 0 0 2px var(--ok)"></i>Earliest start</span><span><i style="box-shadow:inset 0 0 0 2px var(--bad)"></i>Last day for funding</span><span><i style="background:var(--blush)"></i>Busy month</span><span><i style="background:#F4F1F0"></i>Weekend / holiday</span><span><i style="background:var(--badbg)"></i>Too late</span></div><p class="cal-msg" id="${prefix}Msg"></p>`;
+    cal.innerHTML=h; }
+  function hint(d){ const r=verdict(d); const m=$(prefix+'Msg'); if(m){ m.innerHTML=r.html; } }
+  function open(){ cal.hidden=false; btn.setAttribute('aria-expanded','true'); if(sel){ view=D(sel.getUTCFullYear(),sel.getUTCMonth()+1,1); focus=sel; } draw(); const f=cal.querySelector('.day[tabindex="0"]'); f&&f.focus(); hint(focus); }
+  function close(){ cal.hidden=true; btn.setAttribute('aria-expanded','false'); }
+  function pick(d){ if(d<EARLY&&d<TODAY) return; sel=d; val.textContent=fmt(d); val.classList.remove('ph'); const r=verdict(d); out.className='out '+r.k; out.innerHTML=r.html; $('live').textContent=out.textContent; close(); btn.focus(); }
+  function move(d){ focus=d; if(d.getUTCMonth()!==view.getUTCMonth()||d.getUTCFullYear()!==view.getUTCFullYear()) view=D(d.getUTCFullYear(),d.getUTCMonth()+1,1); draw(); const b=cal.querySelector(`[data-d="${iso(d)}"]`); b&&b.focus(); hint(d); }
+  btn.addEventListener('click',()=>cal.hidden?open():close());
+  cal.addEventListener('click',e=>{ const n=e.target.closest('[data-nav]'); if(n){ view=D(view.getUTCFullYear(),view.getUTCMonth()+1+(+n.dataset.nav),1); draw(); return; } const b=e.target.closest('.day[data-d]'); if(b){ const [y,m,d]=b.dataset.d.split('-').map(Number); pick(D(y,m,d)); } });
+  cal.addEventListener('mouseover',e=>{ const b=e.target.closest('.day[data-d]'); if(b){ const [y,m,d]=b.dataset.d.split('-').map(Number); hint(D(y,m,d)); } });
+  cal.addEventListener('keydown',e=>{ const b=e.target.closest('.day[data-d]'); if(e.key==='Escape'){ e.preventDefault(); close(); btn.focus(); return; } if(!b) return;
+    const [y,m,d]=b.dataset.d.split('-').map(Number), cur=D(y,m,d), step={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[e.key];
+    if(step){ e.preventDefault(); move(new Date(+cur+step*864e5)); } else if(e.key==='PageUp'||e.key==='PageDown'){ e.preventDefault(); move(D(y,m+(e.key==='PageUp'?-1:1),Math.min(d,28))); } else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(cur); } });
+  document.addEventListener('mousedown',e=>{ if(!cal.hidden&&!cal.contains(e.target)&&!btn.contains(e.target)) close(); });
+  return {open,close,move,pick,cal}; }
+const C=smart('c'), Dd=smart('d');
+
+// ---- Play: open, glide through the days, pick a good one ----
+$('play').addEventListener('click',async()=>{ const w=ms=>new Promise(r=>setTimeout(r,ms)); C.open(); await w(700);
+  for(const d of [D(2027,1,4),D(2027,1,9),D(2027,1,11)]){ C.move(d); await w(900); }
+  C.move(D(2027,2,8)); await w(1100); C.move(D(2027,3,1)); await w(900); C.move(D(2027,3,15)); await w(1100); C.move(D(2027,3,8)); await w(900); C.pick(D(2027,3,8)); });
+</script>
+</body>
+</html>
