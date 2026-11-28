@@ -1280,7 +1280,7 @@ body{padding-top:52px}
   <li data-k="b"><a href="#c-programme"><span class="n"><span class="z">0<i class="led"></i></span>2</span>Apprenticeship</a></li>
   <li data-k="c"><a href="#c-checks"><span class="n"><span class="z">0<i class="led"></i></span>3</span>Checks <span class="s" id="jChecks"></span></a></li>
   <li data-k="d" class="opt"><a href="#c-timing"><span class="n"><span class="z">0<i class="led"></i></span>4</span>Timing <span class="s">optional</span></a></li>
-  <li data-k="e"><a href="#actions"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final reports</a></li>
+  <li data-k="e"><a href="#actions"><span class="n"><span class="z">0<i class="led"></i></span>5</span>Final Reports</a></li>
   <li data-k="r" class="res"><a href="#verdict"><span class="n">✓</span><span id="jRes">Result</span></a></li>
 </ol></nav>
 
@@ -1292,7 +1292,7 @@ body{padding-top:52px}
   <!-- ================= INPUTS ================= -->
   <section class="inputs" aria-label="About the apprentice">
     <div class="card" id="c-apprentice">
-      <div class="step"><b>1</b>The apprentice</div>
+      <div class="step"><b>1</b>The Apprentice</div>
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
         <input type="text" id="name" autocomplete="off" placeholder="e.g. Jane Smith">
         <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>.</small></label>
@@ -1302,7 +1302,7 @@ body{padding-top:52px}
     </div>
 
     <div class="card" id="c-programme">
-      <div class="step"><b>2</b>The apprenticeship</div>
+      <div class="step"><b>2</b>The Apprenticeship</div>
       <label class="f"><span>Apprenticeship standard</span>
         <div class="combo"><input type="text" id="std" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="stdlist" placeholder="e.g. accounts assistant level 3, or ST0002" autocomplete="off">
         <ul id="stdlist" role="listbox" class="hide"></ul></div></label>
@@ -1330,7 +1330,7 @@ body{padding-top:52px}
     </div>
 
     <div class="card" id="c-checks">
-      <div class="step"><b>3</b>Quick eligibility checks</div>
+      <div class="step"><b>3</b>Quick Eligibility Checks</div>
       <div class="assume">
         <button type="button" class="btn sm" id="assumeAll">✓ Assume all eligible</button>
         <button type="button" class="lnk" id="clearAll">Clear answers</button>
@@ -1340,7 +1340,7 @@ body{padding-top:52px}
     </div>
 
     <div class="card" id="c-timing">
-      <div class="step"><b>4</b>Timing preferences</div>
+      <div class="step"><b>4</b>Timing Preferences</div>
       <p style="margin:0 0 8px;font-size:15.5px;color:var(--ink);font-weight:500">Avoid starting in these months</p>
       <p class="help" style="margin:0 0 10px;font-size:14px;color:var(--muted)">Pre-set to peak trading (Christmas and Valentine's). Change them to fit your team.</p>
       <div class="months" id="months"></div>
@@ -2466,7 +2466,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@c5e72d4391';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@8dc097060c';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2831,16 +2831,16 @@ function guideHtml(){
   const seal=k=>sealStatic(k);
   return `
   <p>Check whether an apprentice can be funded, when they can start, the last date before funding changes, and who pays. Work down the four steps on the left; the result on the right updates as you go. Nothing you type leaves this page.</p>
-  <h3><span class="num">01</span> The apprentice</h3>
+  <h3><span class="num">01</span> The Apprentice</h3>
   <ul><li><b>Date of birth</b> is the only thing you must enter. Age at the start date drives most funding rules.</li>
   <li>Tick <b>EHC plan or care-experienced</b> if it applies: it extends several age limits to 24.</li>
   <li><b>New hire</b> (with Ann Summers 90 days or less at the start) affects the hiring payments.</li></ul>
-  <h3><span class="num">02</span> The apprenticeship</h3>
+  <h3><span class="num">02</span> The Apprenticeship</h3>
   <ul><li>Search by name or ST code. Apprenticeships that cannot be funded for new starts are blocked, with the reason.</li>
   <li>Not sure which one? Open <b>Match a job description</b>, paste the job advert, and pick from the best matches. The report then shows how well the role fits.</li>
   <li>For new managers, the funded <b>Business administrator</b> route is suggested where the leadership standards are no longer funded.</li>
   <li>Set the <b>planned start date</b>, contracted <b>hours a week</b>, and whether the <b>levy balance</b> covers it.</li></ul>
-  <h3><span class="num">03</span> Quick eligibility checks</h3>
+  <h3><span class="num">03</span> Quick Eligibility Checks</h3>
   <p>Six yes/no questions about residency, hours in England, the contract, other courses, full-time education and prior learning. Answer <b>Not sure</b> if you don’t know. <b>Assume all eligible</b> fills them all in; change any that aren’t true.</p>
   <h3><span class="num">04</span> Timing <small>(optional)</small></h3>
   <ul><li><b>Avoid starting in these months</b>: pre-set to peak trading.</li>
@@ -2856,7 +2856,7 @@ function guideHtml(){
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
   <p>The training price, who pays it (levy, government or Ann Summers), employer payments and the net cost, under today’s rules and if Milburn is adopted.</p>
-  <h3><span class="num">05</span> Final reports</h3>
+  <h3><span class="num">05</span> Final Reports</h3>
   <ul><li><b>Preview report</b> builds a Boardroom-style report to print or save as PDF.</li>
   <li><b>Add dates to calendar</b> downloads the start dates and deadlines, with reminders, for Outlook or Google Calendar.</li>
   <li><b>Save this check</b> downloads a small file; <b>Open file</b> at the top brings it all back.</li></ul>
@@ -2879,16 +2879,16 @@ $('hvTour').onclick=()=>{ closeHelp(); startTour(); };
 const TOUR=[
  {el:'header',k:'Welcome',t:'The Eligibility Checker',x:'Four short steps on the left, a live result on the right. This demo fills in an example as it plays, so you can see every part working. Pause it, or step through with ‹ and ›, at any time. Your own entries come back when it ends.'},
  {el:'.journey',k:'Your progress',t:'The journey bar',x:'Shows where you are. Lines fill pink as you work through the steps. Click any step to jump to it.'},
- {el:'#c-apprentice',k:'Step 1',t:'The apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async(fast)=>{ await typeInto('name','Jane Smith',fast); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
- {el:'#c-programme',k:'Step 2',t:'The apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
+ {el:'#c-apprentice',k:'Step 1',t:'The Apprentice',x:'Enter their date of birth. Tick EHC plan or care-experienced if it applies: it extends several age limits.',demo:async(fast)=>{ await typeInto('name','Jane Smith',fast); setVal('dob',iso(addMonths(addYears(utcToday(),-19),-3))); }},
+ {el:'#c-programme',k:'Step 2',t:'The Apprenticeship',x:'Search by name or ST code. Unfundable ones are blocked. Not sure? Match a job description instead.',demo:async(fast)=>{ const s=STDS.find(x=>x.r==='ST0002'); if(s){ if(!fast) await typeInto('std',s.n.slice(0,12));   /* type a search, like a person would, then pick the match */
      await typeInto('std',`${s.n} (${s.r})`,true); } }},
- {el:'#c-checks',k:'Step 3',t:'Quick eligibility checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
+ {el:'#c-checks',k:'Step 3',t:'Quick Eligibility Checks',x:'Six yes/no questions. Use Not sure if you don’t know, or Assume all eligible and change any that aren’t true.',demo:async()=>{ if(!S.assumed) $('assumeAll').click(); }},
  {el:'#c-timing',k:'Step 4 (optional)',t:'Timing',x:'Months to avoid, holidays to skip, and a view of what changes if the Milburn Review is adopted.'},
  {el:'#verdict',k:'The result',t:'Is the apprentice eligible?',x:'A tick means eligible; ! means confirm some items; a broken heart means not eligible; a clock means not yet.'},
  {el:'#reasonsCard',k:'What we checked',t:'What we checked',x:'Every point in plain English. Show the funding rules opens the funding-rule paragraph behind each one.'},
  {el:'#whenCard',k:'Timing',t:'Best time to onboard',x:'The earliest start date that avoids busy months and holidays, the last date before funding changes, and a timeline of key dates.'},
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
- {el:'#actions',k:'Step 5',t:'Final reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
+ {el:'#actions',k:'Step 5',t:'Final Reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
  {el:'#dbtn',k:'Your way',t:'Display and reading',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
