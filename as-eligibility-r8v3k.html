@@ -895,6 +895,24 @@ table.tv button:hover{border-color:var(--pink)}
 @keyframes rvFlash{0%{box-shadow:0 0 0 0 rgba(156,48,100,.6)}35%{box-shadow:0 0 0 9px rgba(156,48,100,.25)}100%{box-shadow:0 0 0 0 rgba(156,48,100,0)}}
 @media (prefers-reduced-motion:reduce){.verdict.rv-flash{animation:none!important}}
 .rp-btns{display:flex;flex-wrap:wrap;gap:8px}
+/* ===== phones (<=639): burger menu (user, 28 Nov). Logo and title scale together with the screen; title on one line ===== */
+#menuBtn{display:none}
+#menuBtn .ico-menu{width:20px;height:20px;display:block}
+.mob-menu{position:absolute;left:12px;right:12px;top:calc(100% + 6px);z-index:60;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.22);padding:6px}
+.mob-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 14px;border:0;background:none;color:var(--ink);font:600 16px/1.2 var(--font,inherit);text-align:left;border-radius:4px;cursor:pointer}
+.mob-menu button + button{border-top:1px solid var(--line)}
+.mob-menu button:hover,.mob-menu button:focus-visible{background:var(--blush);outline:none}
+.mob-menu .mi{flex:none;width:24px;display:inline-grid;place-items:center;font-weight:700;color:var(--plum)}
+.mob-menu .mi svg{width:20px;height:20px;display:block}
+@media (min-width:640px){.mob-menu{display:none!important}}
+@media (max-width:639px){
+  :root header .right > .dbtn:not(#menuBtn){display:none!important}
+  :root #menuBtn{display:inline-flex!important;padding:8px 10px!important}
+  :root .phone-links{display:none!important}
+  :root header .dpanel{left:12px;right:12px;width:auto}
+  :root header .hlogo{--lw:clamp(72px,27vw,108px)}
+  :root header .app{white-space:nowrap;max-width:none;line-height:1.2;font-size:clamp(9px,2.6vw,11px);letter-spacing:.12em;padding-left:clamp(6px,2vw,10px)}
+}
 /* stage 5 reveal (user, 28 Nov): until Review / Jump, the results show the verdict, disclaimer and What we checked only */
 section.results.pre5 #roleCard,section.results.pre5 #whenCard,section.results.pre5 #moneyCard,section.results.pre5 #saveNote,section.results.pre5 .actions-cq{display:none!important}
 @media print{section.results.pre5 #whenCard,section.results.pre5 #moneyCard{display:block!important}}
@@ -916,8 +934,6 @@ section.results.pre5 #roleCard,section.results.pre5 #whenCard,section.results.pr
 :root #dbtn .lbl-t{display:inline!important}
 @media (max-width:1299px){:root #reset .lbl-t{display:none!important}:root #reset.dbtn{padding:7px 11px!important}}
 #reset.dbtn{white-space:nowrap}
-@media (max-width:520px){:root header .app{white-space:normal;line-height:1.15;max-width:86px;letter-spacing:.08em}}
-@media (max-width:359px){:root header .app{max-width:72px;letter-spacing:.04em}:root #dbtn.dbtn,:root #reset.dbtn{padding:5px 8px!important}:root header .right{gap:4px}:root #dbtn{font-size:12.5px}}   /* phones: title on two short lines so 'Accessibility' fits beside Start again */
 /* ===== mobile sweep fixes (28 Nov) ===== */
 @media (max-width:640px){input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),select,textarea{font-size:16px!important}}   /* under 16px makes iPhones zoom in on tap */
 label.tick{min-height:24px}
@@ -1243,7 +1259,9 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
     <button class="dbtn" id="teamBtn" type="button" aria-haspopup="dialog"><span class="aa">⁂</span><span class="lbl-t"> Team check</span></button>
     <button class="dbtn" id="dbtn" type="button" aria-expanded="false" aria-controls="dpanel" aria-label="Accessibility" title="Accessibility: theme, screen colour, reading ruler, spacing and fonts"><svg class="ico-acc" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="6.6" r="1.6" fill="currentColor"/><path d="M6.8 9.4l5.2 1.1 5.2-1.1M12 10.5v3.6l-2.4 4.6M12 14.1l2.4 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl-t"> Accessibility</span></button>
     <button class="dbtn" id="reset" type="button" title="Clear everything and start again"><span class="aa">↺</span><span class="lbl-t"> Start again</span></button>
+    <button class="dbtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mobMenu" aria-label="Menu"><svg class="ico-menu" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
   </div>
+  <nav class="mob-menu hide" id="mobMenu" aria-label="Menu"><button type="button" data-act="help"><span class="mi">?</span>How to use</button><button type="button" data-act="open"><span class="mi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5V18a1.5 1.5 0 0 0 1.5 1.5h15A1.5 1.5 0 0 0 21 18V9a1.5 1.5 0 0 0-1.5-1.5h-7.2L10.5 5H4.5A1.5 1.5 0 0 0 3 6.5z"/></svg></span>Open check</button><button type="button" data-act="team"><span class="mi">⁂</span>Team check</button><button type="button" data-act="acc"><span class="mi"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="6.6" r="1.6" fill="currentColor"/><path d="M6.8 9.4l5.2 1.1 5.2-1.1M12 10.5v3.6l-2.4 4.6M12 14.1l2.4 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Accessibility</button><button type="button" data-act="reset"><span class="mi">↺</span>Start again</button></nav>
   <div class="dpanel hide" id="dpanel" role="dialog" aria-label="Accessibility options">
     <button class="close" id="dclose" type="button" aria-label="Close">×</button>
     <div class="grp"><h4>Theme</h4>
@@ -2531,9 +2549,9 @@ if(mq && mq.addEventListener) mq.addEventListener('change',()=>{ if(D.theme==='a
 (function(){ // panel open/close
   const btn=$('dbtn'), p=$('dpanel');
   const set=open=>{ p.classList.toggle('hide',!open); btn.setAttribute('aria-expanded',String(open)); if(open) p.querySelector('#themeSeg button').focus(); };
-  btn.onclick=()=>set(p.classList.contains('hide')); $('dclose').onclick=()=>{ set(false); btn.focus(); };
+  btn.onclick=()=>set(p.classList.contains('hide')); const back=()=>((btn.getClientRects().length?btn:$('menuBtn')).focus()); $('dclose').onclick=()=>{ set(false); back(); };
   document.addEventListener('mousedown',e=>{ if(!p.classList.contains('hide') && !p.contains(e.target) && !btn.contains(e.target)) set(false); });
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !p.classList.contains('hide')){ set(false); btn.focus(); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !p.classList.contains('hide')){ set(false); back(); } });
 })();
 (function(){ // reading ruler follows pointer, or keyboard focus
   const r=$('ruler'), t=r.querySelector('.t'), b=r.querySelector('.b'), e1=r.querySelector('.e1'), e2=r.querySelector('.e2'); const H=64;
@@ -2546,7 +2564,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@42ac65e64c';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='asElig.entered.v1', SEEN_ID=location.pathname+'@2439115463';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2865,7 +2883,7 @@ function openTeam(e){ if(e) e.preventDefault();
   if(!$('tvForm').tBodies[0].rows.length){ $('tvStds').innerHTML=STDS.filter(x=>!fundBlock(x)).sort((a,b)=>a.n.localeCompare(b.n)).map(x=>`<option value="${esc(x.n)} (${x.r})">`).join(''); tvBlankRows(3); }
   const sel=$('tvDefStd'); if(sel.options.length<2){ STDS.filter(x=>!fundBlock(x)).sort((a,b)=>a.n.localeCompare(b.n)).forEach(x=>sel.insertAdjacentHTML('beforeend',`<option value="${x.r}">${esc(x.n)} (L${x.l})</option>`)); }
   $('teamView').classList.remove('hide'); document.body.style.overflow='hidden'; $('tvForm').querySelector('.tn').focus(); }
-function closeTeam(){ $('teamView').classList.add('hide'); document.body.style.overflow=''; $('teamBtn').focus(); }
+function closeTeam(){ $('teamView').classList.add('hide'); document.body.style.overflow=''; ((x=>x.getClientRects().length?x:$('menuBtn'))($('teamBtn'))).focus(); }
 $('teamBtn').onclick=openTeam; $('teamLink').addEventListener('click',openTeam);
 $('tvClose').onclick=closeTeam;
 $('teamView').addEventListener('keydown',e=>{ if(e.key==='Escape') closeTeam(); });
@@ -2952,7 +2970,20 @@ function guideHtml(){
 function openHelp(e){ if(e) e.preventDefault(); $('hvBody').innerHTML=guideHtml(); $('helpView').classList.remove('hide'); document.body.style.overflow='hidden'; $('hvClose').focus(); }
 function closeHelp(){ $('helpView').classList.add('hide'); document.body.style.overflow=''; }
 $('helpBtn').onclick=openHelp; $('helpLinkM').addEventListener('click',openHelp);
-$('hvClose').onclick=()=>{ closeHelp(); $('helpBtn').focus(); };
+const focusBack=b=>{ ((b&&b.getClientRects().length)?b:$('menuBtn')).focus(); };   // phones: header buttons are hidden behind the menu
+$('hvClose').onclick=()=>{ closeHelp(); focusBack($('helpBtn')); };
+(function(){ const b=$('menuBtn'), m=$('mobMenu');
+  const items=()=>[...m.querySelectorAll('button')];
+  const set=o=>{ m.classList.toggle('hide',!o); b.setAttribute('aria-expanded',String(o)); if(o) items()[0].focus(); };
+  b.addEventListener('click',()=>set(m.classList.contains('hide')));
+  m.addEventListener('click',e=>{ const x=e.target.closest('button[data-act]'); if(!x) return; set(false); const a=x.dataset.act;
+    if(a==='help') $('helpBtn').click(); else if(a==='open') $('openFile').click(); else if(a==='team') $('teamBtn').click(); else if(a==='acc') $('dbtn').click(); else if(a==='reset') $('reset').click(); });
+  m.addEventListener('keydown',e=>{ const it=items(), i=it.indexOf(document.activeElement);
+    if(e.key==='Escape'){ e.preventDefault(); set(false); b.focus(); }
+    else if(e.key==='ArrowDown'){ e.preventDefault(); it[(i+1)%it.length].focus(); } else if(e.key==='ArrowUp'){ e.preventDefault(); it[(i-1+it.length)%it.length].focus(); } });
+  document.addEventListener('mousedown',e=>{ if(!m.classList.contains('hide')&&!m.contains(e.target)&&!b.contains(e.target)) set(false); });
+  window.addEventListener('resize',()=>{ if(innerWidth>639&&!m.classList.contains('hide')) set(false); });
+})();
 $('helpView').addEventListener('keydown',e=>{ if(e.key==='Escape') $('hvClose').onclick(); });
 $('helpView').addEventListener('click',e=>{ if(e.target===$('helpView')) closeHelp(); });
 $('hvPrint').onclick=()=>{ document.body.classList.add('printing-guide'); window.print(); setTimeout(()=>document.body.classList.remove('printing-guide'),400); };
@@ -2973,7 +3004,7 @@ const TOUR=[
  {el:'#moneyCard',k:'Cost',t:'Who pays',x:'What the training costs and who pays it, today and if Milburn is adopted.'},
  {el:'#actions',k:'Step 5',t:'Final Reports',x:'Preview the Boardroom report, add the dates to your calendar, or save this check to open later.'},
  {el:'#teamBtn,#teamLink',k:'Several people?',t:'Team check',x:'Check a whole team at once, ranked by the nearest deadline. A blank template keeps the format right.'},
- {el:'#dbtn',k:'Your way',t:'Accessibility',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
+ {el:'#dbtn,#menuBtn',k:'Your way',t:'Accessibility',x:'Dark mode, a coloured screen cover, a reading ruler and dyslexia-friendly fonts. You’re ready to go.'}
 ];
 let TR={i:0,demo:false,timer:0,saved:null,running:false,tok:0,done:new Set()};
 const setVal=(id,v)=>{ const el=$(id); el.value=v; el.dispatchEvent(new Event('input',{bubbles:true})); };
