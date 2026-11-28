@@ -304,6 +304,16 @@ label.f{display:block;margin-bottom:14px}
 label.f > span{display:block;font-size:15px;font-weight:500;color:var(--ink);margin-bottom:5px}
 label.f small{display:block;color:var(--muted);font-size:14px;margin-top:4px}
 input[type=text],input[type=date],input[type=number]{width:100%;padding:10px 12px;border:1px solid var(--field-line);border-radius:4px;background:var(--field);color:var(--ink)}
+/* date fields (restyled 28 Nov): same height as text boxes, neutral grey calendar icon (brand-safe for white-label), faint dd/mm/yyyy until filled, calendar follows the theme */
+input[type=date]{position:relative;min-height:46px;padding-right:44px;line-height:1.2;color-scheme:light;font-variant-numeric:tabular-nums;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236E6A64' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:20px 20px}
+:root[data-theme=dark] input[type=date]{color-scheme:dark;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A99FA5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='15.5' rx='2'/%3E%3Cpath d='M3.5 10h17M8 3v4M16 3v4'/%3E%3C/svg%3E")}
+input[type=date]::-webkit-calendar-picker-indicator{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;padding:0;margin:0;opacity:0;cursor:pointer}   /* the native button sits invisibly over our icon */
+input[type=date].is-empty::-webkit-datetime-edit{color:var(--muted)}
+input[type=date].is-empty{color:var(--muted)}
+input[type=date]:hover{border-color:var(--ink)}
+input[type=date]:focus-visible{outline:2px solid var(--plum);outline-offset:1px;border-color:var(--plum)}
 input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--pink);outline-offset:2px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .tick{display:flex;gap:10px;align-items:flex-start;margin:0 0 12px;font-size:15px;cursor:pointer}
@@ -357,6 +367,64 @@ input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid 
 
 h3{margin:0 0 12px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);font-weight:600}
 .when{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.when-date{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 14px;margin:0 0 14px}
+/* ===== dates (user chose option D, 28 Nov): date of birth = GOV.UK Day/Month/Year boxes; start dates = smart calendar ===== */
+.dob-f{margin-bottom:14px}
+.dob-lbl{display:block;font-size:15px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.dob-hint{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+.dob-err{margin:0 0 8px;font-weight:700;font-size:15px;color:var(--bad)}
+.dob-f.err{border-left:4px solid var(--bad);padding-left:12px}
+.dob-f.err .dmy input{border-color:var(--bad);border-width:2px}
+.dmy{display:flex;gap:14px;align-items:flex-end}
+.dmy label{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--ink)}
+.dmy input{width:3.6em;min-height:46px;padding:10px 12px;font:inherit;font-size:16px;border:1px solid var(--field-line);border-radius:4px;background:var(--field);color:var(--ink)}
+.dmy input.yr{width:5.4em}
+.dmy input:focus-visible{outline:2px solid var(--plum);outline-offset:1px;border-color:var(--plum)}
+.sd{position:relative;display:block}
+.sd-field{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--field-line);border-radius:4px;background:var(--field);color:var(--ink);font:inherit;font-size:16px;text-align:left;cursor:pointer}
+.when-date .sd-field{width:auto;min-width:200px}
+.sd-field:hover{border-color:var(--ink)}
+.sd-field:focus-visible{outline:2px solid var(--plum);outline-offset:1px;border-color:var(--plum)}
+.sd-field .sd-v.ph{color:var(--muted)}
+.sd-field svg{margin-left:auto;width:20px;height:20px;flex:none;color:var(--muted)}
+.sd-cal{position:absolute;left:0;top:calc(100% + 6px);z-index:70;width:min(340px,calc(100vw - 32px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:6px;box-shadow:0 18px 50px rgba(0,0,0,.22);padding:12px}
+.sd-cal[hidden]{display:none}
+.sd-h{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.sd-h b{font-size:15px;font-weight:700}
+.sd-h button{width:36px;height:36px;border:1px solid var(--line);border-radius:4px;background:var(--card);color:var(--ink);font-size:18px;cursor:pointer}
+.sd-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.sd-dow{font-size:11.5px;text-align:center;color:var(--muted);font-weight:700;padding:2px 0}
+.sd-day{position:relative;height:40px;border:1px solid transparent;border-radius:4px;background:var(--card);color:var(--ink);font:600 14px/1 var(--font,inherit);cursor:pointer}
+.sd-day:hover{border-color:var(--ink)}
+.sd-day.gap{visibility:hidden}
+.sd-day.past{color:var(--muted);opacity:.55;cursor:not-allowed;background:repeating-linear-gradient(135deg,transparent 0 4px,var(--line) 4px 6px)}
+.sd-day.soon{color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 4px,var(--line) 4px 6px)}
+.sd-day.off{color:var(--muted);background:var(--bg)}
+.sd-day.busy{background:var(--blush)}
+.sd-day.late{color:var(--muted);background:var(--bad-bg);text-decoration:line-through}
+.sd-day.early{box-shadow:inset 0 0 0 2px var(--ok)}
+.sd-day.dl{box-shadow:inset 0 0 0 2px var(--bad)}
+.sd-day.today{text-decoration:underline}
+.sd-day.sel{background:var(--plum)!important;color:#fff!important;text-decoration:none}
+:root[data-theme=dark] .sd-day.sel{color:#141013!important}
+.sd-day:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.sd-day .bh{position:absolute;left:50%;bottom:4px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--plum)}
+.sd-leg{display:flex;flex-wrap:wrap;gap:6px 12px;margin:10px 0 0;font-size:12px;color:var(--text)}
+.sd-leg i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px;border:1px solid var(--line)}
+.sd-foot{display:flex;justify-content:space-between;margin:8px 0 0}
+.sd-foot button{border:0;background:none;padding:6px 2px;color:var(--pink-deep);text-decoration:underline;font:inherit;font-size:14px;cursor:pointer}
+.sd-foot button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.sd-x{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;border-radius:50%;background:none;color:var(--muted);font-size:20px;line-height:1;cursor:pointer}
+.sd-x:hover{background:var(--bg);color:var(--ink)}
+.sd-x:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.sd-field{padding-right:72px}
+.sd-msg{margin:10px 0 0;font-size:13.5px;min-height:20px;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.sd-cal{transition:none}}
+.when-date .wd{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:600;color:var(--ink)}
+.when-date input[type=date]{width:auto;min-width:190px;font-size:16px;font-weight:400}
+.when-date .wd-kind{font-size:13.5px;color:var(--muted);padding-bottom:13px}
+.when-date .wd-reset{border:0;background:none;padding:0 0 13px;color:var(--pink-deep);text-decoration:underline;font:inherit;font-size:14px;cursor:pointer}
+.when-date .wd-reset:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 @media (max-width:640px){.when{grid-template-columns:1fr}}
 .when > div{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:12px 14px}
 .when .l{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
@@ -1314,7 +1382,12 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       <label class="f"><span>Name <em style="font-weight:400;color:var(--muted)">(optional)</em></span>
         <input type="text" id="name" autocomplete="off" placeholder="e.g. Jordan Michael">
         <small>Nothing you enter leaves this page. Checking several people? <a href="#" id="teamLink">Check a whole team</a>.</small></label>
-      <label class="f"><span>Date of birth</span><input type="date" id="dob"></label>
+      <div class="f dob-f" id="dobGroup" role="group" aria-labelledby="dobLbl" aria-describedby="dobHint dobErr">
+        <span class="dob-lbl" id="dobLbl">Date of birth</span><span class="dob-hint" id="dobHint">For example, 28 8 2007</span>
+        <p class="dob-err hide" id="dobErr"></p>
+        <div class="dmy"><label>Day<input type="text" id="dobD" inputmode="numeric" maxlength="2" autocomplete="bday-day"></label><label>Month<input type="text" id="dobM" inputmode="numeric" maxlength="2" autocomplete="bday-month"></label><label>Year<input type="text" id="dobY" class="yr" inputmode="numeric" maxlength="4" autocomplete="bday-year"></label></div>
+        <input type="hidden" id="dob">
+      </div>
       <label class="tick"><input type="checkbox" id="care"><span>They have an <b>EHC plan</b> or are <b>care-experienced</b> <small>Extends several age limits to 24.</small></span></label>
       <label class="tick"><input type="checkbox" id="newhire" checked><span>They're a <b>new hire</b> (with us 90 days or less at the start) <small>Affects hiring payments.</small></span></label>
     </div>
@@ -1361,7 +1434,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
       <p class="when-q">Do you have a start date in mind?</p>
       <div class="seg when-seg" role="group" aria-label="Do you have a start date in mind?" id="whenSeg"><button type="button" data-w="suggest" aria-pressed="true">No, suggest the best date</button><button type="button" data-w="plan" aria-pressed="false">Yes, I have a date</button></div>
       <div id="planBox" class="hide">
-        <label class="f" style="margin-top:14px"><span>Planned start date</span><input type="date" id="start"></label>
+        <label class="f" style="margin-top:14px"><span>Planned start date</span><input type="hidden" class="sd-src" id="start"></label>
         <p class="plan-check hide" id="planCheck" role="status"></p>
         <p class="help" style="margin:6px 0 0;font-size:14px;color:var(--muted)">We check it against funding deadlines, the 4 weeks the provider needs to sign them up, weekends, bank holidays and the Christmas shutdown.</p>
       </div>
@@ -1381,8 +1454,8 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
           <p class="hol-sub">Your own dates <small>(stocktake, launches, peak weeks)</small></p>
           <ul id="holList"></ul>
           <div class="hol-add">
-            <label class="f"><span>From</span><input type="date" id="holFrom"></label>
-            <label class="f"><span>To <em>(optional)</em></span><input type="date" id="holTo"></label>
+            <label class="f"><span>From</span><input type="hidden" class="sd-src" id="holFrom"></label>
+            <label class="f"><span>To <em>(optional)</em></span><input type="hidden" class="sd-src" id="holTo"></label>
             <label class="f hol-name"><span>Name <em>(optional)</em></span><input type="text" id="holName" placeholder="e.g. Stocktake" maxlength="40" autocomplete="off"></label>
             <button type="button" class="btn sm ghost" id="holAddBtn">Add dates</button>
           </div>
@@ -1417,6 +1490,7 @@ table.bd-t.crit td{padding:5px 10px;line-height:1.35}
 
     <div class="card" id="whenCard">
       <h3>Best time to onboard</h3>
+      <div class="when-date hide" id="whenDateRow"><label class="wd"><span>Start date for this check</span><input type="hidden" class="sd-src" id="whenDate"></label><span class="wd-kind" id="whenKind"></span><button type="button" class="wd-reset hide" id="whenSuggest">Use the suggested date</button></div>
       <div class="when" id="when"></div>
       <div id="whenNotes"></div>
       <ol class="stem" id="tl" aria-label="Key dates"></ol>
@@ -1727,7 +1801,7 @@ function setWhen(w,quiet){ S.when = w==='plan'?'plan':'suggest';
   $('planBox').classList.toggle('hide',S.when!=='plan'); $('suggestBox').classList.toggle('hide',S.when==='plan');
   if(S.when==='plan' && !$('start').value){ const o=lastO; $('start').value = iso(o&&o.rec&&!o.blocked ? o.rec : addMonths(utcToday(),2)); }
   if(!quiet) render(); }
-$('whenSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-w]'); if(!b) return; setWhen(b.dataset.w); if(S.when==='plan') $('start').focus(); });
+$('whenSeg').addEventListener('click',e=>{ const b=e.target.closest('button[data-w]'); if(!b) return; setWhen(b.dataset.w); if(S.when==='plan') $('start')._sd.btn.focus(); });
 // the company's busy periods: asked once, saved on this computer, reopened with 'Change my busy periods'
 const TKEY='acmeElig.timing.v1';
 function busySummary(){ const m=[...S.busy].sort((a,b)=>a-b).map(i=>MONTHS[i]); const x=[];
@@ -1759,11 +1833,11 @@ $('levybal').addEventListener('input',syncLevyTick);
   const draw=()=>{ $('holList').innerHTML=S.hol.own.map((h,i)=>`<li><span>${h.name?`<b>${esc(h.name)}</b> `:''}${fmt(parse(h.from))}${h.to!==h.from?' to '+fmt(parse(h.to)):''}</span><button type="button" data-i="${i}" aria-label="Remove ${esc(h.name||'these dates')}">×</button></li>`).join(''); };
   $('holAddBtn').onclick=()=>{
     const f=$('holFrom').value, t=$('holTo').value||f, n=$('holName').value.replace(/[<>&"]/g,'').trim(); $('holErr').textContent='';
-    if(!f){ $('holErr').textContent='Choose a From date.'; $('holFrom').focus(); return; }
-    if(t<f){ $('holErr').textContent='The To date is before the From date.'; $('holTo').focus(); return; }
+    if(!f){ $('holErr').textContent='Choose a From date.'; $('holFrom')._sd.btn.focus(); return; }
+    if(t<f){ $('holErr').textContent='The To date is before the From date.'; $('holTo')._sd.btn.focus(); return; }
     if((parse(t)-parse(f))/864e5>92){ $('holErr').textContent='Keep each range to 3 months or less. Use the months above for longer periods.'; return; }
     S.hol.own.push({from:f,to:t,name:n}); S.hol.own.sort((a,b)=>a.from<b.from?-1:1);
-    $('holFrom').value=$('holTo').value=$('holName').value=''; draw(); render(); };
+    $('holFrom').value=$('holTo').value=$('holName').value=''; $('holFrom')._sd.show(); $('holTo')._sd.show(); draw(); render(); };
   $('holList').addEventListener('click',e=>{ const b=e.target.closest('button[data-i]'); if(!b) return; S.hol.own.splice(+b.dataset.i,1); draw(); render(); });
   if(loadBusy()){ draw(); showBusy(true); }
   $('holList').addEventListener('redraw',draw);
@@ -1932,7 +2006,7 @@ function computeAt(at){
 }
 
 /* ---------- render ---------- */
-function render(){ syncLevyTick();
+function render(){ syncLevyTick(); if(typeof syncDob==='function') syncDob();
   { const c=findStd($('std').value); if(!c||c.r!==MGR_ROUTE) S.mgrRoute=false; }
   let o=compute(); lastO=o;
   { const cur=findStd($('std').value); const b=cur&&fundBlock(cur);
@@ -1989,12 +2063,16 @@ function render(){ syncLevyTick();
   // ---- when
   const W=$('when'), N=$('whenNotes');
   if(o.blocked){
+    $('whenDateRow').classList.add('hide');
     W.innerHTML=''; N.innerHTML=`<p class="callout bad">Sort out the blocking items above first. No start date works until they're resolved.</p>`;
   } else {
     const untilV = o.until ? fmt(o.until) : 'No deadline';
 
+    { const wd=$('whenDate'); $('whenDateRow').classList.remove('hide'); if(!(wd._sd&&wd._sd.isOpen())) wd.value=iso(o.start);
+      $('whenKind').textContent = o.startKind==='plan' ? 'Your date' : o.startKind==='rec' ? 'The earliest start date' : 'The first possible date';
+      $('whenSuggest').classList.toggle('hide', o.startKind!=='plan'); }
     W.innerHTML=`<div><div class="l">First possible date</div><div class="v">${fmt(o.from)}</div></div>
-      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span><button type="button" class="use" data-chg="1">Change date</button>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span><button type="button" class="use" data-chg="1">Change date</button>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button>`}</div>
+      <div class="best"><div class="l">Earliest start date</div><div class="v">${fmt(o.rec)}</div>${o.startKind!=='plan'?'<span class="using">✓ Used for this check</span><button type="button" class="use" data-chg="1">Change date</button>':iso(o.rec)===iso(o.start)?'<span class="using">✓ Your planned start</span><button type="button" class="use" data-chg="1">Change date</button>':`<button type="button" class="use" data-date="${iso(o.rec)}">Use this instead</button><button type="button" class="use" data-chg="1">Change date</button>`}</div>
       <div><div class="l">Start no later than</div><div class="v">${untilV}</div><div class="sub">${untilSub(o)}</div></div>`;
     const L=[]; const and=xs=>xs.length<2?(xs[0]||''):xs.slice(0,-1).join(', ')+' and '+xs[xs.length-1];
     const missCur=o.missedByPlan.filter(k=>k.scheme==='cur');
@@ -2099,9 +2177,90 @@ function drawTimeline(o){
 }
 
 /* ---------- 5. use the recommended start date ---------- */
+/* ---- date of birth: GOV.UK Day / Month / Year boxes writing into the hidden #dob ---- */
+const DOB={last:null};
+function dobCompose(){ const d=$('dobD').value.trim(), m=$('dobM').value.trim(), y=$('dobY').value.trim();
+  if(!d&&!m&&!y) return {iso:'',state:'empty'};
+  if(!d||!m||y.length!==4) return {iso:'',state:'partial'};
+  const dd=+d, mm=+m, yy=+y, t=new Date(Date.UTC(yy,mm-1,dd));
+  if(!(mm>=1&&mm<=12&&dd>=1&&dd<=31)||t.getUTCDate()!==dd||t.getUTCMonth()!==mm-1) return {iso:'',state:'bad'};
+  return {iso:iso(t),state:'ok'}; }
+function dobError(msg){ $('dobErr').textContent=msg||''; $('dobErr').classList.toggle('hide',!msg); $('dobGroup').classList.toggle('err',!!msg); }
+['dobD','dobM','dobY'].forEach(id=>$(id).addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,''); const c=dobCompose();
+  if(c.state==='ok'||c.state==='empty') dobError(''); if(c.state==='bad') dobError('Date of birth must be a real date');
+  DOB.last=c.iso; if($('dob').value!==c.iso){ $('dob').value=c.iso; $('dob').dispatchEvent(new Event('input',{bubbles:true})); } }));
+$('dobGroup').addEventListener('focusout',e=>{ if($('dobGroup').contains(e.relatedTarget)) return; const c=dobCompose();
+  if(c.state==='partial') dobError('Date of birth must include a day, month and year'); else if(c.state==='bad') dobError('Date of birth must be a real date'); });
+function syncDob(){ const v=$('dob').value; if(v===DOB.last) return; DOB.last=v; dobError('');   // set by code (demo, open a check, team row, start again)
+  if(!v){ ['dobD','dobM','dobY'].forEach(id=>$(id).value=''); return; } const [y,m,d]=v.split('-'); $('dobD').value=String(+d); $('dobM').value=String(+m); $('dobY').value=y; }
+
+/* ---- smart calendar for start and holiday dates: a button over a hidden input; the rules are drawn on the days ---- */
+const SD_ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>';
+function sdInfo(d,kind){ const t=utcToday(), w=d.getUTCDay(), bh=BANK_HOLIDAYS_EW[iso(d)];
+  if(kind==='plain'){ if(d<t) return {c:'past', why:'is in the past', k:'bad', dis:true}; return {c:(w===0||w===6||bh)?'off':'', why:bh?('is '+bh):'', k:'info'}; }
+  if(d<t) return {c:'past', why:'is in the past', k:'bad', dis:true};
+  const o=lastO, has=o&&o.dob&&!o.badDob&&o.from;
+  if(has&&o.earliest&&d<o.earliest) return {c:'past', why:`is before they can start (${fmt(o.earliest)})`, k:'bad'};
+  if(has&&o.until&&d>o.until) return {c:'late', why:`is after ${fmt(o.until)}: the ${o.untilWhy?o.untilWhy.what.toLowerCase():'funding changes'}`, k:'bad'};
+  if(has&&d<o.from) return {c:'soon', why:'leaves less than 4 weeks for the provider to sign them up', k:'warn'};
+  if(bh) return {c:'off', why:`is a bank holiday (${bh})`, k:'warn'};
+  if(d.getUTCMonth()===11&&d.getUTCDate()>=24) return {c:'off', why:'is in the Christmas shutdown', k:'warn'};
+  if(w===0||w===6) return {c:'off', why:`is a ${w===0?'Sunday':'Saturday'}`, k:'warn'};
+  { const own=S.hol.own.find(h=>iso(d)>=h.from&&iso(d)<=h.to); if(own) return {c:'busy', why:`falls in ${own.name||'dates you set to avoid'}`, k:'warn'}; }
+  if(S.busy.has(d.getUTCMonth())) return {c:'busy', why:`is in ${d.toLocaleString('en-GB',{month:'long',timeZone:'UTC'})}, one of your busy months`, k:'warn'};   // user, 28 Nov: warn, don't block
+  return {c:'', why:'works', k:'ok'}; }
+function smartDate(inp,kind){
+  const wrap=document.createElement('span'); wrap.className='sd'; inp.parentNode.insertBefore(wrap,inp); wrap.appendChild(inp);
+  const btn=document.createElement('button'); btn.type='button'; btn.className='sd-field'; btn.setAttribute('aria-haspopup','dialog'); btn.setAttribute('aria-expanded','false');
+  btn.innerHTML='<span class="sd-v"></span>'+SD_ICON; wrap.insertBefore(btn,inp);
+  const x=document.createElement('button'); x.type='button'; x.className='sd-x hide'; x.setAttribute('aria-label','Clear date'); x.innerHTML='×'; wrap.insertBefore(x,inp);
+  const cal=document.createElement('div'); cal.className='sd-cal'; cal.hidden=true; cal.setAttribute('role','dialog'); cal.setAttribute('aria-label','Choose a date'); wrap.appendChild(cal);
+  const lbl=wrap.closest('label'); if(lbl){ const sp=lbl.querySelector('span'); if(sp){ sp.id=sp.id||('sdl-'+inp.id); btn.setAttribute('aria-labelledby',sp.id+' sdv-'+inp.id); } }
+  btn.querySelector('.sd-v').id='sdv-'+inp.id;
+  let view=null, focus=null;
+  const val=()=>inp.value?parse(inp.value):null;
+  function show(){ const v=val(), s=btn.querySelector('.sd-v'); s.textContent=v?fmt(v):'Choose a date'; s.classList.toggle('ph',!v); x.classList.toggle('hide',!v); }
+  function clear(){ inp.value=''; show(); close(false); btn.focus(); inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); if(kind==='start'&&typeof setWhen==='function') setWhen('suggest'); }   // no date = let the app suggest one
+  x.addEventListener('click',clear);
+  function startView(){ const v=val(), o=lastO; return v||(kind==='start'&&o&&o.rec?o.rec:utcToday()); }
+  function draw(){ const y=view.getUTCFullYear(), m=view.getUTCMonth(), first=new Date(Date.UTC(y,m,1)), lead=(first.getUTCDay()+6)%7, days=new Date(Date.UTC(y,m+1,0)).getUTCDate(), sel=val(), o=lastO, t=utcToday();
+    let h=`<div class="sd-h"><button type="button" data-nav="-1" aria-label="Previous month">‹</button><b>${first.toLocaleDateString('en-GB',{month:'long',year:'numeric',timeZone:'UTC'})}</b><button type="button" data-nav="1" aria-label="Next month">›</button></div><div class="sd-grid">`;
+    ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(x=>h+=`<span class="sd-dow" aria-hidden="true">${x}</span>`);
+    for(let i=0;i<lead;i++) h+='<span class="sd-day gap"></span>';
+    for(let dd=1;dd<=days;dd++){ const d=new Date(Date.UTC(y,m,dd)), r=sdInfo(d,kind), k=iso(d);
+      const cl=['sd-day',r.c, kind==='start'&&o&&o.rec&&+d===+o.rec?'early':'', kind==='start'&&o&&o.until&&+d===+o.until?'dl':'', +d===+t?'today':'', sel&&+d===+sel?'sel':''].filter(Boolean).join(' ');
+      h+=`<button type="button" class="${cl}" data-d="${k}" tabindex="${+d===+focus?0:-1}"${r.dis?' aria-disabled="true"':''} aria-label="${fmt(d)}${r.why?': '+esc(r.why):''}">${dd}${BANK_HOLIDAYS_EW[k]?'<span class="bh"></span>':''}</button>`; }
+    h+='</div>';
+    h+=`<div class="sd-foot"><button type="button" class="sd-clear">Clear</button><button type="button" class="sd-today">Today</button></div>`;
+    if(kind==='start') h+=`<div class="sd-leg"><span><i style="box-shadow:inset 0 0 0 2px var(--ok)"></i>Earliest start</span>${o&&o.until?'<span><i style="box-shadow:inset 0 0 0 2px var(--bad)"></i>Last day</span><span><i style="background:var(--bad-bg)"></i>Too late</span>':''}<span><i style="background:var(--blush)"></i>Busy period</span><span><i style="background:var(--bg)"></i>Weekend / holiday</span><span><i style="background:repeating-linear-gradient(135deg,transparent 0 4px,var(--line) 4px 6px)"></i>Too soon</span></div><p class="sd-msg" aria-live="polite"></p>`;
+    cal.innerHTML=h; }
+  function hint(d){ const m=cal.querySelector('.sd-msg'); if(!m) return; const r=sdInfo(d,kind); m.innerHTML=(r.k==='ok'?'✓ ':r.k==='warn'?'! ':'✕ ')+`<b>${fmt(d)}</b> ${esc(r.why)}.`; }
+  function place(){ cal.style.left='0px'; const r=cal.getBoundingClientRect(), over=r.right-(document.documentElement.clientWidth-12); if(over>0) cal.style.left=(-over)+'px'; }
+  function open(){ focus=startView(); view=new Date(Date.UTC(focus.getUTCFullYear(),focus.getUTCMonth(),1)); cal.hidden=false; btn.setAttribute('aria-expanded','true'); draw(); place(); const f=cal.querySelector('.sd-day[tabindex="0"]'); f&&f.focus(); hint(focus); }
+  function close(back){ if(cal.hidden) return; cal.hidden=true; btn.setAttribute('aria-expanded','false'); if(back) btn.focus(); }
+  function pick(d){ const r=sdInfo(d,kind); if(r.dis) return; inp.value=iso(d); show(); close(true); inp.dispatchEvent(new Event('input',{bubbles:true})); inp.dispatchEvent(new Event('change',{bubbles:true})); }
+  function move(d){ focus=d; if(d.getUTCMonth()!==view.getUTCMonth()||d.getUTCFullYear()!==view.getUTCFullYear()) view=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),1)); draw(); const b=cal.querySelector(`[data-d="${iso(d)}"]`); b&&b.focus(); hint(d); }
+  btn.addEventListener('click',()=>cal.hidden?open():close(true));
+  cal.addEventListener('click',e=>{ if(e.target.closest('.sd-clear')){ clear(); return; } if(e.target.closest('.sd-today')){ move(utcToday()); return; } const n=e.target.closest('[data-nav]'); if(n){ view=new Date(Date.UTC(view.getUTCFullYear(),view.getUTCMonth()+(+n.dataset.nav),1)); draw(); return; } const b=e.target.closest('.sd-day[data-d]'); if(b) pick(parse(b.dataset.d)); });
+  cal.addEventListener('mouseover',e=>{ const b=e.target.closest('.sd-day[data-d]'); if(b) hint(parse(b.dataset.d)); });
+  cal.addEventListener('keydown',e=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); close(true); return; } const b=e.target.closest('.sd-day[data-d]'); if(!b) return; const cur=parse(b.dataset.d);
+    const step={ArrowLeft:-1,ArrowRight:1,ArrowUp:-7,ArrowDown:7}[e.key];
+    if(step){ e.preventDefault(); move(addDays(cur,step)); } else if(e.key==='PageUp'||e.key==='PageDown'){ e.preventDefault(); move(new Date(Date.UTC(cur.getUTCFullYear(),cur.getUTCMonth()+(e.key==='PageUp'?-1:1),Math.min(cur.getUTCDate(),28)))); }
+    else if(e.key==='Home'||e.key==='End'){ e.preventDefault(); move(addDays(cur,e.key==='Home'?-((cur.getUTCDay()+6)%7):6-((cur.getUTCDay()+6)%7))); } else if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(cur); } });
+  document.addEventListener('mousedown',e=>{ if(!cal.hidden&&!wrap.contains(e.target)) close(false); });
+  inp._sd={btn,open,close,show,isOpen:()=>!cal.hidden}; show(); return inp._sd; }
+const SD_FIELDS=[['start','start'],['whenDate','start'],['holFrom','plain'],['holTo','plain']];
+SD_FIELDS.forEach(([id,k])=>smartDate($(id),k));
+const sdSyncAll=()=>SD_FIELDS.forEach(([id])=>{ const i=$(id); if(i&&i._sd&&!i._sd.isOpen()) i._sd.show(); });
+const markEmpty=()=>document.querySelectorAll('input[type=date]').forEach(i=>i.classList.toggle('is-empty',!i.value));
+document.addEventListener('input',e=>{ if(e.target.matches&&e.target.matches('input[type=date]')) e.target.classList.toggle('is-empty',!e.target.value); },true);
+document.addEventListener('change',e=>{ if(e.target.matches&&e.target.matches('input[type=date]')) e.target.classList.toggle('is-empty',!e.target.value); },true);
+setInterval(markEmpty,800); markEmpty();   // values set by code (demo, open a check, team rows) are picked up too
+$('whenDate').addEventListener('change',e=>{ const v=e.target.value; if(!v){ setWhen('suggest'); return; } $('start').value=v; setWhen('plan'); });
+$('when').addEventListener('click',e=>{ const b=e.target.closest('button.use[data-date]'); if(b) setTimeout(()=>{ if(lastO&&lastO.start){ $('whenDate').value=iso(lastO.start); $('whenDate')._sd.show(); } },0); });   // 'Use this instead' updates the report field too   // the report and section 4 always agree
+$('whenSuggest').addEventListener('click',()=>{ setWhen('suggest'); const wd=$('whenDate'); if(lastO&&lastO.start) wd.value=iso(lastO.start); wd._sd.show(); wd._sd.btn.focus(); });   // show the suggested date straight away
 $('when').addEventListener('click',e=>{ const b=e.target.closest('button.use'); if(!b) return;
-  if(b.dataset.chg){ if(S.when!=='plan'){ $('start').value = lastO&&lastO.rec ? iso(lastO.rec) : ''; setWhen('plan'); }   // 'Change date': switch to your own date, starting from this one
-    const c=$('c-timing'); if(typeof selectCard==='function') selectCard(c); c.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); setTimeout(()=>$('start').focus({preventScroll:true}),350); return; }
+  if(b.dataset.chg){ const i=$('whenDate'); i._sd.btn.scrollIntoView({block:'nearest'}); i._sd.open(); return; }   // 'Change date': change it right here in the report
   $('start').value=b.dataset.date; setWhen('plan'); });
 
 /* ---------- 2. phone verdict bar: shows the live verdict until the result card itself is on screen ---------- */
@@ -2494,6 +2653,7 @@ function updateJourney(o){
   const lab={yes:['r-ok','Eligible','✓'],check:['r-warn',o.nostd?'Eligible so far':'Eligible, with checks','!'],no:['r-bad','Not eligible','✕'],notyet:['r-bad','Not eligible yet','✕']}[key];
   if(lab){ R.classList.add(lab[0]); $('jRes').textContent=lab[1]; R.querySelector('.n').textContent=lab[2]; } else { $('jRes').textContent='Result'; R.querySelector('.n').textContent='✓'; }
   if(cur==='r') R.classList.add('current');
+  if(typeof sdSyncAll==='function') sdSyncAll();
   { const has5=!!o.dob&&!o.badDob; document.querySelector('section.results').classList.toggle('pre5',!S.reviewed); $('pre5Hint').classList.toggle('hide',!!S.reviewed||!has5);
     const pc=$('planCheck'), pl=has5&&o.startKind==='plan'&&!o.blocked&&!o.items.some(i=>i.notyet);
     if(!pl){ pc.classList.add('hide'); } else {
@@ -2502,6 +2662,7 @@ function updateJourney(o){
       else if(miss.length){ k='bad'; t=`✕ <b>${fmt(o.start)}</b> is too late for the ${miss[0].what.toLowerCase()}. Start by ${fmt(miss[0].last)}.`; }
       else if(o.start<o.from){ k='warn'; t=`! <b>${fmt(o.start)}</b> leaves less than 4 weeks for the provider to sign them up.`; }
       else if(cl){ k='warn'; t=`! <b>${fmt(o.start)}</b> ${cl.long}. Pick a working day.`; }
+      else { const own=S.hol.own.find(h=>iso(o.start)>=h.from&&iso(o.start)<=h.to); if(own){ k='warn'; t=`! <b>${fmt(o.start)}</b> falls in ${esc(own.name||'dates you set to avoid')}.`; } else if(S.busy.has(o.start.getUTCMonth())){ k='warn'; t=`! <b>${fmt(o.start)}</b> is in ${o.start.toLocaleString('en-GB',{month:'long',timeZone:'UTC'})}, one of your busy months.`; } }
       pc.className='plan-check '+k; pc.innerHTML=t; } }
   { const ready5=!!o.dob&&!o.badDob; $('reviewBtn').disabled=!ready5; $('jumpBtn').disabled=!ready5;
     $('rpLead').textContent = !ready5 ? 'Your result appears once you enter a date of birth in section 1.' : S.reported ? 'Report done. Review the result again any time, or make another report from the buttons under Who pays.' : 'Your result is ready. Review it, then preview, print or save the report, or add the dates to your calendar.'; }
@@ -2571,7 +2732,7 @@ applyDisplay();
 
 /* ---------- splash ---------- */
 // first visit: splash waits for "Click to enter"; return visits go straight in. "Replay intro" in the footer shows it again.
-const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@55c2484efa';   // seen = THIS page at THIS release; another page or a new release shows the splash again
+const SEEN_KEY='acmeElig.entered.v1', SEEN_ID=location.pathname+'@c9defcbf89';   // seen = THIS page at THIS release; another page or a new release shows the splash again
 try{ const tx=new URLSearchParams(location.search).get('tx'); if(/^(fade|morph|mask|curtain|build)$/.test(tx||'')) $('splash').dataset.tx=tx; }catch(e){}   // options page only
 // a copy of an SVG that keeps how it looks now (fills, which logo set shows) once it is moved out of the splash or header
 function frozenCopy(svg){ const c=svg.cloneNode(true), a=[svg,...svg.querySelectorAll('*')], b=[c,...c.querySelectorAll('*')];
@@ -2615,7 +2776,7 @@ function showSplash(){
   const enter=$('enter'); setTimeout(()=>enter.focus({preventScroll:true}),50);
   const close=()=>{ splashExit(sp); sp.classList.add('gone'); document.body.style.overflow='';
     try{ localStorage.setItem(SEEN_KEY,SEEN_ID); }catch(e){}
-    setTimeout(()=>{ sp.classList.add('hide'); $('dob').focus({preventScroll:true}); },1000); };
+    setTimeout(()=>{ sp.classList.add('hide'); $('dobD').focus({preventScroll:true}); },1000); };
   enter.onclick=close;
   sp.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '||e.key==='Escape'){ e.preventDefault(); close(); } };
 }
@@ -2958,7 +3119,8 @@ function guideHtml(){
   <p><b>What we checked</b> lists each point in plain English. <b>Show the funding rules</b> opens the funding-rule paragraph behind each one.</p>
   <h3>Best time to onboard</h3>
   <ul><li><b>First possible date</b>: allows 4 weeks for the provider to sign them up.</li>
-  <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in. <b>Change date</b> takes you to Timing to pick your own.</li>
+  <li><b>Earliest start date</b>: the first working day that also avoids your busy periods. If you entered your own date and this one is better, <b>Use this instead</b> swaps it in.</li>
+  <li><b>Start date for this check</b>: change the date right here in the report and everything updates. <b>Use the suggested date</b> goes back to the app's pick.</li>
   <li><b>Start no later than</b>: the last day before funding or a payment changes, and what that deadline protects.</li>
   <li>The timeline lists every key date in order, with the gaps between them.</li></ul>
   <h3>Who pays</h3>
